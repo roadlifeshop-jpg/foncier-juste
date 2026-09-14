@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Foncier Juste — Vérifiez si vous payez trop de taxe foncière</title>
+<meta name="description" content="Diagnostic gratuit en 2 minutes basé sur de vraies transactions immobilières (DVF, data.gouv.fr) : surface, éléments de confort, écart avec le marché local. Rapport détaillé en option.">
+<link rel="canonical" href="https://www.foncier-juste.fr/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Foncier Juste — Vérifiez si vous payez trop de taxe foncière">
+<meta property="og:description" content="Diagnostic gratuit en 2 minutes basé sur de vraies transactions immobilières de votre commune.">
+<meta property="og:url" content="https://www.foncier-juste.fr/">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary">
+<meta name="robots" content="index, follow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Foncier Juste",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "description": "Diagnostic gratuit pour vérifier des anomalies de calcul de taxe foncière, comparé à des transactions immobilières réelles (DVF).",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "areaServed": "FR"
+}
+</script>
+<style>
+:root{
+  --bg:#F1F1EA; --surface:#FBFBF6; --surface-2:#E9E9DF; --ink:#1D211E; --ink-muted:#5B615A;
+  --line:#D6D5C7; --accent:#2E4A4A; --accent-soft:#DCE6E2; --gold:#93672E; --gold-soft:#EFE3CE;
+  --good:#2F6B4A; --good-soft:#DFEBE1; --bad:#9C3B2E; --bad-soft:#F3DFD8; --warn:#93672E; --warn-soft:#F1E5CD;
+  --shadow:0 1px 2px rgba(30,30,20,.06),0 8px 24px -14px rgba(30,30,20,.25);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151815; --surface:#1C201C; --surface-2:#242822; --ink:#E9E8DF; --ink-muted:#A3A99E;
+    --line:#33372F; --accent:#8FB7AE; --accent-soft:#233330; --gold:#D6A85E; --gold-soft:#332818;
+    --good:#7FBF9A; --good-soft:#1E2E24; --bad:#E19684; --bad-soft:#332019; --warn:#D6A85E; --warn-soft:#332818;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151815; --surface:#1C201C; --surface-2:#242822; --ink:#E9E8DF; --ink-muted:#A3A99E;
+  --line:#33372F; --accent:#8FB7AE; --accent-soft:#233330; --gold:#D6A85E; --gold-soft:#332818;
+  --good:#7FBF9A; --good-soft:#1E2E24; --bad:#E19684; --bad-soft:#332019; --warn:#D6A85E; --warn-soft:#332818;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'IBM Plex Sans',system-ui,sans-serif; line-height:1.55; padding:0 20px;}
+.wrap{max-width:760px; margin:0 auto; padding-block:0 80px;}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif; text-wrap:balance; font-weight:600; line-height:1.15; margin:0 0 8px;}
+p{margin:0 0 14px; max-width:62ch;}
+a{color:var(--accent);}
+.mono{font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums;}
+
+nav.top{display:flex; align-items:center; justify-content:space-between; padding-block:20px; border-bottom:1px solid var(--line); margin-bottom:36px;}
+.brand{font-family:'Fraunces',serif; font-weight:700; font-size:1.15rem;}
+.brand .dot{color:var(--gold);}
+.beta-pill{font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; background:var(--warn-soft); color:var(--warn); padding:3px 10px; border-radius:20px; font-weight:600;}
+
+.hero{padding-block:8px 32px;}
+.hero h1{font-size:2.1rem;}
+.hero .lede{font-family:'Fraunces',serif; font-style:italic; color:var(--ink-muted); font-size:1.08rem; max-width:56ch;}
+.cta-row{display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;}
+button, .btn{
+  font-family:'IBM Plex Sans',sans-serif; font-weight:600; font-size:.95rem; border-radius:9px; border:1px solid transparent;
+  padding:12px 22px; cursor:pointer; transition:transform .08s ease;
+}
+button:active{transform:scale(.98);}
+.btn-primary{background:var(--accent); color:var(--surface);}
+.btn-secondary{background:transparent; color:var(--ink); border-color:var(--line);}
+.btn-primary:disabled{opacity:.5; cursor:not-allowed;}
+
+.steps-mini{display:flex; gap:14px; margin:28px 0; flex-wrap:wrap;}
+.steps-mini .s{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; flex:1; min-width:150px;}
+.steps-mini .s .n{font-family:'IBM Plex Mono',monospace; color:var(--gold); font-weight:700; font-size:.8rem;}
+.steps-mini .s h3{font-size:.92rem; margin:4px 0 2px;}
+.steps-mini .s p{font-size:.82rem; color:var(--ink-muted); margin:0;}
+
+#wizard{display:none; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:26px; box-shadow:var(--shadow); margin-top:20px;}
+.progress{display:flex; gap:6px; margin-bottom:22px;}
+.progress i{height:4px; flex:1; background:var(--surface-2); border-radius:3px; display:block;}
+.progress i.done{background:var(--accent);}
+.field{margin-bottom:18px;}
+.field label{display:block; font-size:.85rem; font-weight:600; margin-bottom:6px;}
+.field .hint{font-size:.78rem; color:var(--ink-muted); margin-top:4px;}
+select, input[type=number]{
+  width:100%; font-family:inherit; font-size:.95rem; padding:10px 12px; border-radius:8px; border:1px solid var(--line);
+  background:var(--bg); color:var(--ink);
+}
+.check-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px;}
+.check-grid label{
+  display:flex; align-items:center; gap:8px; font-size:.85rem; font-weight:500; background:var(--surface-2);
+  padding:9px 11px; border-radius:8px; cursor:pointer; border:1px solid transparent;
+}
+.check-grid label:has(input:checked){border-color:var(--accent); background:var(--accent-soft);}
+.wizard-nav{display:flex; justify-content:space-between; margin-top:22px;}
+
+#results{display:none;}
+.score-card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:24px; box-shadow:var(--shadow); margin-top:20px;}
+.score-headline{display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+.score-dial{
+  width:84px; height:84px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:1.3rem; border:6px solid var(--surface-2);
+}
+.anomaly{border-left:3px solid var(--line); padding:10px 14px; margin:10px 0; border-radius:0 8px 8px 0; background:var(--surface-2); font-size:.88rem;}
+.anomaly.haute{border-color:var(--bad); background:var(--bad-soft);}
+.anomaly.moyenne{border-color:var(--warn); background:var(--warn-soft);}
+.anomaly.info{border-color:var(--accent); background:var(--accent-soft);}
+.impact-box{background:var(--good-soft); border:1px solid color-mix(in srgb, var(--good) 35%, var(--line)); border-radius:10px; padding:16px; margin:16px 0;}
+.impact-box .amount{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:1.5rem; color:var(--good);}
+.stub-note{font-size:.78rem; color:var(--ink-muted); background:var(--surface-2); border-radius:8px; padding:10px 12px; margin-top:16px;}
+
+footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font-size:.78rem; color:var(--ink-muted);}
+@media(max-width:600px){.hero h1{font-size:1.6rem;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="top">
+    <div class="brand">Foncier<span class="dot">·</span>Juste</div>
+    <span class="beta-pill">Bêta — métropole nantaise</span>
+  </nav>
+
+  <section class="hero">
+    <h1>Vérifiez en 2 minutes si vous payez trop de taxe foncière</h1>
+    <p class="lede">Un pré-diagnostic gratuit basé sur des règles transparentes et sur de vraies transactions immobilières publiques (DVF) de votre secteur — pas une estimation en l'air.</p>
+    <div class="cta-row">
+      <button class="btn-primary" id="start-btn">Commencer le diagnostic gratuit</button>
+      <a class="btn btn-secondary" href="#comment-ca-marche">Comment ça marche</a>
+    </div>
+  </section>
+
+  <section id="comment-ca-marche">
+    <div class="steps-mini">
+      <div class="s"><div class="n">01</div><h3>Répondez à 4 questions</h3><p>Surface, éléments de confort, sans avoir besoin de documents pour le pré-diagnostic.</p></div>
+      <div class="s"><div class="n">02</div><h3>On croise avec le marché réel</h3><p>Comparaison avec des ventes réelles récentes dans votre commune (open data officiel).</p></div>
+      <div class="s"><div class="n">03</div><h3>Vous obtenez un score</h3><p>Un niveau de vigilance clair, et un rapport complet en option si un signal est détecté.</p></div>
+    </div>
+  </section>
+
+  <section id="wizard">
+    <div class="progress"><i id="p1"></i><i id="p2"></i><i id="p3"></i><i id="p4"></i></div>
+
+    <div class="step" data-step="1">
+      <h2>Votre bien</h2>
+      <div class="field">
+        <label for="commune">Commune</label>
+        <select id="commune">
+          <option value="44109">Nantes</option>
+          <option value="44020">Bouguenais</option>
+          <option value="44066">Grandchamps-des-Fontaines</option>
+          <option value="44143">Orvault</option>
+        </select>
+        <div class="hint">Bêta limitée à ces communes (données réelles disponibles). D'autres arrivent ensuite.</div>
+      </div>
+      <div class="field">
+        <label for="type_local">Type de bien</label>
+        <select id="type_local"><option value="Maison">Maison</option><option value="Appartement">Appartement</option></select>
+      </div>
+    </div>
+
+    <div class="step" data-step="2" style="display:none">
+      <h2>Surfaces</h2>
+      <div class="field">
+        <label for="surf_cadastrale">Surface utilisée pour calculer votre taxe actuelle (m²)</label>
+        <input type="number" id="surf_cadastrale" min="8" max="400" value="100">
+        <div class="hint">Indiquée sur votre avis de taxe foncière, ou approximative si vous ne l'avez pas sous la main.</div>
+      </div>
+      <div class="field">
+        <label for="surf_reelle">Surface réelle actuelle du bien (m²)</label>
+        <input type="number" id="surf_reelle" min="8" max="400" value="100">
+        <div class="hint">Ce que mesure réellement le bien aujourd'hui (après démolition, division, etc. si applicable).</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="3" style="display:none">
+      <h2>Éléments de confort</h2>
+      <div class="field">
+        <label>Facturés dans le calcul actuel de votre taxe</label>
+        <div class="check-grid" id="confort-factures">
+          <label><input type="checkbox" value="piscine"> Piscine</label>
+          <label><input type="checkbox" value="garage"> Garage</label>
+          <label><input type="checkbox" value="dependance"> Dépendance</label>
+          <label><input type="checkbox" value="veranda"> Véranda</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Existent réellement aujourd'hui</label>
+        <div class="check-grid" id="confort-existants">
+          <label><input type="checkbox" value="piscine"> Piscine</label>
+          <label><input type="checkbox" value="garage"> Garage</label>
+          <label><input type="checkbox" value="dependance"> Dépendance</label>
+          <label><input type="checkbox" value="veranda"> Véranda</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-step="4" style="display:none">
+      <h2>Dernier détail (facultatif)</h2>
+      <div class="field">
+        <label for="taxe_actuelle">Montant annuel de votre taxe foncière (€)</label>
+        <input type="number" id="taxe_actuelle" min="0" placeholder="ex : 1450">
+        <div class="hint">Permet d'estimer un montant en euros. Laissez vide sinon — vous aurez quand même un score.</div>
+      </div>
+    </div>
+
+    <div class="wizard-nav">
+      <button class="btn-secondary" id="back-btn" style="visibility:hidden">Précédent</button>
+      <button class="btn-primary" id="next-btn">Continuer</button>
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="score-card">
+      <div class="score-headline">
+        <div class="score-dial" id="score-dial">0</div>
+        <div>
+          <h2 id="score-title" style="margin-bottom:2px">Niveau de vigilance</h2>
+          <p id="score-sub" style="margin:0; color:var(--ink-muted)"></p>
+        </div>
+      </div>
+      <div id="anomalies-list"></div>
+      <p id="marche-note" class="mono" style="font-size:.82rem; color:var(--ink-muted)"></p>
+      <div id="impact-container"></div>
+      <div class="cta-row">
+        <button class="btn-primary" disabled title="Paiement Stripe pas encore branché">Obtenir le rapport complet — 29€</button>
+        <button class="btn-secondary" id="restart-btn">Refaire le diagnostic</button>
+      </div>
+      <p class="stub-note">Ce pré-diagnostic est indicatif : il ne remplace pas votre fiche d'évaluation officielle (formulaire 6675-M, disponible sur impots.gouv.fr) ni une vérification par les services fiscaux.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p style="margin-bottom:12px">
+      <a href="guide-erreurs-taxe-fonciere.html">Guide : erreurs fréquentes</a> ·
+      <a href="mentions-legales.html">Mentions légales</a> ·
+      <a href="confidentialite.html">Confidentialité</a> ·
+      <a href="cgv.html">CGV</a>
+    </p>
+    Prototype de test — septembre 2026. Données de marché : DVF (data.gouv.fr), transactions 2023, Nantes et communes limitrophes. Aucune donnée personnelle n'est envoyée à un serveur dans cette version : tout le calcul se fait dans votre navigateur.
+  </footer>
+</div>
+
+<script>
+let DVF = [];
+fetch('dvf_data.json').then(r => r.json()).then(d => DVF = d).catch(() => {
+  document.getElementById('wizard').insertAdjacentHTML('beforeend',
+    '<p style="color:var(--bad)">Impossible de charger les données de marché (dvf_data.json). Servez ce dossier via un serveur local, pas en file://</p>');
+});
+
+// ---- Navigation du wizard ----
+const steps = [...document.querySelectorAll('.step')];
+let current = 0;
+
+function renderProgress(){
+  [1,2,3,4].forEach(n => document.getElementById('p'+n).classList.toggle('done', n <= current+1));
+}
+function showStep(i){
+  steps.forEach((s, idx) => s.style.display = idx === i ? '' : 'none');
+  document.getElementById('back-btn').style.visibility = i === 0 ? 'hidden' : 'visible';
+  document.getElementById('next-btn').textContent = i === steps.length - 1 ? 'Voir mon score' : 'Continuer';
+  renderProgress();
+}
+
+document.getElementById('start-btn').addEventListener('click', () => {
+  document.getElementById('wizard').style.display = 'block';
+  document.getElementById('wizard').scrollIntoView({behavior:'smooth'});
+  current = 0; showStep(current);
+});
+document.getElementById('back-btn').addEventListener('click', () => { if (current>0){current--; showStep(current);} });
+document.getElementById('next-btn').addEventListener('click', () => {
+  if (current < steps.length - 1) { current++; showStep(current); }
+  else { runDiagnostic(); }
+});
+document.getElementById('restart-btn').addEventListener('click', () => {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('wizard').style.display = 'block';
+  current = 0; showStep(current);
+  document.getElementById('wizard').scrollIntoView({behavior:'smooth'});
+});
+
+// ---- Moteur de diagnostic (miroir JS de backend/diagnostic_engine.py) ----
+function findComparables(commune, type, surface, tolerancePct=20){
+  let tol = tolerancePct, matches = [];
+  for (let i=0;i<4;i++){
+    const low = surface*(1-tol/100), high = surface*(1+tol/100);
+    matches = DVF.filter(r => r.c===commune && r.t===type && r.s>=low && r.s<=high);
+    if (matches.length >= 5) return matches;
+    tol += 15;
+  }
+  return matches;
+}
+function median(arr){
+  const s = [...arr].sort((a,b)=>a-b);
+  const m = Math.floor(s.length/2);
+  return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
+}
+
+function runDiagnostic(){
+  const commune = document.getElementById('commune').value;
+  const type = document.getElementById('type_local').value;
+  const surfCad = parseFloat(document.getElementById('surf_cadastrale').value) || 0;
+  const surfReelle = parseFloat(document.getElementById('surf_reelle').value) || 0;
+  const factures = [...document.querySelectorAll('#confort-factures input:checked')].map(i=>i.value);
+  const existants = [...document.querySelectorAll('#confort-existants input:checked')].map(i=>i.value);
+  const taxeActuelle = parseFloat(document.getElementById('taxe_actuelle').value) || null;
+
+  const comps = findComparables(commune, type, surfReelle || surfCad);
+  const prixM2 = comps.map(c=>c.p);
+  const prixMedian = prixM2.length ? median(prixM2) : null;
+
+  const anomalies = [];
+  const ecart = surfCad - surfReelle;
+  const ecartPct = surfReelle ? (ecart/surfReelle*100) : 0;
+  if (ecart > 5 && ecartPct > 5){
+    anomalies.push({
+      code:'surface_surevaluee',
+      gravite: ecartPct > 15 ? 'haute' : 'moyenne',
+      message: `La surface utilisée pour votre taxe (${surfCad} m²) dépasse de ${ecart.toFixed(0)} m² (${ecartPct.toFixed(0)}%) la surface réelle déclarée (${surfReelle} m²).`
+    });
+  }
+  const obsoletes = factures.filter(f => !existants.includes(f));
+  if (obsoletes.length){
+    anomalies.push({
+      code:'elements_confort_obsoletes',
+      gravite: obsoletes.length > 1 ? 'haute' : 'moyenne',
+      message: `Ces éléments comptent dans votre taxe mais n'existeraient plus : ${obsoletes.join(', ')}.`
+    });
+  }
+  if (comps.length >= 5){
+    anomalies.push({
+      code:'a_verifier_avec_marche',
+      gravite:'info',
+      message:`Sur ${comps.length} transactions réelles comparables, le prix médian observé est de ${prixMedian.toFixed(0)} €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul.`
+    });
+  }
+
+  const graviteScore = {haute:40, moyenne:20, info:5};
+  const score = Math.min(100, anomalies.reduce((s,a)=>s+graviteScore[a.gravite],0));
+  const niveau = score>=40 ? 'élevé' : score>=20 ? 'moyen' : 'faible';
+
+  renderResults({score, niveau, anomalies, comps: comps.length, prixMedian, taxeActuelle});
+}
+
+function renderResults({score, niveau, anomalies, comps, prixMedian, taxeActuelle}){
+  document.getElementById('wizard').style.display = 'none';
+  const results = document.getElementById('results');
+  results.style.display = 'block';
+
+  const dial = document.getElementById('score-dial');
+  dial.textContent = score;
+  const color = score>=40 ? 'var(--bad)' : score>=20 ? 'var(--warn)' : 'var(--good)';
+  dial.style.borderColor = color; dial.style.color = color;
+
+  document.getElementById('score-sub').textContent =
+    niveau==='élevé' ? 'Signal fort — une vérification approfondie est justifiée.' :
+    niveau==='moyen' ? 'Signal modéré — à creuser avec votre fiche officielle.' :
+    'Aucun signal fort avec les informations fournies.';
+
+  document.getElementById('anomalies-list').innerHTML = anomalies.length
+    ? anomalies.map(a => `<div class="anomaly ${a.gravite}">${a.message}</div>`).join('')
+    : '<div class="anomaly">Rien à signaler sur la base de vos réponses.</div>';
+
+  document.getElementById('marche-note').textContent = comps >= 5
+    ? `Comparé à ${comps} transactions réelles (DVF, 2023) dans votre secteur.`
+    : `Échantillon local limité (${comps} transactions) — résultat à interpréter avec prudence.`;
+
+  const impactBox = document.getElementById('impact-container');
+  const hasHaute = anomalies.some(a=>a.gravite==='haute');
+  const hasMoyenne = anomalies.some(a=>a.gravite==='moyenne');
+  if (taxeActuelle && (hasHaute || hasMoyenne)){
+    const [pctLow, pctHigh] = hasHaute ? [8,20] : [3,10];
+    const eurMin = Math.round(taxeActuelle*pctLow/100), eurMax = Math.round(taxeActuelle*pctHigh/100);
+    impactBox.innerHTML = `<div class="impact-box">Impact potentiel estimé : <span class="amount">${eurMin}–${eurMax} €/an</span><br><span style="font-size:.8rem;color:var(--ink-muted)">Fourchette indicative, pas un recalcul officiel.</span></div>`;
+  } else {
+    impactBox.innerHTML = '';
+  }
+}
+</script>
+</body>
+</html>
