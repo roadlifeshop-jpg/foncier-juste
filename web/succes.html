@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Paiement confirmé — Foncier Juste</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#F1F1EA; --surface:#FBFBF6; --surface-2:#E9E9DF; --ink:#1D211E; --ink-muted:#5B615A;
+  --line:#D6D5C7; --accent:#2E4A4A; --accent-soft:#DCE6E2; --gold:#93672E;
+  --good:#2F6B4A; --good-soft:#DFEBE1; --bad:#9C3B2E; --bad-soft:#F3DFD8;
+  --shadow:0 1px 2px rgba(30,30,20,.06),0 8px 24px -14px rgba(30,30,20,.25);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151815; --surface:#1C201C; --surface-2:#242822; --ink:#E9E8DF; --ink-muted:#A3A99E;
+    --line:#33372F; --accent:#8FB7AE; --gold:#D6A85E;
+    --good:#7FBF9A; --good-soft:#1E2E24; --bad:#E19684; --bad-soft:#332019;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151815; --surface:#1C201C; --surface-2:#242822; --ink:#E9E8DF; --ink-muted:#A3A99E;
+  --line:#33372F; --accent:#8FB7AE; --gold:#D6A85E;
+  --good:#7FBF9A; --good-soft:#1E2E24; --bad:#E19684; --bad-soft:#332019;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;line-height:1.6;padding:0 20px;}
+.wrap{max-width:600px;margin:0 auto;padding-block:80px;text-align:center;}
+h1{font-family:'Fraunces',Georgia,serif;font-size:1.8rem;margin-bottom:12px;}
+p{color:var(--ink-muted);margin-bottom:24px;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:32px;box-shadow:var(--shadow);}
+.spinner{width:32px;height:32px;border:3px solid var(--surface-2);border-top-color:var(--accent);border-radius:50%;margin:0 auto 20px;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.icon-ok{width:48px;height:48px;border-radius:50%;background:var(--good-soft);color:var(--good);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.6rem;}
+.icon-err{width:48px;height:48px;border-radius:50%;background:var(--bad-soft);color:var(--bad);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.6rem;}
+button{font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:9px;border:1px solid transparent;padding:12px 22px;cursor:pointer;background:var(--accent);color:var(--surface);}
+a.retour{display:block;margin-top:18px;color:var(--ink-muted);font-size:.85rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" id="etat-attente">
+    <div class="spinner"></div>
+    <h1>Vérification du paiement...</h1>
+    <p>Un instant, on confirme tout auprès de Stripe.</p>
+  </div>
+
+  <div class="card" id="etat-ok" style="display:none">
+    <div class="icon-ok">✓</div>
+    <h1>Paiement confirmé</h1>
+    <p>Votre rapport complet est prêt. Le téléchargement démarre automatiquement — sinon, cliquez ci-dessous.</p>
+    <button id="dl-btn">Télécharger le rapport (PDF)</button>
+  </div>
+
+  <div class="card" id="etat-erreur" style="display:none">
+    <div class="icon-err">!</div>
+    <h1>Impossible de confirmer le paiement</h1>
+    <p id="erreur-msg">Une vérification est nécessaire avant de livrer le rapport.</p>
+  </div>
+  <a class="retour" href="index.html">← Retour à l'accueil</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
+<script src="rapport.js"></script>
+<script>
+function afficher(id){
+  ['etat-attente','etat-ok','etat-erreur'].forEach(x =>
+    document.getElementById(x).style.display = x === id ? 'block' : 'none');
+}
+
+function telecharger(){
+  const brut = sessionStorage.getItem('dernierDiagnostic');
+  if (!brut){
+    document.getElementById('erreur-msg').textContent =
+      "Le paiement est confirmé, mais les réponses de votre diagnostic n'ont pas été retrouvées dans ce navigateur (nouvel onglet ou navigation privée ?). Contactez-nous en indiquant l'identifiant de session ci-dessous.";
+    afficher('etat-erreur');
+    return;
+  }
+  const diagnostic = JSON.parse(brut);
+  genererRapportPDF(diagnostic, { exemple: false });
+}
+
+(async function verifier(){
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  if (!sessionId){
+    document.getElementById('erreur-msg').textContent = "Identifiant de paiement manquant dans l'adresse.";
+    afficher('etat-erreur');
+    return;
+  }
+  try {
+    const r = await fetch(`/api/verify-session?session_id=${encodeURIComponent(sessionId)}`);
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'réponse invalide');
+    if (data.payment_status === 'paid'){
+      afficher('etat-ok');
+      telecharger();
+      document.getElementById('dl-btn').addEventListener('click', telecharger);
+    } else {
+      document.getElementById('erreur-msg').textContent =
+        `Paiement non confirmé (statut : ${data.payment_status}). Si vous venez de payer, réessayez de rafraîchir cette page dans quelques secondes.`;
+      afficher('etat-erreur');
+    }
+  } catch (e) {
+    document.getElementById('erreur-msg').textContent = "Erreur de vérification : " + e.message;
+    afficher('etat-erreur');
+    console.error(e);
+  }
+})();
+</script>
+</body>
+</html>
