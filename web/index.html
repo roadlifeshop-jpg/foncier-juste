@@ -137,7 +137,7 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
 
   <nav class="top">
     <div class="brand">Foncier<span class="dot">·</span>Juste</div>
-    <span class="beta-pill">Bêta — 10 départements</span>
+    <span class="beta-pill">Bêta — 20 départements</span>
   </nav>
 
   <section class="hero">
@@ -268,7 +268,7 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
       <a href="confidentialite.html">Confidentialité</a> ·
       <a href="cgv.html">CGV</a>
     </p>
-    Prototype de test — septembre 2026. Données de marché : DVF (data.gouv.fr), transactions 2024, 10 départements (Loire-Atlantique, Paris, Rhône, Bouches-du-Rhône, Gironde, Haute-Garonne, Nord, Ille-et-Vilaine, Hérault, Seine-Maritime). Aucune donnée personnelle n'est envoyée à un serveur dans cette version : tout le calcul se fait dans votre navigateur.
+    Prototype de test — septembre 2026. Données de marché : DVF (data.gouv.fr), transactions 2024, 20 départements couvrant Paris, Lyon, Marseille, Nice, Toulouse, Nantes, Bordeaux, Lille, Rennes, Montpellier, Rouen/Le Havre, Reims, Saint-Étienne, Toulon, Grenoble, Dijon, Angers, Nîmes, Clermont-Ferrand et Le Mans. Aucune donnée personnelle n'est envoyée à un serveur dans cette version : tout le calcul se fait dans votre navigateur.
   </footer>
 </div>
 
@@ -290,7 +290,7 @@ fetch('communes.json').then(r => r.json()).then(communes => {
   });
   list.appendChild(frag);
   document.getElementById('commune-hint').textContent =
-    `${communes.length} communes couvertes pour l'instant (10 départements). D'autres arrivent progressivement.`;
+    `${communes.length} communes couvertes pour l'instant (20 départements). D'autres arrivent progressivement.`;
 }).catch(() => {
   document.getElementById('commune-hint').textContent =
     "Impossible de charger la liste des communes (communes.json). Servez ce dossier via un serveur local, pas en file://";

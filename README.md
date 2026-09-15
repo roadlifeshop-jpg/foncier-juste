@@ -22,9 +22,13 @@ compte), mais ça se fait en 30 secondes une fois sur place.
 
 ## Nouveau : couverture nationale + rapport PDF (15/09/2026)
 
-- **10 départements réels** couverts (Loire-Atlantique, Paris, Rhône,
-  Bouches-du-Rhône, Gironde, Haute-Garonne, Nord, Ille-et-Vilaine, Hérault,
-  Seine-Maritime), 238 039 transactions DVF 2024, 3617 communes.
+- **20 départements réels** couverts — les 10 premiers (Loire-Atlantique,
+  Paris, Rhône, Bouches-du-Rhône, Gironde, Haute-Garonne, Nord,
+  Ille-et-Vilaine, Hérault, Seine-Maritime) + 10 villes supplémentaires de
+  plus de 120 000 habitants (Alpes-Maritimes/Nice, Marne/Reims, Loire/Saint-
+  Étienne, Var/Toulon, Isère/Grenoble, Côte-d'Or/Dijon, Maine-et-Loire/
+  Angers, Gard/Nîmes, Puy-de-Dôme/Clermont-Ferrand, Sarthe/Le Mans).
+  Soit **379 171 transactions DVF 2024, 7134 communes**.
   Alsace-Moselle (67/68/57) volontairement exclue : régime du Livre Foncier,
   pas de fichiers DVF standards. Relancer `backend/build_dataset.py` avec
   d'autres codes département pour étendre encore.

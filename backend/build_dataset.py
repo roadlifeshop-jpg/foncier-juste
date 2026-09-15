@@ -53,6 +53,17 @@ DEPARTEMENTS = {
     "35": "Ille-et-Vilaine (Rennes)",
     "34": "Hérault (Montpellier)",
     "76": "Seine-Maritime (Rouen, Le Havre)",
+    # Ajout : 10 villes supplémentaires de plus de 120 000 habitants (INSEE)
+    "06": "Alpes-Maritimes (Nice)",
+    "51": "Marne (Reims)",
+    "42": "Loire (Saint-Étienne)",
+    "83": "Var (Toulon)",
+    "38": "Isère (Grenoble)",
+    "21": "Côte-d'Or (Dijon)",
+    "49": "Maine-et-Loire (Angers)",
+    "30": "Gard (Nîmes)",
+    "63": "Puy-de-Dôme (Clermont-Ferrand)",
+    "72": "Sarthe (Le Mans)",
 }
 
 SURFACE_BUCKET_SIZE = 20  # m² — granularité des tranches de surface agrégées
