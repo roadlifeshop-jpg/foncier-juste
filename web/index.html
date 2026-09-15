@@ -346,12 +346,17 @@ track('page_vue');
 fetch('communes.json').then(r => r.json()).then(communes => {
   const list = document.getElementById('communes-list');
   const frag = document.createDocumentFragment();
+  // Une entrée par code postal valide : une commune en a souvent plusieurs
+  // (Grenoble = 38000 ET 38100, Nantes en a quatre). N'en proposer qu'un seul
+  // faisait échouer la recherche pour une partie des habitants.
   communes.forEach(c => {
-    const label = `${c.commune} (${c.code_postal})`;
-    communesIndex.set(label, c);
-    const opt = document.createElement('option');
-    opt.value = label;
-    frag.appendChild(opt);
+    (c.codes_postaux || []).forEach(cp => {
+      const label = `${c.commune} (${cp})`;
+      communesIndex.set(label, c);
+      const opt = document.createElement('option');
+      opt.value = label;
+      frag.appendChild(opt);
+    });
   });
   list.appendChild(frag);
   document.getElementById('commune-hint').textContent =
@@ -404,7 +409,12 @@ document.getElementById('next-btn').addEventListener('click', async () => {
       hint.style.color = 'var(--bad)';
       return;
     }
-    hint.style.color = '';
+    // Confirme ce qui a été compris : utile quand plusieurs communes portent
+    // le même nom dans des départements différents (87 cas dans la base).
+    hint.style.color = 'var(--good)';
+    hint.textContent = communeChoisie.dept_nom
+      ? `✓ ${communeChoisie.commune} — ${communeChoisie.dept_nom}`
+      : `✓ ${communeChoisie.commune}`;
     // Précharge les stats du département pendant que l'utilisateur remplit la suite
     statsPourDepartement(communeChoisie.code_dept).catch(() => {});
   }

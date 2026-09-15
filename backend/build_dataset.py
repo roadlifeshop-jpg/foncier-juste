@@ -69,6 +69,35 @@ DEPARTEMENTS = {
 SURFACE_BUCKET_SIZE = 20  # m² — granularité des tranches de surface agrégées
 
 
+def charger_referentiel_communes() -> dict[str, dict]:
+    """Référentiel officiel des communes (geo.api.gouv.fr), indexé par code INSEE.
+
+    Pourquoi : DVF ne contient que le code postal figurant sur la transaction,
+    choisi arbitrairement parmi ceux de la commune. Résultat, Grenoble
+    n'apparaissait que sous 38100 et un habitant tapant 38000 ne trouvait pas
+    sa ville — abandon à la première question du parcours.
+
+    Le référentiel donne TOUS les codes postaux d'une commune, son nom officiel
+    et son département. Les arrondissements de Paris, Lyon et Marseille n'y
+    figurent pas (ce ne sont pas des communes) : pour eux on conserve le code
+    postal issu de DVF, qui est unique et donc fiable.
+    """
+    url = "https://geo.api.gouv.fr/communes?fields=nom,code,codesPostaux,departement&format=json"
+    print(f"  référentiel communes : {url}")
+    with urllib.request.urlopen(url, timeout=60) as resp:
+        communes = json.loads(resp.read().decode("utf-8"))
+    referentiel = {
+        c["code"]: {
+            "nom": c["nom"],
+            "codes_postaux": sorted(c.get("codesPostaux") or []),
+            "dept_nom": (c.get("departement") or {}).get("nom", ""),
+        }
+        for c in communes
+    }
+    print(f"  {len(referentiel)} communes de référence chargées")
+    return referentiel
+
+
 def telecharger_departement(code_dept: str, annee: str) -> list[dict]:
     """Télécharge un département ; retombe sur l'année précédente si le
     fichier demandé n'existe pas encore (publication DVF parfois décalée
@@ -126,7 +155,9 @@ def bucket_surface(surface: float) -> int:
     return int(surface // SURFACE_BUCKET_SIZE) * SURFACE_BUCKET_SIZE
 
 
-def construire_agregats(lignes_dept: list[dict], code_dept: str) -> tuple[list[dict], list[dict]]:
+def construire_agregats(
+    lignes_dept: list[dict], code_dept: str, referentiel: dict[str, dict]
+) -> tuple[list[dict], list[dict]]:
     """Agrège les transactions d'UN département. Retourne (stats, communes)."""
     groupes: dict[tuple, list[dict]] = defaultdict(list)
     communes_vues: dict[str, dict] = {}
@@ -134,12 +165,32 @@ def construire_agregats(lignes_dept: list[dict], code_dept: str) -> tuple[list[d
     for r in lignes_dept:
         cle = (r["code_commune"], r["type_local"], bucket_surface(r["surface_m2"]))
         groupes[cle].append(r)
-        communes_vues.setdefault(r["code_commune"], {
-            "code_commune": r["code_commune"],
-            "commune": r["commune"],
-            "code_postal": r["code_postal"],
-            "code_dept": code_dept,
-        })
+
+        if r["code_commune"] not in communes_vues:
+            ref = referentiel.get(r["code_commune"])
+            if ref:
+                nom = ref["nom"]
+                codes_postaux = ref["codes_postaux"] or [r["code_postal"]]
+                dept_nom = ref["dept_nom"]
+            else:
+                # Arrondissement municipal (Paris / Lyon / Marseille) : absent du
+                # référentiel des communes, mais son code postal DVF est unique.
+                # Le nom du département se déduit d'une autre commune du même
+                # département dans le référentiel.
+                nom = r["commune"]
+                codes_postaux = [r["code_postal"]] if r["code_postal"] else []
+                dept_nom = next(
+                    (v["dept_nom"] for k, v in referentiel.items()
+                     if k.startswith(code_dept) and v["dept_nom"]),
+                    "",
+                )
+            communes_vues[r["code_commune"]] = {
+                "code_commune": r["code_commune"],
+                "commune": nom,
+                "codes_postaux": codes_postaux,
+                "code_dept": code_dept,
+                "dept_nom": dept_nom,
+            }
 
     stats = []
     for (code_commune, type_local, bucket), lignes in groupes.items():
@@ -161,7 +212,7 @@ def construire_agregats(lignes_dept: list[dict], code_dept: str) -> tuple[list[d
             "echantillon": echantillon,
         })
 
-    communes = sorted(communes_vues.values(), key=lambda c: (c["code_postal"], c["commune"]))
+    communes = sorted(communes_vues.values(), key=lambda c: c["commune"])
     return stats, communes
 
 
@@ -170,6 +221,7 @@ def main():
     stats_dir = WEB_DIR / "market_stats"
     stats_dir.mkdir(exist_ok=True)
 
+    referentiel = charger_referentiel_communes()
     toutes_les_communes = []
     total_transactions = 0
     total_groupes = 0
@@ -187,7 +239,7 @@ def main():
         # Un fichier de stats agrégées PAR DÉPARTEMENT : le navigateur ne
         # télécharge que celui du département choisi par l'utilisateur, pas
         # la France entière à chaque visite.
-        stats, communes = construire_agregats(rows, code_dept)
+        stats, communes = construire_agregats(rows, code_dept, referentiel)
         dept_path = stats_dir / f"{code_dept}.json"
         with open(dept_path, "w", encoding="utf-8") as f:
             json.dump(stats, f, ensure_ascii=False, separators=(",", ":"))
@@ -199,7 +251,7 @@ def main():
 
     with open(WEB_DIR / "communes.json", "w", encoding="utf-8") as f:
         json.dump(
-            sorted(toutes_les_communes, key=lambda c: (c["code_postal"], c["commune"])),
+            sorted(toutes_les_communes, key=lambda c: c["commune"]),
             f, ensure_ascii=False, separators=(",", ":"),
         )
     communes_kb = (WEB_DIR / "communes.json").stat().st_size / 1024
