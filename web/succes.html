@@ -102,7 +102,7 @@ function telecharger(produit){
     if (!r.ok) throw new Error(data.error || 'réponse invalide');
     if (data.payment_status === 'paid'){
       afficher('etat-ok');
-      const libelle = data.produit === 'dossier' ? 'le dossier complet' : 'le rapport';
+      const libelle = data.produit === 'dossier' ? 'dossier complet' : 'rapport';
       document.querySelector('#etat-ok p').textContent =
         `Votre ${libelle} est prêt. Le téléchargement démarre automatiquement — sinon, cliquez ci-dessous.`;
       telecharger(data.produit);
