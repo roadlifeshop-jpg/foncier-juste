@@ -232,7 +232,11 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
       <div class="field">
         <label for="taxe_actuelle">Montant annuel de votre taxe foncière (€)</label>
         <input type="number" id="taxe_actuelle" min="0" placeholder="ex : 1450">
-        <div class="hint">Permet d'estimer un montant en euros. Laissez vide sinon — vous aurez quand même un score.</div>
+        <div class="hint">
+          <strong>Ce montant n'influence pas votre score.</strong> Payer cher n'est pas une anomalie en soi :
+          une grande maison bien située coûte normalement cher. Ce chiffre sert uniquement à convertir
+          en euros une anomalie déjà détectée aux étapes précédentes. Laissez vide si vous préférez.
+        </div>
       </div>
     </div>
 
@@ -249,6 +253,7 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
         <div>
           <h2 id="score-title" style="margin-bottom:2px">Niveau de vigilance</h2>
           <p id="score-sub" style="margin:0; color:var(--ink-muted)"></p>
+          <p id="score-base" style="margin:6px 0 0; font-size:.82rem; line-height:1.5; color:var(--ink-muted)"></p>
         </div>
       </div>
       <div id="anomalies-list"></div>
@@ -521,6 +526,11 @@ function renderResults({score, niveau, anomalies, n, taxeActuelle}){
     niveau==='élevé' ? 'Signal fort — une vérification approfondie est justifiée.' :
     niveau==='moyen' ? 'Signal modéré — à creuser avec votre fiche officielle.' :
     'Aucun signal fort avec les informations fournies.';
+
+  // Le score ne dépend que des écarts constatés, jamais du montant payé.
+  document.getElementById('score-base').textContent =
+    'Ce score repose uniquement sur deux éléments : l\'écart entre la surface facturée et la surface réelle, '
+    + 'et les éléments de confort facturés qui n\'existent plus. Le montant de votre taxe n\'entre pas dans ce calcul.';
 
   document.getElementById('anomalies-list').innerHTML = anomalies.length
     ? anomalies.map(a => `<div class="anomaly ${a.gravite}">${a.message}</div>`).join('')

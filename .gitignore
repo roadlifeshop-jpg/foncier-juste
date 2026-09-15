@@ -2,3 +2,9 @@
 __pycache__/
 *.pyc
 .env
+
+# Le dépôt est PUBLIC : rien qui contienne des données personnelles ne doit y entrer.
+# Grilles de collecte T1 (prénoms, communes, surfaces, montants de taxe de personnes réelles)
+*.xlsx
+# PDF générés lors des tests (peuvent contenir les données d'un bien réel)
+*.pdf
