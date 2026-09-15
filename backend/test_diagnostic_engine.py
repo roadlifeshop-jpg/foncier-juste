@@ -91,6 +91,70 @@ class TestMoteurDiagnostic(unittest.TestCase):
         r = run_diagnostic(u, self.data)
         self.assertIsNone(r["impact_estime_eur_par_an"])
 
+    # ---- Cas limites (robustesse avant calibrage sur de vrais dossiers) ----
+
+    def test_petit_ecart_ne_declenche_pas_de_faux_positif(self):
+        # 2 m² d'écart : du bruit de mesure normal, pas une anomalie à signaler.
+        # C'est exactement le genre de cas qui, mal réglé, décrédibiliserait l'outil.
+        u = UserInput(
+            code_commune=NANTES,
+            type_local="Appartement",
+            surface_cadastrale_m2=62,
+            surface_reelle_actuelle_m2=60,
+        )
+        r = run_diagnostic(u, self.data)
+        self.assertEqual(r["anomalies"], [])
+        self.assertEqual(r["score_vigilance"], 0)
+
+    def test_commune_inconnue_ne_plante_pas(self):
+        # Code commune qui n'existe pas dans le jeu de données : doit dégrader
+        # proprement (0 comparable), jamais planter.
+        u = UserInput(
+            code_commune="99999",
+            type_local="Maison",
+            surface_cadastrale_m2=140,
+            surface_reelle_actuelle_m2=100,
+        )
+        r = run_diagnostic(u, self.data)
+        self.assertEqual(r["marche_local"]["n_transactions_comparables"], 0)
+        self.assertIn("surface_surevaluee", {a["code"] for a in r["anomalies"]})
+
+    def test_surface_reelle_nulle_ne_plante_pas(self):
+        # Saisie aberrante (0 m²) : ne doit pas provoquer de division par zéro.
+        u = UserInput(
+            code_commune=NANTES,
+            type_local="Maison",
+            surface_cadastrale_m2=100,
+            surface_reelle_actuelle_m2=0,
+        )
+        r = run_diagnostic(u, self.data)  # ne doit lever aucune exception
+        self.assertIsInstance(r["score_vigilance"], int)
+
+    def test_type_de_bien_rare_dans_la_commune(self):
+        # Peu de maisons individuelles dans le très dense 44109 (Nantes intra-muros)
+        # comparé aux appartements : le moteur doit quand même répondre, sans crash,
+        # même avec un échantillon local potentiellement faible.
+        u = UserInput(
+            code_commune=NANTES,
+            type_local="Maison",
+            surface_cadastrale_m2=250,  # grande maison, rare
+            surface_reelle_actuelle_m2=250,
+        )
+        r = run_diagnostic(u, self.data)
+        self.assertIsInstance(r["marche_local"]["n_transactions_comparables"], int)
+
+    def test_aucun_element_de_confort_ne_declenche_rien(self):
+        u = UserInput(
+            code_commune=NANTES,
+            type_local="Maison",
+            surface_cadastrale_m2=100,
+            surface_reelle_actuelle_m2=100,
+            elements_confort_factures=[],
+            elements_confort_existants=[],
+        )
+        r = run_diagnostic(u, self.data)
+        self.assertEqual(r["anomalies"], [])
+
 
 if __name__ == "__main__":
     unittest.main()

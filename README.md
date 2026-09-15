@@ -80,6 +80,14 @@ compte), mais ça se fait en 30 secondes une fois sur place.
 - Aucune base de données ni compte utilisateur : tout tourne dans le
   navigateur, rien n'est sauvegardé.
 
+## Backlog (souhaité, pas encore fait)
+
+- **Lettre de réclamation 100% pré-remplie** : ajouter au questionnaire les
+  champs nom, adresse du bien et référence de l'avis d'imposition, pour que
+  `dessinerLettreReclamation` (rapport.js) n'ait plus aucun `[crochet]` à
+  compléter à la main. Actuellement laissés en placeholder pour ne pas
+  toucher au tunnel déjà testé (voir conversation du 15/09/2026).
+
 ## Prochaines étapes (J5-J7 du plan)
 
 1. Créer un compte Stripe (à faire par toi — je ne peux pas créer de compte
