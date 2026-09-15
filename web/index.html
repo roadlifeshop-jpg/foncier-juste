@@ -344,8 +344,9 @@ input::placeholder{color:var(--ink-faint);}
   <section class="hero shell">
     <h1>Votre taxe foncière mérite-t-elle d'être vérifiée&nbsp;?</h1>
     <p class="lede">
-      Foncier·Juste confronte ce que l'administration retient pour évaluer votre logement à ce que
-      votre bien est réellement aujourd'hui, et vous indique les éléments qui méritent un contrôle.
+      Foncier·Juste compare les informations que vous relevez vous-même sur votre fiche d'évaluation
+      à la réalité actuelle de votre logement, et vous indique les éléments qui méritent un contrôle.
+      Nous n'avons aucun accès à votre dossier fiscal&nbsp;: tout part de ce que vous saisissez.
       Quand il n'y a rien à vérifier, nous vous le disons aussi.
     </p>
     <div class="cta-row">
@@ -416,25 +417,35 @@ input::placeholder{color:var(--ink-faint);}
             <label for="surf_fiche">Surface réelle totale indiquée sur la fiche</label>
             <div class="unit" data-unit="m²"><input type="number" id="surf_fiche" min="8" max="400" step="1" inputmode="numeric" placeholder="ex : 104"></div>
             <div class="hint">
-              Cherchez la ligne <b>« surface réelle »</b> du cadre d'évaluation.
-              <b>N'utilisez pas la surface pondérée</b> qui figure plus bas&nbsp;: elle est normalement
-              supérieure de 20 à 40&nbsp;%, car elle intègre des équivalences superficielles (baignoire,
-              WC, chauffage central) et des coefficients. Comparer une surface pondérée à une surface
-              mesurée produit un écart qui n'a aucune signification.
+              <b>Où la trouver.</b> La fiche décompose votre logement partie par partie, avec pour
+              chacune une colonne <b>« surface réelle »</b>. Additionnez ces surfaces, ou reprenez le
+              total si la fiche l'indique. C'est un nombre de mètres carrés bruts, sans correction.<br><br>
+              <b>Ne saisissez pas la surface pondérée.</b> Elle figure plus bas sur la même fiche, après
+              les correctifs et les équivalences superficielles — environ 5&nbsp;m² pour une baignoire,
+              3&nbsp;m² pour un WC, 2&nbsp;m² par pièce pour le chauffage central. Sur une fiche
+              parfaitement exacte, elle dépasse normalement la surface mesurée de 20 à 40&nbsp;%.
+              La comparer à un relevé au mètre produirait un écart qui ne veut rien dire.<br><br>
+              <b>Comment les distinguer&nbsp;:</b> si le chiffre que vous lisez est nettement plus grand que
+              ce que vous mesurez chez vous, c'est très probablement la pondérée — ce n'est pas celle-là.
             </div>
           </div>
 
           <div class="field">
             <label for="surf_reelle">Surface habitable du bien aujourd'hui</label>
             <div class="unit" data-unit="m²"><input type="number" id="surf_reelle" min="8" max="400" step="1" inputmode="numeric" placeholder="ex : 108"></div>
-            <div class="hint">Mesurée au sol, à l'intérieur des murs, pièces habitables uniquement — hors garage, cave, et combles non aménagés.</div>
+            <div class="hint">
+              Mesurée au sol, à l'intérieur des murs, pièces habitables uniquement — hors garage, cave,
+              et combles non aménagés. C'est le chiffre à confronter à la surface réelle de la fiche&nbsp;:
+              deux grandeurs de même nature, donc comparables. Si vous ne l'avez jamais mesurée,
+              reprenez la surface de votre acte de vente et indiquez-le juste en dessous.
+            </div>
           </div>
 
           <div class="field">
-            <label for="certitude">D'où vient ce chiffre&nbsp;?</label>
+            <label for="certitude">D'où vient la surface que vous venez de saisir&nbsp;?</label>
             <select id="certitude">
-              <option value="mesuree">Je l'ai mesuré moi-même</option>
-              <option value="acte" selected>Il vient de mon acte de vente ou d'un diagnostic</option>
+              <option value="mesuree">Je l'ai mesurée moi-même, au mètre</option>
+              <option value="acte" selected>Elle vient de mon acte de vente ou d'un diagnostic</option>
               <option value="estimee">C'est une estimation de mémoire</option>
             </select>
             <div class="hint">Une donnée incertaine ne crée jamais d'anomalie chez nous&nbsp;; elle réduit la confiance que nous accordons au résultat, et nous vous le disons.</div>
@@ -602,7 +613,7 @@ input::placeholder{color:var(--ink-faint);}
   <section class="band" id="fonctionnement">
     <div class="shell">
       <div class="eyebrow">Fonctionnement</div>
-      <h2>Trois étapes, aucune inscription</h2>
+      <h2>Du questionnaire au résultat, sans inscription</h2>
       <div class="rows">
         <div class="row">
           <div class="marker num">01</div>
