@@ -67,6 +67,15 @@ a.retour{display:block;margin-top:18px;color:var(--ink-muted);font-size:.85rem;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
 <script src="rapport.js"></script>
 <script>
+function track(evenement, meta = {}) {
+  try {
+    navigator.sendBeacon?.('/api/track', new Blob(
+      [JSON.stringify({ e: evenement, ...meta })],
+      { type: 'application/json' }
+    ));
+  } catch (_) { /* la mesure ne doit jamais casser la livraison */ }
+}
+
 function afficher(id){
   ['etat-attente','etat-ok','etat-erreur'].forEach(x =>
     document.getElementById(x).style.display = x === id ? 'block' : 'none');
@@ -86,6 +95,7 @@ function telecharger(produit){
   } else {
     genererRapportPDF(diagnostic, { exemple: false });
   }
+  track('document_telecharge', { produit });
 }
 
 (async function verifier(){
@@ -101,6 +111,7 @@ function telecharger(produit){
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'réponse invalide');
     if (data.payment_status === 'paid'){
+      track('paiement_reussi', { produit: data.produit });
       afficher('etat-ok');
       const libelle = data.produit === 'dossier' ? 'dossier complet' : 'rapport';
       document.querySelector('#etat-ok p').textContent =

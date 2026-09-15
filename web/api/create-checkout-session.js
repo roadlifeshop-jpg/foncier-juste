@@ -38,6 +38,16 @@ module.exports = async (req, res) => {
   const produitId = PRODUITS[body.produit] ? body.produit : 'rapport';
   const produit = PRODUITS[produitId];
 
+  // L'email permet à Stripe d'envoyer le reçu et, surtout, de retrouver le
+  // client si la livraison du PDF échoue de son côté (onglet fermé, etc.).
+  const email = typeof body.email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email.trim())
+    ? body.email.trim()
+    : null;
+  if (!email) {
+    res.status(400).json({ error: 'Email invalide ou manquant.' });
+    return;
+  }
+
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const origin = `https://${host}`;
 
@@ -45,7 +55,11 @@ module.exports = async (req, res) => {
   params.append('mode', 'payment');
   params.append('success_url', `${origin}/succes.html?session_id={CHECKOUT_SESSION_ID}`);
   params.append('cancel_url', `${origin}/index.html`);
+  params.append('customer_email', email);
   params.append('metadata[produit]', produitId);
+  // Trace du consentement L221-28 : le bouton d'achat est inaccessible sans
+  // la case cochée côté client, on en garde la preuve horodatée chez Stripe.
+  params.append('metadata[renonciation_retractation]', new Date().toISOString());
   params.append('line_items[0][quantity]', '1');
   params.append('line_items[0][price_data][currency]', 'eur');
   params.append('line_items[0][price_data][unit_amount]', String(produit.montant)); // fixé ici, pas côté client

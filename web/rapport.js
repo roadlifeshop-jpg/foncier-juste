@@ -120,6 +120,56 @@ function genererRapportPDF(d, opts = {}) {
 }
 
 // --------------------------------------------------------------------------
+// Aperçu gratuit — montre la STRUCTURE du livrable, jamais son contenu.
+// Règle : tout ce qui constitue la valeur payante (détail des écarts, base
+// légale, montant estimé, courrier) est masqué. Ne jamais « enrichir » cet
+// aperçu sans se demander s'il redevient un substitut gratuit du produit.
+// --------------------------------------------------------------------------
+
+function genererApercuPDF(d) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const w = creerEcrivain(doc, 20, 170);
+  w.y = dessinerEnTete(doc, 'Foncier Juste — Aperçu du dossier', {
+    sousTitre: 'Document de démonstration : les conclusions et le courrier sont volontairement masqués.',
+  });
+
+  w.y += 4;
+  w.ligne(`Bien étudié : ${d.commune.commune} (${d.commune.code_postal}) · ${d.type}`, { taille: 10, couleur: [90, 95, 88], espace: 10 });
+
+  const masque = (titre, lignes) => {
+    w.ligne(titre, { taille: 12, style: 'bold', espace: 4 });
+    lignes.forEach(() => {
+      doc.setFillColor(226, 226, 216);
+      doc.roundedRect(20, w.y - 3.5, 120 + Math.random() * 45, 4, 1, 1, 'F');
+      w.y += 8;
+    });
+    w.y += 4;
+  };
+
+  w.ligne(`Écarts relevés : ${d.anomalies.filter(a => a.gravite !== 'info').length}`, { taille: 11, style: 'bold', espace: 6 });
+  masque('Détail de chaque écart et base légale applicable', [1, 2, 3]);
+  masque('Montant potentiellement récupérable', [1, 2]);
+  masque('Votre lettre de réclamation, rédigée et référencée', [1, 2, 3, 4, 5]);
+  masque('Pièces à joindre et délais à respecter', [1, 2, 3]);
+
+  w.y += 2;
+  doc.setDrawColor(147, 103, 46);
+  doc.setFillColor(241, 229, 205);
+  doc.roundedRect(20, w.y - 4, 170, 22, 2, 2, 'FD');
+  doc.setTextColor(120, 85, 35);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text('Le dossier complet contient ces quatre sections remplies pour votre bien.', 25, w.y + 3);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  doc.text('Votre diagnostic reste consultable gratuitement sur le site, sans aucun engagement.', 25, w.y + 10);
+
+  dessinerPiedDePage(doc,
+    "Aperçu sans valeur juridique, fourni à titre de démonstration de format. Les analyses, montants et courriers ne figurent que dans le document complet."
+  );
+  doc.save(`foncier-juste-apercu.pdf`);
+}
+
+// --------------------------------------------------------------------------
 // Produit 2 : Dossier complet (49€) — diagnostic + lettre + pièces
 // --------------------------------------------------------------------------
 

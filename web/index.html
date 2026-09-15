@@ -78,7 +78,9 @@ button:active{transform:scale(.98);}
 .btn-primary:disabled{opacity:.5; cursor:not-allowed;}
 
 .steps-mini{display:flex; gap:14px; margin:28px 0; flex-wrap:wrap;}
-.steps-mini .s{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; flex:1; min-width:150px;}
+/* min-width 220px : sous ~700px on passe à une seule colonne, plutôt que
+   2 cartes + 1 orpheline sur sa propre ligne. */
+.steps-mini .s{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; flex:1; min-width:220px;}
 .steps-mini .s .n{font-family:'IBM Plex Mono',monospace; color:var(--gold); font-weight:700; font-size:.8rem;}
 .steps-mini .s h3{font-size:.92rem; margin:4px 0 2px;}
 .steps-mini .s p{font-size:.82rem; color:var(--ink-muted); margin:0;}
@@ -90,10 +92,13 @@ button:active{transform:scale(.98);}
 .field{margin-bottom:18px;}
 .field label{display:block; font-size:.85rem; font-weight:600; margin-bottom:6px;}
 .field .hint{font-size:.78rem; color:var(--ink-muted); margin-top:4px;}
-select, input[type=number]{
-  width:100%; font-family:inherit; font-size:.95rem; padding:10px 12px; border-radius:8px; border:1px solid var(--line);
+select, input[type=number], input[type=text], input[type=email]{
+  /* 16px minimum : en dessous, iOS Safari zoome automatiquement au focus
+     et laisse l'utilisateur zoomé pour le reste du formulaire. */
+  width:100%; font-family:inherit; font-size:16px; padding:10px 12px; border-radius:8px; border:1px solid var(--line);
   background:var(--bg); color:var(--ink);
 }
+input::placeholder{color:var(--ink-muted); opacity:.75;}
 .check-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px;}
 .check-grid label{
   display:flex; align-items:center; gap:8px; font-size:.85rem; font-weight:500; background:var(--surface-2);
@@ -124,6 +129,18 @@ select, input[type=number]{
 .offer p{font-size:.85rem; color:var(--ink-muted); margin-bottom:14px; min-height:52px;}
 .offer button{width:100%;}
 .offer-highlight{background:var(--accent-soft); border-color:var(--accent);}
+
+.achat-form{margin-top:16px; padding:16px; background:var(--surface-2); border-radius:12px;}
+.achat-form .field{margin-bottom:12px;}
+label.consent{display:flex; gap:10px; align-items:flex-start; font-size:.82rem; color:var(--ink-muted); cursor:pointer; line-height:1.5;}
+label.consent input{margin-top:3px; flex-shrink:0; width:16px; height:16px; accent-color:var(--accent);}
+
+.sans-signal{background:var(--good-soft); border:1px solid color-mix(in srgb,var(--good) 35%,var(--line)); border-radius:12px; padding:20px 22px; margin-top:20px;}
+.sans-signal h3{font-size:1.1rem; margin-bottom:8px; color:var(--good);}
+.sans-signal p{font-size:.9rem;}
+.sans-signal ul{font-size:.9rem; padding-left:20px; margin:0 0 16px;}
+.sans-signal li{margin-bottom:8px;}
+.sans-signal .btn{display:inline-block; text-decoration:none;}
 .offer-badge{position:absolute; top:-10px; right:14px; background:var(--gold); color:var(--surface); font-family:'IBM Plex Mono',monospace; font-size:.65rem; text-transform:uppercase; letter-spacing:.05em; font-weight:700; padding:3px 9px; border-radius:20px;}
 
 footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font-size:.78rem; color:var(--ink-muted);}
@@ -237,23 +254,56 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
       <div id="anomalies-list"></div>
       <p id="marche-note" class="mono" style="font-size:.82rem; color:var(--ink-muted)"></p>
       <div id="impact-container"></div>
-      <div class="offers-grid">
-        <div class="offer">
-          <h3>Rapport complet</h3>
-          <div class="price">29&nbsp;€</div>
-          <p>Diagnostic détaillé + comparables de marché de votre secteur, en PDF.</p>
-          <button class="btn-primary buy-btn" data-produit="rapport">Choisir</button>
+      <!-- Zone affichée UNIQUEMENT si un écart réel a été détecté.
+           On ne vend pas un dossier de réclamation à quelqu'un qui n'a rien
+           à réclamer : c'est absurde commercialement et malhonnête. -->
+      <div id="zone-vente" style="display:none">
+        <div class="offers-grid">
+          <div class="offer">
+            <h3>Rapport complet</h3>
+            <div class="price">29&nbsp;€</div>
+            <p>Le détail de chaque écart relevé, sa base légale, et les comparables de marché de votre secteur, en PDF.</p>
+            <button class="btn-primary buy-btn" data-produit="rapport">Choisir</button>
+          </div>
+          <div class="offer offer-highlight">
+            <span class="offer-badge">Recommandé</span>
+            <h3>Dossier complet</h3>
+            <div class="price">49&nbsp;€</div>
+            <p>Le rapport, <b>+ votre lettre de réclamation</b> rédigée et référencée, la liste des pièces à joindre et les délais à respecter.</p>
+            <button class="btn-primary buy-btn" data-produit="dossier">Choisir</button>
+          </div>
         </div>
-        <div class="offer offer-highlight">
-          <span class="offer-badge">Recommandé</span>
-          <h3>Dossier complet</h3>
-          <div class="price">49&nbsp;€</div>
-          <p>Le rapport, <b>+ la lettre de réclamation</b> prête à compléter, la liste des pièces à joindre et les délais à respecter.</p>
-          <button class="btn-primary buy-btn" data-produit="dossier">Choisir</button>
+
+        <div class="achat-form">
+          <div class="field">
+            <label for="email_client">Votre email (pour recevoir le reçu et retrouver votre dossier)</label>
+            <input type="email" id="email_client" placeholder="vous@exemple.fr" autocomplete="email">
+          </div>
+          <label class="consent">
+            <input type="checkbox" id="consent-retractation">
+            <span>J'accepte que le document me soit fourni immédiatement et je renonce expressément à mon droit de rétractation de 14 jours, conformément à l'article L221-28 du Code de la consommation. J'ai lu les <a href="cgv.html" target="_blank">CGV</a>.</span>
+          </label>
+          <p class="stub-note" id="achat-erreur" style="display:none;color:var(--bad)"></p>
         </div>
       </div>
+
+      <!-- Zone affichée quand AUCUN écart n'est détecté : on assume de ne rien vendre. -->
+      <div id="zone-sans-signal" style="display:none">
+        <div class="sans-signal">
+          <h3>Nous ne vous vendons rien aujourd'hui</h3>
+          <p>Avec les informations que vous avez données, aucun écart ne justifie d'engager une réclamation. Payer pour contester n'aurait aucun sens dans votre situation, et nous préférons vous le dire.</p>
+          <p><b>Ce que vous pouvez faire gratuitement, si vous voulez aller plus loin :</b></p>
+          <ul>
+            <li>Demandez votre <b>fiche d'évaluation (formulaire 6675-M)</b> sur impots.gouv.fr, par la messagerie sécurisée de votre espace particulier. C'est gratuit.</li>
+            <li>Vérifiez-y la <b>catégorie de confort</b> (classée de 1 à 8) : c'est l'erreur que notre questionnaire ne peut pas détecter, et l'une des plus coûteuses.</li>
+            <li>Si la fiche révèle quelque chose d'inattendu, revenez refaire le diagnostic avec les vrais chiffres.</li>
+          </ul>
+          <a class="btn btn-secondary" href="guide-erreurs-taxe-fonciere.html">Lire le guide des erreurs fréquentes</a>
+        </div>
+      </div>
+
       <div class="cta-row">
-        <button class="btn-secondary" id="preview-pdf-btn">Voir un exemple de rapport (PDF)</button>
+        <button class="btn-secondary" id="preview-pdf-btn">Voir à quoi ressemble le dossier</button>
         <button class="btn-secondary" id="restart-btn">Refaire le diagnostic</button>
       </div>
       <p class="stub-note" id="pdf-hint" style="display:none">Génération du PDF...</p>
@@ -268,7 +318,8 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
       <a href="confidentialite.html">Confidentialité</a> ·
       <a href="cgv.html">CGV</a>
     </p>
-    Prototype de test — septembre 2026. Données de marché : DVF (data.gouv.fr), transactions 2024, 20 départements couvrant Paris, Lyon, Marseille, Nice, Toulouse, Nantes, Bordeaux, Lille, Rennes, Montpellier, Rouen/Le Havre, Reims, Saint-Étienne, Toulon, Grenoble, Dijon, Angers, Nîmes, Clermont-Ferrand et Le Mans. Aucune donnée personnelle n'est envoyée à un serveur dans cette version : tout le calcul se fait dans votre navigateur.
+    Données de marché : DVF (data.gouv.fr), transactions 2024, 20 départements couvrant Paris, Lyon, Marseille, Nice, Toulouse, Nantes, Bordeaux, Lille, Rennes, Montpellier, Rouen/Le Havre, Reims, Saint-Étienne, Toulon, Grenoble, Dijon, Angers, Nîmes, Clermont-Ferrand et Le Mans.<br>
+    <b>Vos réponses ne sont jamais envoyées à un serveur</b> : le diagnostic est calculé entièrement dans votre navigateur. Seules des statistiques de navigation anonymes (étape atteinte, sans aucune donnée sur votre bien) nous permettent de savoir où le parcours bloque.
   </footer>
 </div>
 
@@ -277,6 +328,20 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
 let communesIndex = new Map(); // "Commune (CP)" -> {code_commune, code_dept, commune, code_postal}
 let deptStatsCache = {};        // code_dept -> Promise<statsArray>
 let dernierDiagnostic = null;   // dernier résultat calculé, utilisé pour générer le PDF
+
+// ---- Mesure du funnel ----
+// Volontairement minimal : pas de cookie, pas d'identifiant, aucune donnée sur
+// le bien de l'utilisateur. Seulement le nom de l'étape atteinte, pour savoir
+// où le parcours casse. Ne pas y ajouter commune, surface ou montant.
+function track(evenement, meta = {}) {
+  try {
+    navigator.sendBeacon?.('/api/track', new Blob(
+      [JSON.stringify({ e: evenement, ...meta })],
+      { type: 'application/json' }
+    ));
+  } catch (_) { /* la mesure ne doit jamais casser le parcours */ }
+}
+track('page_vue');
 
 fetch('communes.json').then(r => r.json()).then(communes => {
   const list = document.getElementById('communes-list');
@@ -325,6 +390,7 @@ document.getElementById('start-btn').addEventListener('click', () => {
   document.getElementById('wizard').style.display = 'block';
   document.getElementById('wizard').scrollIntoView({behavior:'smooth'});
   current = 0; showStep(current);
+  track('diagnostic_demarre');
 });
 document.getElementById('back-btn').addEventListener('click', () => { if (current>0){current--; showStep(current);} });
 
@@ -342,6 +408,7 @@ document.getElementById('next-btn').addEventListener('click', async () => {
     // Précharge les stats du département pendant que l'utilisateur remplit la suite
     statsPourDepartement(communeChoisie.code_dept).catch(() => {});
   }
+  track(`etape_${current + 1}_validee`);
   if (current < steps.length - 1) { current++; showStep(current); }
   else { await runDiagnostic(); }
 });
@@ -458,44 +525,77 @@ function renderResults({score, niveau, anomalies, n, taxeActuelle}){
   impactBox.innerHTML = impact
     ? `<div class="impact-box">Impact potentiel estimé : <span class="amount">${impact.eurMin}–${impact.eurMax} €/an</span><br><span style="font-size:.8rem;color:var(--ink-muted)">Fourchette indicative, pas un recalcul officiel.</span></div>`
     : '';
+
+  // On ne propose une offre payante QUE si un écart réel a été relevé.
+  // Une ligne "info" (repère de marché) n'est pas un motif de réclamation.
+  const aUnSignalReel = anomalies.some(a => a.gravite === 'haute' || a.gravite === 'moyenne');
+  document.getElementById('zone-vente').style.display = aUnSignalReel ? 'block' : 'none';
+  document.getElementById('zone-sans-signal').style.display = aUnSignalReel ? 'none' : 'block';
+  track('resultat_affiche', { signal: aUnSignalReel, anomalies: anomalies.length });
+  if (aUnSignalReel) track('offre_vue');
 }
 
-// ---- Aperçu PDF gratuit (rapport.js, mode "exemple") ----
+// ---- Aperçu du livrable (tronqué : ne contient AUCUNE conclusion) ----
+// Le diagnostic est déjà visible gratuitement à l'écran ; l'aperçu sert
+// uniquement à montrer la forme du document, pas à livrer son contenu.
 document.getElementById('preview-pdf-btn').addEventListener('click', () => {
   if (!dernierDiagnostic){ return; }
   const hint = document.getElementById('pdf-hint');
   hint.style.display = 'block';
-  hint.textContent = 'Génération du PDF...';
+  hint.textContent = 'Génération de l\'aperçu...';
+  track('apercu_demande');
   // Un léger délai laisse le temps au navigateur d'afficher le message
   // avant le calcul (jsPDF bloque le thread principal un court instant).
   setTimeout(() => {
     try {
-      genererRapportPDF(dernierDiagnostic, { exemple: true });
+      genererApercuPDF(dernierDiagnostic);
       hint.style.display = 'none';
     } catch (e) {
-      hint.textContent = "Impossible de générer le PDF (bibliothèque jsPDF non chargée ?). Réessayez avec une connexion internet active.";
+      hint.textContent = "Impossible de générer l'aperçu (bibliothèque jsPDF non chargée ?). Réessayez avec une connexion internet active.";
       console.error(e);
     }
   }, 50);
 });
 
-// ---- Achat du rapport complet (Stripe Checkout) ----
+// ---- Achat (Stripe Checkout) ----
 document.querySelectorAll('.buy-btn').forEach(btn => btn.addEventListener('click', async () => {
   if (!dernierDiagnostic){ return; }
   const produit = btn.dataset.produit;
-  const hint = document.getElementById('pdf-hint');
+  const erreur = document.getElementById('achat-erreur');
+  const email = document.getElementById('email_client').value.trim();
+  const consent = document.getElementById('consent-retractation').checked;
+
+  // Contrôles avant paiement : un email pour retrouver le client et lui
+  // envoyer son reçu, et le consentement explicite exigé par l'article
+  // L221-28 pour un contenu numérique livré immédiatement.
+  const emailValide = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!emailValide){
+    erreur.style.display = 'block';
+    erreur.textContent = "Merci d'indiquer une adresse email valide : c'est elle qui vous permet de retrouver votre dossier.";
+    document.getElementById('email_client').focus();
+    return;
+  }
+  if (!consent){
+    erreur.style.display = 'block';
+    erreur.textContent = "Merci de cocher la case de renonciation au droit de rétractation pour recevoir le document immédiatement.";
+    return;
+  }
+  erreur.style.display = 'none';
+
   document.querySelectorAll('.buy-btn').forEach(b => b.disabled = true);
+  const hint = document.getElementById('pdf-hint');
   hint.style.display = 'block';
   hint.textContent = 'Redirection vers le paiement sécurisé...';
+  track('paiement_demarre', { produit });
   try {
-    // Le diagnostic ne quitte jamais notre serveur (il n'y en a pas) : on le
-    // garde juste le temps du paiement pour pouvoir régénérer le vrai PDF
-    // au retour, sans jamais l'envoyer à Stripe ni à qui que ce soit.
+    // Les réponses du diagnostic ne sont envoyées à personne : elles restent
+    // dans le navigateur le temps du paiement, pour régénérer le document au
+    // retour. Seul l'email part vers Stripe, pour le reçu.
     sessionStorage.setItem('dernierDiagnostic', JSON.stringify(dernierDiagnostic));
     const r = await fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ produit }),
+      body: JSON.stringify({ produit, email }),
     });
     const data = await r.json();
     if (!r.ok || !data.url) throw new Error(data.error || 'réponse invalide');
