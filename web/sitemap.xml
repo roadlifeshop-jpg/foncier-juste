@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.foncier-juste.fr/</loc>
+    <loc>https://foncier-juste.vercel.app/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.foncier-juste.fr/guide-erreurs-taxe-fonciere.html</loc>
+    <loc>https://foncier-juste.vercel.app/guide-erreurs-taxe-fonciere.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.foncier-juste.fr/mentions-legales.html</loc>
+    <loc>https://foncier-juste.vercel.app/mentions-legales.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.1</priority>
   </url>
   <url>
-    <loc>https://www.foncier-juste.fr/confidentialite.html</loc>
+    <loc>https://foncier-juste.vercel.app/confidentialite.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.1</priority>
   </url>
   <url>
-    <loc>https://www.foncier-juste.fr/cgv.html</loc>
+    <loc>https://foncier-juste.vercel.app/cgv.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.1</priority>
   </url>
