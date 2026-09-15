@@ -2,6 +2,22 @@
 
 Statut au 15/09/2026. Voir aussi le dossier de recherche complet : "Foncier Juste" (artefact publié dans la conversation Claude).
 
+## Nouveau : couverture nationale + rapport PDF (15/09/2026)
+
+- **10 départements réels** couverts (Loire-Atlantique, Paris, Rhône,
+  Bouches-du-Rhône, Gironde, Haute-Garonne, Nord, Ille-et-Vilaine, Hérault,
+  Seine-Maritime), 238 039 transactions DVF 2024, 3617 communes.
+  Alsace-Moselle (67/68/57) volontairement exclue : régime du Livre Foncier,
+  pas de fichiers DVF standards. Relancer `backend/build_dataset.py` avec
+  d'autres codes département pour étendre encore.
+- Recherche de commune (autocomplétion) à la place de la liste figée de 4.
+  Les statistiques de marché sont chargées **par département, à la demande**
+  (`web/market_stats/<dept>.json`, ~100-1500 Ko chacun) plutôt qu'un seul
+  fichier monolithique — ça reste rapide même en couvrant tout le pays.
+- **Génération de rapport PDF** (bouton "Voir un exemple de rapport") via
+  jsPDF, entièrement côté navigateur. Marqué "EXEMPLE" tant que le paiement
+  Stripe n'est pas branché — le bouton payant reste désactivé.
+
 ## Nouveau : fondations SEO + mise en ligne
 
 - Pages ajoutées : `guide-erreurs-taxe-fonciere.html` (contenu pilier),
