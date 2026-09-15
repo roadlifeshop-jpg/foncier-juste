@@ -120,6 +120,7 @@ select, input[type=number]{
 footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font-size:.78rem; color:var(--ink-muted);}
 @media(max-width:600px){.hero h1{font-size:1.6rem;}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -228,8 +229,10 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
       <div id="impact-container"></div>
       <div class="cta-row">
         <button class="btn-primary" disabled title="Paiement Stripe pas encore branché">Obtenir le rapport complet — 29€</button>
+        <button class="btn-secondary" id="preview-pdf-btn">Voir un exemple de rapport (PDF)</button>
         <button class="btn-secondary" id="restart-btn">Refaire le diagnostic</button>
       </div>
+      <p class="stub-note" id="pdf-hint" style="display:none">Génération du PDF...</p>
       <p class="stub-note">Ce pré-diagnostic est indicatif : il ne remplace pas votre fiche d'évaluation officielle (formulaire 6675-M, disponible sur impots.gouv.fr) ni une vérification par les services fiscaux.</p>
     </div>
   </section>
@@ -249,6 +252,7 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
 // ---- Communes couvertes (chargé une fois, léger) ----
 let communesIndex = new Map(); // "Commune (CP)" -> {code_commune, code_dept, commune, code_postal}
 let deptStatsCache = {};        // code_dept -> Promise<statsArray>
+let dernierDiagnostic = null;   // dernier résultat calculé, utilisé pour générer le PDF
 
 fetch('communes.json').then(r => r.json()).then(communes => {
   const list = document.getElementById('communes-list');
@@ -394,7 +398,12 @@ async function runDiagnostic(){
   const score = Math.min(100, anomalies.reduce((s,a)=>s+graviteScore[a.gravite],0));
   const niveau = score>=40 ? 'élevé' : score>=20 ? 'moyen' : 'faible';
 
-  renderResults({score, niveau, anomalies, n: comps ? comps.n : 0, taxeActuelle});
+  const resultat = {
+    score, niveau, anomalies, n: comps ? comps.n : 0, taxeActuelle,
+    commune: communeChoisie, type, surfCad, surfReelle,
+  };
+  dernierDiagnostic = resultat; // conservé pour la génération du PDF
+  renderResults(resultat);
 }
 
 function renderResults({score, niveau, anomalies, n, taxeActuelle}){
@@ -421,15 +430,104 @@ function renderResults({score, niveau, anomalies, n, taxeActuelle}){
     : `Échantillon local limité (${n} transactions) — résultat à interpréter avec prudence.`;
 
   const impactBox = document.getElementById('impact-container');
+  const impact = calculerImpact(anomalies, taxeActuelle);
+  impactBox.innerHTML = impact
+    ? `<div class="impact-box">Impact potentiel estimé : <span class="amount">${impact.eurMin}–${impact.eurMax} €/an</span><br><span style="font-size:.8rem;color:var(--ink-muted)">Fourchette indicative, pas un recalcul officiel.</span></div>`
+    : '';
+}
+
+function calculerImpact(anomalies, taxeActuelle){
   const hasHaute = anomalies.some(a=>a.gravite==='haute');
   const hasMoyenne = anomalies.some(a=>a.gravite==='moyenne');
-  if (taxeActuelle && (hasHaute || hasMoyenne)){
-    const [pctLow, pctHigh] = hasHaute ? [8,20] : [3,10];
-    const eurMin = Math.round(taxeActuelle*pctLow/100), eurMax = Math.round(taxeActuelle*pctHigh/100);
-    impactBox.innerHTML = `<div class="impact-box">Impact potentiel estimé : <span class="amount">${eurMin}–${eurMax} €/an</span><br><span style="font-size:.8rem;color:var(--ink-muted)">Fourchette indicative, pas un recalcul officiel.</span></div>`;
+  if (!taxeActuelle || (!hasHaute && !hasMoyenne)) return null;
+  const [pctLow, pctHigh] = hasHaute ? [8,20] : [3,10];
+  return { eurMin: Math.round(taxeActuelle*pctLow/100), eurMax: Math.round(taxeActuelle*pctHigh/100) };
+}
+
+// ---- Génération du rapport PDF (exemple gratuit tant que Stripe n'est pas branché) ----
+document.getElementById('preview-pdf-btn').addEventListener('click', () => {
+  if (!dernierDiagnostic){ return; }
+  const hint = document.getElementById('pdf-hint');
+  hint.style.display = 'block';
+  hint.textContent = 'Génération du PDF...';
+  // Un léger délai laisse le temps au navigateur d'afficher le message
+  // avant le calcul (jsPDF bloque le thread principal un court instant).
+  setTimeout(() => {
+    try {
+      genererRapportPDF(dernierDiagnostic);
+      hint.style.display = 'none';
+    } catch (e) {
+      hint.textContent = "Impossible de générer le PDF (bibliothèque jsPDF non chargée ?). Réessayez avec une connexion internet active.";
+      console.error(e);
+    }
+  }, 50);
+});
+
+function genererRapportPDF(d){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const marge = 20;
+  let y = 24;
+  const largeur = 210 - marge * 2;
+
+  const ligne = (texte, opts = {}) => {
+    const { taille = 10, style = 'normal', couleur = [30,30,25], espace = 6 } = opts;
+    doc.setFont('helvetica', style);
+    doc.setFontSize(taille);
+    doc.setTextColor(...couleur);
+    const morceaux = doc.splitTextToSize(texte, largeur);
+    doc.text(morceaux, marge, y);
+    y += morceaux.length * (taille / 2.6) + espace;
+  };
+
+  // En-tête
+  doc.setFillColor(46, 74, 74);
+  doc.rect(0, 0, 210, 16, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold'); doc.setFontSize(13);
+  doc.text('Foncier Juste — Rapport de pré-diagnostic', marge, 10.5);
+  y = 28;
+
+  doc.setTextColor(160,60,45);
+  doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text('EXEMPLE — généré gratuitement, ne constitue pas le rapport payant final', marge, y);
+  y += 10;
+
+  ligne(`Date : ${new Date().toLocaleDateString('fr-FR')}`, { taille: 9, couleur: [90,95,88], espace: 2 });
+  ligne(`Commune : ${d.commune.commune} (${d.commune.code_postal})  ·  Type de bien : ${d.type}`, { taille: 9, couleur: [90,95,88], espace: 8 });
+
+  ligne('Niveau de vigilance', { taille: 14, style: 'bold', espace: 2 });
+  const couleurNiveau = d.score >= 40 ? [156,59,46] : d.score >= 20 ? [147,103,46] : [47,107,74];
+  ligne(`${d.score} / 100 — signal ${d.niveau}`, { taille: 12, style: 'bold', couleur: couleurNiveau, espace: 8 });
+
+  ligne('Éléments relevés', { taille: 12, style: 'bold', espace: 3 });
+  if (d.anomalies.length){
+    d.anomalies.forEach(a => ligne(`• ${a.message}`, { taille: 10, espace: 5 }));
   } else {
-    impactBox.innerHTML = '';
+    ligne('Aucune anomalie détectée avec les informations fournies.', { taille: 10, espace: 5 });
   }
+  y += 2;
+
+  const impact = calculerImpact(d.anomalies, d.taxeActuelle);
+  if (impact){
+    ligne('Impact potentiel estimé', { taille: 12, style: 'bold', espace: 3 });
+    ligne(`${impact.eurMin} à ${impact.eurMax} € par an (fourchette indicative, pas un recalcul officiel).`, { taille: 10, espace: 8 });
+  }
+
+  ligne('Prochaines étapes recommandées', { taille: 12, style: 'bold', espace: 3 });
+  [
+    "1. Demandez votre fiche d'évaluation (formulaire 6675-M) sur impots.gouv.fr, espace particulier, par messagerie sécurisée.",
+    "2. Comparez chaque ligne de la fiche à la réalité actuelle de votre bien (surface, éléments de confort).",
+    "3. En cas d'écart confirmé, déposez une réclamation avant le 31 décembre de l'année suivant la mise en recouvrement de l'avis contesté.",
+  ].forEach(t => ligne(t, { taille: 10, espace: 5 }));
+
+  y = 275;
+  doc.setDrawColor(214,213,199); doc.line(marge, y, 210-marge, y);
+  y += 5;
+  ligne("Ce document est un pré-diagnostic indicatif basé sur les informations fournies et des données de marché publiques (DVF, data.gouv.fr). Il ne constitue ni un conseil fiscal personnalisé, ni une garantie de résultat, ni un document officiel de l'administration fiscale.", { taille: 7.5, couleur: [110,114,105], espace: 0 });
+
+  const nomFichier = `foncier-juste-exemple-${d.commune.code_commune}.pdf`;
+  doc.save(nomFichier);
 }
 </script>
 </body>
