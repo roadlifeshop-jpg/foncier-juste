@@ -2,6 +2,31 @@
 
 Statut au 15/09/2026. Voir aussi le dossier de recherche complet : "Foncier Juste" (artefact publié dans la conversation Claude).
 
+## Source de vérité des règles métier
+
+Les règles de diagnostic existent en deux implémentations — JavaScript dans
+`web/index.html` (le calcul se fait dans le navigateur du visiteur, ses
+réponses ne partent sur aucun serveur) et Python dans
+`backend/diagnostic_engine.py` (dépouillement du test T1, tests hors ligne).
+**Ce ne sont pas deux règles : c'est une règle écrite deux fois.** Les points
+à synchroniser portent le marqueur `PARITÉ` dans les deux fichiers.
+
+Toute modification d'une règle doit être répercutée des deux côtés, puis
+vérifiée :
+
+```bash
+cd backend && python3 -m unittest discover -p "test_*.py"   # 29 tests
+python3 test_parite_moteurs.py --table                      # tableau comparatif
+```
+
+Le test de parité rejoue les cas de `backend/cas_parite.json` dans les deux
+moteurs et compare 14 champs, libellés utilisateur compris. La capture du
+moteur de production (`backend/parite_production.json`) se régénère avec
+`backend/capture_production.js`, dont l'en-tête donne le mode d'emploi.
+
+**Instrumentation à ajouter avant l'ouverture commerciale :** l'événement
+`achat_bloque`, spécifié en détail en tête de `web/api/track.js`.
+
 ## ⚠️ Site mis en pause (15/09/2026)
 
 Sur demande explicite : `robots.txt` bloque tout crawl (`Disallow: /`) et

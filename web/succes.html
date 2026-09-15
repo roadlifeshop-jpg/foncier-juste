@@ -3,66 +3,73 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Paiement confirmé — Foncier Juste</title>
+<title>Paiement confirmé — Foncier·Juste</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230F3D56'/><path d='M7 16.5 16 8.5l9 8' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 23.5h16' stroke='%23C8A15A' stroke-width='2.6' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:wght@500;600&display=swap">
+<link rel="stylesheet" href="base.css">
 <style>
-:root{
-  --bg:#F1F1EA; --surface:#FBFBF6; --surface-2:#E9E9DF; --ink:#1D211E; --ink-muted:#5B615A;
-  --line:#D6D5C7; --accent:#2E4A4A; --accent-soft:#DCE6E2; --gold:#93672E;
-  --good:#2F6B4A; --good-soft:#DFEBE1; --bad:#9C3B2E; --bad-soft:#F3DFD8;
-  --shadow:0 1px 2px rgba(30,30,20,.06),0 8px 24px -14px rgba(30,30,20,.25);
+main.center{max-width:560px; margin:0 auto; padding:72px 20px 60px;}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:34px 30px; box-shadow:var(--lift);}
+.card h1{font-size:1.5rem;}
+.card p{color:var(--ink-muted); font-size:.95rem;}
+.mark{
+  width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; font-weight:700; margin-bottom:18px;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#151815; --surface:#1C201C; --surface-2:#242822; --ink:#E9E8DF; --ink-muted:#A3A99E;
-    --line:#33372F; --accent:#8FB7AE; --gold:#D6A85E;
-    --good:#7FBF9A; --good-soft:#1E2E24; --bad:#E19684; --bad-soft:#332019;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -14px rgba(0,0,0,.6);
-  }
+.mark-ok{background:var(--ok-soft); color:var(--ok);}
+.mark-err{background:var(--alert-soft); color:var(--alert);}
+.spinner{
+  width:28px; height:28px; border:2.5px solid var(--surface-3); border-top-color:var(--accent);
+  border-radius:50%; margin-bottom:18px; animation:spin .8s linear infinite;
 }
-:root[data-theme="dark"]{
-  --bg:#151815; --surface:#1C201C; --surface-2:#242822; --ink:#E9E8DF; --ink-muted:#A3A99E;
-  --line:#33372F; --accent:#8FB7AE; --gold:#D6A85E;
-  --good:#7FBF9A; --good-soft:#1E2E24; --bad:#E19684; --bad-soft:#332019;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -14px rgba(0,0,0,.6);
-}
-*{box-sizing:border-box;}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;line-height:1.6;padding:0 20px;}
-.wrap{max-width:600px;margin:0 auto;padding-block:80px;text-align:center;}
-h1{font-family:'Fraunces',Georgia,serif;font-size:1.8rem;margin-bottom:12px;}
-p{color:var(--ink-muted);margin-bottom:24px;}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:32px;box-shadow:var(--shadow);}
-.spinner{width:32px;height:32px;border:3px solid var(--surface-2);border-top-color:var(--accent);border-radius:50%;margin:0 auto 20px;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.icon-ok{width:48px;height:48px;border-radius:50%;background:var(--good-soft);color:var(--good);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.6rem;}
-.icon-err{width:48px;height:48px;border-radius:50%;background:var(--bad-soft);color:var(--bad);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.6rem;}
-button{font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:.95rem;border-radius:9px;border:1px solid transparent;padding:12px 22px;cursor:pointer;background:var(--accent);color:var(--surface);}
-a.retour{display:block;margin-top:18px;color:var(--ink-muted);font-size:.85rem;}
+.card .btn{margin-top:22px;}
+.next{margin-top:26px; padding-top:20px; border-top:1px solid var(--line);}
+.next h2{font-family:'Archivo',sans-serif; font-size:.95rem; font-weight:600; margin:0;}
+.next ol{margin-top:10px; font-size:.89rem; color:var(--ink-muted);}
+.back{display:inline-block; margin-top:20px; font-size:.86rem; color:var(--ink-muted); text-decoration:none;}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<header class="site-head">
+  <div class="shell">
+    <a class="brand" href="index.html">Foncier<span class="dot">·</span>Juste</a>
+  </div>
+</header>
+
+<main class="center">
   <div class="card" id="etat-attente">
     <div class="spinner"></div>
-    <h1>Vérification du paiement...</h1>
-    <p>Un instant, on confirme tout auprès de Stripe.</p>
+    <h1>Vérification du paiement…</h1>
+    <p>Un instant, nous confirmons la transaction auprès de Stripe.</p>
   </div>
 
-  <div class="card" id="etat-ok" style="display:none">
-    <div class="icon-ok">✓</div>
+  <div class="card" id="etat-ok" hidden>
+    <div class="mark mark-ok">✓</div>
     <h1>Paiement confirmé</h1>
-    <p>Votre rapport complet est prêt. Le téléchargement démarre automatiquement — sinon, cliquez ci-dessous.</p>
-    <button id="dl-btn">Télécharger le rapport (PDF)</button>
+    <p id="ok-msg">Votre document est prêt. Le téléchargement démarre automatiquement — sinon, utilisez le bouton ci-dessous.</p>
+    <button class="btn btn-primary" id="dl-btn">Télécharger mon document (PDF)</button>
+    <div class="next">
+      <h2>Et maintenant&nbsp;?</h2>
+      <ol>
+        <li>Enregistrez le PDF&nbsp;: il n'est pas conservé sur nos serveurs, et cette page ne pourra pas le régénérer une fois fermée.</li>
+        <li>Complétez les mentions entre crochets avec vos informations personnelles.</li>
+        <li>Joignez les pièces listées, puis déposez votre réclamation depuis la messagerie sécurisée d'impots.gouv.fr.</li>
+      </ol>
+    </div>
   </div>
 
-  <div class="card" id="etat-erreur" style="display:none">
-    <div class="icon-err">!</div>
+  <div class="card" id="etat-erreur" hidden>
+    <div class="mark mark-err">!</div>
     <h1>Impossible de confirmer le paiement</h1>
-    <p id="erreur-msg">Une vérification est nécessaire avant de livrer le rapport.</p>
+    <p id="erreur-msg">Une vérification est nécessaire avant de délivrer le document.</p>
   </div>
-  <a class="retour" href="index.html">← Retour à l'accueil</a>
-</div>
+
+  <a class="back" href="index.html">← Retour à l'accueil</a>
+</main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
 <script src="rapport.js"></script>
@@ -70,31 +77,27 @@ a.retour{display:block;margin-top:18px;color:var(--ink-muted);font-size:.85rem;}
 function track(evenement, meta = {}) {
   try {
     navigator.sendBeacon?.('/api/track', new Blob(
-      [JSON.stringify({ e: evenement, ...meta })],
-      { type: 'application/json' }
+      [JSON.stringify({ e: evenement, ...meta })], { type: 'application/json' }
     ));
   } catch (_) { /* la mesure ne doit jamais casser la livraison */ }
 }
 
 function afficher(id){
   ['etat-attente','etat-ok','etat-erreur'].forEach(x =>
-    document.getElementById(x).style.display = x === id ? 'block' : 'none');
+    document.getElementById(x).hidden = x !== id);
 }
 
 function telecharger(produit){
   const brut = sessionStorage.getItem('dernierDiagnostic');
   if (!brut){
     document.getElementById('erreur-msg').textContent =
-      "Le paiement est confirmé, mais les réponses de votre diagnostic n'ont pas été retrouvées dans ce navigateur (nouvel onglet ou navigation privée ?). Contactez-nous en indiquant l'identifiant de session ci-dessous.";
+      "Le paiement est confirmé, mais les réponses de votre pré-diagnostic n'ont pas été retrouvées dans ce navigateur (nouvel onglet, ou navigation privée). Contactez-nous en indiquant l'identifiant de session présent dans l'adresse de cette page : nous régénérerons votre document.";
     afficher('etat-erreur');
     return;
   }
   const diagnostic = JSON.parse(brut);
-  if (produit === 'dossier') {
-    genererDossierPDF(diagnostic, { exemple: false });
-  } else {
-    genererRapportPDF(diagnostic, { exemple: false });
-  }
+  if (produit === 'dossier') genererDossierPDF(diagnostic, { exemple: false });
+  else genererRapportPDF(diagnostic, { exemple: false });
   track('document_telecharge', { produit });
 }
 
@@ -113,14 +116,14 @@ function telecharger(produit){
     if (data.payment_status === 'paid'){
       track('paiement_reussi', { produit: data.produit });
       afficher('etat-ok');
-      const libelle = data.produit === 'dossier' ? 'dossier complet' : 'rapport';
-      document.querySelector('#etat-ok p').textContent =
-        `Votre ${libelle} est prêt. Le téléchargement démarre automatiquement — sinon, cliquez ci-dessous.`;
+      const libelle = data.produit === 'dossier' ? 'dossier de vérification' : 'analyse détaillée';
+      document.getElementById('ok-msg').textContent =
+        `Votre ${libelle} est prête. Le téléchargement démarre automatiquement — sinon, utilisez le bouton ci-dessous.`;
       telecharger(data.produit);
       document.getElementById('dl-btn').addEventListener('click', () => telecharger(data.produit));
     } else {
       document.getElementById('erreur-msg').textContent =
-        `Paiement non confirmé (statut : ${data.payment_status}). Si vous venez de payer, réessayez de rafraîchir cette page dans quelques secondes.`;
+        `Paiement non confirmé (statut : ${data.payment_status}). Si vous venez de payer, rafraîchissez cette page dans quelques secondes.`;
       afficher('etat-erreur');
     }
   } catch (e) {

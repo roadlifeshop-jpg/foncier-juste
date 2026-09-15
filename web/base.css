@@ -1,0 +1,116 @@
+/* ==========================================================================
+   Foncier·Juste — feuille commune aux pages secondaires
+   (guide, mentions légales, confidentialité, CGV, page de succès).
+   La page d'accueil embarque son propre CSS : elle est servie en premier et
+   doit s'afficher sans requête supplémentaire. Les jetons ci-dessous en sont
+   la copie exacte — toute modification de palette doit être répercutée dans
+   index.html, et inversement.
+   ========================================================================== */
+:root{
+  --bg:#F6F7F8; --surface:#FFFFFF; --surface-2:#EDF0F3; --surface-3:#E3E8EC;
+  --ink:#0E1721; --ink-muted:#5B6875; --ink-faint:#8996A3;
+  --line:#DCE2E8; --line-strong:#C3CDD6;
+  --accent:#0F3D56; --accent-ink:#FFFFFF; --accent-soft:#E4EEF4; --accent-line:#B9D2E0;
+  --gold:#9A7328;
+  --ok:#1E6B4B; --ok-soft:#E4F0E9;
+  --warn:#8A5A12; --warn-soft:#F7EDD9; --warn-line:#E0C58C;
+  --alert:#A03325; --alert-soft:#F9E6E2; --alert-line:#E6BCB4;
+  --ring:0 0 0 3px rgba(15,61,86,.18);
+  --lift:0 1px 1px rgba(14,23,33,.04), 0 10px 30px -18px rgba(14,23,33,.35);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1218; --surface:#121A22; --surface-2:#18222B; --surface-3:#1F2B35;
+    --ink:#E7EDF2; --ink-muted:#94A3B0; --ink-faint:#71808D;
+    --line:#243039; --line-strong:#33424E;
+    --accent:#84BAD7; --accent-ink:#08121A; --accent-soft:#142936; --accent-line:#28485C;
+    --gold:#C9A263;
+    --ok:#6FC49B; --ok-soft:#10261E;
+    --warn:#DCAC5C; --warn-soft:#2A2113; --warn-line:#4A3A1C;
+    --alert:#E7907F; --alert-soft:#2C1A17; --alert-line:#4C2C25;
+    --ring:0 0 0 3px rgba(132,186,215,.25);
+    --lift:0 1px 1px rgba(0,0,0,.3), 0 10px 30px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1218; --surface:#121A22; --surface-2:#18222B; --surface-3:#1F2B35;
+  --ink:#E7EDF2; --ink-muted:#94A3B0; --ink-faint:#71808D;
+  --line:#243039; --line-strong:#33424E;
+  --accent:#84BAD7; --accent-ink:#08121A; --accent-soft:#142936; --accent-line:#28485C;
+  --gold:#C9A263;
+  --ok:#6FC49B; --ok-soft:#10261E;
+  --warn:#DCAC5C; --warn-soft:#2A2113; --warn-line:#4A3A1C;
+  --alert:#E7907F; --alert-soft:#2C1A17; --alert-line:#4C2C25;
+  --ring:0 0 0 3px rgba(132,186,215,.25);
+  --lift:0 1px 1px rgba(0,0,0,.3), 0 10px 30px -18px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Archivo',system-ui,-apple-system,sans-serif;
+  font-size:16px; line-height:1.65; letter-spacing:-.003em;
+  -webkit-font-smoothing:antialiased;
+}
+.shell{max-width:720px; margin:0 auto; padding-inline:20px;}
+a{color:var(--accent); text-underline-offset:2px;}
+:focus-visible{outline:none; box-shadow:var(--ring); border-radius:6px;}
+.num{font-variant-numeric:tabular-nums;}
+
+.site-head{border-bottom:1px solid var(--line); background:var(--surface);}
+.site-head .shell{display:flex; align-items:center; justify-content:space-between; gap:16px; padding-block:16px;}
+.brand{display:inline-flex; align-items:baseline; gap:1px; font-family:'Spectral',Georgia,serif; font-weight:600; font-size:1.12rem; color:var(--ink); text-decoration:none;}
+.brand .dot{color:var(--gold); font-size:1.3em; line-height:0;}
+.head-link{font-size:.85rem; font-weight:500; color:var(--ink-muted); text-decoration:none;}
+.head-link:hover{color:var(--ink);}
+
+.doc{padding-block:48px 24px;}
+.doc .eyebrow{font-size:.7rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:12px;}
+h1,h2,h3{font-family:'Spectral',Georgia,serif; font-weight:600; line-height:1.2; text-wrap:balance; margin:0;}
+h1{font-size:clamp(1.6rem,4.4vw,2.1rem); letter-spacing:-.02em;}
+h2{font-size:1.22rem; margin-top:38px; letter-spacing:-.015em;}
+h3{font-family:'Archivo',sans-serif; font-size:1rem; font-weight:600; margin-top:26px;}
+p{margin:14px 0 0; max-width:66ch;}
+ul,ol{margin:14px 0 0; padding-left:22px; max-width:66ch;}
+li{margin-bottom:9px;}
+p + h2, ul + h2, ol + h2, table + h2{margin-top:38px;}
+strong,b{font-weight:600;}
+
+.warn{
+  background:var(--warn-soft); border:1px solid var(--warn-line); border-radius:10px;
+  padding:15px 17px; font-size:.89rem; line-height:1.6; margin-top:24px; color:var(--ink);
+}
+.warn strong{font-weight:700;}
+[data-fill]{
+  background:var(--warn-soft); border-bottom:1px solid var(--warn-line);
+  padding:1px 5px; border-radius:3px; font-size:.9em;
+}
+
+.callout{
+  background:var(--accent-soft); border:1px solid var(--accent-line); border-radius:10px;
+  padding:15px 17px; font-size:.92rem; margin-top:22px;
+}
+.callout p{margin-top:0;}
+
+.tablewrap{overflow-x:auto; margin-top:16px;}
+table{border-collapse:collapse; width:100%; min-width:460px; font-size:.89rem;}
+th,td{text-align:left; padding:11px 13px; border-bottom:1px solid var(--line); vertical-align:top;}
+th{font-weight:600; font-size:.76rem; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-family:inherit; font-size:.94rem; font-weight:600; border-radius:8px;
+  border:1px solid transparent; padding:12px 20px; cursor:pointer; text-decoration:none;
+  transition:background-color .15s ease, border-color .15s ease;
+}
+.btn-primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
+.btn-secondary{background:var(--surface); color:var(--ink); border-color:var(--line-strong);}
+.btn-secondary:hover{border-color:var(--ink-faint);}
+@media (prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important;}}
+
+.site-foot{border-top:1px solid var(--line); background:var(--surface); margin-top:56px; padding-block:26px 36px;}
+.site-foot .links{display:flex; flex-wrap:wrap; gap:8px 18px; font-size:.86rem;}
+.site-foot .links a{color:var(--ink-muted); text-decoration:none;}
+.site-foot .links a:hover{color:var(--ink); text-decoration:underline;}
+.site-foot .fine{margin-top:16px; font-size:.79rem; color:var(--ink-faint); max-width:70ch;}

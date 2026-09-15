@@ -13,6 +13,57 @@
 // remplacer par Plausible ou Umami (sans cookie eux aussi) — pas par Google
 // Analytics, qui contredirait le positionnement du produit.
 
+// ---------------------------------------------------------------------------
+// À AJOUTER AVANT L'OUVERTURE COMMERCIALE AU PUBLIC : `achat_bloque`
+// ---------------------------------------------------------------------------
+// Pourquoi. Depuis la V1, l'offre payante n'apparaît que si un écart réel
+// repose sur une donnée fiable (fiche 6675-M). Une très grande partie des
+// visiteurs ne verra donc jamais de bouton d'achat. Sans cet événement, un
+// taux de conversion nul est indéchiffrable : impossible de distinguer
+//   (a) « personne ne veut payer »            -> le produit n'intéresse pas ;
+//   (b) « personne n'atteint l'offre »        -> le gabarit d'accès est trop
+//       strict, ou les gens n'ont pas leur fiche ;
+//   (c) « l'offre s'affiche mais le formulaire email/consentement bloque »
+//       -> problème d'interface, pas de désir.
+// Ce sont trois décisions produit opposées. L'événement les sépare.
+//
+// Ce qu'il faut ajouter, précisément.
+//
+// 1. Ici : ajouter 'achat_bloque' à EVENEMENTS_AUTORISES, puis étendre la
+//    liste blanche des méta-données avec un champ `raison` contraint à un
+//    ensemble fermé de valeurs — jamais une chaîne libre, qui rouvrirait la
+//    porte à des données personnelles dans les logs :
+//      const RAISONS = new Set([
+//        'aucun_signal',        // diagnostic sans écart : rien à vendre
+//        'signal_non_fiable',   // écart relevé, mais confiance faible
+//        'sans_fiche',          // l'utilisateur n'a pas sa fiche 6675-M
+//        'email_invalide',      // l'offre était visible, l'email a bloqué
+//        'consentement_absent', // l'offre était visible, la case a bloqué
+//      ]);
+//      raison: RAISONS.has(body.raison) ? body.raison : undefined,
+//
+// 2. Dans web/index.html, fonction `renderResults()`, juste après le calcul de
+//    `const vente = venteAutorisee(anomalies);` — dans la branche `if (!vente)`
+//    qui existe déjà :
+//      track('achat_bloque', {
+//        raison: reels.length === 0 ? 'aucun_signal'
+//              : !avecFiche        ? 'sans_fiche'
+//                                  : 'signal_non_fiable'
+//      });
+//
+// 3. Dans web/index.html, gestionnaire des `.buy-btn`, sur les deux retours
+//    anticipés qui existent déjà :
+//      - après l'échec du test d'email  : track('achat_bloque', { raison: 'email_invalide' });
+//      - après l'échec du consentement  : track('achat_bloque', { raison: 'consentement_absent' });
+//
+// Ce que ça ne change pas : toujours aucun cookie, aucun identifiant, aucune
+// donnée sur le bien. `raison` est un mot d'une liste fermée de cinq valeurs.
+//
+// Pourquoi ce n'est pas fait maintenant : le périmètre du test T1 est gelé, et
+// cet événement ne sert qu'à lire du trafic public — que le site n'a pas
+// encore, puisqu'il reste en `noindex` jusqu'à l'immatriculation.
+// ---------------------------------------------------------------------------
+
 const EVENEMENTS_AUTORISES = new Set([
   'page_vue',
   'diagnostic_demarre',

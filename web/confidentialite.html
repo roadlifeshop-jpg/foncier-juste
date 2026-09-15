@@ -3,59 +3,88 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Politique de confidentialité — Foncier Juste</title>
+<title>Politique de confidentialité — Foncier·Juste</title>
+<meta name="description" content="Quelles données Foncier·Juste traite, pourquoi, combien de temps, et qui les reçoit. Le pré-diagnostic est calculé dans le navigateur : les réponses ne sont transmises à aucun serveur.">
+<link rel="canonical" href="https://foncier-juste.vercel.app/confidentialite.html">
 <meta name="robots" content="noindex, nofollow">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
-<style>
-:root{--bg:#F1F1EA;--surface:#FBFBF6;--ink:#1D211E;--ink-muted:#5B615A;--line:#D6D5C7;--accent:#2E4A4A;--gold:#93672E;--warn-soft:#F1E5CD;--warn:#93672E;}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#151815;--surface:#1C201C;--ink:#E9E8DF;--ink-muted:#A3A99E;--line:#33372F;--accent:#8FB7AE;--gold:#D6A85E;--warn-soft:#332818;--warn:#D6A85E;}}
-:root[data-theme="dark"]{--bg:#151815;--surface:#1C201C;--ink:#E9E8DF;--ink-muted:#A3A99E;--line:#33372F;--accent:#8FB7AE;--gold:#D6A85E;--warn-soft:#332818;--warn:#D6A85E;}
-*{box-sizing:border-box;}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;line-height:1.6;padding:0 20px;}
-.wrap{max-width:680px;margin:0 auto;padding-block:0 80px;}
-h1{font-family:'Fraunces',Georgia,serif;font-size:1.7rem;}
-h2{font-family:'Fraunces',Georgia,serif;font-size:1.1rem;margin-top:28px;}
-nav.top{display:flex;justify-content:space-between;padding-block:20px;border-bottom:1px solid var(--line);margin-bottom:30px;}
-.brand{font-family:'Fraunces',serif;font-weight:700;text-decoration:none;color:var(--ink);}
-.brand .dot{color:var(--gold);}
-.warn{background:var(--warn-soft);border:1px solid var(--warn);border-radius:10px;padding:14px 16px;font-size:.88rem;margin-bottom:26px;}
-[data-fill]{background:var(--warn-soft);padding:1px 5px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:.85em;}
-table{border-collapse:collapse;width:100%;margin:14px 0;font-size:.88rem;}
-th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top;}
-th{font-family:'IBM Plex Mono',monospace;font-size:.68rem;text-transform:uppercase;color:var(--ink-muted);}
-footer{border-top:1px solid var(--line);padding-top:18px;margin-top:50px;font-size:.8rem;color:var(--ink-muted);}
-footer a{color:var(--ink-muted);margin-right:14px;}
-</style>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230F3D56'/><path d='M7 16.5 16 8.5l9 8' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 23.5h16' stroke='%23C8A15A' stroke-width='2.6' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:wght@500;600&display=swap">
+<link rel="stylesheet" href="base.css">
 </head>
 <body>
-<div class="wrap">
-  <nav class="top"><a class="brand" href="index.html">Foncier<span class="dot">·</span>Juste</a></nav>
-  <h1>Politique de confidentialité</h1>
-  <div class="warn">⚠️ <strong>Brouillon.</strong> À valider avant mise en ligne publique — en particulier une fois le prestataire de paiement (Stripe) et l'hébergeur réellement choisis, pour que les destinataires listés ci-dessous soient exacts.</div>
 
-  <h2>Ce que nous collectons</h2>
-  <table>
-    <thead><tr><th>Donnée</th><th>Finalité</th><th>Base légale</th></tr></thead>
-    <tbody>
-      <tr><td>Réponses au pré-diagnostic (surface, commune, éléments de confort)</td><td>Calculer le score de vigilance</td><td>Exécution du service demandé — traitement effectué dans le navigateur, non transmis à un serveur dans la version actuelle</td></tr>
-      <tr><td>Email + informations de paiement (rapport payant)</td><td>Livrer le rapport et facturer</td><td>Exécution du contrat</td></tr>
-    </tbody>
-  </table>
+<header class="site-head">
+  <div class="shell">
+    <a class="brand" href="index.html">Foncier<span class="dot">·</span>Juste</a>
+    <a class="head-link" href="index.html">Retour au site</a>
+  </div>
+</header>
+
+<main class="shell doc">
+  <div class="eyebrow">Vos données</div>
+  <h1>Politique de confidentialité</h1>
+
+  <div class="warn">
+    <strong>Brouillon.</strong> À valider avant toute mise en ligne publique, notamment pour préciser
+    la durée de conservation retenue et l'identité exacte des destinataires une fois l'immatriculation
+    effectuée.
+  </div>
+
+  <div class="callout">
+    <p><strong>Le point essentiel :</strong> le pré-diagnostic est calculé entièrement dans votre navigateur. Vos réponses — commune, surfaces, éléments de confort, montant de taxe — ne sont transmises à aucun serveur, ni au nôtre, ni à un tiers. Elles disparaissent quand vous fermez l'onglet.</p>
+  </div>
+
+  <h2>Ce que nous traitons</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Donnée</th><th>Finalité</th><th>Base légale</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Réponses au pré-diagnostic (commune, surfaces, éléments de confort, montant)</td>
+          <td>Établir le résultat du pré-diagnostic</td>
+          <td>Exécution du service demandé — traitement effectué dans le navigateur, jamais transmis à un serveur</td>
+        </tr>
+        <tr>
+          <td>Étape du parcours atteinte</td>
+          <td>Savoir à quel moment les visiteurs abandonnent, pour corriger le parcours</td>
+          <td>Intérêt légitime — sans cookie, sans identifiant, sans aucune information sur le bien</td>
+        </tr>
+        <tr>
+          <td>Adresse email et informations de paiement (achat uniquement)</td>
+          <td>Délivrer le document acheté, émettre le reçu, répondre en cas d'échec de livraison</td>
+          <td>Exécution du contrat</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Ce que nous n'utilisons pas</h2>
+  <ul>
+    <li>Aucun cookie de mesure d'audience, aucun traceur publicitaire.</li>
+    <li>Aucun identifiant de visiteur, aucune reconstitution de parcours individuel.</li>
+    <li>Aucune donnée bancaire : le paiement est traité intégralement par Stripe, qui ne nous transmet jamais votre numéro de carte.</li>
+  </ul>
 
   <h2>Durée de conservation</h2>
-  <p><span data-fill>[à définir — ex. 3 ans après le dernier contact, conformément aux recommandations CNIL]</span></p>
+  <p><span data-fill>[À définir — par exemple 3 ans après le dernier contact, conformément aux recommandations de la CNIL, et 10 ans pour les pièces comptables liées à une vente]</span></p>
 
   <h2>Destinataires</h2>
-  <p>Prestataire de paiement : <span data-fill>[Stripe, une fois le compte créé]</span>. Hébergeur : <span data-fill>[à compléter]</span>. Aucune donnée n'est vendue à des tiers.</p>
+  <p>Prestataire de paiement : <strong>Stripe Payments Europe Ltd</strong>, pour le traitement des transactions. Hébergeur : <span data-fill>[à compléter]</span>. Aucune donnée n'est vendue ni cédée à des tiers.</p>
 
   <h2>Vos droits</h2>
-  <p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour l'exercer : <span data-fill>[email de contact]</span>.</p>
+  <p>Conformément au Règlement général sur la protection des données, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition sur les données vous concernant. Pour l'exercer : <span data-fill>[email de contact]</span>. Vous pouvez également introduire une réclamation auprès de la CNIL.</p>
+</main>
 
-  <footer>
-    <a href="index.html">Accueil</a>
-    <a href="mentions-legales.html">Mentions légales</a>
-    <a href="cgv.html">CGV</a>
-  </footer>
-</div>
+<footer class="site-foot">
+  <div class="shell">
+    <div class="links">
+      <a href="index.html">Accueil</a>
+      <a href="guide-erreurs-taxe-fonciere.html">Guide</a>
+      <a href="mentions-legales.html">Mentions légales</a>
+      <a href="cgv.html">CGV</a>
+    </div>
+  </div>
+</footer>
 </body>
 </html>

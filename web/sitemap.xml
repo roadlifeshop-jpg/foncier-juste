@@ -1,28 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Ne liste que les pages destinées à être indexées le jour où le site
+     s'ouvrira au public. Les pages légales et la page de succès en sont
+     volontairement absentes : elles sont en noindex de façon permanente. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://foncier-juste.vercel.app/</loc>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://foncier-juste.vercel.app/guide-erreurs-taxe-fonciere.html</loc>
+    <lastmod>2026-09-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://foncier-juste.vercel.app/mentions-legales.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.1</priority>
-  </url>
-  <url>
-    <loc>https://foncier-juste.vercel.app/confidentialite.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.1</priority>
-  </url>
-  <url>
-    <loc>https://foncier-juste.vercel.app/cgv.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.1</priority>
   </url>
 </urlset>

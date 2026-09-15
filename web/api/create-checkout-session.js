@@ -10,13 +10,13 @@
 const PRODUITS = {
   rapport: {
     montant: 2900, // 29,00 €
-    nom: 'Foncier Juste — Rapport complet de diagnostic',
-    description: "Diagnostic détaillé des anomalies détectées, comparé aux transactions immobilières réelles de votre secteur (DVF).",
+    nom: 'Foncier·Juste — Analyse détaillée',
+    description: "Chaque écart repris et expliqué avec sa base réglementaire, les données utilisées, et les transactions comparables de votre commune.",
   },
   dossier: {
     montant: 4900, // 49,00 €
-    nom: 'Foncier Juste — Dossier complet de réclamation',
-    description: "Le rapport de diagnostic + la lettre de réclamation prête à compléter + la liste des pièces à joindre et les délais à respecter.",
+    nom: 'Foncier·Juste — Dossier de vérification',
+    description: "L'analyse détaillée, plus la lettre de réclamation rédigée et référencée, les pièces à joindre et les délais à respecter.",
   },
 };
 

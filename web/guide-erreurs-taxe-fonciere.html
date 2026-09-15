@@ -3,130 +3,117 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Erreurs fréquentes de calcul de la taxe foncière — Guide</title>
-<meta name="description" content="Comment est calculée la taxe foncière, les erreurs cadastrales les plus fréquentes (surface, éléments de confort), comment obtenir sa fiche d'évaluation 6675-M et les délais de réclamation.">
+<title>Erreurs de calcul de la taxe foncière : comment les repérer — Foncier·Juste</title>
+<meta name="description" content="Comment se calcule la taxe foncière, pourquoi la surface pondérée dépasse normalement la surface mesurée, les erreurs les plus fréquentes, comment obtenir sa fiche d'évaluation 6675-M et dans quels délais réclamer.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/guide-erreurs-taxe-fonciere.html">
-<meta name="robots" content="noindex, nofollow">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Erreurs fréquentes de calcul de la taxe foncière">
-<meta property="og:description" content="Comment est calculée la taxe foncière et comment vérifier si votre fiche cadastrale est à jour.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<meta property="og:site_name" content="Foncier·Juste">
+<meta property="og:title" content="Erreurs de calcul de la taxe foncière : comment les repérer">
+<meta property="og:description" content="Surface pondérée, catégorie de confort, éléments disparus : ce qui se glisse dans une évaluation foncière, et comment le vérifier soi-même.">
+<meta property="og:url" content="https://foncier-juste.vercel.app/guide-erreurs-taxe-fonciere.html">
+<meta property="og:locale" content="fr_FR">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230F3D56'/><path d='M7 16.5 16 8.5l9 8' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 23.5h16' stroke='%23C8A15A' stroke-width='2.6' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:wght@500;600&display=swap">
+<link rel="stylesheet" href="base.css">
 <style>
-:root{
-  --bg:#F1F1EA; --surface:#FBFBF6; --surface-2:#E9E9DF; --ink:#1D211E; --ink-muted:#5B615A;
-  --line:#D6D5C7; --accent:#2E4A4A; --accent-soft:#DCE6E2; --gold:#93672E; --gold-soft:#EFE3CE;
+.meta{margin-top:10px; font-size:.83rem; color:var(--ink-faint);}
+.cta-band{margin-top:40px; padding:24px; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--lift);}
+.cta-band h2{margin-top:0; font-size:1.15rem;}
+.cta-band .btn{margin-top:18px;}
+.formula{
+  margin-top:18px; padding:16px 18px; border-radius:10px; background:var(--surface-2);
+  border:1px solid var(--line); font-size:.93rem;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#151815; --surface:#1C201C; --surface-2:#242822; --ink:#E9E8DF; --ink-muted:#A3A99E;
-    --line:#33372F; --accent:#8FB7AE; --accent-soft:#233330; --gold:#D6A85E; --gold-soft:#332818;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#151815; --surface:#1C201C; --surface-2:#242822; --ink:#E9E8DF; --ink-muted:#A3A99E;
-  --line:#33372F; --accent:#8FB7AE; --accent-soft:#233330; --gold:#D6A85E; --gold-soft:#332818;
-}
-*{box-sizing:border-box;}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;line-height:1.65;padding:0 20px;}
-.wrap{max-width:680px;margin:0 auto;padding-block:0 80px;}
-h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;text-wrap:balance;line-height:1.2;}
-h1{font-size:2rem;margin:0 0 10px;}
-h2{font-size:1.3rem;margin:34px 0 10px;}
-p,li{margin:0 0 14px;max-width:66ch;}
-a{color:var(--accent);}
-nav.top{display:flex;align-items:center;justify-content:space-between;padding-block:20px;border-bottom:1px solid var(--line);margin-bottom:30px;}
-.brand{font-family:'Fraunces',serif;font-weight:700;font-size:1.1rem;text-decoration:none;color:var(--ink);}
-.brand .dot{color:var(--gold);}
-.updated{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--ink-muted);}
-.callout{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:0 10px 10px 0;padding:16px 18px;margin:20px 0;}
-.cta{display:inline-block;margin-top:16px;background:var(--accent);color:var(--surface);font-weight:600;padding:12px 22px;border-radius:9px;text-decoration:none;}
-table{border-collapse:collapse;width:100%;margin:16px 0;font-size:.92rem;}
-th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
-th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-transform:uppercase;color:var(--ink-muted);}
-footer{border-top:1px solid var(--line);padding-top:18px;margin-top:50px;font-size:.8rem;color:var(--ink-muted);}
-footer a{color:var(--ink-muted);margin-right:14px;}
+.formula .eq{font-weight:600; letter-spacing:-.01em;}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <nav class="top">
-    <a class="brand" href="index.html">Foncier<span class="dot">·</span>Juste</a>
-    <span class="updated">Mis à jour le 15/09/2026</span>
-  </nav>
 
+<header class="site-head">
+  <div class="shell">
+    <a class="brand" href="index.html">Foncier<span class="dot">·</span>Juste</a>
+    <a class="head-link" href="index.html">Pré-diagnostic gratuit</a>
+  </div>
+</header>
+
+<main class="shell doc">
   <article>
-    <h1>Erreurs fréquentes de calcul de la taxe foncière : comment les repérer</h1>
-    <p>La taxe foncière n'est pas calculée sur le prix de votre bien, mais sur une <strong>valeur locative cadastrale</strong> — un loyer théorique annuel estimé par l'administration, revalorisé chaque année, qui sert de base au calcul avec le taux voté par votre commune. Cette valeur est établie une fois, puis rarement revue en profondeur : d'où des écarts qui s'accumulent avec le temps.</p>
+    <div class="eyebrow">Guide</div>
+    <h1>Erreurs de calcul de la taxe foncière : comment les repérer</h1>
+    <p class="meta">Mis à jour le 15 septembre 2026 · Lecture : 6 minutes</p>
+
+    <p>La taxe foncière ne se calcule pas sur le prix de votre bien, mais sur une <strong>valeur locative cadastrale</strong> : un loyer théorique annuel estimé par l'administration, revalorisé chaque année, auquel s'applique le taux voté par votre commune. Cette valeur est établie une fois, puis rarement revue en profondeur. C'est de là que viennent les écarts qui s'accumulent sur des décennies.</p>
 
     <h2>Sur quoi repose le calcul</h2>
-    <p>Trois éléments déterminent la valeur locative cadastrale d'un local d'habitation (article 1494 et suivants du Code général des impôts) :</p>
+    <p>Trois éléments déterminent la valeur locative cadastrale d'un local d'habitation (articles 1494 et suivants du Code général des impôts) :</p>
     <ul>
-      <li><strong>La surface pondérée</strong> — la surface réelle du logement, ajustée selon des règles précises (dépendances, hauteur sous plafond, état d'entretien).</li>
-      <li><strong>La catégorie de confort</strong> — un classement de 1 (grand luxe) à 8 (très médiocre) qui reflète la qualité de construction et les équipements.</li>
-      <li><strong>Les éléments de confort</strong> — salle de bain, chauffage central, piscine, garage, dépendances — qui s'ajoutent à la base de calcul.</li>
+      <li><strong>La surface pondérée</strong> — la surface réelle du logement, corrigée puis augmentée selon des règles précises.</li>
+      <li><strong>La catégorie de confort</strong> — un classement de 1 (grand luxe) à 8 (très médiocre) établi par comparaison avec un local de référence de votre commune.</li>
+      <li><strong>Les éléments de confort</strong> — baignoire, lavabo, WC, chauffage central, piscine, garage, dépendances — qui s'ajoutent à la base de calcul.</li>
     </ul>
 
-    <h2>Les écarts les plus fréquents</h2>
-    <table>
-      <thead><tr><th>Type d'erreur</th><th>Origine typique</th></tr></thead>
-      <tbody>
-        <tr><td>Élément de confort facturé mais disparu</td><td>Piscine comblée, dépendance démolie, jamais signalé au service du cadastre</td></tr>
-        <tr><td>Surface pondérée surestimée</td><td>Ancienne extension jamais mesurée précisément, garage compté comme pièce habitable</td></tr>
-        <tr><td>Catégorie de confort trop élevée</td><td>Bien classé lors d'une construction ancienne, jamais réévalué malgré une dégradation</td></tr>
-        <tr><td>Double comptage après division</td><td>Bien divisé en plusieurs lots sans mise à jour cohérente des surfaces</td></tr>
-      </tbody>
-    </table>
-
+    <h2>Le piège de la surface pondérée</h2>
+    <p>C'est le point que presque tout le monde comprend de travers, et il mérite qu'on s'y arrête. La surface pondérée n'est pas la surface que vous mesureriez au mètre ruban :</p>
+    <div class="formula">
+      <p class="eq">Surface pondérée = (surface réelle × correctifs) + équivalences superficielles</p>
+      <p>Les <strong>correctifs</strong> tiennent compte de l'état d'entretien, de la situation générale et particulière du bien. Les <strong>équivalences superficielles</strong> ajoutent des mètres carrés fictifs pour chaque élément de confort : environ 5 m² pour une baignoire, 3 m² pour un WC, 2 m² par pièce pour le chauffage central (articles 324 L à 324 V de l'annexe III au CGI).</p>
+    </div>
+    <p>Conséquence directe : sur une fiche parfaitement exacte, <strong>la surface pondérée dépasse normalement la surface mesurée de 20 à 40 %</strong>. Un logement de 104 m² réels peut légitimement afficher 138 m² pondérés. Si vous comparez cette surface pondérée à votre mètre ruban et que vous criez à l'erreur, vous vous trompez de combat — et vous risquez de déposer une réclamation vouée à l'échec.</p>
     <div class="callout">
-      <strong>À noter :</strong> ces écarts favorisent aussi bien une sur-imposition qu'une sous-imposition. Ce guide et l'outil associé se concentrent sur les cas de <em>sur-imposition</em> — ceux où vous payez plus que ce que votre bien justifie réellement.
+      <p><strong>La seule comparaison qui a du sens</strong> est celle de la <em>surface réelle</em> inscrite sur votre fiche d'évaluation avec la surface que vous mesurez aujourd'hui. Ce sont deux grandeurs de même nature. La surface pondérée, elle, se vérifie autrement : en contrôlant que les éléments de confort listés existent bien.</p>
+    </div>
+
+    <h2>Les écarts les plus fréquents</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Type d'erreur</th><th>Origine typique</th><th>Facile à prouver ?</th></tr></thead>
+        <tbody>
+          <tr><td>Élément de confort facturé mais disparu</td><td>Piscine comblée, dépendance démolie, jamais signalé au cadastre</td><td>Oui — photo datée, facture de travaux</td></tr>
+          <tr><td>Surface réelle surestimée</td><td>Ancienne extension mal mesurée, garage compté comme pièce habitable, division non reportée</td><td>Oui — plan coté ou relevé</td></tr>
+          <tr><td>Catégorie de confort trop élevée</td><td>Bien classé à la construction, jamais réévalué malgré la vétusté</td><td>Plus difficile — appréciation comparative</td></tr>
+          <tr><td>Local de référence inadapté</td><td>Le bien type retenu pour la commune ne correspond plus au parc réel</td><td>Difficile — suppose de consulter les PV d'évaluation</td></tr>
+          <tr><td>Double comptage après division</td><td>Bien divisé en lots sans mise à jour cohérente des surfaces</td><td>Oui — acte de division</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <p><strong>À noter :</strong> ces écarts jouent dans les deux sens. Ce guide et l'outil associé se concentrent sur la <em>sur-imposition</em> — les cas où vous payez plus que ce que votre bien justifie. Une réclamation peut, à l'inverse, révéler une sous-imposition.</p>
     </div>
 
     <h2>Comment obtenir sa fiche d'évaluation (formulaire 6675-M)</h2>
-    <p>Ce document officiel détaille les éléments retenus pour le calcul de votre taxe foncière. Il est gratuit et vous pouvez le demander :</p>
+    <p>Ce document officiel détaille tout ce que l'administration retient pour votre logement : surface réelle, correctifs appliqués, éléments de confort comptabilisés, catégorie attribuée. Sans lui, vous ne pouvez rien vérifier sérieusement. Il est gratuit, et vous pouvez le demander :</p>
     <ul>
-      <li>Via votre espace particulier sur <a href="https://www.impots.gouv.fr" rel="nofollow noopener" target="_blank">impots.gouv.fr</a>, par messagerie sécurisée ;</li>
-      <li>Ou directement auprès du service des impôts fonciers dont dépend votre bien.</li>
+      <li>depuis votre espace particulier sur <a href="https://www.impots.gouv.fr" rel="nofollow noopener" target="_blank">impots.gouv.fr</a>, par la messagerie sécurisée, en demandant « la fiche d'évaluation de mon local » ;</li>
+      <li>ou directement auprès du service des impôts fonciers dont dépend votre bien.</li>
     </ul>
-    <p>Comparez ensuite chaque ligne à la réalité actuelle de votre logement : c'est la première étape avant toute réclamation.</p>
+    <p>Comparez ensuite chaque ligne à la réalité actuelle de votre logement. C'est la première étape avant toute réclamation, et c'est celle qui décide de tout le reste.</p>
 
-    <h2>Délais de réclamation</h2>
-    <p>Une réclamation se dépose en principe avant le 31 décembre de l'année suivant la mise en recouvrement de l'avis contesté. Le délai peut courir sur plusieurs années pour les impositions antérieures selon les cas — vérifiez votre situation précise avec les services fiscaux ou un professionnel avant de déposer un dossier.</p>
+    <h2>Délais pour réclamer</h2>
+    <p>Une réclamation contentieuse se dépose en principe avant le <strong>31 décembre de l'année suivant celle de la mise en recouvrement</strong> de l'avis contesté (article R*196-2 du Livre des procédures fiscales). Elle est gratuite et ne nécessite pas d'avocat (articles L.190 et R*190-1 du même livre). L'administration dispose ensuite de six mois pour répondre, prolongeables de trois mois si elle vous en informe.</p>
 
     <h2>Vérifier avant de réclamer</h2>
-    <p>Avant de déposer quoi que ce soit, il est utile de savoir si votre situation ressemble à un cas fréquent d'erreur. C'est exactement ce que fait le pré-diagnostic gratuit de Foncier Juste, en comparant vos réponses à de vraies transactions immobilières de votre secteur.</p>
-    <a class="cta" href="index.html">Faire le diagnostic gratuit →</a>
-  </article>
+    <p>Déposer une réclamation sans élément solide vous fait perdre du temps, et fait perdre le sien à un service qui traitera moins bien le dossier suivant. Commencez par savoir si votre situation ressemble à un cas d'écart connu.</p>
 
-  <footer>
-    <a href="index.html">Accueil</a>
-    <a href="mentions-legales.html">Mentions légales</a>
-    <a href="confidentialite.html">Confidentialité</a>
-    <a href="cgv.html">CGV</a>
-    <p style="margin-top:14px">Contenu informatif, à titre indicatif. Ne remplace pas une consultation auprès des services fiscaux ou d'un professionnel du droit fiscal.</p>
-  </footer>
-</div>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Comment est calculée la taxe foncière ?",
-      "acceptedAnswer": {"@type": "Answer", "text": "La taxe foncière est calculée sur une valeur locative cadastrale (loyer théorique estimé par l'administration) déterminée par la surface pondérée, la catégorie de confort et les éléments de confort du logement, multipliée par le taux voté par la commune."}
-    },
-    {
-      "@type": "Question",
-      "name": "Comment obtenir sa fiche d'évaluation 6675-M ?",
-      "acceptedAnswer": {"@type": "Answer", "text": "Ce document est gratuit et peut être demandé via l'espace particulier sur impots.gouv.fr (messagerie sécurisée) ou directement auprès du service des impôts fonciers dont dépend le bien."}
-    },
-    {
-      "@type": "Question",
-      "name": "Quel est le délai pour contester sa taxe foncière ?",
-      "acceptedAnswer": {"@type": "Answer", "text": "En principe avant le 31 décembre de l'année suivant la mise en recouvrement de l'avis contesté, avec des règles spécifiques selon les situations."}
-    }
-  ]
-}
-</script>
+    <div class="cta-band">
+      <h2>Le pré-diagnostic Foncier·Juste</h2>
+      <p>Gratuit, sans compte, calculé dans votre navigateur. Il vous indique quels éléments méritent une vérification — et vous dit aussi, le cas échéant, qu'il n'y a rien à vérifier.</p>
+      <a class="btn btn-primary" href="index.html">Lancer le pré-diagnostic</a>
+    </div>
+  </article>
+</main>
+
+<footer class="site-foot">
+  <div class="shell">
+    <div class="links">
+      <a href="index.html">Accueil</a>
+      <a href="mentions-legales.html">Mentions légales</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="cgv.html">CGV</a>
+    </div>
+    <p class="fine">Contenu informatif donné à titre indicatif, d'après les textes en vigueur à la date de mise à jour. Il ne remplace ni une consultation auprès des services fiscaux, ni l'avis d'un professionnel du droit fiscal.</p>
+  </div>
+</footer>
 </body>
 </html>

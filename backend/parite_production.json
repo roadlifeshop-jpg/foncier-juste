@@ -1,0 +1,397 @@
+[
+ {
+  "id": "P01",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": ["contexte_marche"],
+  "gravites": ["info"],
+  "confiances": ["contexte"],
+  "figures": ["3171 €/m² médian"],
+  "messages": [
+   "Sur 982 transactions réelles comparables à Nantes, le prix médian observé est de 3171 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 982,
+  "prix_median": 3170.64,
+  "impact_min": null,
+  "impact_max": null
+ },
+ {
+  "id": "P02",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": ["contexte_marche"],
+  "gravites": ["info"],
+  "confiances": ["contexte"],
+  "figures": ["4159 €/m² médian"],
+  "messages": [
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": null,
+  "impact_max": null
+ },
+ {
+  "id": "P03",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": true,
+  "n_signaux_reels": 1,
+  "codes": ["surface_surevaluee", "contexte_marche"],
+  "gravites": ["haute", "info"],
+  "confiances": ["elevee", "contexte"],
+  "figures": ["+30 m² · 30 %", "4159 €/m² médian"],
+  "messages": [
+   "La surface réelle retenue sur la fiche (130 m²) dépasse de 30 m² (30 %) la surface habitable actuelle déclarée (100 m²).",
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": 120,
+  "impact_max": 300
+ },
+ {
+  "id": "P04",
+  "classification": "modere",
+  "classification_label": "Vérification recommandée",
+  "score": 25,
+  "vente_autorisee": true,
+  "n_signaux_reels": 1,
+  "codes": ["surface_surevaluee", "contexte_marche"],
+  "gravites": ["moyenne", "info"],
+  "confiances": ["elevee", "contexte"],
+  "figures": ["+8 m² · 8 %", "2397 €/m² médian"],
+  "messages": [
+   "La surface réelle retenue sur la fiche (108 m²) dépasse de 8 m² (8 %) la surface habitable actuelle déclarée (100 m²).",
+   "Sur 104 transactions réelles comparables à Grenoble, le prix médian observé est de 2397 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 104,
+  "prix_median": 2396.89,
+  "impact_min": 36,
+  "impact_max": 120
+ },
+ {
+  "id": "P05",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": ["contexte_marche"],
+  "gravites": ["info"],
+  "confiances": ["contexte"],
+  "figures": ["4159 €/m² médian"],
+  "messages": [
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": null,
+  "impact_max": null
+ },
+ {
+  "id": "P06",
+  "classification": "modere",
+  "classification_label": "Vérification recommandée",
+  "score": 25,
+  "vente_autorisee": true,
+  "n_signaux_reels": 1,
+  "codes": ["surface_surevaluee", "contexte_marche"],
+  "gravites": ["moyenne", "info"],
+  "confiances": ["elevee", "contexte"],
+  "figures": ["+6 m² · 6 %", "4159 €/m² médian"],
+  "messages": [
+   "La surface réelle retenue sur la fiche (106 m²) dépasse de 6 m² (6 %) la surface habitable actuelle déclarée (100 m²).",
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": 42,
+  "impact_max": 140
+ },
+ {
+  "id": "P07",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": ["contexte_marche"],
+  "gravites": ["info"],
+  "confiances": ["contexte"],
+  "figures": ["3333 €/m² médian"],
+  "messages": [
+   "Sur 1035 transactions réelles comparables à Nantes, le prix médian observé est de 3333 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 1035,
+  "prix_median": 3333.33,
+  "impact_min": null,
+  "impact_max": null
+ },
+ {
+  "id": "P08",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": false,
+  "n_signaux_reels": 1,
+  "codes": ["surface_surevaluee", "contexte_marche"],
+  "gravites": ["haute", "info"],
+  "confiances": ["faible", "contexte"],
+  "figures": ["+30 m² · 30 %", "4159 €/m² médian"],
+  "messages": [
+   "La surface réelle retenue sur la fiche (130 m²) dépasse de 30 m² (30 %) la surface habitable actuelle déclarée (100 m²).",
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": 120,
+  "impact_max": 300
+ },
+ {
+  "id": "P09",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": true,
+  "n_signaux_reels": 1,
+  "codes": ["surface_surevaluee", "contexte_marche"],
+  "gravites": ["haute", "info"],
+  "confiances": ["moyenne", "contexte"],
+  "figures": ["+30 m² · 30 %", "4159 €/m² médian"],
+  "messages": [
+   "La surface réelle retenue sur la fiche (130 m²) dépasse de 30 m² (30 %) la surface habitable actuelle déclarée (100 m²).",
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": 120,
+  "impact_max": 300
+ },
+ {
+  "id": "P10",
+  "classification": "modere",
+  "classification_label": "Vérification recommandée",
+  "score": 25,
+  "vente_autorisee": true,
+  "n_signaux_reels": 1,
+  "codes": ["elements_confort_obsoletes", "contexte_marche"],
+  "gravites": ["moyenne", "info"],
+  "confiances": ["elevee", "contexte"],
+  "figures": ["Piscine", "4159 €/m² médian"],
+  "messages": [
+   "Ces éléments sont pris en compte dans votre évaluation mais n'existeraient plus : piscine.",
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": 48,
+  "impact_max": 160
+ },
+ {
+  "id": "P11",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": true,
+  "n_signaux_reels": 1,
+  "codes": ["elements_confort_obsoletes", "contexte_marche"],
+  "gravites": ["haute", "info"],
+  "confiances": ["elevee", "contexte"],
+  "figures": ["Piscine · Dependance", "4159 €/m² médian"],
+  "messages": [
+   "Ces éléments sont pris en compte dans votre évaluation mais n'existeraient plus : piscine, dependance.",
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": 168,
+  "impact_max": 420
+ },
+ {
+  "id": "P12",
+  "classification": "modere",
+  "classification_label": "Vérification recommandée",
+  "score": 25,
+  "vente_autorisee": false,
+  "n_signaux_reels": 1,
+  "codes": ["elements_confort_obsoletes", "contexte_marche"],
+  "gravites": ["moyenne", "info"],
+  "confiances": ["faible", "contexte"],
+  "figures": ["Piscine", "4159 €/m² médian"],
+  "messages": [
+   "Ces éléments sont pris en compte dans votre évaluation mais n'existeraient plus : piscine.",
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": 48,
+  "impact_max": 160
+ },
+ {
+  "id": "P13",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": ["contexte_marche"],
+  "gravites": ["info"],
+  "confiances": ["contexte"],
+  "figures": ["4159 €/m² médian"],
+  "messages": [
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": null,
+  "impact_max": null
+ },
+ {
+  "id": "P14",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 85,
+  "vente_autorisee": true,
+  "n_signaux_reels": 2,
+  "codes": ["surface_surevaluee", "elements_confort_obsoletes", "contexte_marche"],
+  "gravites": ["haute", "haute", "info"],
+  "confiances": ["elevee", "elevee", "contexte"],
+  "figures": ["+30 m² · 30 %", "Piscine · Veranda", "4159 €/m² médian"],
+  "messages": [
+   "La surface réelle retenue sur la fiche (130 m²) dépasse de 30 m² (30 %) la surface habitable actuelle déclarée (100 m²).",
+   "Ces éléments sont pris en compte dans votre évaluation mais n'existeraient plus : piscine, veranda.",
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": 120,
+  "impact_max": 300
+ },
+ {
+  "id": "P15",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 65,
+  "vente_autorisee": true,
+  "n_signaux_reels": 2,
+  "codes": ["surface_surevaluee", "elements_confort_obsoletes", "contexte_marche"],
+  "gravites": ["haute", "moyenne", "info"],
+  "confiances": ["elevee", "elevee", "contexte"],
+  "figures": ["+40 m² · 33 %", "Dependance", "2907 €/m² médian"],
+  "messages": [
+   "La surface réelle retenue sur la fiche (160 m²) dépasse de 40 m² (33 %) la surface habitable actuelle déclarée (120 m²).",
+   "Ces éléments sont pris en compte dans votre évaluation mais n'existeraient plus : dependance.",
+   "Sur 7 transactions réelles comparables à Charavines, le prix médian observé est de 2907 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 7,
+  "prix_median": 2906.704286,
+  "impact_min": 88,
+  "impact_max": 220
+ },
+ {
+  "id": "P16",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": ["contexte_marche"],
+  "gravites": ["info"],
+  "confiances": ["contexte"],
+  "figures": ["4848 €/m² médian"],
+  "messages": [
+   "Sur 13 transactions réelles comparables à Nantes, le prix médian observé est de 4848 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 13,
+  "prix_median": 4848.346154,
+  "impact_min": null,
+  "impact_max": null
+ },
+ {
+  "id": "P17",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": ["contexte_marche"],
+  "gravites": ["info"],
+  "confiances": ["contexte"],
+  "figures": ["4078 €/m² médian"],
+  "messages": [
+   "Sur 73 transactions réelles comparables à Nantes, le prix médian observé est de 4078 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 73,
+  "prix_median": 4077.92,
+  "impact_min": null,
+  "impact_max": null
+ },
+ {
+  "id": "P18",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": true,
+  "n_signaux_reels": 1,
+  "codes": ["surface_surevaluee", "contexte_marche"],
+  "gravites": ["haute", "info"],
+  "confiances": ["elevee", "contexte"],
+  "figures": ["+30 m² · 30 %", "4159 €/m² médian"],
+  "messages": [
+   "La surface réelle retenue sur la fiche (130 m²) dépasse de 30 m² (30 %) la surface habitable actuelle déclarée (100 m²).",
+   "Sur 159 transactions réelles comparables à Nantes, le prix médian observé est de 4159 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 159,
+  "prix_median": 4159.29,
+  "impact_min": null,
+  "impact_max": null
+ },
+ {
+  "id": "P19",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": ["contexte_marche"],
+  "gravites": ["info"],
+  "confiances": ["contexte"],
+  "figures": ["9861 €/m² médian"],
+  "messages": [
+   "Sur 1007 transactions réelles comparables à Paris 11e Arrondissement, le prix médian observé est de 9861 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 1007,
+  "prix_median": 9861.11,
+  "impact_min": null,
+  "impact_max": null
+ },
+ {
+  "id": "P20",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 65,
+  "vente_autorisee": true,
+  "n_signaux_reels": 2,
+  "codes": ["surface_surevaluee", "elements_confort_obsoletes", "contexte_marche"],
+  "gravites": ["haute", "moyenne", "info"],
+  "confiances": ["moyenne", "elevee", "contexte"],
+  "figures": ["+30 m² · 50 %", "Garage", "1923 €/m² médian"],
+  "messages": [
+   "La surface réelle retenue sur la fiche (90 m²) dépasse de 30 m² (50 %) la surface habitable actuelle déclarée (60 m²).",
+   "Ces éléments sont pris en compte dans votre évaluation mais n'existeraient plus : garage.",
+   "Sur 581 transactions réelles comparables à Clermont-Ferrand, le prix médian observé est de 1923 €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul."
+  ],
+  "n_comparables": 581,
+  "prix_median": 1923.08,
+  "impact_min": 78,
+  "impact_max": 196
+ }
+]

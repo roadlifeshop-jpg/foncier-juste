@@ -81,13 +81,34 @@ function dessinerPageDiagnostic(doc, d, { exemple }) {
   w.ligne(`Date : ${new Date().toLocaleDateString('fr-FR')}`, { taille: 9, couleur: [90, 95, 88], espace: 2 });
   w.ligne(`Commune : ${d.commune.commune} (${d.commune.code_postal})  ·  Type de bien : ${d.type}`, { taille: 9, couleur: [90, 95, 88], espace: 8 });
 
-  w.ligne('Niveau de vigilance', { taille: 14, style: 'bold', espace: 2 });
-  const couleurNiveau = d.score >= 40 ? [156, 59, 46] : d.score >= 20 ? [147, 103, 46] : [47, 107, 74];
-  w.ligne(`${d.score} / 100 — signal ${d.niveau}`, { taille: 12, style: 'bold', couleur: couleurNiveau, espace: 8 });
+  // Conclusion : une classification, jamais un score sur 100. Le score interne
+  // ne peut prendre que huit valeurs distinctes ; l'afficher comme une note
+  // suggérerait une précision que la méthode ne permet pas.
+  w.ligne('Conclusion', { taille: 14, style: 'bold', espace: 2 });
+  const couleurNiveau = d.score >= 40 ? [160, 51, 37] : d.score >= 20 ? [138, 90, 18] : [30, 107, 75];
+  const conclusion = d.classifLabel
+    || (d.score >= 40 ? 'Vérification fortement recommandée'
+        : d.score >= 20 ? 'Vérification recommandée'
+        : 'Aucun élément notable détecté');
+  w.ligne(conclusion, { taille: 12, style: 'bold', couleur: couleurNiveau, espace: 6 });
+
+  // Base de l'analyse : sans la fiche 6675-M, aucune surface n'a pu être
+  // comparée. Le document doit le dire explicitement.
+  w.ligne(
+    d.avecFiche === false
+      ? "Base de l'analyse : informations déclaratives, sans consultation de la fiche d'évaluation 6675-M. Aucune comparaison de surface n'a donc été effectuée."
+      : "Base de l'analyse : les chiffres relevés sur votre fiche d'évaluation (formulaire 6675-M), confrontés à la situation actuelle du bien.",
+    { taille: 9, couleur: [90, 95, 88], espace: 8 }
+  );
 
   w.ligne('Éléments relevés', { taille: 12, style: 'bold', espace: 3 });
   if (d.anomalies.length) {
-    d.anomalies.forEach(a => w.ligne(`• ${a.message}`, { taille: 10, espace: 5 }));
+    d.anomalies.forEach(a => {
+      w.ligne(`• ${a.message}`, { taille: 10, espace: a.confiance ? 2 : 5 });
+      if (a.confiance) {
+        w.ligne(`Niveau de confiance : ${a.confiance.texte}`, { taille: 8.5, couleur: [90, 95, 88], espace: 5, x: 24 });
+      }
+    });
   } else {
     w.ligne('Aucune anomalie détectée avec les informations fournies.', { taille: 10, espace: 5 });
   }
