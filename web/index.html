@@ -117,6 +117,15 @@ select, input[type=number]{
 .impact-box .amount{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:1.5rem; color:var(--good);}
 .stub-note{font-size:.78rem; color:var(--ink-muted); background:var(--surface-2); border-radius:8px; padding:10px 12px; margin-top:16px;}
 
+.offers-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; margin-top:20px;}
+.offer{position:relative; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:18px;}
+.offer h3{font-size:1rem; margin-bottom:4px;}
+.offer .price{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:1.5rem; margin-bottom:8px;}
+.offer p{font-size:.85rem; color:var(--ink-muted); margin-bottom:14px; min-height:52px;}
+.offer button{width:100%;}
+.offer-highlight{background:var(--accent-soft); border-color:var(--accent);}
+.offer-badge{position:absolute; top:-10px; right:14px; background:var(--gold); color:var(--surface); font-family:'IBM Plex Mono',monospace; font-size:.65rem; text-transform:uppercase; letter-spacing:.05em; font-weight:700; padding:3px 9px; border-radius:20px;}
+
 footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font-size:.78rem; color:var(--ink-muted);}
 @media(max-width:600px){.hero h1{font-size:1.6rem;}}
 </style>
@@ -228,8 +237,22 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
       <div id="anomalies-list"></div>
       <p id="marche-note" class="mono" style="font-size:.82rem; color:var(--ink-muted)"></p>
       <div id="impact-container"></div>
+      <div class="offers-grid">
+        <div class="offer">
+          <h3>Rapport complet</h3>
+          <div class="price">29&nbsp;€</div>
+          <p>Diagnostic détaillé + comparables de marché de votre secteur, en PDF.</p>
+          <button class="btn-primary buy-btn" data-produit="rapport">Choisir</button>
+        </div>
+        <div class="offer offer-highlight">
+          <span class="offer-badge">Recommandé</span>
+          <h3>Dossier complet</h3>
+          <div class="price">49&nbsp;€</div>
+          <p>Le rapport, <b>+ la lettre de réclamation</b> prête à compléter, la liste des pièces à joindre et les délais à respecter.</p>
+          <button class="btn-primary buy-btn" data-produit="dossier">Choisir</button>
+        </div>
+      </div>
       <div class="cta-row">
-        <button class="btn-primary" id="buy-report-btn">Obtenir le rapport complet — 29€</button>
         <button class="btn-secondary" id="preview-pdf-btn">Voir un exemple de rapport (PDF)</button>
         <button class="btn-secondary" id="restart-btn">Refaire le diagnostic</button>
       </div>
@@ -457,11 +480,11 @@ document.getElementById('preview-pdf-btn').addEventListener('click', () => {
 });
 
 // ---- Achat du rapport complet (Stripe Checkout) ----
-document.getElementById('buy-report-btn').addEventListener('click', async () => {
+document.querySelectorAll('.buy-btn').forEach(btn => btn.addEventListener('click', async () => {
   if (!dernierDiagnostic){ return; }
-  const btn = document.getElementById('buy-report-btn');
+  const produit = btn.dataset.produit;
   const hint = document.getElementById('pdf-hint');
-  btn.disabled = true;
+  document.querySelectorAll('.buy-btn').forEach(b => b.disabled = true);
   hint.style.display = 'block';
   hint.textContent = 'Redirection vers le paiement sécurisé...';
   try {
@@ -469,16 +492,20 @@ document.getElementById('buy-report-btn').addEventListener('click', async () => 
     // garde juste le temps du paiement pour pouvoir régénérer le vrai PDF
     // au retour, sans jamais l'envoyer à Stripe ni à qui que ce soit.
     sessionStorage.setItem('dernierDiagnostic', JSON.stringify(dernierDiagnostic));
-    const r = await fetch('/api/create-checkout-session', { method: 'POST' });
+    const r = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ produit }),
+    });
     const data = await r.json();
     if (!r.ok || !data.url) throw new Error(data.error || 'réponse invalide');
     window.location.href = data.url;
   } catch (e) {
     hint.textContent = "Impossible de démarrer le paiement pour le moment. Réessayez dans un instant.";
     console.error(e);
-    btn.disabled = false;
+    document.querySelectorAll('.buy-btn').forEach(b => b.disabled = false);
   }
-});
+}));
 </script>
 </body>
 </html>

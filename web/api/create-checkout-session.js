@@ -5,6 +5,21 @@
 // (29€). Le prix est fixé ICI, côté serveur — jamais envoyé par le client,
 // pour qu'il ne puisse pas être manipulé.
 
+// Catalogue défini ICI, côté serveur — jamais envoyé ni modifiable par le
+// client. Le client ne fait que choisir une clé ("rapport" ou "dossier").
+const PRODUITS = {
+  rapport: {
+    montant: 2900, // 29,00 €
+    nom: 'Foncier Juste — Rapport complet de diagnostic',
+    description: "Diagnostic détaillé des anomalies détectées, comparé aux transactions immobilières réelles de votre secteur (DVF).",
+  },
+  dossier: {
+    montant: 4900, // 49,00 €
+    nom: 'Foncier Juste — Dossier complet de réclamation',
+    description: "Le rapport de diagnostic + la lettre de réclamation prête à compléter + la liste des pièces à joindre et les délais à respecter.",
+  },
+};
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Méthode non autorisée' });
@@ -17,6 +32,12 @@ module.exports = async (req, res) => {
     return;
   }
 
+  // Vercel parse déjà le JSON en objet si Content-Type: application/json ;
+  // ce fallback gère aussi le cas d'un corps encore sous forme de texte.
+  const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+  const produitId = PRODUITS[body.produit] ? body.produit : 'rapport';
+  const produit = PRODUITS[produitId];
+
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const origin = `https://${host}`;
 
@@ -24,14 +45,12 @@ module.exports = async (req, res) => {
   params.append('mode', 'payment');
   params.append('success_url', `${origin}/succes.html?session_id={CHECKOUT_SESSION_ID}`);
   params.append('cancel_url', `${origin}/index.html`);
+  params.append('metadata[produit]', produitId);
   params.append('line_items[0][quantity]', '1');
   params.append('line_items[0][price_data][currency]', 'eur');
-  params.append('line_items[0][price_data][unit_amount]', '2900'); // 29,00 € — fixé ici, pas côté client
-  params.append('line_items[0][price_data][product_data][name]', 'Foncier Juste — Rapport complet de diagnostic');
-  params.append(
-    'line_items[0][price_data][product_data][description]',
-    "Diagnostic détaillé des anomalies détectées, comparé aux transactions immobilières réelles de votre secteur (DVF)."
-  );
+  params.append('line_items[0][price_data][unit_amount]', String(produit.montant)); // fixé ici, pas côté client
+  params.append('line_items[0][price_data][product_data][name]', produit.nom);
+  params.append('line_items[0][price_data][product_data][description]', produit.description);
 
   try {
     const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {

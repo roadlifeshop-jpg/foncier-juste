@@ -29,6 +29,7 @@ module.exports = async (req, res) => {
       payment_status: data.payment_status, // "paid" | "unpaid" | "no_payment_required"
       amount_total: data.amount_total,
       currency: data.currency,
+      produit: data.metadata?.produit || 'rapport',
     });
   } catch (e) {
     res.status(500).json({ error: 'Erreur serveur : ' + e.message });
