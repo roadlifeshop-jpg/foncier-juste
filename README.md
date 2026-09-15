@@ -2,6 +2,24 @@
 
 Statut au 15/09/2026. Voir aussi le dossier de recherche complet : "Foncier Juste" (artefact publié dans la conversation Claude).
 
+## ⚠️ Site mis en pause (15/09/2026)
+
+Sur demande explicite : `robots.txt` bloque tout crawl (`Disallow: /`) et
+toutes les pages sont passées en `noindex, nofollow`. Le site reste
+techniquement accessible à qui a l'URL exacte — pour une vraie protection
+par mot de passe, voir "Rendre le site vraiment privé" ci-dessous.
+
+**Pour relancer publiquement** : remettre `Allow: /` dans `web/robots.txt`
+et repasser les balises `<meta name="robots">` de chaque page HTML à
+`index, follow`, puis commit + push.
+
+### Rendre le site vraiment privé (action à faire toi-même)
+Vercel → ton projet `foncier-juste` → **Settings → Deployment Protection**
+→ active soit "Vercel Authentication" (accès réservé aux personnes ayant un
+compte Vercel autorisé, gratuit), soit "Password Protection" si ton plan
+l'inclut. Je ne peux pas activer ce réglage à ta place (c'est dans ton
+compte), mais ça se fait en 30 secondes une fois sur place.
+
 ## Nouveau : couverture nationale + rapport PDF (15/09/2026)
 
 - **10 départements réels** couverts (Loire-Atlantique, Paris, Rhône,
