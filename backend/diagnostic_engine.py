@@ -8,7 +8,9 @@ IMPORTANT — ce que ce module fait et ne fait PAS :
   remplace pas une vérification par les services fiscaux ou un professionnel.
 - Il compare la situation déclarée par l'utilisateur à des TRANSACTIONS
   IMMOBILIÈRES RÉELLES ET PUBLIQUES (source : DVF / data.gouv.fr, extraction
-  du 14/09/2026 pour Nantes et communes limitrophes, département 44).
+  du 15/09/2026, données 2024). Couverture actuelle : 10 départements
+  (voir backend/build_dataset.py) — Alsace-Moselle exclue car soumise au
+  Livre Foncier, un régime différent du reste de la France.
   C'est un indicateur de plausibilité, pas une preuve.
 - Toute anomalie détectée doit être confirmée par la fiche d'évaluation
   officielle (formulaire 6675-M, disponible sur impots.gouv.fr) avant tout
@@ -41,7 +43,6 @@ def load_comparables(csv_path: str | Path) -> list[dict]:
         rows = []
         for row in reader:
             row["surface_m2"] = float(row["surface_m2"])
-            row["pieces"] = float(row["pieces"])
             row["valeur_fonciere"] = float(row["valeur_fonciere"])
             row["prix_m2"] = float(row["prix_m2"])
             rows.append(row)

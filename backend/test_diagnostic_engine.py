@@ -9,7 +9,7 @@ from diagnostic_engine import (
     run_diagnostic,
 )
 
-DATA_PATH = Path(__file__).parent.parent / "data" / "dvf_nantes_2023.csv"
+DATA_PATH = Path(__file__).parent.parent / "data" / "dvf_44_2024.csv"
 NANTES = "44109"
 
 

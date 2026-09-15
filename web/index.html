@@ -126,7 +126,7 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
 
   <nav class="top">
     <div class="brand">Foncier<span class="dot">·</span>Juste</div>
-    <span class="beta-pill">Bêta — métropole nantaise</span>
+    <span class="beta-pill">Bêta — 10 départements</span>
   </nav>
 
   <section class="hero">
@@ -153,13 +153,9 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
       <h2>Votre bien</h2>
       <div class="field">
         <label for="commune">Commune</label>
-        <select id="commune">
-          <option value="44109">Nantes</option>
-          <option value="44020">Bouguenais</option>
-          <option value="44066">Grandchamps-des-Fontaines</option>
-          <option value="44143">Orvault</option>
-        </select>
-        <div class="hint">Bêta limitée à ces communes (données réelles disponibles). D'autres arrivent ensuite.</div>
+        <input type="text" id="commune" list="communes-list" placeholder="Tapez le nom de votre commune..." autocomplete="off">
+        <datalist id="communes-list"></datalist>
+        <div class="hint" id="commune-hint">Chargement des communes couvertes...</div>
       </div>
       <div class="field">
         <label for="type_local">Type de bien</label>
@@ -245,20 +241,47 @@ footer{border-top:1px solid var(--line); padding-top:18px; margin-top:50px; font
       <a href="confidentialite.html">Confidentialité</a> ·
       <a href="cgv.html">CGV</a>
     </p>
-    Prototype de test — septembre 2026. Données de marché : DVF (data.gouv.fr), transactions 2023, Nantes et communes limitrophes. Aucune donnée personnelle n'est envoyée à un serveur dans cette version : tout le calcul se fait dans votre navigateur.
+    Prototype de test — septembre 2026. Données de marché : DVF (data.gouv.fr), transactions 2024, 10 départements (Loire-Atlantique, Paris, Rhône, Bouches-du-Rhône, Gironde, Haute-Garonne, Nord, Ille-et-Vilaine, Hérault, Seine-Maritime). Aucune donnée personnelle n'est envoyée à un serveur dans cette version : tout le calcul se fait dans votre navigateur.
   </footer>
 </div>
 
 <script>
-let DVF = [];
-fetch('dvf_data.json').then(r => r.json()).then(d => DVF = d).catch(() => {
-  document.getElementById('wizard').insertAdjacentHTML('beforeend',
-    '<p style="color:var(--bad)">Impossible de charger les données de marché (dvf_data.json). Servez ce dossier via un serveur local, pas en file://</p>');
+// ---- Communes couvertes (chargé une fois, léger) ----
+let communesIndex = new Map(); // "Commune (CP)" -> {code_commune, code_dept, commune, code_postal}
+let deptStatsCache = {};        // code_dept -> Promise<statsArray>
+
+fetch('communes.json').then(r => r.json()).then(communes => {
+  const list = document.getElementById('communes-list');
+  const frag = document.createDocumentFragment();
+  communes.forEach(c => {
+    const label = `${c.commune} (${c.code_postal})`;
+    communesIndex.set(label, c);
+    const opt = document.createElement('option');
+    opt.value = label;
+    frag.appendChild(opt);
+  });
+  list.appendChild(frag);
+  document.getElementById('commune-hint').textContent =
+    `${communes.length} communes couvertes pour l'instant (10 départements). D'autres arrivent progressivement.`;
+}).catch(() => {
+  document.getElementById('commune-hint').textContent =
+    "Impossible de charger la liste des communes (communes.json). Servez ce dossier via un serveur local, pas en file://";
 });
+
+function statsPourDepartement(codeDept){
+  if (!deptStatsCache[codeDept]){
+    deptStatsCache[codeDept] = fetch(`market_stats/${codeDept}.json`).then(r => {
+      if (!r.ok) throw new Error('dept introuvable');
+      return r.json();
+    });
+  }
+  return deptStatsCache[codeDept];
+}
 
 // ---- Navigation du wizard ----
 const steps = [...document.querySelectorAll('.step')];
 let current = 0;
+let communeChoisie = null; // {code_commune, code_dept, commune, code_postal}
 
 function renderProgress(){
   [1,2,3,4].forEach(n => document.getElementById('p'+n).classList.toggle('done', n <= current+1));
@@ -276,10 +299,25 @@ document.getElementById('start-btn').addEventListener('click', () => {
   current = 0; showStep(current);
 });
 document.getElementById('back-btn').addEventListener('click', () => { if (current>0){current--; showStep(current);} });
-document.getElementById('next-btn').addEventListener('click', () => {
+
+document.getElementById('next-btn').addEventListener('click', async () => {
+  if (current === 0){
+    const saisie = document.getElementById('commune').value.trim();
+    const hint = document.getElementById('commune-hint');
+    communeChoisie = communesIndex.get(saisie);
+    if (!communeChoisie){
+      hint.textContent = "Choisissez une commune dans la liste suggérée (tapez quelques lettres puis sélectionnez).";
+      hint.style.color = 'var(--bad)';
+      return;
+    }
+    hint.style.color = '';
+    // Précharge les stats du département pendant que l'utilisateur remplit la suite
+    statsPourDepartement(communeChoisie.code_dept).catch(() => {});
+  }
   if (current < steps.length - 1) { current++; showStep(current); }
-  else { runDiagnostic(); }
+  else { await runDiagnostic(); }
 });
+
 document.getElementById('restart-btn').addEventListener('click', () => {
   document.getElementById('results').style.display = 'none';
   document.getElementById('wizard').style.display = 'block';
@@ -288,24 +326,31 @@ document.getElementById('restart-btn').addEventListener('click', () => {
 });
 
 // ---- Moteur de diagnostic (miroir JS de backend/diagnostic_engine.py) ----
-function findComparables(commune, type, surface, tolerancePct=20){
-  let tol = tolerancePct, matches = [];
-  for (let i=0;i<4;i++){
-    const low = surface*(1-tol/100), high = surface*(1+tol/100);
-    matches = DVF.filter(r => r.c===commune && r.t===type && r.s>=low && r.s<=high);
-    if (matches.length >= 5) return matches;
-    tol += 15;
+// Travaille sur des statistiques déjà agrégées par tranche de surface de 20 m²
+// (voir backend/build_dataset.py), pas sur les transactions brutes : ça reste
+// utilisable à l'échelle nationale sans faire télécharger des méga-octets à
+// chaque visiteur.
+const BUCKET = 20;
+
+function comparablesAgreges(stats, codeCommune, type, surface){
+  const bucketCible = Math.floor(surface / BUCKET) * BUCKET;
+  const memeCommuneType = stats.filter(s => s.code_commune === codeCommune && s.type_local === type);
+
+  for (let rayon = 0; rayon <= 3; rayon++){
+    const retenus = memeCommuneType.filter(s =>
+      Math.abs(s.surface_bucket_min - bucketCible) <= rayon * BUCKET
+    );
+    const n = retenus.reduce((s, r) => s + r.n, 0);
+    if (n >= 5 || rayon === 3){
+      if (!retenus.length) return null;
+      const prixMedian = retenus.reduce((s, r) => s + r.prix_m2_median * r.n, 0) / n;
+      return { n, prixMedian };
+    }
   }
-  return matches;
-}
-function median(arr){
-  const s = [...arr].sort((a,b)=>a-b);
-  const m = Math.floor(s.length/2);
-  return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
+  return null;
 }
 
-function runDiagnostic(){
-  const commune = document.getElementById('commune').value;
+async function runDiagnostic(){
   const type = document.getElementById('type_local').value;
   const surfCad = parseFloat(document.getElementById('surf_cadastrale').value) || 0;
   const surfReelle = parseFloat(document.getElementById('surf_reelle').value) || 0;
@@ -313,9 +358,11 @@ function runDiagnostic(){
   const existants = [...document.querySelectorAll('#confort-existants input:checked')].map(i=>i.value);
   const taxeActuelle = parseFloat(document.getElementById('taxe_actuelle').value) || null;
 
-  const comps = findComparables(commune, type, surfReelle || surfCad);
-  const prixM2 = comps.map(c=>c.p);
-  const prixMedian = prixM2.length ? median(prixM2) : null;
+  let comps = null;
+  try {
+    const stats = await statsPourDepartement(communeChoisie.code_dept);
+    comps = comparablesAgreges(stats, communeChoisie.code_commune, type, surfReelle || surfCad);
+  } catch (e) { /* pas de données pour ce département, on continue sans */ }
 
   const anomalies = [];
   const ecart = surfCad - surfReelle;
@@ -335,11 +382,11 @@ function runDiagnostic(){
       message: `Ces éléments comptent dans votre taxe mais n'existeraient plus : ${obsoletes.join(', ')}.`
     });
   }
-  if (comps.length >= 5){
+  if (comps && comps.n >= 5){
     anomalies.push({
       code:'a_verifier_avec_marche',
       gravite:'info',
-      message:`Sur ${comps.length} transactions réelles comparables, le prix médian observé est de ${prixMedian.toFixed(0)} €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul.`
+      message:`Sur ${comps.n} transactions réelles comparables à ${communeChoisie.commune}, le prix médian observé est de ${comps.prixMedian.toFixed(0)} €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul.`
     });
   }
 
@@ -347,10 +394,10 @@ function runDiagnostic(){
   const score = Math.min(100, anomalies.reduce((s,a)=>s+graviteScore[a.gravite],0));
   const niveau = score>=40 ? 'élevé' : score>=20 ? 'moyen' : 'faible';
 
-  renderResults({score, niveau, anomalies, comps: comps.length, prixMedian, taxeActuelle});
+  renderResults({score, niveau, anomalies, n: comps ? comps.n : 0, taxeActuelle});
 }
 
-function renderResults({score, niveau, anomalies, comps, prixMedian, taxeActuelle}){
+function renderResults({score, niveau, anomalies, n, taxeActuelle}){
   document.getElementById('wizard').style.display = 'none';
   const results = document.getElementById('results');
   results.style.display = 'block';
@@ -369,9 +416,9 @@ function renderResults({score, niveau, anomalies, comps, prixMedian, taxeActuell
     ? anomalies.map(a => `<div class="anomaly ${a.gravite}">${a.message}</div>`).join('')
     : '<div class="anomaly">Rien à signaler sur la base de vos réponses.</div>';
 
-  document.getElementById('marche-note').textContent = comps >= 5
-    ? `Comparé à ${comps} transactions réelles (DVF, 2023) dans votre secteur.`
-    : `Échantillon local limité (${comps} transactions) — résultat à interpréter avec prudence.`;
+  document.getElementById('marche-note').textContent = n >= 5
+    ? `Comparé à ${n} transactions réelles (DVF, 2024) dans votre secteur.`
+    : `Échantillon local limité (${n} transactions) — résultat à interpréter avec prudence.`;
 
   const impactBox = document.getElementById('impact-container');
   const hasHaute = anomalies.some(a=>a.gravite==='haute');
