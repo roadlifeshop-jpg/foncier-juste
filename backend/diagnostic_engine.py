@@ -3,30 +3,27 @@ Foncier·Juste — moteur de pré-diagnostic.
 
 SOURCE DE VÉRITÉ DES RÈGLES MÉTIER
 ==================================
-Ce module et le moteur JavaScript embarqué dans `web/index.html` appliquent
-EXACTEMENT les mêmes règles, sur les mêmes données agrégées
-(`web/market_stats/<dept>.json`). Toute divergence est un bug.
+Ce module et `web/moteur.js` appliquent EXACTEMENT les mêmes règles, sur les
+mêmes données agrégées (`web/market_stats/<dept>.json`). Toute divergence est
+un bug, et `backend/test_parite_moteurs.py` la détecte.
 
-Les deux implémentations existent pour une raison : le diagnostic doit être
-calculé dans le navigateur du visiteur (ses réponses ne partent sur aucun
-serveur), tandis que le dépouillement des tests T1 et les tests de
-non-régression se font hors ligne, en Python. Il n'y a donc pas une règle
-« du site » et une règle « des tests » : il y a une règle, écrite deux fois,
-et `backend/test_parite_moteurs.py` vérifie qu'elles ne divergent pas.
+Les deux implémentations existent parce que le diagnostic doit être calculé
+dans le navigateur du visiteur — ses réponses ne partent sur aucun serveur
+pendant le pré-diagnostic gratuit — tandis que le dépouillement du test T1 et
+les tests de non-régression se font hors ligne, en Python.
 
-Toute modification d'une règle ici DOIT être répercutée dans `web/index.html`,
-et inversement. Les points de synchronisation sont signalés par le marqueur
-« PARITÉ » dans les deux fichiers.
+Les points de synchronisation portent le marqueur « PARITÉ » dans les deux
+fichiers. Toute modification d'une règle ici DOIT être répercutée là-bas.
 
 Ce que ce module fait, et ne fait pas
 -------------------------------------
 - Il applique des règles transparentes et explicables — jamais de boîte noire.
-- Il ne calcule PAS une valeur locative cadastrale : seule l'administration
-  fiscale peut le faire.
+- Il ne calcule PAS de valeur locative cadastrale, et n'estime AUCUN montant
+  d'économie : aucune méthode fondée n'existe pour cela à partir d'un
+  pré-diagnostic. Cette estimation a été retirée le 16/09/2026.
 - Sans la fiche d'évaluation 6675-M, il n'effectue AUCUNE comparaison de
   surface : la surface retenue par l'administration ne figure sur aucun autre
-  document, et comparer une surface mesurée à un chiffre approximatif
-  fabriquerait un signal qui n'existe pas.
+  document.
 - Une donnée incertaine ne crée jamais d'anomalie : elle dégrade le niveau de
   confiance attaché au signal.
 
@@ -58,7 +55,7 @@ def fixed0(x: float) -> str:
     Python arrondit au pair le plus proche (`f"{2.5:.0f}"` donne "2"),
     JavaScript arrondit à l'écart de zéro (`(2.5).toFixed(0)` donne "3").
     Sans ce correctif, les deux moteurs produiraient des libellés différents
-    sur les valeurs à mi-chemin — une divergence invisible mais réelle.
+    sur les valeurs à mi-chemin.
     """
     if x < 0:
         return "-" + fixed0(-x)
@@ -69,7 +66,7 @@ def fixed0(x: float) -> str:
 # Données de marché agrégées — identiques à celles servies au navigateur
 # --------------------------------------------------------------------------
 
-BUCKET = 20  # PARITÉ : const BUCKET dans web/index.html
+BUCKET = 20  # PARITÉ : const BUCKET dans web/moteur.js
 
 _cache_stats: dict[str, list[dict]] = {}
 
@@ -86,12 +83,7 @@ def charger_market_stats(code_dept: str) -> list[dict]:
 def comparables_agreges(
     stats: list[dict], code_commune: str, type_local: str, surface: float
 ) -> Optional[dict]:
-    """PARITÉ : fonction `comparablesAgreges` de web/index.html.
-
-    Élargit le rayon de recherche par paliers d'une tranche de 20 m² jusqu'à
-    réunir au moins 5 transactions, puis renvoie leur nombre et le prix médian
-    pondéré par les effectifs de chaque tranche.
-    """
+    """PARITÉ : fonction `comparablesAgreges` de web/moteur.js."""
     bucket_cible = math.floor(surface / BUCKET) * BUCKET
     meme_commune_type = [
         s for s in stats
@@ -151,7 +143,7 @@ def compute_market_stats(comparables: list[dict]) -> MarketStats:
 
 
 # --------------------------------------------------------------------------
-# Entrée utilisateur — miroir exact du questionnaire du site
+# Entrée utilisateur — miroir exact du questionnaire du site (3 étapes)
 # --------------------------------------------------------------------------
 
 @dataclass
@@ -161,7 +153,7 @@ class UserInput:
     nom_commune: str
     type_local: str                       # "Maison" ou "Appartement"
 
-    # Étape 2 du questionnaire.
+    # Étape 2.
     a_la_fiche: bool                      # la fiche 6675-M est-elle sous les yeux ?
     surface_reelle_actuelle_m2: float     # surface habitable mesurée aujourd'hui
     source_surface: str = "acte"          # "mesuree" | "acte" | "estimee"
@@ -173,20 +165,27 @@ class UserInput:
     elements_confort_factures: list[str] = field(default_factory=list)
     elements_confort_existants: list[str] = field(default_factory=list)
 
-    # Étape 4 (facultative) : n'intervient que dans le chiffrage, jamais dans
-    # la détection.
-    taxe_fonciere_annuelle_eur: Optional[float] = None
+
+# --------------------------------------------------------------------------
+# Bornes de saisie
+# --------------------------------------------------------------------------
+# PARITÉ : SURFACE_MIN_M2 / SURFACE_MAX_M2 de web/moteur.js.
+# Ce ne sont pas des seuils métier : ce sont les bornes de filtrage du jeu de
+# données DVF (backend/build_dataset.py), donc le domaine sur lequel le
+# produit sait travailler.
+SURFACE_MIN_M2 = 8.0
+SURFACE_MAX_M2 = 400.0
 
 
 # --------------------------------------------------------------------------
-# Niveaux de confiance
+# Niveaux de confiance — PARITÉ : constantes de web/moteur.js
 # --------------------------------------------------------------------------
-# PARITÉ : constante CONFIANCE_SURFACE de web/index.html.
 
 CONFIANCE_SURFACE = {
     "mesuree": {
         "niveau": "elevee",
-        "texte": "Élevée — surface que vous avez mesurée vous-même.",
+        "texte": "Élevée — vous avez mesuré cette surface vous-même.",
+        "origine": "Votre relevé, confronté au chiffre que vous avez lu sur votre fiche.",
     },
     "acte": {
         "niveau": "moyenne",
@@ -195,6 +194,10 @@ CONFIANCE_SURFACE = {
             "exactement les mêmes espaces que l’évaluation fiscale. L’écart reste "
             "exploitable, mais devra être confirmé par une mesure."
         ),
+        "origine": (
+            "Un document que vous détenez, dont la définition de surface diffère de "
+            "celle de l’administration."
+        ),
     },
     "estimee": {
         "niveau": "faible",
@@ -202,32 +205,36 @@ CONFIANCE_SURFACE = {
             "Faible — surface estimée de mémoire. Ce constat ne suffit pas à fonder "
             "une réclamation : mesurez avant d’aller plus loin."
         ),
+        "origine": "Votre estimation. Aucun document ne l’appuie pour l’instant.",
     },
 }
 
 CONFIANCE_CONFORT_AVEC_FICHE = {
     "niveau": "elevee",
-    "texte": "Élevée — éléments relevés directement sur votre fiche d’évaluation.",
+    "texte": "Élevée — ces éléments sont relevés directement sur votre fiche d’évaluation.",
+    "origine": "Votre fiche 6675-M, que vous avez sous les yeux.",
 }
 CONFIANCE_CONFORT_SANS_FICHE = {
     "niveau": "faible",
     "texte": (
-        "Faible — vous avez répondu de mémoire. Ce que l’administration facture "
-        "réellement ne figure que sur la fiche 6675-M ; tant que vous ne l’avez pas "
-        "lue, ce constat reste une hypothèse."
+        "Faible — vous avez répondu de mémoire. Ce que l’administration prend "
+        "réellement en compte ne figure que sur la fiche 6675-M ; tant que vous ne "
+        "l’avez pas lue, ce constat reste une hypothèse."
     ),
+    "origine": "Votre déclaration seule.",
 }
 CONFIANCE_MARCHE = {
     "niveau": "contexte",
     "texte": "Élément de contexte, versable à un dossier. Ce n’est pas un motif de réclamation.",
+    "origine": "Le fichier public DVF des ventes réellement enregistrées en 2024.",
 }
 
 
 # --------------------------------------------------------------------------
 # Règles de détection
 # --------------------------------------------------------------------------
-# PARITÉ : seuils identiques à web/index.html. NE PAS MODIFIER sans décision
-# explicite : ils sont en cours de validation par le test T1.
+# PARITÉ : seuils identiques à web/moteur.js. EN COURS DE VALIDATION PAR LE
+# TEST T1. Ne pas modifier sans constat étayé sur de vraies fiches 6675-M.
 
 SURFACE_ECART_SEUIL_M2 = 5.0
 SURFACE_ECART_SEUIL_PCT = 5.0
@@ -235,12 +242,7 @@ SURFACE_GRAVITE_HAUTE_PCT = 15.0
 
 
 def _check_surface(u: UserInput) -> Optional[dict]:
-    """Règle 1 — surface.
-
-    Évaluée UNIQUEMENT lorsque la fiche 6675-M fournit le chiffre de référence.
-    Sans elle il n'existe aucune surface administrative comparable : la surface
-    retenue ne figure ni sur l'avis d'imposition, ni sur l'acte de vente.
-    """
+    """Règle 1 — surface. Évaluée uniquement si la fiche fournit la référence."""
     if not u.a_la_fiche:
         return None
     if not u.surface_fiche_m2 or u.surface_fiche_m2 <= 0:
@@ -258,31 +260,59 @@ def _check_surface(u: UserInput) -> Optional[dict]:
         "code": "surface_surevaluee",
         "gravite": "haute" if ecart_pct > SURFACE_GRAVITE_HAUTE_PCT else "moyenne",
         "kind": "Surface",
-        "figure": f"+{fixed0(ecart)} m² · {fixed0(ecart_pct)} %",
+        "titre": "Les deux surfaces que vous avez saisies ne concordent pas",
+        "figure": f"{fixed0(ecart)} m² d'écart · {fixed0(ecart_pct)} %",
+        "vosReponses": (
+            f"Vous avez relevé {fixed0(u.surface_fiche_m2)} m² sur votre fiche d'évaluation "
+            f"et mesuré {fixed0(u.surface_reelle_actuelle_m2)} m² aujourd'hui."
+        ),
+        "calcul": (
+            f"Différence : {fixed0(ecart)} m², soit {fixed0(ecart_pct)} % de la surface mesurée."
+        ),
+        "aVerifier": (
+            "Plusieurs explications sont possibles et une seule est une anomalie : les deux "
+            "chiffres ne couvrent peut-être pas les mêmes pièces, la fiche n'a peut-être pas "
+            "été mise à jour après des travaux, ou la mesure est peut-être imprécise. Cet écart "
+            "ne démontre rien à lui seul — il indique où regarder."
+        ),
         "confiance": conf,
         "message": (
-            f"La surface réelle retenue sur la fiche ({fixed0(u.surface_fiche_m2)} m²) "
-            f"dépasse de {fixed0(ecart)} m² ({fixed0(ecart_pct)} %) la surface habitable "
-            f"actuelle déclarée ({fixed0(u.surface_reelle_actuelle_m2)} m²)."
+            f"La surface réelle relevée sur la fiche ({fixed0(u.surface_fiche_m2)} m²) dépasse "
+            f"de {fixed0(ecart)} m² ({fixed0(ecart_pct)} %) la surface habitable mesurée "
+            f"déclarée ({fixed0(u.surface_reelle_actuelle_m2)} m²)."
         ),
     }
 
 
 def _check_elements_confort(u: UserInput) -> Optional[dict]:
-    """Règle 2 — éléments de confort disparus.
-
-    Évaluable dans les deux modes : la disparition d'un élément est un fait que
-    le propriétaire connaît. Mais sans la fiche, il ne sait pas ce qui lui est
-    réellement facturé — d'où une confiance faible, qui n'ouvre pas la vente.
-    """
+    """Règle 2 — éléments de confort disparus. Évaluable dans les deux modes."""
     obsoletes = [e for e in u.elements_confort_factures if e not in u.elements_confort_existants]
     if not obsoletes:
         return None
+    libelles = [o.capitalize() for o in obsoletes]
+    pluriel = len(obsoletes) > 1
     return {
         "code": "elements_confort_obsoletes",
-        "gravite": "haute" if len(obsoletes) > 1 else "moyenne",
+        "gravite": "haute" if pluriel else "moyenne",
         "kind": "Éléments de confort",
-        "figure": " · ".join(o.capitalize() for o in obsoletes),
+        "titre": (
+            "Plusieurs éléments que vous avez déclarés n’existent plus" if pluriel
+            else "Un élément que vous avez déclaré n’existe plus"
+        ),
+        "figure": " · ".join(libelles),
+        "vosReponses": (
+            "Vous avez indiqué que ces éléments entrent dans votre évaluation alors qu'ils "
+            f"n’existent plus aujourd'hui : {', '.join(obsoletes)}."
+            if pluriel else
+            "Vous avez indiqué que cet élément entre dans votre évaluation alors qu'il "
+            f"n’existe plus aujourd'hui : {', '.join(obsoletes)}."
+        ),
+        "calcul": "Aucun calcul : c’est la comparaison directe de vos deux réponses.",
+        "aVerifier": (
+            "Aucune mise à jour n'est automatique : ni une démolition, ni le comblement d'une "
+            "piscine ne sont signalés d'office aux services fiscaux. Reste à confirmer, sur "
+            "votre fiche, que l'élément y figure bien — et à pouvoir dater sa disparition."
+        ),
         "confiance": CONFIANCE_CONFORT_AVEC_FICHE if u.a_la_fiche else CONFIANCE_CONFORT_SANS_FICHE,
         "message": (
             "Ces éléments sont pris en compte dans votre évaluation mais n'existeraient "
@@ -292,18 +322,28 @@ def _check_elements_confort(u: UserInput) -> Optional[dict]:
 
 
 def _check_contexte_marche(u: UserInput, comps: Optional[dict]) -> Optional[dict]:
-    """Règle 3 — contexte de marché.
-
-    Jamais un motif de réclamation, et aucun chiffre publié sur un échantillon
-    de moins de 5 transactions.
-    """
+    """Règle 3 — contexte de marché. Jamais un motif de réclamation."""
     if not comps or comps["n"] < 5:
         return None
     return {
         "code": "contexte_marche",
         "gravite": "info",
         "kind": "Contexte de marché",
+        "titre": f"{comps['n']} ventes comparables à {u.nom_commune}",
         "figure": f"{fixed0(comps['prix_median'])} €/m² médian",
+        "vosReponses": (
+            f"Vous avez indiqué un bien de type {u.type_local.lower()} d'environ "
+            f"{fixed0(u.surface_reelle_actuelle_m2)} m² à {u.nom_commune}."
+        ),
+        "calcul": (
+            f"Prix médian de {comps['n']} ventes réellement enregistrées en 2024 pour des "
+            "biens de même type et de surface voisine."
+        ),
+        "aVerifier": (
+            "Rien, du point de vue de votre taxe. La valeur locative cadastrale repose sur des "
+            "valeurs de 1970 revalorisées, pas sur les prix actuels : ce chiffre situe votre "
+            "bien dans son marché, il ne dit pas si votre imposition est juste."
+        ),
         "confiance": CONFIANCE_MARCHE,
         "message": (
             f"Sur {comps['n']} transactions réelles comparables à {u.nom_commune}, le prix "
@@ -321,12 +361,7 @@ GRAVITE_POIDS = {"haute": 40, "moyenne": 20, "info": 5}
 
 
 def classifier(score: int) -> dict:
-    """PARITÉ : bloc `classif` de web/index.html.
-
-    Le score reste calculé en interne — il sert de référence partagée entre les
-    deux moteurs — mais n'est plus affiché : il ne peut prendre que huit valeurs
-    distinctes, ce qui donnait une impression de précision inexistante.
-    """
+    """PARITÉ : classifier() de web/moteur.js."""
     if score >= 40:
         return {"cle": "fort", "label": "Vérification fortement recommandée"}
     if score >= 20:
@@ -334,44 +369,31 @@ def classifier(score: int) -> dict:
     return {"cle": "aucun", "label": "Aucun élément notable détecté"}
 
 
-def vente_autorisee(anomalies: list[dict]) -> bool:
-    """PARITÉ : fonction `venteAutorisee` de web/index.html.
+# PARITÉ : CODES_NE_DECLENCHANT_PAS_LA_VENTE de web/moteur.js.
+#
+# Décision produit du 16/09/2026, volontairement conservatrice. Tant que le
+# test T1 n'a pas établi, sur de vraies fiches, que la « surface réelle » de
+# la fiche 6675-M et la surface habitable mesurée recouvrent bien le même
+# périmètre, un écart de surface peut être un artefact de la question posée.
+# Il reste affiché et expliqué ; il ne déclenche simplement aucune vente.
+#
+# À LEVER après T1 si la comparaison est validée — des deux côtés.
+CODES_NE_DECLENCHANT_PAS_LA_VENTE = ("surface_surevaluee",)
 
-    Deux conditions cumulatives : un écart réel, et une donnée assez fiable pour
-    fonder un dossier. La seconde implique la fiche 6675-M, que la réclamation
-    exige de produire en pièce jointe.
+
+def vente_autorisee(anomalies: list[dict]) -> bool:
+    """PARITÉ : venteAutorisee() de web/moteur.js.
+
+    Trois conditions cumulatives : un écart réel, une donnée assez fiable pour
+    fonder un dossier (ce qui implique la fiche 6675-M, que la réclamation
+    exige de produire), et un motif autre que le seul écart de surface.
     """
     return any(
         a["gravite"] in ("haute", "moyenne")
         and a.get("confiance", {}).get("niveau") in ("elevee", "moyenne")
+        and a["code"] not in CODES_NE_DECLENCHANT_PAS_LA_VENTE
         for a in anomalies
     )
-
-
-# --------------------------------------------------------------------------
-# Estimation d'impact
-# --------------------------------------------------------------------------
-
-def estimate_impact_eur(u: UserInput, anomalies: list[dict]) -> Optional[dict]:
-    """PARITÉ : fonction `calculerImpact` de web/rapport.js."""
-    if not u.taxe_fonciere_annuelle_eur or not anomalies:
-        return None
-    haute = any(a["gravite"] == "haute" for a in anomalies)
-    moyenne = any(a["gravite"] == "moyenne" for a in anomalies)
-    if haute:
-        pct_low, pct_high = 8, 20
-    elif moyenne:
-        pct_low, pct_high = 3, 10
-    else:
-        return None
-    return {
-        "eur_min": round(u.taxe_fonciere_annuelle_eur * pct_low / 100),
-        "eur_max": round(u.taxe_fonciere_annuelle_eur * pct_high / 100),
-        "avertissement": (
-            "Fourchette indicative basée sur la gravité des écarts détectés, "
-            "pas sur un recalcul officiel de la valeur locative cadastrale."
-        ),
-    }
 
 
 # --------------------------------------------------------------------------
@@ -422,7 +444,6 @@ def run_diagnostic(u: UserInput, stats: Optional[list[dict]] = None) -> dict:
             "n_transactions_comparables": comps["n"] if comps else 0,
             "prix_m2_median": comps["prix_median"] if comps else None,
         },
-        "impact_estime_eur_par_an": estimate_impact_eur(u, anomalies),
         "prochaine_etape": (
             "Demandez votre fiche d'évaluation (formulaire 6675-M) sur impots.gouv.fr : "
             "sans elle, aucune comparaison de surface n'est possible."

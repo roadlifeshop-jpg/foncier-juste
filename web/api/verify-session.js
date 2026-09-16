@@ -25,11 +25,20 @@ module.exports = async (req, res) => {
       res.status(502).json({ error: data.error?.message || 'Erreur Stripe inconnue' });
       return;
     }
+    // Les réponses du pré-diagnostic ont été jointes au paiement : elles
+    // permettent de reconstruire le document acheté, sur n'importe quel
+    // appareil et à tout moment, à partir du seul identifiant de session.
+    let diag = null;
+    try { if (data.metadata?.diag) diag = JSON.parse(data.metadata.diag); }
+    catch (_) { diag = null; }
+
     res.status(200).json({
       payment_status: data.payment_status, // "paid" | "unpaid" | "no_payment_required"
       amount_total: data.amount_total,
       currency: data.currency,
       produit: data.metadata?.produit || 'rapport',
+      date: data.created ? new Date(data.created * 1000).toISOString() : null,
+      diag,
     });
   } catch (e) {
     res.status(500).json({ error: 'Erreur serveur : ' + e.message });

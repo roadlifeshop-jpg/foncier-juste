@@ -32,28 +32,44 @@
   </div>
 
   <div class="callout">
-    <p><strong>Le point essentiel :</strong> le pré-diagnostic est calculé entièrement dans votre navigateur. Vos réponses — commune, surfaces, éléments de confort, montant de taxe — ne sont transmises à aucun serveur, ni au nôtre, ni à un tiers. Elles disparaissent quand vous fermez l'onglet.</p>
+    <p><strong>Le point essentiel :</strong> le pré-diagnostic gratuit est calculé entièrement dans votre navigateur. Vos réponses — commune, surfaces, éléments de confort — ne sont transmises à aucun serveur. Elles disparaissent quand vous fermez l'onglet.</p>
+    <p><strong>Une seule exception, et elle est volontaire :</strong> si vous achetez un document, vos réponses accompagnent le paiement. Sans cela, un client qui ferme son navigateur au mauvais moment aurait payé sans que son document puisse jamais être reconstruit. Nous avons préféré garantir la livraison et vous le dire, plutôt que l'inverse.</p>
   </div>
 
   <h2>Ce que nous traitons</h2>
   <div class="tablewrap">
     <table>
-      <thead><tr><th>Donnée</th><th>Finalité</th><th>Base légale</th></tr></thead>
+      <thead><tr><th>Donnée</th><th>Quand</th><th>Finalité</th><th>Base légale</th></tr></thead>
       <tbody>
         <tr>
-          <td>Réponses au pré-diagnostic (commune, surfaces, éléments de confort, montant)</td>
-          <td>Établir le résultat du pré-diagnostic</td>
-          <td>Exécution du service demandé — traitement effectué dans le navigateur, jamais transmis à un serveur</td>
+          <td>Réponses au pré-diagnostic (commune, type de bien, surfaces, éléments de confort)</td>
+          <td>Pendant le pré-diagnostic</td>
+          <td>Établir le résultat</td>
+          <td>Exécution du service demandé — traitement effectué dans votre navigateur, jamais transmis à un serveur</td>
         </tr>
         <tr>
-          <td>Étape du parcours atteinte</td>
+          <td>Étape du parcours atteinte, et nombre d'éléments relevés à l'affichage du résultat</td>
+          <td>Pendant le pré-diagnostic</td>
           <td>Savoir à quel moment les visiteurs abandonnent, pour corriger le parcours</td>
-          <td>Intérêt légitime — sans cookie, sans identifiant, sans aucune information sur le bien</td>
+          <td>Intérêt légitime — sans cookie, sans identifiant, sans surface ni commune</td>
         </tr>
         <tr>
-          <td>Adresse email et informations de paiement (achat uniquement)</td>
-          <td>Délivrer le document acheté, émettre le reçu, répondre en cas d'échec de livraison</td>
+          <td>Département du bien</td>
+          <td>Pendant le pré-diagnostic</td>
+          <td>Conséquence technique : votre navigateur télécharge le fichier de données de ce département, et cette requête figure dans les journaux de notre hébergeur</td>
+          <td>Exécution du service demandé</td>
+        </tr>
+        <tr>
+          <td>Adresse email, et réponses au questionnaire</td>
+          <td><strong>En cas d'achat uniquement</strong></td>
+          <td>Délivrer le document, permettre son retéléchargement ultérieur depuis n'importe quel appareil, émettre le reçu</td>
           <td>Exécution du contrat</td>
+        </tr>
+        <tr>
+          <td>Informations de paiement</td>
+          <td>En cas d'achat uniquement</td>
+          <td>Encaisser</td>
+          <td>Exécution du contrat — traitées intégralement par Stripe, jamais par nous</td>
         </tr>
       </tbody>
     </table>
@@ -63,14 +79,23 @@
   <ul>
     <li>Aucun cookie de mesure d'audience, aucun traceur publicitaire.</li>
     <li>Aucun identifiant de visiteur, aucune reconstitution de parcours individuel.</li>
-    <li>Aucune donnée bancaire : le paiement est traité intégralement par Stripe, qui ne nous transmet jamais votre numéro de carte.</li>
+    <li>Aucune donnée bancaire : nous ne voyons jamais votre numéro de carte.</li>
+    <li>Aucun script chargé depuis un serveur tiers : la bibliothèque qui produit les documents PDF est hébergée avec ce site.</li>
   </ul>
+
+  <h2>Ressources chargées depuis un tiers</h2>
+  <p>Les polices de caractères de ce site proviennent de <strong>Google Fonts</strong> (googleapis.com et gstatic.com). À ce titre, Google reçoit votre adresse IP et votre navigateur lors du chargement des pages. Aucune autre ressource externe n'est utilisée.</p>
 
   <h2>Durée de conservation</h2>
   <p><span data-fill>[À définir — par exemple 3 ans après le dernier contact, conformément aux recommandations de la CNIL, et 10 ans pour les pièces comptables liées à une vente]</span></p>
 
   <h2>Destinataires</h2>
-  <p>Prestataire de paiement : <strong>Stripe Payments Europe Ltd</strong>, pour le traitement des transactions. Hébergeur : <span data-fill>[à compléter]</span>. Aucune donnée n'est vendue ni cédée à des tiers.</p>
+  <ul>
+    <li><strong>Stripe Payments Europe Ltd</strong> — prestataire de paiement. Reçoit, en cas d'achat, votre adresse email, le montant, et vos réponses au questionnaire jointes à la transaction pour permettre la redélivrance du document.</li>
+    <li><strong>Vercel Inc.</strong> — hébergeur. Journalise les requêtes reçues, avec adresse IP et horodatage, y compris celle du fichier de données de votre département.</li>
+    <li><strong>Google</strong> — fourniture des polices de caractères. Reçoit votre adresse IP lors du chargement des pages.</li>
+  </ul>
+  <p>Aucune donnée n'est vendue ni cédée à d'autres tiers.</p>
 
   <h2>Vos droits</h2>
   <p>Conformément au Règlement général sur la protection des données, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition sur les données vous concernant. Pour l'exercer : <span data-fill>[email de contact]</span>. Vous pouvez également introduire une réclamation auprès de la CNIL.</p>

@@ -3,41 +3,40 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Paiement confirmé — Foncier·Juste</title>
+<title>Votre document — Foncier·Juste</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230F3D56'/><path d='M7 16.5 16 8.5l9 8' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 23.5h16' stroke='%23C8A15A' stroke-width='2.6' stroke-linecap='round'/></svg>">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:wght@500;600&display=swap">
 <link rel="stylesheet" href="base.css">
 <style>
-main.center{max-width:560px; margin:0 auto; padding:72px 20px 60px;}
-.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:34px 30px; box-shadow:var(--lift);}
-.card h1{font-size:1.5rem;}
-.card p{color:var(--ink-muted); font-size:.95rem;}
-.mark{
-  width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  font-size:1.4rem; font-weight:700; margin-bottom:18px;
-}
+main.center{max-width:620px; margin:0 auto; padding:64px 20px 60px;}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:32px 28px; box-shadow:var(--lift);}
+.card h1{font-size:1.45rem;}
+.card > p{color:var(--ink-muted); font-size:.95rem;}
+.mark{width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.35rem; font-weight:700; margin-bottom:16px;}
 .mark-ok{background:var(--ok-soft); color:var(--ok);}
 .mark-err{background:var(--alert-soft); color:var(--alert);}
-.spinner{
-  width:28px; height:28px; border:2.5px solid var(--surface-3); border-top-color:var(--accent);
-  border-radius:50%; margin-bottom:18px; animation:spin .8s linear infinite;
-}
+.spinner{width:26px; height:26px; border:2.5px solid var(--surface-3); border-top-color:var(--accent); border-radius:50%; margin-bottom:16px; animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.card .btn{margin-top:22px;}
-.next{margin-top:26px; padding-top:20px; border-top:1px solid var(--line);}
-.next h2{font-family:'Archivo',sans-serif; font-size:.95rem; font-weight:600; margin:0;}
-.next ol{margin-top:10px; font-size:.89rem; color:var(--ink-muted);}
+.card .btn{margin-top:20px;}
+.bloc{margin-top:24px; padding-top:20px; border-top:1px solid var(--line);}
+.bloc h2{font-family:'Archivo',sans-serif; font-size:.95rem; font-weight:600; margin:0;}
+.bloc p, .bloc ol{margin-top:9px; font-size:.89rem; color:var(--ink-muted);}
+.lien-reprise{
+  display:flex; gap:8px; align-items:center; margin-top:10px; padding:10px 12px;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:8px;
+}
+.lien-reprise code{flex:1; font-size:.76rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; background:none; padding:0;}
+.lien-reprise button{flex-shrink:0; font-size:.8rem; padding:6px 12px;}
+.recu{font-size:.82rem; color:var(--ink-faint); margin-top:14px;}
 .back{display:inline-block; margin-top:20px; font-size:.86rem; color:var(--ink-muted); text-decoration:none;}
 </style>
 </head>
 <body>
 
 <header class="site-head">
-  <div class="shell">
-    <a class="brand" href="index.html">Foncier<span class="dot">·</span>Juste</a>
-  </div>
+  <div class="shell"><a class="brand" href="index.html">Foncier<span class="dot">·</span>Juste</a></div>
 </header>
 
 <main class="center">
@@ -49,31 +48,50 @@ main.center{max-width:560px; margin:0 auto; padding:72px 20px 60px;}
 
   <div class="card" id="etat-ok" hidden>
     <div class="mark mark-ok">✓</div>
-    <h1>Paiement confirmé</h1>
-    <p id="ok-msg">Votre document est prêt. Le téléchargement démarre automatiquement — sinon, utilisez le bouton ci-dessous.</p>
+    <h1 id="ok-titre">Votre document est prêt</h1>
+    <p id="ok-msg">Le téléchargement démarre automatiquement. Sinon, utilisez le bouton ci-dessous.</p>
     <button class="btn btn-primary" id="dl-btn">Télécharger mon document (PDF)</button>
-    <div class="next">
+
+    <div class="bloc">
+      <h2>Conservez ce lien</h2>
+      <p>Il vous permet de retélécharger votre document à tout moment, depuis n'importe quel appareil, même si vous fermez cette page. Mettez-le en favori ou envoyez-le-vous par message.</p>
+      <div class="lien-reprise">
+        <code id="lien-texte">—</code>
+        <button class="btn btn-secondary" id="copier-btn" type="button">Copier</button>
+      </div>
+      <p class="recu">Vous avez également reçu de Stripe un reçu par email à l'adresse indiquée lors du paiement. Il vaut preuve d'achat&nbsp;: si vous perdez ce lien, il nous permet de retrouver votre commande.</p>
+    </div>
+
+    <div class="bloc">
       <h2>Et maintenant&nbsp;?</h2>
       <ol>
-        <li>Enregistrez le PDF&nbsp;: il n'est pas conservé sur nos serveurs, et cette page ne pourra pas le régénérer une fois fermée.</li>
-        <li>Complétez les mentions entre crochets avec vos informations personnelles.</li>
-        <li>Joignez les pièces listées, puis déposez votre réclamation depuis la messagerie sécurisée d'impots.gouv.fr.</li>
+        <li>Complétez les mentions entre crochets avec vos informations.</li>
+        <li>Réunissez les pièces listées dans le document — l'avis de taxe foncière est obligatoire.</li>
+        <li>Déposez votre réclamation depuis la messagerie sécurisée d'impots.gouv.fr, ou par courrier signé.</li>
       </ol>
     </div>
   </div>
 
   <div class="card" id="etat-erreur" hidden>
     <div class="mark mark-err">!</div>
-    <h1>Impossible de confirmer le paiement</h1>
-    <p id="erreur-msg">Une vérification est nécessaire avant de délivrer le document.</p>
+    <h1 id="erreur-titre">Nous n'avons pas pu délivrer votre document</h1>
+    <p id="erreur-msg">Une vérification est nécessaire.</p>
+    <div class="bloc" id="erreur-aide" hidden>
+      <h2>Comment récupérer votre achat</h2>
+      <p>Votre paiement n'est pas perdu. Écrivez-nous en joignant le reçu Stripe reçu par email, ou l'identifiant ci-dessous, et nous vous renverrons votre document.</p>
+      <div class="lien-reprise"><code id="session-texte">—</code><button class="btn btn-secondary" id="copier-session" type="button">Copier</button></div>
+    </div>
   </div>
 
   <a class="back" href="index.html">← Retour à l'accueil</a>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="moteur.js"></script>
 <script src="rapport.js"></script>
 <script>
+const $ = id => document.getElementById(id);
+
 function track(evenement, meta = {}) {
   try {
     navigator.sendBeacon?.('/api/track', new Blob(
@@ -83,21 +101,47 @@ function track(evenement, meta = {}) {
 }
 
 function afficher(id){
-  ['etat-attente','etat-ok','etat-erreur'].forEach(x =>
-    document.getElementById(x).hidden = x !== id);
+  ['etat-attente','etat-ok','etat-erreur'].forEach(x => $(x).hidden = x !== id);
 }
 
-function telecharger(produit){
-  const brut = sessionStorage.getItem('dernierDiagnostic');
-  if (!brut){
-    document.getElementById('erreur-msg').textContent =
-      "Le paiement est confirmé, mais les réponses de votre pré-diagnostic n'ont pas été retrouvées dans ce navigateur (nouvel onglet, ou navigation privée). Contactez-nous en indiquant l'identifiant de session présent dans l'adresse de cette page : nous régénérerons votre document.";
-    afficher('etat-erreur');
-    return;
+function copier(bouton, valeur){
+  bouton.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(valeur); bouton.textContent = 'Copié'; }
+    catch (_) { bouton.textContent = 'Sélectionnez le lien'; }
+    setTimeout(() => { bouton.textContent = 'Copier'; }, 2500);
+  });
+}
+
+function echec(titre, message, sessionId){
+  $('erreur-titre').textContent = titre;
+  $('erreur-msg').textContent = message;
+  if (sessionId){
+    $('erreur-aide').hidden = false;
+    $('session-texte').textContent = sessionId;
+    copier($('copier-session'), sessionId);
   }
-  const diagnostic = JSON.parse(brut);
-  if (produit === 'dossier') genererDossierPDF(diagnostic, { exemple: false });
-  else genererRapportPDF(diagnostic, { exemple: false });
+  afficher('etat-erreur');
+}
+
+/* =========================================================================
+   Livraison du document.
+   -------------------------------------------------------------------------
+   Les réponses du pré-diagnostic ont été jointes au paiement : le document
+   est donc reconstruit ici à partir de la session Stripe, et non depuis le
+   stockage du navigateur. C'est ce qui permet de le retélécharger depuis
+   n'importe quel appareil. Le stockage local n'est qu'un secours.
+   ========================================================================= */
+async function delivrer(produit, diag){
+  let entree = diag;
+  if (!entree){
+    try { entree = JSON.parse(localStorage.getItem('fj_dernier_diagnostic') || 'null'); }
+    catch (_) { entree = null; }
+  }
+  if (!entree) throw new Error('réponses introuvables');
+
+  const d = await rejouerDiagnostic(entree);
+  if (produit === 'dossier') genererDossierPDF(d, { exemple: false });
+  else genererRapportPDF(d, { exemple: false });
   track('document_telecharge', { produit });
 }
 
@@ -105,31 +149,51 @@ function telecharger(produit){
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session_id');
   if (!sessionId){
-    document.getElementById('erreur-msg').textContent = "Identifiant de paiement manquant dans l'adresse.";
-    afficher('etat-erreur');
+    echec("Identifiant de paiement manquant", "L'adresse de cette page ne contient pas d'identifiant de session. Utilisez le lien qui vous a été fourni après votre paiement.");
     return;
   }
+
+  let data;
   try {
     const r = await fetch(`/api/verify-session?session_id=${encodeURIComponent(sessionId)}`);
-    const data = await r.json();
+    data = await r.json();
     if (!r.ok) throw new Error(data.error || 'réponse invalide');
-    if (data.payment_status === 'paid'){
-      track('paiement_reussi', { produit: data.produit });
-      afficher('etat-ok');
-      const libelle = data.produit === 'dossier' ? 'dossier de vérification' : 'analyse détaillée';
-      document.getElementById('ok-msg').textContent =
-        `Votre ${libelle} est prête. Le téléchargement démarre automatiquement — sinon, utilisez le bouton ci-dessous.`;
-      telecharger(data.produit);
-      document.getElementById('dl-btn').addEventListener('click', () => telecharger(data.produit));
-    } else {
-      document.getElementById('erreur-msg').textContent =
-        `Paiement non confirmé (statut : ${data.payment_status}). Si vous venez de payer, rafraîchissez cette page dans quelques secondes.`;
-      afficher('etat-erreur');
-    }
   } catch (e) {
-    document.getElementById('erreur-msg').textContent = "Erreur de vérification : " + e.message;
-    afficher('etat-erreur');
+    echec("Vérification impossible", "Nous n'avons pas pu joindre notre prestataire de paiement. Rechargez cette page dans quelques instants — votre lien reste valable.", sessionId);
     console.error(e);
+    return;
+  }
+
+  if (data.payment_status !== 'paid'){
+    echec("Paiement non confirmé",
+      `Statut renvoyé par Stripe : ${data.payment_status}. Si vous venez de payer, rechargez cette page dans quelques secondes.`,
+      sessionId);
+    return;
+  }
+
+  track('paiement_reussi', { produit: data.produit });
+  const libelle = data.produit === 'dossier' ? 'Votre dossier de vérification est prêt' : 'Votre analyse détaillée est prête';
+  $('ok-titre').textContent = libelle;
+  afficher('etat-ok');
+
+  const lien = `${location.origin}${location.pathname}?session_id=${encodeURIComponent(sessionId)}`;
+  $('lien-texte').textContent = lien;
+  copier($('copier-btn'), lien);
+
+  $('dl-btn').addEventListener('click', () => {
+    delivrer(data.produit, data.diag).catch(e => {
+      $('ok-msg').textContent = "La génération a échoué. Rechargez la page : votre lien reste valable et votre paiement est enregistré.";
+      console.error(e);
+    });
+  });
+
+  try {
+    await delivrer(data.produit, data.diag);
+  } catch (e) {
+    console.error(e);
+    echec("Paiement confirmé, document non généré",
+      "Votre paiement est bien enregistré, mais nous n'avons pas pu reconstruire le document. Rechargez cette page — si le problème persiste, écrivez-nous avec l'identifiant ci-dessous et nous vous l'enverrons.",
+      sessionId);
   }
 })();
 </script>

@@ -327,7 +327,11 @@ input::placeholder{color:var(--ink-faint);}
   .wizard-nav button{flex:1;}
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js"></script>
+<!-- jsPDF est servi depuis ce site, pas depuis un CDN : aucune requête vers un
+     tiers, et aucune possibilité qu'un CDN compromis exécute du code sur la
+     page qui manipule vos réponses. -->
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="moteur.js"></script>
 <script src="rapport.js"></script>
 </head>
 <body>
@@ -344,19 +348,19 @@ input::placeholder{color:var(--ink-faint);}
   <section class="hero shell">
     <h1>Votre taxe foncière mérite-t-elle d'être vérifiée&nbsp;?</h1>
     <p class="lede">
-      Foncier·Juste compare les informations que vous relevez vous-même sur votre fiche d'évaluation
-      à la réalité actuelle de votre logement, et vous indique les éléments qui méritent un contrôle.
-      Nous n'avons aucun accès à votre dossier fiscal&nbsp;: tout part de ce que vous saisissez.
-      Quand il n'y a rien à vérifier, nous vous le disons aussi.
+      En quelques minutes, identifiez les informations de votre bien qui pourraient mériter une
+      vérification. Foncier·Juste compare ce que vous relevez vous-même sur votre fiche d'évaluation
+      à la réalité actuelle de votre logement. Nous n'avons aucun accès à votre dossier fiscal&nbsp;:
+      tout part de ce que vous saisissez. Quand il n'y a rien à vérifier, nous vous le disons aussi.
     </p>
     <div class="cta-row">
       <button class="btn-primary" id="start-btn">Lancer le pré-diagnostic gratuit</button>
       <a class="btn btn-secondary" href="#fonctionnement">Comment ça fonctionne</a>
     </div>
     <div class="trust-row">
-      <span>Gratuit, sans compte</span>
-      <span>Calculé dans votre navigateur</span>
-      <span>Aucune vente sans motif</span>
+      <span>Gratuit, sans inscription</span>
+      <span>Environ 2 minutes</span>
+      <span>Vos réponses restent dans votre navigateur</span>
     </div>
   </section>
 
@@ -364,12 +368,12 @@ input::placeholder{color:var(--ink-faint);}
   <section class="shell" id="diagnostic" hidden>
     <div class="panel">
       <div class="panel-head">
-        <div class="progress" role="presentation"><i id="p1"></i><i id="p2"></i><i id="p3"></i><i id="p4"></i></div>
+        <div class="progress" role="presentation"><i id="p1"></i><i id="p2"></i><i id="p3"></i></div>
       </div>
       <div class="panel-body">
 
         <div class="step" data-step="1">
-          <div class="step-label">Étape 1 sur 4</div>
+          <div class="step-label">Étape 1 sur 3</div>
           <h2>Votre bien</h2>
           <p class="intro">Nous commençons par situer le logement, pour pouvoir le comparer à des ventes réelles du même secteur.</p>
           <div class="field">
@@ -389,7 +393,7 @@ input::placeholder{color:var(--ink-faint);}
         </div>
 
         <div class="step" data-step="2" hidden>
-          <div class="step-label">Étape 2 sur 4</div>
+          <div class="step-label">Étape 2 sur 3</div>
           <h2>Les surfaces</h2>
           <p class="intro">C'est l'étape décisive. Une surface n'a de sens que comparée à une surface de même nature&nbsp;: nous vous demandons donc précisément laquelle vous saisissez.</p>
 
@@ -453,7 +457,7 @@ input::placeholder{color:var(--ink-faint);}
         </div>
 
         <div class="step" data-step="3" hidden>
-          <div class="step-label">Étape 3 sur 4</div>
+          <div class="step-label">Étape 3 sur 3</div>
           <h2>Les éléments de confort</h2>
           <p class="intro">Une piscine comblée, un garage démoli ou une dépendance disparue continuent d'être facturés tant que la disparition n'a pas été déclarée. C'est l'anomalie la plus simple à démontrer.</p>
 
@@ -478,22 +482,6 @@ input::placeholder{color:var(--ink-faint);}
             </div>
             <div class="hint">Ne cochez que ce qui est physiquement présent sur la propriété au moment où vous répondez.</div>
           </fieldset>
-        </div>
-
-        <div class="step" data-step="4" hidden>
-          <div class="step-label">Étape 4 sur 4</div>
-          <h2>Le montant, pour chiffrer</h2>
-          <p class="intro">Facultatif.</p>
-          <div class="field">
-            <label for="taxe_actuelle">Montant annuel de votre taxe foncière</label>
-            <div class="unit" data-unit="€"><input type="number" id="taxe_actuelle" min="0" step="1" inputmode="numeric" placeholder="ex : 1 450"></div>
-            <div class="hint">
-              <b>Ce montant n'entre pas dans notre analyse.</b> Payer cher n'est pas une anomalie&nbsp;:
-              un grand logement bien situé coûte normalement cher. Ce chiffre sert uniquement à
-              convertir en euros une anomalie déjà identifiée aux étapes précédentes. Laissez vide si
-              vous préférez.
-            </div>
-          </div>
         </div>
 
         <div class="wizard-nav">
@@ -533,27 +521,33 @@ input::placeholder{color:var(--ink-faint);}
         <div id="action-contenu"></div>
       </div>
 
+      <!-- Contexte de marché : présenté après les signaux et les limites,
+           parce que ce n'est pas un motif de réclamation. -->
+      <div id="contexte-marche"></div>
+
       <!-- Affiché uniquement quand un signal existe ET qu'il repose sur une
            donnée suffisamment fiable. Voir `venteAutorisee()`. -->
       <div class="offers" id="zone-vente" hidden>
         <div class="eyebrow">Aller plus loin</div>
         <h3 class="lead">Voici ce que nous pouvons faire pour vous</h3>
         <p class="lead-p">
-          Vous avez déjà, gratuitement, l'essentiel du diagnostic. Ce que vous achetez ici, c'est le
-          travail de mise en forme qui sépare un constat d'un dossier recevable.
+          Le pré-diagnostic ci-dessus est à vous, gratuitement et intégralement&nbsp;: nous ne cachons
+          aucune conclusion derrière un paiement. Ce que vous achetez ici, c'est le travail entre le
+          constat et le dossier. <b>Nous ne promettons aucune économie et ne pouvons pas en calculer
+          une&nbsp;</b>: elle dépend d'un recalcul que seule l'administration peut faire.
         </p>
 
         <div class="offer-grid">
           <div class="offer">
             <h4>Analyse détaillée</h4>
             <div class="price num">29 €</div>
-            <p class="for">Pour comprendre précisément ce qui cloche et sur quoi vous appuyer.</p>
+            <p class="for">Pour comprendre exactement ce que vous devez vérifier, et pourquoi.</p>
             <ul>
-              <li>Chaque écart repris et expliqué, avec sa base réglementaire</li>
-              <li>Les données exactes utilisées pour votre bien</li>
-              <li>Les transactions comparables de votre commune</li>
-              <li>Ce qui relève d'une anomalie et ce qui n'en est pas une</li>
-              <li>Document PDF, téléchargeable immédiatement</li>
+              <li>Chaque élément repris : ce que vous avez indiqué, ce qui en est calculé, ce qu'il reste à vérifier</li>
+              <li>Le niveau de confiance de chaque constat et l'origine de l'information</li>
+              <li>Les données exactes retenues pour votre bien</li>
+              <li>Ce que notre analyse ne couvre pas, écrit noir sur blanc</li>
+              <li>Les sources réglementaires, pour vérifier par vous-même</li>
             </ul>
             <div class="go"><button class="btn-secondary buy-btn" data-produit="rapport">Choisir l'analyse</button></div>
           </div>
@@ -561,13 +555,13 @@ input::placeholder{color:var(--ink-faint);}
           <div class="offer main">
             <h4>Dossier de vérification</h4>
             <div class="price num">49 €</div>
-            <p class="for">Pour passer du constat à une réclamation effectivement déposable.</p>
+            <p class="for">Pour passer du constat à une demande correctement formée.</p>
             <ul>
               <li>Tout le contenu de l'analyse détaillée</li>
-              <li class="plus">Votre lettre de réclamation rédigée et référencée</li>
-              <li class="plus">La liste des pièces à joindre à votre situation</li>
-              <li class="plus">Les étapes de la démarche, du dépôt à la réponse</li>
-              <li class="plus">Les délais à respecter et ceux de l'administration</li>
+              <li class="plus">Un projet de courrier, à relire, compléter et signer</li>
+              <li class="plus">Les pièces à réunir pour votre situation, et lesquelles sont obligatoires</li>
+              <li class="plus">Où déposer, et le délai à ne pas dépasser</li>
+              <li class="plus">Ce qui se passe ensuite, et ce que la démarche ne garantit pas</li>
             </ul>
             <div class="go"><button class="btn-primary buy-btn" data-produit="dossier">Choisir le dossier</button></div>
           </div>
@@ -578,6 +572,13 @@ input::placeholder{color:var(--ink-faint);}
             <label for="email_client">Votre email</label>
             <input type="email" id="email_client" placeholder="vous@exemple.fr" autocomplete="email">
             <div class="hint">Sert au reçu Stripe et à vous retrouver si le téléchargement échoue. Rien d'autre.</div>
+            <div class="hint" style="margin-top:8px">
+              <b>Ce qui est transmis avec votre paiement&nbsp;:</b> vos réponses au questionnaire
+              (commune, type de bien, surfaces, éléments cochés) accompagnent la transaction chez
+              Stripe. C'est ce qui nous permet de reconstruire votre document si vous fermez cette
+              page — depuis n'importe quel appareil, et à tout moment. Pendant tout le pré-diagnostic
+              gratuit, rien n'a quitté votre navigateur.
+            </div>
           </div>
           <label class="consent">
             <input type="checkbox" id="consent-retractation">
@@ -586,7 +587,7 @@ input::placeholder{color:var(--ink-faint);}
             consommation. J'ai lu les <a href="cgv.html" target="_blank" rel="noopener">CGV</a>.</span>
           </label>
           <p class="form-err" id="achat-erreur" hidden></p>
-          <p class="after-pay">Paiement par Stripe. Nous ne voyons jamais votre numéro de carte. Le document se télécharge dès le paiement confirmé.</p>
+          <p class="after-pay">Paiement par Stripe. Nous ne voyons jamais votre numéro de carte. Le document se télécharge dès le paiement confirmé, et la page d'après vous donne un lien permanent pour le retélécharger quand vous voulez.</p>
         </div>
       </div>
 
@@ -710,7 +711,7 @@ input::placeholder{color:var(--ink-faint);}
         </div>
         <div>
           <dt>Vos données</dt>
-          <dd><b>Le diagnostic est calculé dans votre navigateur.</b> Vos réponses ne sont envoyées à aucun serveur. Nous mesurons uniquement l'étape du parcours atteinte, sans cookie, sans identifiant, et sans aucune information sur votre bien.</dd>
+          <dd><b>Le pré-diagnostic gratuit est calculé dans votre navigateur.</b> Vos réponses ne sont envoyées à aucun serveur. Nous mesurons l'étape du parcours atteinte et, à l'affichage du résultat, le nombre d'éléments relevés — sans cookie, sans identifiant, sans surface ni commune. Le fichier de données que votre navigateur télécharge révèle en revanche le département concerné. <b>En cas d'achat seulement</b>, vos réponses accompagnent le paiement chez Stripe, afin que votre document puisse vous être redélivré. Détail complet sur la <a href="confidentialite.html">page Confidentialité</a>.</dd>
         </div>
       </dl>
     </div>
@@ -752,7 +753,10 @@ input::placeholder{color:var(--ink-faint);}
         </details>
         <details>
           <summary>Mes réponses sont-elles conservées&nbsp;?</summary>
-          <div class="ans"><p>Non. Le calcul s'effectue entièrement dans votre navigateur et vos réponses ne sont transmises à aucun serveur. Nous enregistrons seulement l'étape du parcours atteinte, sans cookie ni identifiant, pour savoir où les visiteurs abandonnent. En cas d'achat, seule votre adresse email est transmise à Stripe, pour le reçu.</p></div>
+          <div class="ans">
+            <p>Pendant le pré-diagnostic gratuit, non : le calcul s'effectue entièrement dans votre navigateur et vos réponses ne sont transmises à aucun serveur. Nous enregistrons l'étape du parcours atteinte et le nombre d'éléments relevés, sans cookie ni identifiant. Le fichier de données que votre navigateur télécharge indique le département concerné, mais ni votre commune ni vos surfaces.</p>
+            <p>Si vous achetez un document, alors oui : votre adresse email et vos réponses au questionnaire accompagnent le paiement chez Stripe. C'est ce qui nous permet de vous redélivrer votre document si vous fermez la page — sans cela, un achat perdu serait définitivement perdu.</p>
+          </div>
         </details>
         <details>
           <summary>Que se passe-t-il si aucun élément n'est détecté&nbsp;?</summary>
@@ -798,15 +802,15 @@ input::placeholder{color:var(--ink-faint);}
 
 <script>
 /* =========================================================================
-   Index des communes + statistiques de marché
+   Index des communes. Le moteur lui-même vit dans moteur.js — il est partagé
+   avec succes.html, qui doit pouvoir reconstruire un document acheté.
    ========================================================================= */
 let communesIndex = new Map();  // "Commune (CP)" -> {code_commune, code_dept, ...}
-let deptStatsCache = {};
 let dernierDiagnostic = null;
 
 /* Mesure du funnel — volontairement minimale : pas de cookie, pas
-   d'identifiant, aucune donnée sur le bien. Seulement l'étape atteinte.
-   Ne jamais y ajouter commune, surface ou montant. */
+   d'identifiant, aucune surface, aucune commune. Seulement l'étape atteinte,
+   plus, à l'affichage du résultat, le nombre d'éléments relevés. */
 function track(evenement, meta = {}) {
   try {
     navigator.sendBeacon?.('/api/track', new Blob(
@@ -824,7 +828,7 @@ fetch('communes.json').then(r => r.json()).then(communes => {
   communes.forEach(c => {
     (c.codes_postaux || []).forEach(cp => {
       const label = `${c.commune} (${cp})`;
-      communesIndex.set(label, c);
+      communesIndex.set(label, { ...c, code_postal_choisi: cp });
       const opt = document.createElement('option');
       opt.value = label;
       frag.appendChild(opt);
@@ -838,16 +842,6 @@ fetch('communes.json').then(r => r.json()).then(communes => {
     "Impossible de charger la liste des communes. Rechargez la page dans un instant.";
 });
 
-function statsPourDepartement(codeDept){
-  if (!deptStatsCache[codeDept]){
-    deptStatsCache[codeDept] = fetch(`market_stats/${codeDept}.json`).then(r => {
-      if (!r.ok) throw new Error('département introuvable');
-      return r.json();
-    });
-  }
-  return deptStatsCache[codeDept];
-}
-
 /* =========================================================================
    Navigation du questionnaire
    ========================================================================= */
@@ -858,7 +852,7 @@ let communeChoisie = null;
 const $ = id => document.getElementById(id);
 
 function renderProgress(){
-  [1,2,3,4].forEach(n => $('p'+n).classList.toggle('done', n <= current + 1));
+  [1,2,3].forEach(n => $('p'+n).classList.toggle('done', n <= current + 1));
 }
 function showStep(i){
   steps.forEach((s, idx) => s.hidden = idx !== i);
@@ -897,6 +891,72 @@ function majModeFiche(){
 document.querySelectorAll('input[name=fiche]').forEach(r => r.addEventListener('change', majModeFiche));
 majModeFiche();
 
+/* Validation des surfaces. Les bornes ne sont pas un choix métier : ce sont
+   celles du jeu de données DVF (8 à 400 m²), donc le domaine sur lequel le
+   produit sait réellement travailler. Elles étaient déjà déclarées dans le
+   HTML mais n'étaient pas appliquées : une faute de frappe (1300 au lieu de
+   130) produisait un résultat absurde. */
+function validerSurface(champ, obligatoire){
+  const hint = champ.parentElement.nextElementSibling;
+  const brut = champ.value.trim();
+  const v = parseFloat(brut);
+  const echouer = (msg) => { hint.dataset.erreur = msg; hint.style.color = 'var(--alert)'; champ.focus(); return false; };
+  if (!brut){
+    if (!obligatoire) return true;
+    return echouer('obligatoire');
+  }
+  if (!Number.isFinite(v) || v <= 0) return echouer('invalide');
+  if (v < SURFACE_MIN_M2 || v > SURFACE_MAX_M2) return echouer('hors bornes');
+  hint.style.color = '';
+  delete hint.dataset.erreur;
+  return true;
+}
+
+function messageSurface(champ, texte){
+  const hint = champ.parentElement.nextElementSibling;
+  hint.style.color = 'var(--alert)';
+  hint.textContent = texte;
+}
+
+const HINT_ORIGINAL = new Map();
+function memoriserHint(id){
+  const champ = $(id);
+  const hint = champ.parentElement.nextElementSibling;
+  if (!HINT_ORIGINAL.has(id)) HINT_ORIGINAL.set(id, hint.innerHTML);
+}
+function restaurerHint(id){
+  const champ = $(id);
+  const hint = champ.parentElement.nextElementSibling;
+  if (HINT_ORIGINAL.has(id)){ hint.innerHTML = HINT_ORIGINAL.get(id); hint.style.color = ''; }
+}
+['surf_fiche','surf_reelle'].forEach(memoriserHint);
+
+function controlerEtape2(){
+  ['surf_fiche','surf_reelle'].forEach(restaurerHint);
+  const sr = $('surf_reelle'), sf = $('surf_fiche');
+  const vr = parseFloat(sr.value);
+  if (!sr.value.trim() || !Number.isFinite(vr) || vr <= 0){
+    messageSurface(sr, "Indiquez la surface habitable actuelle : c'est elle qui sert de point de comparaison.");
+    sr.focus(); return false;
+  }
+  if (vr < SURFACE_MIN_M2 || vr > SURFACE_MAX_M2){
+    messageSurface(sr, `Cette surface doit être comprise entre ${SURFACE_MIN_M2} et ${SURFACE_MAX_M2} m² — c'est le domaine sur lequel nous disposons de données comparables. Vérifiez votre saisie.`);
+    sr.focus(); return false;
+  }
+  if (aLaFiche()){
+    const vf = parseFloat(sf.value);
+    if (!sf.value.trim() || !Number.isFinite(vf) || vf <= 0){
+      messageSurface(sf, "Indiquez la surface réelle lue sur votre fiche, ou revenez à « Non, pas encore » si vous ne l'avez pas.");
+      sf.focus(); return false;
+    }
+    if (vf < SURFACE_MIN_M2 || vf > SURFACE_MAX_M2){
+      messageSurface(sf, `Cette surface doit être comprise entre ${SURFACE_MIN_M2} et ${SURFACE_MAX_M2} m². Au-delà, vérifiez que vous n'avez pas repris la surface pondérée ou ajouté un chiffre de trop.`);
+      sf.focus(); return false;
+    }
+  }
+  return true;
+}
+
 $('next-btn').addEventListener('click', async () => {
   if (current === 0){
     const saisie = $('commune').value.trim();
@@ -916,248 +976,139 @@ $('next-btn').addEventListener('click', async () => {
       : communeChoisie.commune;
     statsPourDepartement(communeChoisie.code_dept).catch(() => {});
   }
-  if (current === 1){
-    const hint = $('surf_reelle').parentElement.nextElementSibling;
-    if (!(parseFloat($('surf_reelle').value) > 0)){
-      hint.textContent = "Indiquez la surface habitable actuelle : c'est elle qui sert de point de comparaison.";
-      hint.style.color = 'var(--alert)';
-      $('surf_reelle').focus();
-      return;
-    }
-    hint.style.color = '';
-    if (aLaFiche() && !(parseFloat($('surf_fiche').value) > 0)){
-      const h = $('surf_fiche').parentElement.nextElementSibling;
-      h.style.color = 'var(--alert)';
-      $('surf_fiche').focus();
-      return;
-    }
-  }
+  if (current === 1 && !controlerEtape2()) return;
+
   track(`etape_${current + 1}_validee`);
   if (current < steps.length - 1){ current++; showStep(current); }
   else { await runDiagnostic(); }
 });
 
 /* =========================================================================
-   Moteur de diagnostic — miroir JS de backend/diagnostic_engine.py.
-   LES SEUILS SONT INCHANGÉS (écart > 5 m² ET > 5 % ; haute au-delà de 15 %).
-   Ce qui a changé n'est pas le calcul mais son périmètre : une règle qui
-   repose sur une donnée que l'utilisateur ne possède pas n'est plus évaluée.
+   Lecture des réponses -> objet d'entrée du moteur.
+   C'est exactement cet objet qui sera transmis à Stripe en cas d'achat,
+   pour que le document puisse être reconstruit plus tard. Rien de plus.
    ========================================================================= */
-const BUCKET = 20;
-
-function comparablesAgreges(stats, codeCommune, type, surface){
-  const bucketCible = Math.floor(surface / BUCKET) * BUCKET;
-  const memeCommuneType = stats.filter(s => s.code_commune === codeCommune && s.type_local === type);
-  for (let rayon = 0; rayon <= 3; rayon++){
-    const retenus = memeCommuneType.filter(s => Math.abs(s.surface_bucket_min - bucketCible) <= rayon * BUCKET);
-    const n = retenus.reduce((s, r) => s + r.n, 0);
-    if (n >= 5 || rayon === 3){
-      if (!retenus.length) return null;
-      return { n, prixMedian: retenus.reduce((s, r) => s + r.prix_m2_median * r.n, 0) / n };
-    }
-  }
-  return null;
+function lireEntree(){
+  return {
+    cc: communeChoisie.code_commune,
+    cn: communeChoisie.commune,
+    cp: communeChoisie.code_postal_choisi || (communeChoisie.codes_postaux || [])[0] || '',
+    cd: communeChoisie.code_dept,
+    t: $('type_local').value,
+    f: aLaFiche() ? 1 : 0,
+    sf: aLaFiche() ? (parseFloat($('surf_fiche').value) || 0) : null,
+    sr: parseFloat($('surf_reelle').value) || 0,
+    ss: $('certitude').value,
+    ef: [...document.querySelectorAll('#confort-factures input:checked')].map(i => i.value),
+    ee: [...document.querySelectorAll('#confort-existants input:checked')].map(i => i.value),
+  };
 }
 
-// Confiance accordée à la surface mesurée, d'après la source déclarée.
-// Une incertitude ne crée jamais d'anomalie : elle dégrade la confiance.
-const CONFIANCE_SURFACE = {
-  mesuree: { niveau:'elevee', texte:'Élevée — surface que vous avez mesurée vous-même.' },
-  acte:    { niveau:'moyenne', texte:'Modérée — la surface d’un acte de vente (loi Carrez) ne retient pas exactement les mêmes espaces que l’évaluation fiscale. L’écart reste exploitable, mais devra être confirmé par une mesure.' },
-  estimee: { niveau:'faible', texte:'Faible — surface estimée de mémoire. Ce constat ne suffit pas à fonder une réclamation : mesurez avant d’aller plus loin.' },
-};
-
 async function runDiagnostic(){
-  const type = $('type_local').value;
-  const avecFiche = aLaFiche();
-  const surfFiche = parseFloat($('surf_fiche').value) || 0;
-  const surfReelle = parseFloat($('surf_reelle').value) || 0;
-  const sourceSurface = $('certitude').value;
-  const factures = [...document.querySelectorAll('#confort-factures input:checked')].map(i => i.value);
-  const existants = [...document.querySelectorAll('#confort-existants input:checked')].map(i => i.value);
-  const taxeActuelle = parseFloat($('taxe_actuelle').value) || null;
-
-  let comps = null;
-  try {
-    const stats = await statsPourDepartement(communeChoisie.code_dept);
-    comps = comparablesAgreges(stats, communeChoisie.code_commune, type, surfReelle);
-  } catch (e) { /* département sans données : on continue sans repère de marché */ }
-
-  const anomalies = [];
-
-  // --- Règle 1 : surface. Évaluée UNIQUEMENT si la fiche fournit le chiffre
-  // de référence. Sans elle, il n'existe aucune surface comparable.
-  if (avecFiche && surfFiche > 0 && surfReelle > 0){
-    const ecart = surfFiche - surfReelle;
-    const ecartPct = ecart / surfReelle * 100;
-    if (ecart > 5 && ecartPct > 5){          // seuils d'origine, inchangés
-      const conf = CONFIANCE_SURFACE[sourceSurface];
-      anomalies.push({
-        code:'surface_surevaluee',
-        gravite: ecartPct > 15 ? 'haute' : 'moyenne',
-        kind:'Surface',
-        titre:'La surface retenue dépasse la surface habitable actuelle',
-        figure:`+${ecart.toFixed(0)} m² · ${ecartPct.toFixed(0)} %`,
-        pourquoi:`Votre fiche d'évaluation retient ${surfFiche.toFixed(0)} m² de surface réelle, alors que vous déclarez ${surfReelle.toFixed(0)} m² habitables aujourd'hui. Un écart de cette ampleur provient généralement d'une division non reportée, d'une démolition non déclarée, ou d'une erreur de saisie ancienne jamais corrigée. Il se répercute chaque année sur votre imposition.`,
-        confiance: conf,
-        message:`La surface réelle retenue sur la fiche (${surfFiche.toFixed(0)} m²) dépasse de ${ecart.toFixed(0)} m² (${ecartPct.toFixed(0)} %) la surface habitable actuelle déclarée (${surfReelle.toFixed(0)} m²).`,
-      });
-    }
-  }
-
-  // --- Règle 2 : éléments de confort. Évaluable dans les deux modes, mais
-  // la confiance chute sans la fiche : de mémoire, on ne sait pas ce qui est
-  // réellement facturé.
-  const obsoletes = factures.filter(f => !existants.includes(f));
-  if (obsoletes.length){
-    anomalies.push({
-      code:'elements_confort_obsoletes',
-      gravite: obsoletes.length > 1 ? 'haute' : 'moyenne',   // seuils d'origine
-      kind:'Éléments de confort',
-      titre: obsoletes.length > 1
-        ? 'Plusieurs éléments comptés n’existent plus'
-        : 'Un élément compté n’existe plus',
-      figure: obsoletes.map(o => o.charAt(0).toUpperCase() + o.slice(1)).join(' · '),
-      pourquoi:`Un élément disparu continue d'être pris en compte tant que sa suppression n'a pas été déclarée à l'administration. Aucune mise à jour n'est automatique : ni une démolition, ni un comblement de piscine ne sont signalés d'office aux services fiscaux. C'est l'anomalie la plus simple à documenter, une photo datée et une attestation suffisant souvent.`,
-      confiance: avecFiche
-        ? { niveau:'elevee', texte:'Élevée — éléments relevés directement sur votre fiche d’évaluation.' }
-        : { niveau:'faible', texte:'Faible — vous avez répondu de mémoire. Ce que l’administration facture réellement ne figure que sur la fiche 6675-M ; tant que vous ne l’avez pas lue, ce constat reste une hypothèse.' },
-      message:`Ces éléments sont pris en compte dans votre évaluation mais n'existeraient plus : ${obsoletes.join(', ')}.`,
-    });
-  }
-
-  // --- Contexte de marché : jamais une preuve, et jamais de chiffre affiché
-  // sur un échantillon insuffisant.
-  if (comps && comps.n >= 5){
-    anomalies.push({
-      code:'contexte_marche',
-      gravite:'info',
-      kind:'Contexte de marché',
-      titre:`${comps.n} ventes comparables à ${communeChoisie.commune}`,
-      figure:`${comps.prixMedian.toFixed(0)} €/m² médian`,
-      pourquoi:`Prix médian constaté sur des ventes réellement enregistrées en 2024 pour des biens de même type et de surface voisine. Cette donnée situe votre bien dans son marché ; elle ne dit rien de la justesse de votre taxe, qui repose sur une valeur locative de 1970 revalorisée et non sur les prix actuels.`,
-      confiance:{ niveau:'contexte', texte:'Élément de contexte, versable à un dossier. Ce n’est pas un motif de réclamation.' },
-      message:`Sur ${comps.n} transactions réelles comparables à ${communeChoisie.commune}, le prix médian observé est de ${comps.prixMedian.toFixed(0)} €/m². Repère utile pour documenter une réclamation, pas une preuve à lui seul.`,
-    });
-  }
-
-  // Score conservé en interne : il reste la référence partagée avec le moteur
-  // Python et les documents PDF. Il n'est plus affiché, parce qu'il ne peut
-  // prendre que huit valeurs distinctes et suggérait une précision inexistante.
-  const graviteScore = { haute:40, moyenne:20, info:5 };
-  const score = Math.min(100, anomalies.reduce((s, a) => s + graviteScore[a.gravite], 0));
-  const niveau = score >= 40 ? 'élevé' : score >= 20 ? 'moyen' : 'faible';
-
-  const classif = score >= 40
-    ? { cle:'fort',   ton:'t-alert', label:'Vérification fortement recommandée' }
-    : score >= 20
-    ? { cle:'modere', ton:'t-warn',  label:'Vérification recommandée' }
-    : { cle:'aucun',  ton:'t-ok',    label:'Aucun élément notable détecté' };
-
-  dernierDiagnostic = {
-    score, niveau, classif, classifLabel: classif.label, anomalies,
-    n: comps ? comps.n : 0, taxeActuelle, commune: communeChoisie, type,
-    avecFiche, surfFiche, surfReelle, sourceSurface,
-    // Conservés pour compatibilité avec rapport.js et le moteur Python.
-    surfCad: surfFiche,
-  };
+  const entree = lireEntree();
+  let stats = null;
+  try { stats = await statsPourDepartement(entree.cd); }
+  catch (e) { /* département sans données : on continue sans repère de marché */ }
+  dernierDiagnostic = calculerDiagnostic(entree, stats);
   renderResults(dernierDiagnostic);
 }
 
-/* =========================================================================
-   Règle de vente
-   -------------------------------------------------------------------------
-   Une offre n'apparaît que si DEUX conditions sont réunies :
-     1. un écart réel a été relevé (gravité haute ou moyenne) ;
-     2. cet écart repose sur une donnée suffisamment fiable.
-   La condition 2 implique la fiche 6675-M, parce que la réclamation elle-même
-   exige de la produire en pièce jointe. Vendre un dossier à quelqu'un qui ne
-   peut pas le déposer n'aurait aucun sens.
-   ========================================================================= */
-function venteAutorisee(anomalies){
-  return anomalies.some(a =>
-    (a.gravite === 'haute' || a.gravite === 'moyenne') &&
-    a.confiance && (a.confiance.niveau === 'elevee' || a.confiance.niveau === 'moyenne')
-  );
-}
+/* ========================================================================= */
 
 const echappe = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+function blocSignal(a){
+  const tag = a.gravite === 'haute' ? 'tag-alert' : a.gravite === 'moyenne' ? 'tag-warn' : 'tag-info';
+  const lib = a.gravite === 'haute' ? 'À vérifier en priorité' : a.gravite === 'moyenne' ? 'À vérifier' : 'Contexte';
+  return `<article class="signal">
+    <div class="signal-head">
+      <span class="signal-kind">${echappe(a.kind)}</span>
+      <span class="signal-tag ${tag}">${lib}</span>
+    </div>
+    <h3>${echappe(a.titre)}</h3>
+    <div class="figure">${echappe(a.figure)}</div>
+    <p class="why"><span class="k">Ce que vous avez indiqué</span>${echappe(a.vosReponses)}</p>
+    <p class="why"><span class="k">Ce que nous en avons calculé</span>${echappe(a.calcul)}</p>
+    <p class="why"><span class="k">Ce qu'il reste à vérifier</span>${echappe(a.aVerifier)}</p>
+    <p class="conf"><b>Niveau de confiance :</b> ${echappe(a.confiance.texte)}<br>
+    <b>Origine de l'information :</b> ${echappe(a.confiance.origine)}</p>
+    ${CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code) ? `<p class="conf" style="color:var(--warn)">
+      <b>Constat non validé.</b> Nous vérifions actuellement, sur de vraies fiches d'évaluation, que les
+      deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point n'est pas tranché, cet
+      élément ne compte pas comme une anomalie : il n'ouvre aucune offre payante et ne figure pas dans le
+      projet de courrier si vous achetez le dossier. Il vous indique où regarder, rien de plus.</p>` : ''}
+  </article>`;
+}
+
 function renderResults(d){
-  const { anomalies, taxeActuelle, classif, avecFiche } = d;
+  const { anomalies, classif, avecFiche } = d;
   $('diagnostic').hidden = true;
   $('resultats').hidden = false;
 
   const reels = anomalies.filter(a => a.gravite !== 'info');
+  const contexte = anomalies.filter(a => a.gravite === 'info');
 
-  // 1 — Conclusion immédiate
+  // 1 & 2 — Conclusion, puis nombre d'éléments
   const bloc = $('verdict');
   bloc.className = 'verdict ' + classif.ton;
   $('verdict-titre').textContent = classif.label;
   $('verdict-sum').textContent = reels.length === 0
     ? (avecFiche
-        ? "Avec les chiffres de votre fiche d'évaluation, nous n'identifions aucun écart justifiant une réclamation."
+        ? "Avec les chiffres de votre fiche d'évaluation, nous n'identifions aucun élément appelant une vérification."
         : "Avec les informations fournies, nous n'identifions aucun élément appelant une vérification approfondie.")
     : reels.length === 1
       ? "Nous avons identifié 1 élément qui mérite une vérification."
       : `Nous avons identifié ${reels.length} éléments qui méritent une vérification.`;
 
-  // 2 — Chaque signal, séparément
-  $('signaux').innerHTML = anomalies.map(a => {
-    const tag = a.gravite === 'haute' ? 'tag-alert' : a.gravite === 'moyenne' ? 'tag-warn' : 'tag-info';
-    const lib = a.gravite === 'haute' ? 'À vérifier en priorité' : a.gravite === 'moyenne' ? 'À vérifier' : 'Contexte';
-    return `<article class="signal">
-      <div class="signal-head">
-        <span class="signal-kind">${echappe(a.kind)}</span>
-        <span class="signal-tag ${tag}">${lib}</span>
-      </div>
-      <h3>${echappe(a.titre)}</h3>
-      <div class="figure">${echappe(a.figure)}</div>
-      <p class="why"><span class="k">Pourquoi cela retient notre attention</span>${echappe(a.pourquoi)}</p>
-      <p class="conf"><b>Niveau de confiance :</b> ${echappe(a.confiance.texte)}</p>
-    </article>`;
-  }).join('') || `<div class="block"><p>Aucun élément relevé à partir de vos réponses.</p></div>`;
+  // 3, 4, 5 — Chaque signal, avec ce qui vient de vous, ce qui est calculé,
+  // ce qui reste à vérifier, et d'où vient l'information.
+  $('signaux').innerHTML = reels.map(blocSignal).join('')
+    || `<div class="block"><p>Aucun élément relevé à partir de vos réponses.</p></div>`;
 
-  // 3 — Limites, adaptées au mode
+  // 6 — Ce que cela signifie, et ne signifie pas
   $('limite-texte').textContent = avecFiche
-    ? "Ce résultat n'établit pas que votre taxe foncière est incorrecte. Il indique que certains éléments de votre évaluation méritent d'être contrôlés. Seule l'administration fiscale peut recalculer une valeur locative cadastrale, et notre analyse ne porte ni sur votre catégorie de confort, ni sur le local de référence retenu pour votre commune."
-    : "Ce résultat est partiel, et volontairement. Sans votre fiche d'évaluation, nous n'avons comparé aucune surface : la surface retenue par l'administration ne figure sur aucun autre document. Ce que vous lisez ici est une orientation, pas un diagnostic.";
+    ? "Ce résultat n'établit pas que votre taxe foncière est incorrecte, et nous ne pouvons pas le savoir : nous n'avons accès ni à votre dossier fiscal, ni au raisonnement de l'administration. Tout ce qui précède est calculé à partir des chiffres que vous avez saisis. Seule l'administration fiscale peut recalculer une valeur locative cadastrale, et notre analyse ne porte ni sur votre catégorie de confort, ni sur le local de référence retenu pour votre commune."
+    : "Ce résultat est partiel, et volontairement. Sans votre fiche d'évaluation, nous n'avons comparé aucune surface : la surface retenue par l'administration ne figure sur aucun autre document. Ce que vous lisez ici est une orientation construite à partir de vos seules déclarations, pas un diagnostic.";
 
-  // 4 — Prochaine action concrète
-  const impact = calculerImpact(anomalies, taxeActuelle);
-  $('action-contenu').innerHTML = (avecFiche
+  // 7 — Prochaines étapes
+  $('action-contenu').innerHTML = avecFiche
     ? `<ol>
          <li><b>Vérifiez la catégorie de confort</b> inscrite sur votre fiche (échelle de 1 à 8). Nous ne savons pas la contrôler automatiquement, et un classement trop favorable à l'administration compte parmi les erreurs les plus coûteuses.</li>
-         <li><b>Mesurez vous-même les pièces</b> si ce n'est pas déjà fait : un plan coté ou un relevé daté constitue la pièce maîtresse d'une réclamation portant sur la surface.</li>
-         <li><b>Réunissez vos preuves</b> pour chaque élément disparu : photo datée, facture de démolition, attestation.</li>
-         <li><b>Déposez votre réclamation</b> avant le 31 décembre de l'année suivant la mise en recouvrement de l'avis contesté. La démarche est gratuite et ne nécessite pas d'avocat.</li>
+         <li><b>Mesurez vous-même les pièces</b> si ce n'est pas déjà fait : un plan coté ou un relevé daté constitue la pièce maîtresse d'une contestation portant sur la surface.</li>
+         <li><b>Réunissez vos preuves</b> pour chaque élément disparu : facture de démolition, permis de démolir, ou photographie aérienne datée sur remonterletemps.ign.fr — c'est gratuit et daté.</li>
+         <li><b>Respectez le délai</b> : une réclamation se dépose au plus tard le 31 décembre de l'année suivant la mise en recouvrement de l'avis contesté (article R*196-2 du Livre des procédures fiscales).</li>
        </ol>`
     : `<ol>
          <li><b>Demandez votre fiche d'évaluation (formulaire 6675-M)</b> depuis votre espace particulier sur impots.gouv.fr, par la messagerie sécurisée. C'est gratuit, et c'est le seul document qui indique la surface et les éléments réellement retenus.</li>
          <li><b>Lisez-y la ligne « surface réelle »</b>, et non la surface pondérée : cette dernière intègre des équivalences (baignoire, WC, chauffage central) et dépasse normalement la surface mesurée de 20 à 40 %.</li>
          <li><b>Vérifiez la catégorie de confort</b> attribuée à votre logement, sur l'échelle de 1 à 8.</li>
          <li><b>Revenez ici avec ces chiffres</b> : le pré-diagnostic deviendra alors réellement exploitable.</li>
-       </ol>`)
-    + (impact
-      ? `<div class="impact"><span class="amount num">${impact.eurMin}–${impact.eurMax} €</span>
-         <span class="cav">Ordre de grandeur annuel si l'anomalie était confirmée et corrigée. Fourchette indicative issue de votre montant déclaré, pas un recalcul officiel.</span></div>`
-      : '');
+       </ol>`;
 
-  // 5 — Offre, ou refus de vendre
-  const vente = venteAutorisee(anomalies);
+  // 8 — Contexte de marché, après les limites : ce n'est pas un motif.
+  $('contexte-marche').innerHTML = contexte.map(blocSignal).join('');
+
+  // 9 — Offre, ou refus de vendre
+  const vente = d.vente;
   $('zone-vente').hidden = !vente;
   $('zone-sans-signal').hidden = vente;
 
   if (!vente){
-    const aUnSignalFaible = reels.length > 0;
-    $('stance-titre').textContent = aUnSignalFaible
+    const aUnSignal = reels.length > 0;
+    const seulementSurface = aUnSignal && reels.every(a => a.code === 'surface_surevaluee');
+    $('stance-titre').textContent = aUnSignal
       ? 'Nous ne vous vendons rien pour l’instant'
       : 'Nous ne vous vendons rien aujourd’hui';
-    $('stance-contenu').innerHTML = aUnSignalFaible
+    $('stance-contenu').innerHTML = seulementSurface
+      ? `<p>Nous avons relevé un écart entre vos deux surfaces, et il mérite que vous le regardiez de près. Mais nous ne vous vendons pas de dossier sur cette seule base, pour une raison que nous préférons vous dire franchement&nbsp;: <b>nous ne sommes pas encore certains que les deux chiffres comparés recouvrent exactement le même périmètre.</b></p>
+         <p>La fiche d'évaluation décompose le logement en plusieurs parties, et nous vérifions actuellement, sur de vraies fiches, laquelle doit être comparée à une surface habitable mesurée. Tant que ce point n'est pas tranché, un écart de surface peut venir de la question que nous vous avons posée plutôt que de votre situation.</p>
+         <p><b>Ce que vous pouvez faire dès maintenant&nbsp;:</b> reprenez votre fiche, vérifiez quelles pièces sont comptées dans la ligne « surface réelle », et comparez-la à la même liste de pièces chez vous. Si l'écart persiste, il est réel.</p>
+         <a class="btn btn-secondary" href="guide-erreurs-taxe-fonciere.html">Lire le guide des erreurs fréquentes</a>`
+      : aUnSignal
       ? `<p>Nous avons bien relevé quelque chose, mais la donnée sur laquelle cela repose n'est pas assez solide pour construire un dossier. Une réclamation s'appuie sur des pièces&nbsp;: la fiche d'évaluation en fait partie, et un chiffre approximatif ne tient pas devant l'administration.</p>
          <p>Vous vendre un dossier aujourd'hui reviendrait à vous vendre un dossier que vous ne pourriez pas déposer. Récupérez d'abord les éléments manquants ci-dessus, puis revenez&nbsp;: c'est gratuit, et ça ne prend que quelques jours.</p>
          <a class="btn btn-secondary" href="guide-erreurs-taxe-fonciere.html" style="margin-top:6px">Lire le guide des erreurs fréquentes</a>`
-      : `<p>Avec ce que vous nous avez indiqué, aucun écart ne justifie d'engager une réclamation. Payer pour contester n'aurait aucun sens dans votre situation, et nous préférons vous le dire.</p>
+      : `<p>Avec ce que vous nous avez indiqué, aucun élément ne justifie d'engager une réclamation. Payer pour contester n'aurait aucun sens dans votre situation, et nous préférons vous le dire.</p>
          <p><b>Ce que vous pouvez faire gratuitement, si vous souhaitez aller plus loin&nbsp;:</b></p>
          <ul>
            <li>Demander votre <b>fiche d'évaluation (formulaire 6675-M)</b> sur impots.gouv.fr, par la messagerie sécurisée de votre espace particulier.</li>
@@ -1185,7 +1136,7 @@ $('preview-pdf-btn').addEventListener('click', () => {
   setTimeout(() => {
     try { genererApercuPDF(dernierDiagnostic); hint.hidden = true; }
     catch (e) {
-      hint.textContent = "Impossible de générer l'aperçu. Vérifiez votre connexion et réessayez.";
+      hint.textContent = "Impossible de générer l'aperçu. Rechargez la page et réessayez.";
       console.error(e);
     }
   }, 50);
@@ -1193,6 +1144,11 @@ $('preview-pdf-btn').addEventListener('click', () => {
 
 /* =========================================================================
    Paiement (Stripe Checkout)
+   -------------------------------------------------------------------------
+   Vos réponses sont transmises ICI, et seulement ici : au moment de l'achat,
+   elles accompagnent le paiement afin que le document puisse vous être
+   redélivré plus tard, depuis n'importe quel appareil. Pendant tout le
+   pré-diagnostic gratuit, rien n'a quitté le navigateur.
    ========================================================================= */
 document.querySelectorAll('.buy-btn').forEach(btn => btn.addEventListener('click', async () => {
   if (!dernierDiagnostic) return;
@@ -1201,9 +1157,6 @@ document.querySelectorAll('.buy-btn').forEach(btn => btn.addEventListener('click
   const email = $('email_client').value.trim();
   const consent = $('consent-retractation').checked;
 
-  // Email pour retrouver le client et lui adresser son reçu ; consentement
-  // explicite exigé par l'article L221-28 pour un contenu numérique livré
-  // immédiatement.
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
     erreur.hidden = false;
     erreur.textContent = "Indiquez une adresse email valide : c'est elle qui vous permet de récupérer votre document.";
@@ -1223,12 +1176,13 @@ document.querySelectorAll('.buy-btn').forEach(btn => btn.addEventListener('click
   hint.textContent = 'Redirection vers le paiement sécurisé…';
   track('paiement_demarre', { produit });
   try {
-    // Les réponses ne sont envoyées à personne : elles restent dans le
-    // navigateur le temps du paiement, pour régénérer le document au retour.
-    sessionStorage.setItem('dernierDiagnostic', JSON.stringify(dernierDiagnostic));
+    // Copie locale : confort de récupération immédiate si l'utilisateur
+    // revient sur ce même navigateur. Ce n'est PAS la garantie de livraison —
+    // celle-ci repose sur les réponses jointes au paiement.
+    try { localStorage.setItem('fj_dernier_diagnostic', JSON.stringify(dernierDiagnostic.entree)); } catch (_) {}
     const r = await fetch('/api/create-checkout-session', {
       method:'POST', headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ produit, email }),
+      body: JSON.stringify({ produit, email, diag: dernierDiagnostic.entree }),
     });
     const data = await r.json();
     if (!r.ok || !data.url) throw new Error(data.error || 'réponse invalide');

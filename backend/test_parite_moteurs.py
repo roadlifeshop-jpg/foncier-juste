@@ -25,6 +25,7 @@ Usage :
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 import unittest
@@ -40,9 +41,28 @@ PRODUCTION_PATH = ICI / "parite_production.json"
 # décision produit doit figurer ici.
 CHAMPS = [
     "classification", "classification_label", "score", "vente_autorisee",
-    "n_signaux_reels", "codes", "gravites", "confiances", "figures",
-    "messages", "n_comparables", "prix_median", "impact_min", "impact_max",
+    "n_signaux_reels", "codes", "gravites", "confiances",
+    "n_comparables", "prix_median", "empreinte",
 ]
+
+
+def empreinte_textes(anomalies: list[dict]) -> str:
+    """Empreinte des textes affichés à l'utilisateur.
+
+    On compare une empreinte plutôt que des dizaines de milliers de caractères
+    de prose : une divergence de formulation, même d'un seul caractère, fait
+    échouer le test. Le détail se retrouve en rejouant la capture.
+    PARITÉ : fonction empreinteTextes() de backend/capture_production.js.
+    """
+    textes = [
+        [a["figure"] for a in anomalies],
+        [a["titre"] for a in anomalies],
+        [a["vosReponses"] for a in anomalies],
+        [a["calcul"] for a in anomalies],
+        [a["message"] for a in anomalies],
+    ]
+    brut = json.dumps(textes, ensure_ascii=False, separators=(",", ":"))
+    return hashlib.sha256(brut.encode("utf-8")).hexdigest()
 
 
 def charger_cas() -> list[dict]:
@@ -62,7 +82,6 @@ def user_input(cas: dict) -> UserInput:
         surface_fiche_m2=cas["surface_fiche"],
         elements_confort_factures=cas["factures"],
         elements_confort_existants=cas["existants"],
-        taxe_fonciere_annuelle_eur=cas["taxe"],
     )
 
 
@@ -70,7 +89,6 @@ def resultat_normalise(cas: dict) -> dict:
     """Exécute le moteur Python et réduit sa sortie à la forme comparable."""
     r = run_diagnostic(user_input(cas))
     anomalies = r["anomalies"]
-    impact = r["impact_estime_eur_par_an"]
     prix = r["marche_local"]["prix_m2_median"]
     return {
         "classification": r["classification"],
@@ -81,12 +99,9 @@ def resultat_normalise(cas: dict) -> dict:
         "codes": [a["code"] for a in anomalies],
         "gravites": [a["gravite"] for a in anomalies],
         "confiances": [a["confiance"]["niveau"] for a in anomalies],
-        "figures": [a["figure"] for a in anomalies],
-        "messages": [a["message"] for a in anomalies],
         "n_comparables": r["marche_local"]["n_transactions_comparables"],
         "prix_median": round(prix, 6) if prix is not None else None,
-        "impact_min": impact["eur_min"] if impact else None,
-        "impact_max": impact["eur_max"] if impact else None,
+        "empreinte": empreinte_textes(anomalies),
     }
 
 

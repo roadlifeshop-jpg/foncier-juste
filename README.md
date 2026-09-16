@@ -2,12 +2,34 @@
 
 Statut au 15/09/2026. Voir aussi le dossier de recherche complet : "Foncier Juste" (artefact publié dans la conversation Claude).
 
+## Livraison d'un document acheté (16/09/2026)
+
+Les réponses au questionnaire sont jointes à la session Stripe
+(`metadata[diag]`, liste blanche stricte côté serveur). `succes.html` les relit
+via `/api/verify-session` et **reconstruit le document** avec `moteur.js` +
+`rapport.js`. Conséquence : un acheteur peut retélécharger son document depuis
+n'importe quel appareil, à tout moment, avec le lien permanent affiché après
+paiement. Le `localStorage` n'est qu'un secours, jamais la garantie.
+
+C'est la seule donnée du questionnaire qui quitte le navigateur, et uniquement
+en cas d'achat. La page Confidentialité le dit explicitement.
+
+## Garde-fou T1 sur l'écart de surface
+
+Un écart de surface **seul** n'ouvre plus l'offre payante
+(`CODES_NE_DECLENCHANT_PAS_LA_VENTE`, présent dans les deux moteurs). Raison :
+le questionnaire demande d'additionner les surfaces réelles de la fiche puis de
+les comparer à une surface habitable mesurée — tant que T1 n'a pas établi que
+ces deux périmètres coïncident, l'écart peut être un artefact de la question.
+Le signal reste affiché et expliqué. **À lever après T1**, des deux côtés.
+
 ## Source de vérité des règles métier
 
 Les règles de diagnostic existent en deux implémentations — JavaScript dans
-`web/index.html` (le calcul se fait dans le navigateur du visiteur, ses
-réponses ne partent sur aucun serveur) et Python dans
-`backend/diagnostic_engine.py` (dépouillement du test T1, tests hors ligne).
+`web/moteur.js` (chargé par `index.html` pour le pré-diagnostic et par
+`succes.html` pour reconstruire un document acheté ; le calcul se fait dans le
+navigateur du visiteur) et Python dans `backend/diagnostic_engine.py`
+(dépouillement du test T1, tests hors ligne).
 **Ce ne sont pas deux règles : c'est une règle écrite deux fois.** Les points
 à synchroniser portent le marqueur `PARITÉ` dans les deux fichiers.
 
@@ -19,9 +41,11 @@ cd backend && python3 -m unittest discover -p "test_*.py"   # 29 tests
 python3 test_parite_moteurs.py --table                      # tableau comparatif
 ```
 
-Le test de parité rejoue les cas de `backend/cas_parite.json` dans les deux
-moteurs et compare 14 champs, libellés utilisateur compris. La capture du
-moteur de production (`backend/parite_production.json`) se régénère avec
+Le test de parité rejoue les 22 cas de `backend/cas_parite.json` dans les deux
+moteurs et compare les décisions produit champ par champ, plus une **empreinte
+SHA-256 de tous les textes affichés à l'utilisateur** : une divergence de
+formulation, même d'un caractère, fait échouer le test. La capture du moteur de
+production (`backend/parite_production.json`) se régénère avec
 `backend/capture_production.js`, dont l'en-tête donne le mode d'emploi.
 
 **Instrumentation à ajouter avant l'ouverture commerciale :** l'événement

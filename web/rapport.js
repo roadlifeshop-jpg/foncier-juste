@@ -1,48 +1,91 @@
 // Génération des PDF — partagée entre l'aperçu gratuit (index.html, marqué
-// "EXEMPLE") et les vrais documents livrés après paiement (succes.html).
+// « EXEMPLE ») et les documents livrés après paiement (succes.html).
 // Nécessite jsPDF chargé sur la page (window.jspdf).
 //
-// Deux produits :
-//  - genererRapportPDF   : le diagnostic seul (offre "Rapport complet", 29€)
-//  - genererDossierPDF   : diagnostic + lettre de réclamation prête à
-//    compléter + liste des pièces à joindre (offre "Dossier complet", 49€)
+// Trois produits :
+//  - genererApercuPDF    : structure du livrable, contenu masqué (gratuit)
+//  - genererRapportPDF   : l'analyse détaillée (29 €)
+//  - genererDossierPDF   : l'analyse + le projet de courrier + la marche à
+//                          suivre (49 €)
 //
-// Base légale de la lettre de réclamation, vérifiée avant rédaction :
-//  - Article L.190 du Livre des procédures fiscales (LPF) — droit de
-//    réclamation contre une imposition
-//  - Article R*190-1 du LPF — la réclamation est gratuite, sans avocat
-//  - Article R*196-2 du LPF — délai : avant le 31 décembre de l'année
-//    suivant celle de la mise en recouvrement de l'avis contesté
+// RÈGLE DE VÉRACITÉ APPLIQUÉE À CES DOCUMENTS
+// -------------------------------------------
+// Ces documents peuvent affirmer ce qui se calcule à partir des réponses de
+// l'utilisateur. Ils ne peuvent rien affirmer sur ce que l'administration a
+// retenu, sur le caractère fautif d'une donnée, ni sur l'issue d'une
+// démarche. Aucun montant d'économie n'y figure : nous ne disposons d'aucune
+// méthode fondée pour le calculer.
+//
+// POINTS JURIDIQUES — vérifiés sur sources officielles le 16/09/2026
+// ------------------------------------------------------------------
+//  - Délai de réclamation, impôts directs locaux : au plus tard le
+//    31 décembre de l'année suivant celle de la mise en recouvrement du rôle
+//    ou de la réalisation de l'événement motivant la réclamation
+//    (art. R*196-2 LPF ; BOI-CTX-PREA-10-30). En pratique cela ouvre l'année
+//    en cours et, au plus, la précédente — et NON « toutes les années non
+//    prescrites », mention qui figurait à tort dans une version antérieure.
+//  - Forme de la réclamation : mentionner l'imposition contestée, contenir un
+//    exposé sommaire des moyens et conclusions, porter la signature
+//    manuscrite de son auteur, et être accompagnée de l'avis d'imposition ou
+//    de sa copie (art. R*197-3 LPF), à peine d'irrecevabilité.
+//  - Instruction : l'administration statue dans les six mois, prolongeables
+//    de trois mois si elle en informe le contribuable (art. R*198-10 LPF).
+//  - Silence de l'administration : il ne vaut PAS acceptation. Le
+//    contribuable peut saisir le tribunal administratif passé six mois, et
+//    aucun délai de recours ne court contre lui tant qu'une décision expresse
+//    de rejet ne lui a pas été régulièrement notifiée (CE, 8e-3e ch.,
+//    21 octobre 2020, n° 443327). La formulation « le silence vaut rejet
+//    implicite » d'une version antérieure était trompeuse.
 
-function calculerImpact(anomalies, taxeActuelle) {
-  const hasHaute = anomalies.some(a => a.gravite === 'haute');
-  const hasMoyenne = anomalies.some(a => a.gravite === 'moyenne');
-  if (!taxeActuelle || (!hasHaute && !hasMoyenne)) return null;
-  const [pctLow, pctHigh] = hasHaute ? [8, 20] : [3, 10];
-  return { eurMin: Math.round(taxeActuelle * pctLow / 100), eurMax: Math.round(taxeActuelle * pctHigh / 100) };
-}
+// --------------------------------------------------------------------------
+// Écrivain paginé
+// --------------------------------------------------------------------------
+// Une page A4 fait 297 mm. Le pied de page occupe la zone 275-290 mm. Au-delà
+// de HAUTEUR_UTILE, on passe à la page suivante : sans ce contrôle, la lettre
+// de réclamation débordait dès deux motifs (mesuré à 293 mm), et la signature
+// se retrouvait par-dessus le pied de page.
+const HAUTEUR_UTILE = 258;
+const HAUT_DE_PAGE = 24;
 
-// Petit utilitaire d'écriture de texte avec retour à la ligne automatique,
-// partagé par toutes les pages du document.
-function creerEcrivain(doc, margeGauche, largeur) {
-  let y = 24;
+function creerEcrivain(doc, margeGauche, largeur, opts = {}) {
+  let y = HAUT_DE_PAGE;
+  const { pied, titreSuite } = opts;
+
+  function pageSuivante() {
+    if (pied) dessinerPiedDePage(doc, pied);
+    doc.addPage();
+    y = HAUT_DE_PAGE;
+    if (titreSuite) {
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8.5);
+      doc.setTextColor(120, 128, 136);
+      doc.text(`${titreSuite} (suite)`, margeGauche, y - 8);
+      doc.setDrawColor(216, 223, 227);
+      doc.line(margeGauche, y - 5, margeGauche + largeur, y - 5);
+    }
+  }
+
   return {
     get y() { return y; },
     set y(v) { y = v; },
-    ligne(texte, opts = {}) {
-      const { taille = 10, style = 'normal', couleur = [30, 30, 25], espace = 6, x = margeGauche } = opts;
+    espace(h) { if (y + h > HAUTEUR_UTILE) pageSuivante(); else y += h; },
+    ligne(texte, o = {}) {
+      const { taille = 10, style = 'normal', couleur = [18, 24, 29], espace = 6, x = margeGauche } = o;
       doc.setFont('helvetica', style);
       doc.setFontSize(taille);
       doc.setTextColor(...couleur);
       const morceaux = doc.splitTextToSize(texte, largeur - (x - margeGauche));
+      const hauteur = morceaux.length * (taille / 2.6) + espace;
+      if (y + hauteur > HAUTEUR_UTILE) pageSuivante();
       doc.text(morceaux, x, y);
-      y += morceaux.length * (taille / 2.6) + espace;
+      y += hauteur;
     },
+    finir() { if (pied) dessinerPiedDePage(doc, pied); },
   };
 }
 
-function dessinerEnTete(doc, titre, { exemple, sousTitre }) {
-  doc.setFillColor(46, 74, 74);
+function dessinerEnTete(doc, titre, { exemple, sousTitre } = {}) {
+  doc.setFillColor(33, 65, 79);
   doc.rect(0, 0, 210, 16, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
@@ -50,281 +93,403 @@ function dessinerEnTete(doc, titre, { exemple, sousTitre }) {
 
   let y = 28;
   if (exemple) {
-    doc.setTextColor(160, 60, 45);
+    doc.setTextColor(150, 39, 31);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
-    doc.text('EXEMPLE — généré gratuitement, ne constitue pas le document payant final', 20, y);
+    doc.text('EXEMPLE — généré gratuitement, ne constitue pas le document payant', 20, y);
     y += 10;
   }
   if (sousTitre) {
-    doc.setTextColor(90, 95, 88);
+    doc.setTextColor(120, 128, 136);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-    doc.text(sousTitre, 20, y);
-    y += 8;
+    const l = doc.splitTextToSize(sousTitre, 170);
+    doc.text(l, 20, y);
+    y += l.length * 4 + 6;
   }
   return y;
 }
 
 function dessinerPiedDePage(doc, texte) {
-  doc.setDrawColor(214, 213, 199); doc.line(20, 275, 190, 275);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(110, 114, 105);
+  doc.setDrawColor(216, 223, 227); doc.line(20, 275, 190, 275);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(124, 137, 148);
   doc.text(doc.splitTextToSize(texte, 170), 20, 280);
 }
 
+const PIED_ANALYSE =
+  "Document d'information établi à partir des seules réponses fournies par son destinataire et de données publiques " +
+  "(DVF, data.gouv.fr). Foncier·Juste n'a pas accès au dossier fiscal de l'usager, ne recalcule pas de valeur locative " +
+  "cadastrale et ne garantit aucun résultat. Ce document ne constitue ni un conseil fiscal personnalisé, ni une " +
+  "consultation juridique, ni une pièce officielle.";
+
+const LIBELLES_ELEMENTS = {
+  piscine: 'la piscine', garage: 'le garage',
+  dependance: 'la dépendance', veranda: 'la véranda',
+};
+
 // --------------------------------------------------------------------------
-// Produit 1 : Rapport complet (29€) — le diagnostic seul
+// Page 1 — l'analyse
 // --------------------------------------------------------------------------
 
-function dessinerPageDiagnostic(doc, d, { exemple }) {
-  const w = creerEcrivain(doc, 20, 170);
-  w.y = dessinerEnTete(doc, exemple ? 'Foncier Juste — Rapport de pré-diagnostic' : 'Foncier Juste — Rapport complet de diagnostic', { exemple });
+function dessinerPageAnalyse(doc, d, { exemple }) {
+  const titre = exemple ? 'Foncier·Juste — Pré-diagnostic' : 'Foncier·Juste — Analyse détaillée';
+  const w = creerEcrivain(doc, 20, 170, { pied: PIED_ANALYSE, titreSuite: 'Analyse détaillée' });
+  w.y = dessinerEnTete(doc, titre, { exemple });
 
-  w.ligne(`Date : ${new Date().toLocaleDateString('fr-FR')}`, { taille: 9, couleur: [90, 95, 88], espace: 2 });
-  w.ligne(`Commune : ${d.commune.commune} (${d.commune.code_postal})  ·  Type de bien : ${d.type}`, { taille: 9, couleur: [90, 95, 88], espace: 8 });
+  const reels = d.anomalies.filter(a => a.gravite !== 'info');
+  const contexte = d.anomalies.filter(a => a.gravite === 'info');
 
-  // Conclusion : une classification, jamais un score sur 100. Le score interne
-  // ne peut prendre que huit valeurs distinctes ; l'afficher comme une note
-  // suggérerait une précision que la méthode ne permet pas.
-  w.ligne('Conclusion', { taille: 14, style: 'bold', espace: 2 });
-  const couleurNiveau = d.score >= 40 ? [160, 51, 37] : d.score >= 20 ? [138, 90, 18] : [30, 107, 75];
-  const conclusion = d.classifLabel
-    || (d.score >= 40 ? 'Vérification fortement recommandée'
-        : d.score >= 20 ? 'Vérification recommandée'
-        : 'Aucun élément notable détecté');
-  w.ligne(conclusion, { taille: 12, style: 'bold', couleur: couleurNiveau, espace: 6 });
+  // 1 — Synthèse
+  w.ligne(`Établi le ${new Date().toLocaleDateString('fr-FR')}`, { taille: 9, couleur: [124, 137, 148], espace: 2 });
+  w.ligne(`Bien étudié : ${d.commune.commune} (${d.commune.code_postal}) · ${d.type}`, { taille: 9, couleur: [124, 137, 148], espace: 8 });
 
-  // Base de l'analyse : sans la fiche 6675-M, aucune surface n'a pu être
-  // comparée. Le document doit le dire explicitement.
+  w.ligne('Synthèse', { taille: 14, style: 'bold', espace: 3 });
+  const couleur = d.score >= 40 ? [150, 39, 31] : d.score >= 20 ? [122, 94, 16] : [44, 99, 73];
+  w.ligne(d.classifLabel || 'Aucun élément notable détecté', { taille: 12, style: 'bold', couleur, espace: 4 });
   w.ligne(
-    d.avecFiche === false
-      ? "Base de l'analyse : informations déclaratives, sans consultation de la fiche d'évaluation 6675-M. Aucune comparaison de surface n'a donc été effectuée."
-      : "Base de l'analyse : les chiffres relevés sur votre fiche d'évaluation (formulaire 6675-M), confrontés à la situation actuelle du bien.",
-    { taille: 9, couleur: [90, 95, 88], espace: 8 }
+    reels.length === 0
+      ? "Aucun élément appelant une vérification n'a été relevé à partir de vos réponses."
+      : reels.length === 1
+        ? "Un élément de votre situation mérite d'être vérifié. Il est détaillé ci-dessous."
+        : `${reels.length} éléments de votre situation méritent d'être vérifiés. Ils sont détaillés ci-dessous.`,
+    { taille: 10, espace: 6 }
   );
 
-  w.ligne('Éléments relevés', { taille: 12, style: 'bold', espace: 3 });
-  if (d.anomalies.length) {
-    d.anomalies.forEach(a => {
-      w.ligne(`• ${a.message}`, { taille: 10, espace: a.confiance ? 2 : 5 });
-      if (a.confiance) {
-        w.ligne(`Niveau de confiance : ${a.confiance.texte}`, { taille: 8.5, couleur: [90, 95, 88], espace: 5, x: 24 });
+  // 2 — Données utilisées
+  w.ligne('Données utilisées pour cette analyse', { taille: 12, style: 'bold', espace: 3 });
+  w.ligne(
+    d.avecFiche
+      ? `Fiche d'évaluation 6675-M : consultée par vos soins. Surface réelle relevée : ${Number(d.surfFiche).toFixed(0)} m².`
+      : "Fiche d'évaluation 6675-M : non consultée. Aucune comparaison de surface n'a donc été possible.",
+    { taille: 10, espace: 3 }
+  );
+  w.ligne(`Surface habitable mesurée aujourd'hui : ${Number(d.surfReelle).toFixed(0)} m² (${
+    d.sourceSurface === 'mesuree' ? 'mesurée par vos soins'
+    : d.sourceSurface === 'acte' ? 'issue de votre acte de vente ou d\'un diagnostic'
+    : 'estimée de mémoire'}).`, { taille: 10, espace: 3 });
+  const ef = (d.entree && d.entree.ef) || [];
+  const ee = (d.entree && d.entree.ee) || [];
+  w.ligne(`Éléments portés à l'évaluation selon vos réponses : ${ef.length ? ef.join(', ') : 'aucun'}. Existant aujourd'hui : ${ee.length ? ee.join(', ') : 'aucun'}.`, { taille: 10, espace: 8 });
+
+  // 3 — Chaque élément détecté
+  if (reels.length) {
+    w.ligne('Éléments à vérifier', { taille: 12, style: 'bold', espace: 4 });
+    reels.forEach((a, i) => {
+      w.ligne(`${i + 1}. ${a.titre}`, { taille: 11, style: 'bold', espace: 3 });
+      w.ligne(`Écart constaté : ${a.figure}`, { taille: 10, style: 'bold', couleur: [33, 65, 79], espace: 3, x: 24 });
+      w.ligne(`Ce que vous avez indiqué — ${a.vosReponses}`, { taille: 9.5, espace: 2.5, x: 24 });
+      w.ligne(`Ce que nous en avons calculé — ${a.calcul}`, { taille: 9.5, espace: 2.5, x: 24 });
+      w.ligne(`Ce qu'il reste à vérifier — ${a.aVerifier}`, { taille: 9.5, espace: 2.5, x: 24 });
+      w.ligne(`Niveau de confiance — ${a.confiance.texte}`, { taille: 9.5, couleur: [91, 104, 117], espace: 2.5, x: 24 });
+      w.ligne(`Origine de l'information — ${a.confiance.origine}`, {
+        taille: 9.5, couleur: [91, 104, 117],
+        espace: CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code) ? 2.5 : 7, x: 24,
+      });
+      if (CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code)) {
+        w.ligne(
+          "Statut — constat non validé. Nous vérifions actuellement, sur de vraies fiches d'évaluation, " +
+          "que les deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point n'est pas " +
+          "tranché, cet élément n'est pas présenté comme une anomalie et ne figure pas dans le projet de " +
+          "courrier. Il vous indique où regarder, rien de plus.",
+          { taille: 9, style: 'bold', couleur: [122, 94, 16], espace: 7, x: 24 }
+        );
       }
     });
   } else {
-    w.ligne('Aucune anomalie détectée avec les informations fournies.', { taille: 10, espace: 5 });
-  }
-  w.y += 2;
-
-  const impact = calculerImpact(d.anomalies, d.taxeActuelle);
-  if (impact) {
-    w.ligne('Impact potentiel estimé', { taille: 12, style: 'bold', espace: 3 });
-    w.ligne(`${impact.eurMin} à ${impact.eurMax} € par an (fourchette indicative, pas un recalcul officiel).`, { taille: 10, espace: 8 });
+    w.ligne('Éléments à vérifier', { taille: 12, style: 'bold', espace: 3 });
+    w.ligne("Aucun, sur la base de vos réponses. Cela ne signifie pas que votre évaluation est exacte : cela signifie que les points que nous savons contrôler ne présentent pas d'écart.", { taille: 10, espace: 8 });
   }
 
-  w.ligne('Prochaines étapes recommandées', { taille: 12, style: 'bold', espace: 3 });
+  // 4 — Contexte de marché
+  if (contexte.length) {
+    w.ligne('Contexte immobilier de votre commune', { taille: 12, style: 'bold', espace: 3 });
+    contexte.forEach(a => {
+      w.ligne(`${a.titre} — ${a.figure}`, { taille: 10, style: 'bold', espace: 2.5 });
+      w.ligne(a.aVerifier, { taille: 9.5, couleur: [91, 104, 117], espace: 7 });
+    });
+  }
+
+  // 5 — Limites
+  w.ligne("Limites de cette analyse", { taille: 12, style: 'bold', espace: 3 });
   [
-    "1. Demandez votre fiche d'évaluation (formulaire 6675-M) sur impots.gouv.fr, espace particulier, par messagerie sécurisée.",
-    "2. Comparez chaque ligne de la fiche à la réalité actuelle de votre bien (surface, éléments de confort).",
-    "3. En cas d'écart confirmé, déposez une réclamation avant le 31 décembre de l'année suivant la mise en recouvrement de l'avis contesté.",
-  ].forEach(t => w.ligne(t, { taille: 10, espace: 5 }));
+    "Nous n'avons pas accès à votre dossier fiscal. Tout ce qui précède est calculé à partir des chiffres que vous avez saisis.",
+    "La catégorie de confort (échelle de 1 à 8) et le local de référence retenu pour votre commune ne sont pas analysés : ils supposent une appréciation comparative que nous ne pouvons pas automatiser.",
+    "Un écart inférieur à 5 m² n'est pas signalé, même s'il représente une part importante d'une petite surface. Cette limite est connue et en cours de réévaluation.",
+    "Nous ne pouvons pas calculer l'incidence financière d'une éventuelle correction : elle dépend de la valeur locative recalculée par l'administration, de coefficients qui nous sont inconnus et du taux voté par votre commune.",
+  ].forEach(t => w.ligne(`— ${t}`, { taille: 9.5, espace: 3 }));
+  w.espace(4);
 
-  dessinerPiedDePage(doc,
-    "Ce document est un pré-diagnostic indicatif basé sur les informations fournies et des données de marché publiques (DVF, data.gouv.fr). Il ne constitue ni un conseil fiscal personnalisé, ni une garantie de résultat, ni un document officiel de l'administration fiscale."
-  );
+  // 6 — Sources
+  w.ligne('Sources', { taille: 12, style: 'bold', espace: 3 });
+  [
+    "Méthode d'évaluation des locaux d'habitation : articles 324 L à 324 V de l'annexe III au Code général des impôts ; commentaires BOFiP BOI-IF-TFB-20-10-20-50.",
+    "Données de marché : fichier DVF (Demandes de valeurs foncières), DGFiP, publié sur data.gouv.fr, millésime 2024.",
+    "Délai de réclamation : article R*196-2 du Livre des procédures fiscales.",
+  ].forEach(t => w.ligne(`— ${t}`, { taille: 9, couleur: [91, 104, 117], espace: 3 }));
+
+  w.finir();
 }
 
 function genererRapportPDF(d, opts = {}) {
   const exemple = opts.exemple !== false;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  dessinerPageDiagnostic(doc, d, { exemple });
-  doc.save(exemple ? `foncier-juste-exemple-${d.commune.code_commune}.pdf` : `foncier-juste-rapport-${d.commune.code_commune}.pdf`);
+  dessinerPageAnalyse(doc, d, { exemple });
+  doc.save(exemple ? `foncier-juste-exemple-${d.commune.code_commune}.pdf` : `foncier-juste-analyse-${d.commune.code_commune}.pdf`);
 }
 
 // --------------------------------------------------------------------------
 // Aperçu gratuit — montre la STRUCTURE du livrable, jamais son contenu.
-// Règle : tout ce qui constitue la valeur payante (détail des écarts, base
-// légale, montant estimé, courrier) est masqué. Ne jamais « enrichir » cet
-// aperçu sans se demander s'il redevient un substitut gratuit du produit.
+// Ne jamais l'enrichir sans se demander s'il redevient un substitut gratuit.
 // --------------------------------------------------------------------------
 
 function genererApercuPDF(d) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const w = creerEcrivain(doc, 20, 170);
-  w.y = dessinerEnTete(doc, 'Foncier Juste — Aperçu du dossier', {
-    sousTitre: 'Document de démonstration : les conclusions et le courrier sont volontairement masqués.',
+  const w = creerEcrivain(doc, 20, 170, {
+    pied: "Aperçu de format, sans valeur juridique. Les analyses et le projet de courrier ne figurent que dans le document complet.",
+  });
+  w.y = dessinerEnTete(doc, 'Foncier·Juste — Aperçu du dossier', {
+    sousTitre: 'Document de démonstration : le contenu est volontairement masqué.',
   });
 
-  w.y += 4;
-  w.ligne(`Bien étudié : ${d.commune.commune} (${d.commune.code_postal}) · ${d.type}`, { taille: 10, couleur: [90, 95, 88], espace: 10 });
+  w.espace(4);
+  w.ligne(`Bien étudié : ${d.commune.commune} (${d.commune.code_postal}) · ${d.type}`, { taille: 10, couleur: [124, 137, 148], espace: 10 });
 
-  const masque = (titre, lignes) => {
+  const masque = (titre, n) => {
     w.ligne(titre, { taille: 12, style: 'bold', espace: 4 });
-    lignes.forEach(() => {
-      doc.setFillColor(226, 226, 216);
+    for (let i = 0; i < n; i++) {
+      doc.setFillColor(226, 232, 236);
       doc.roundedRect(20, w.y - 3.5, 120 + Math.random() * 45, 4, 1, 1, 'F');
-      w.y += 8;
-    });
-    w.y += 4;
+      w.espace(8);
+    }
+    w.espace(4);
   };
 
-  w.ligne(`Écarts relevés : ${d.anomalies.filter(a => a.gravite !== 'info').length}`, { taille: 11, style: 'bold', espace: 6 });
-  masque('Détail de chaque écart et base légale applicable', [1, 2, 3]);
-  masque('Montant potentiellement récupérable', [1, 2]);
-  masque('Votre lettre de réclamation, rédigée et référencée', [1, 2, 3, 4, 5]);
-  masque('Pièces à joindre et délais à respecter', [1, 2, 3]);
+  w.ligne(`Éléments à vérifier relevés : ${d.anomalies.filter(a => a.gravite !== 'info').length}`, { taille: 11, style: 'bold', espace: 6 });
+  masque('Chaque élément, expliqué : ce que vous avez indiqué, ce qui en est calculé, ce qu\'il reste à vérifier', 2);
+  masque('Les données exactes utilisées pour votre bien', 2);
+  masque('Les documents à réunir, adaptés à votre situation', 2);
+  masque('Votre projet de courrier, à relire et compléter', 3);
+  masque('La marche à suivre et les délais applicables', 2);
 
-  w.y += 2;
-  doc.setDrawColor(147, 103, 46);
-  doc.setFillColor(241, 229, 205);
-  doc.roundedRect(20, w.y - 4, 170, 22, 2, 2, 'FD');
-  doc.setTextColor(120, 85, 35);
+  w.espace(2);
+  doc.setDrawColor(122, 94, 16);
+  doc.setFillColor(247, 240, 218);
+  doc.roundedRect(20, w.y - 4, 170, 24, 2, 2, 'FD');
+  doc.setTextColor(110, 84, 14);
   doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
-  doc.text('Le dossier complet contient ces quatre sections remplies pour votre bien.', 25, w.y + 3);
+  doc.text('Le document complet contient ces sections renseignées pour votre bien.', 25, w.y + 3);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-  doc.text('Votre diagnostic reste consultable gratuitement sur le site, sans aucun engagement.', 25, w.y + 10);
+  doc.text(doc.splitTextToSize("Votre pré-diagnostic reste consultable gratuitement sur le site. Aucun montant d'économie n'est annoncé, ici ni ailleurs : nous ne savons pas le calculer.", 160), 25, w.y + 9);
 
-  dessinerPiedDePage(doc,
-    "Aperçu sans valeur juridique, fourni à titre de démonstration de format. Les analyses, montants et courriers ne figurent que dans le document complet."
-  );
-  doc.save(`foncier-juste-apercu.pdf`);
+  w.finir();
+  doc.save('foncier-juste-apercu.pdf');
 }
 
 // --------------------------------------------------------------------------
-// Produit 2 : Dossier complet (49€) — diagnostic + lettre + pièces
+// Dossier de vérification (49 €) — analyse + pièces + courrier + marche à suivre
 // --------------------------------------------------------------------------
 
 function piecesAJoindre(anomalies) {
+  // L'article R*197-3 du LPF fixe ce qui est exigé à peine d'irrecevabilité ;
+  // le reste relève des pièces qui étayent le fond.
   const pieces = [
-    "Copie de l'avis de taxe foncière contesté",
-    "Copie de la fiche d'évaluation (formulaire 6675-M), obtenue sur impots.gouv.fr",
+    "OBLIGATOIRE — l'avis de taxe foncière contesté, ou sa copie. L'article R*197-3 du Livre des procédures fiscales le rend indispensable : sans lui, la réclamation peut être écartée sans examen.",
+    "Votre fiche d'évaluation (formulaire 6675-M), obtenue gratuitement auprès du service des impôts fonciers ou par la messagerie sécurisée d'impots.gouv.fr.",
   ];
   if (anomalies.some(a => a.code === 'surface_surevaluee')) {
-    pieces.push("Justificatif de la surface réelle : plan coté, acte de vente, ou diagnostic de surface (loi Carrez/Boutin) si disponible");
+    pieces.push(
+      "Un justificatif de surface : plan coté, relevé de géomètre-expert, ou acte de vente avec plan annexé. " +
+      "Si vous joignez une attestation Carrez ou Boutin, précisez-le : ces mesures ne retiennent pas le même périmètre que l'évaluation fiscale, et produites sans explication elles peuvent être écartées."
+    );
   }
   if (anomalies.some(a => a.code === 'elements_confort_obsoletes')) {
-    pieces.push("Justificatif de la disparition ou de l'absence de l'élément contesté (photo datée, facture de démolition, attestation sur l'honneur)");
+    pieces.push(
+      "Une preuve datée de la disparition de l'élément : facture de l'entreprise intervenue, permis de démolir ou déclaration préalable, ou photographie aérienne historique de l'IGN (remonterletemps.ign.fr — gratuit, daté). " +
+      "Une attestation sur l'honneur peut accompagner ces pièces, mais ne les remplace pas."
+    );
   }
-  pieces.push("Le présent rapport de diagnostic Foncier Juste, à titre d'élément d'appui");
   return pieces;
 }
 
-function dessinerLettreReclamation(doc, d) {
+function dessinerPageCourrier(doc, d) {
   doc.addPage();
-  const w = creerEcrivain(doc, 20, 170);
-  w.y = dessinerEnTete(doc, 'Modèle de lettre de réclamation', {
-    sousTitre: 'À recopier sur papier libre ou à transmettre depuis votre espace impots.gouv.fr, une fois les crochets complétés.',
+  const w = creerEcrivain(doc, 20, 170, {
+    pied: "Projet de courrier à relire, compléter et signer. Foncier·Juste n'est pas un cabinet d'avocats ; ce texte ne constitue pas une consultation juridique et n'engage pas son destinataire sur l'issue de la démarche.",
+    titreSuite: 'Projet de courrier',
+  });
+  w.y = dessinerEnTete(doc, 'Projet de courrier', {
+    sousTitre: "À recopier sur papier libre et à signer, ou à transmettre depuis votre espace sur impots.gouv.fr. Les mentions entre crochets sont à compléter par vos soins.",
   });
 
-  w.y += 4;
-  w.ligne('[Vos NOM Prénom]', { taille: 10 });
-  w.ligne('[Votre adresse complète]', { taille: 10 });
-  w.ligne('[Votre numéro fiscal — en haut de votre avis d\'imposition]', { taille: 10, espace: 10 });
+  const annee = new Date().getFullYear();
+  w.espace(2);
+  w.ligne('[Vos NOM et Prénom]', { taille: 10, espace: 3 });
+  w.ligne('[Votre adresse complète]', { taille: 10, espace: 3 });
+  w.ligne("[Votre numéro fiscal — en haut de votre avis d'imposition]", { taille: 10, espace: 9 });
 
-  w.ligne('À l\'attention du Service des Impôts Fonciers', { taille: 10, style: 'bold' });
-  w.ligne(`[Adresse du service — indiquée sur votre avis de taxe foncière, ou via impots.gouv.fr > Contact]`, { taille: 10, espace: 10 });
+  w.ligne("À l'attention du Service des Impôts Fonciers", { taille: 10, style: 'bold', espace: 3 });
+  w.ligne("[Adresse du service — indiquée sur votre avis de taxe foncière]", { taille: 10, espace: 9 });
 
   w.ligne(`Fait à [Ville], le ${new Date().toLocaleDateString('fr-FR')}`, { taille: 10, espace: 8 });
 
   w.ligne(
-    `Objet : Réclamation contentieuse relative à la taxe foncière ${new Date().getFullYear()} — ` +
-    `[référence de l'avis contesté] — Article L.190 du Livre des procédures fiscales`,
+    `Objet : réclamation contentieuse relative à la taxe foncière sur les propriétés bâties — ` +
+    `avis n° [référence de l'avis contesté], année ${annee} — article L.190 du Livre des procédures fiscales`,
     { taille: 10, style: 'bold', espace: 8 }
   );
 
   w.ligne('Madame, Monsieur,', { taille: 10, espace: 6 });
 
   w.ligne(
-    `Je vous prie de bien vouloir réexaminer le calcul de la taxe foncière relative à mon bien situé ` +
+    `Je vous prie de bien vouloir procéder à un nouvel examen de l'évaluation retenue pour le bien situé ` +
     `[adresse complète du bien], commune de ${d.commune.commune} (${d.commune.code_postal}), ` +
-    `au titre de l'année ${new Date().getFullYear()}.`,
-    { taille: 10, espace: 6 }
-  );
-
-  w.ligne("En effet, la fiche d'évaluation de ce bien présente, à ma connaissance, la ou les anomalies suivantes :", { taille: 10, espace: 4 });
-  d.anomalies
-    .filter(a => a.gravite !== 'info')
-    .forEach(a => w.ligne(`— ${a.message}`, { taille: 10, espace: 4 }));
-  w.y += 2;
-
-  w.ligne(
-    "Ces éléments me semblent conduire à une surévaluation de la valeur locative cadastrale servant de base au calcul " +
-    "de ma taxe foncière, et donc à une imposition supérieure à ce qu'elle devrait être.",
+    `au titre de l'avis de taxe foncière mentionné en objet.`,
     { taille: 10, espace: 6 }
   );
 
   w.ligne(
-    "Je sollicite en conséquence, sur le fondement de l'article L.190 du Livre des procédures fiscales, la " +
-    "rectification de la valeur locative cadastrale de mon bien ainsi que le dégrèvement correspondant, pour l'année " +
-    "en cours et, le cas échéant, pour les années antérieures non prescrites.",
+    "Après avoir consulté la fiche d'évaluation de ce local, je constate les éléments suivants, que je porte " +
+    "à votre connaissance sans préjuger de leur incidence sur le calcul :",
+    { taille: 10, espace: 4 }
+  );
+
+  // Seuls les motifs que nous considérons comme étayés figurent dans le
+  // courrier. L'écart de surface en est exclu tant que le test T1 n'a pas
+  // établi que la « surface réelle » de la fiche et la surface habitable
+  // mesurée recouvrent le même périmètre : nous refusons de vendre sur ce
+  // motif, il serait incohérent de le faire porter à l'administration.
+  // Il reste exposé dans l'analyse, et une note ci-dessous explique au
+  // lecteur comment l'ajouter lui-même s'il a vérifié le périmètre.
+  const motifs = d.anomalies.filter(
+    a => a.gravite !== 'info' && !CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code)
+  );
+  const surfaceEcartee = d.anomalies.some(
+    a => a.gravite !== 'info' && CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code)
+  );
+  motifs.forEach(a => {
+    w.ligne(`— ${a.message}`, { taille: 10, espace: 4, x: 24 });
+  });
+  w.espace(2);
+
+  w.ligne(
+    "Ces éléments me paraissent susceptibles d'affecter la valeur locative cadastrale servant de base au calcul " +
+    "de mon imposition. Je m'en remets à votre appréciation pour déterminer s'ils justifient une rectification.",
     { taille: 10, espace: 6 }
   );
 
-  w.ligne("Vous trouverez en pièces jointes les justificatifs suivants :", { taille: 10, espace: 4 });
-  piecesAJoindre(d.anomalies).forEach(p => w.ligne(`— ${p}`, { taille: 10, espace: 4 }));
-  w.y += 2;
-
   w.ligne(
-    "Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.",
-    { taille: 10, espace: 10 }
+    "Je sollicite en conséquence, sur le fondement de l'article L.190 du Livre des procédures fiscales, le " +
+    "réexamen de l'évaluation de ce local et, s'il y a lieu, le dégrèvement correspondant de l'imposition contestée.",
+    { taille: 10, espace: 6 }
   );
-  w.ligne('[Signature]', { taille: 10 });
 
-  dessinerPiedDePage(doc,
-    "Modèle indicatif, à adapter à votre situation exacte. Vérifiez les informations avant envoi (adresse du service, " +
-    "référence de l'avis, pièces jointes). Foncier Juste n'est pas un cabinet d'avocats et ce document ne constitue pas " +
-    "une consultation juridique personnalisée."
-  );
+  w.ligne("Vous trouverez ci-joint les pièces suivantes :", { taille: 10, espace: 4 });
+  piecesAJoindre(motifs).forEach(p => w.ligne(`— ${p}`, { taille: 9.5, espace: 4, x: 24 }));
+  w.espace(2);
+
+  w.ligne("Je reste à votre disposition pour tout élément complémentaire et vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.", { taille: 10, espace: 10 });
+  w.ligne('[Signature manuscrite]', { taille: 10, style: 'bold', espace: 4 });
+  w.ligne("La signature manuscrite est exigée par l'article R*197-3 du Livre des procédures fiscales pour une réclamation adressée par courrier.", { taille: 8.5, couleur: [124, 137, 148], espace: 4 });
+
+  if (surfaceEcartee) {
+    w.espace(8);
+    doc.setDrawColor(216, 223, 227);
+    doc.setFillColor(237, 241, 244);
+    const hautBloc = w.y - 5;
+    w.ligne("Pourquoi l'écart de surface ne figure pas dans ce courrier", { taille: 10, style: 'bold', espace: 3, x: 24 });
+    w.ligne(
+      "Votre analyse relève un écart entre la surface lue sur votre fiche et celle que vous avez mesurée. " +
+      "Nous ne l'avons volontairement pas inscrit comme motif : nous ne sommes pas encore certains que ces " +
+      "deux chiffres recouvrent le même périmètre. La fiche décompose le local en parties principales, " +
+      "parties secondaires et dépendances ; si votre total inclut un garage ou une cave que votre mesure " +
+      "exclut, l'écart n'est qu'un artefact.",
+      { taille: 9, espace: 3, x: 24 }
+    );
+    w.ligne(
+      "Avant d'avancer ce motif, reprenez votre fiche et identifiez précisément les lignes que vous avez " +
+      "additionnées, puis mesurez exactement les mêmes espaces. Si l'écart subsiste, il est réel : vous " +
+      "pouvez alors l'ajouter vous-même à la liste ci-dessus, accompagné d'un plan coté ou d'un relevé.",
+      { taille: 9, espace: 4, x: 24 }
+    );
+    doc.setDrawColor(191, 201, 207);
+    doc.line(20, hautBloc, 20, w.y - 4);
+  }
+
+  w.finir();
 }
 
-function dessinerPagePratique(doc) {
+function dessinerPageDemarche(doc, d) {
   doc.addPage();
-  const w = creerEcrivain(doc, 20, 170);
-  w.y = dessinerEnTete(doc, 'Informations pratiques', {});
+  const w = creerEcrivain(doc, 20, 170, {
+    pied: "Informations établies d'après le Livre des procédures fiscales et la jurisprudence en vigueur au 16 septembre 2026. Vérifiez leur actualité sur impots.gouv.fr ou legifrance.gouv.fr avant d'engager la démarche.",
+    titreSuite: 'Marche à suivre',
+  });
+  w.y = dessinerEnTete(doc, 'Marche à suivre');
 
-  w.ligne('Où envoyer votre réclamation', { taille: 12, style: 'bold', espace: 4 });
+  w.ligne('1. Avant d\'envoyer', { taille: 12, style: 'bold', espace: 4 });
+  [
+    "Relisez le projet de courrier et complétez toutes les mentions entre crochets. Un courrier incomplet retarde le traitement.",
+    "Vérifiez que chaque élément que vous avancez est appuyé par une pièce. Une affirmation sans justificatif a peu de chances d'aboutir.",
+    "Si vous n'êtes pas certain d'un chiffre, retirez-le plutôt que de l'avancer : une inexactitude fragilise tout le dossier.",
+  ].forEach(t => w.ligne(`— ${t}`, { taille: 10, espace: 3 }));
+  w.espace(5);
+
+  w.ligne('2. Où déposer votre réclamation', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
-    "Par courrier à l'adresse du Service des Impôts Fonciers indiquée sur votre avis de taxe foncière, ou directement " +
-    "en ligne depuis votre espace particulier sur impots.gouv.fr (rubrique « Messagerie sécurisée » > « Écrire » > " +
-    "« Je signale une erreur dans le calcul de mon impôt »).",
+    "Deux voies au choix. Par la messagerie sécurisée de votre espace particulier sur impots.gouv.fr, rubrique " +
+    "« J'ai une question sur le calcul de mon impôt » — l'envoi y est horodaté automatiquement. Ou par courrier " +
+    "adressé au Service des Impôts Fonciers dont l'adresse figure sur votre avis, de préférence en recommandé " +
+    "avec accusé de réception. La démarche est gratuite dans les deux cas et ne nécessite pas d'avocat.",
     { taille: 10, espace: 8 }
   );
 
-  w.ligne('Délai pour réclamer', { taille: 12, style: 'bold', espace: 4 });
+  w.ligne('3. Le délai à ne pas dépasser', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
-    "Avant le 31 décembre de l'année suivant celle de la mise en recouvrement de l'avis contesté (article R*196-2 du " +
-    "Livre des procédures fiscales). La réclamation est gratuite et ne nécessite pas d'avocat (article R*190-1 du LPF).",
+    "Pour les impôts directs locaux, la réclamation doit parvenir à l'administration au plus tard le 31 décembre " +
+    "de l'année suivant celle de la mise en recouvrement du rôle, ou celle de l'événement qui motive la " +
+    "réclamation (article R*196-2 du Livre des procédures fiscales).",
+    { taille: 10, espace: 4 }
+  );
+  w.ligne(
+    "Concrètement, ce délai vous ouvre l'avis de l'année en cours et, selon la date, celui de l'année précédente. " +
+    "Il ne permet pas de remonter au-delà : contrairement à ce qu'on lit parfois, une réclamation de taxe foncière " +
+    "ne porte pas sur « toutes les années non prescrites ».",
     { taille: 10, espace: 8 }
   );
 
-  w.ligne("Ce qui se passe après l'envoi", { taille: 12, style: 'bold', espace: 4 });
+  w.ligne('4. Ce qui se passe ensuite', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
-    "L'administration dispose en principe de 6 mois pour répondre (délai prolongeable de 3 mois si elle vous en informe). " +
-    "Passé ce délai sans réponse, le silence vaut décision implicite de rejet — vous pouvez alors saisir le tribunal " +
-    "administratif. En cas de rejet explicite et motivé, vous disposez de 2 mois à compter de sa notification pour " +
-    "contester devant le tribunal administratif.",
+    "L'administration dispose de six mois pour statuer. Si elle ne peut pas tenir ce délai, elle doit vous en " +
+    "informer avant son expiration et peut se réserver trois mois supplémentaires au maximum (article R*198-10 " +
+    "du Livre des procédures fiscales).",
+    { taille: 10, espace: 4 }
+  );
+  w.ligne(
+    "Si elle garde le silence, cela ne vaut pas acceptation de votre demande. Passé six mois, vous pouvez saisir " +
+    "le tribunal administratif — et aucun délai de recours ne court contre vous tant qu'une décision expresse de " +
+    "rejet ne vous a pas été régulièrement notifiée (Conseil d'État, 21 octobre 2020, n° 443327). En cas de rejet " +
+    "exprès et motivé, vous disposez de deux mois à compter de sa notification pour saisir le tribunal.",
     { taille: 10, espace: 8 }
   );
 
-  w.ligne('Conserver une preuve d\'envoi', { taille: 12, style: 'bold', espace: 4 });
+  w.ligne('5. Ce que cette démarche ne garantit pas', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
-    "Privilégiez l'envoi via votre espace impots.gouv.fr (horodaté automatiquement) ou une lettre recommandée avec " +
-    "accusé de réception si vous envoyez par courrier postal.",
-    { taille: 10, espace: 8 }
+    "Aucune réclamation ne garantit un dégrèvement. L'administration peut confirmer son évaluation, la corriger " +
+    "partiellement, ou constater une insuffisance d'imposition. Foncier·Juste ne peut pas anticiper sa décision et " +
+    "ne vous promet aucun montant. Ce que ce dossier vous apporte, c'est une demande correctement formée, appuyée " +
+    "sur les bonnes pièces et déposée dans les délais — ce qui est la seule chose sur laquelle vous ayez prise.",
+    { taille: 10, espace: 6 }
   );
 
-  dessinerPiedDePage(doc,
-    "Informations données à titre indicatif d'après le Livre des procédures fiscales en vigueur au moment de la " +
-    "génération de ce document. Vérifiez leur actualité en cas de doute sur impots.gouv.fr."
-  );
+  w.finir();
 }
 
 function genererDossierPDF(d, opts = {}) {
   const exemple = opts.exemple !== false;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  dessinerPageDiagnostic(doc, d, { exemple });
-  dessinerLettreReclamation(doc, d);
-  dessinerPagePratique(doc);
+  dessinerPageAnalyse(doc, d, { exemple });
+  dessinerPageCourrier(doc, d);
+  dessinerPageDemarche(doc, d);
   doc.save(exemple ? `foncier-juste-dossier-exemple-${d.commune.code_commune}.pdf` : `foncier-juste-dossier-${d.commune.code_commune}.pdf`);
 }

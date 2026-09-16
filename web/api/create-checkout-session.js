@@ -48,6 +48,47 @@ module.exports = async (req, res) => {
     return;
   }
 
+  // --------------------------------------------------------------------
+  // Réponses du pré-diagnostic, jointes au paiement.
+  // --------------------------------------------------------------------
+  // C'est ce qui garantit la livraison : sans elles, un client qui ferme son
+  // onglet pendant le tunnel de paiement aurait payé sans que le document
+  // puisse jamais être reconstruit. Elles sont conservées par Stripe avec la
+  // transaction, et relues par /api/verify-session au retour.
+  //
+  // Liste blanche stricte : rien d'autre n'est accepté, aucune valeur libre,
+  // et le tout est plafonné — un champ de métadonnée Stripe est limité à
+  // 500 caractères.
+  const ELEMENTS = ['piscine', 'garage', 'dependance', 'veranda'];
+  const SOURCES = ['mesuree', 'acte', 'estimee'];
+  const texte = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
+  const nombre = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 && n <= 400 ? Math.round(n) : null;
+  };
+  const liste = (v) => (Array.isArray(v) ? v.filter((x) => ELEMENTS.includes(x)) : []);
+
+  const d = body.diag && typeof body.diag === 'object' ? body.diag : null;
+  let diagnostic = null;
+  if (d) {
+    diagnostic = {
+      cc: texte(d.cc, 10), cn: texte(d.cn, 60), cp: texte(d.cp, 10), cd: texte(d.cd, 4),
+      t: d.t === 'Appartement' ? 'Appartement' : 'Maison',
+      f: d.f ? 1 : 0,
+      sf: nombre(d.sf),
+      sr: nombre(d.sr),
+      ss: SOURCES.includes(d.ss) ? d.ss : 'estimee',
+      ef: liste(d.ef), ee: liste(d.ee),
+    };
+    if (!diagnostic.cc || !diagnostic.cd || !diagnostic.sr) diagnostic = null;
+  }
+  const diagJson = diagnostic ? JSON.stringify(diagnostic) : null;
+  if (diagJson && diagJson.length > 480) {
+    // Ne devrait jamais arriver avec la liste blanche ci-dessus ; on préfère
+    // ne rien joindre plutôt que de faire échouer le paiement.
+    diagnostic = null;
+  }
+
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const origin = `https://${host}`;
 
@@ -60,6 +101,7 @@ module.exports = async (req, res) => {
   // Trace du consentement L221-28 : le bouton d'achat est inaccessible sans
   // la case cochée côté client, on en garde la preuve horodatée chez Stripe.
   params.append('metadata[renonciation_retractation]', new Date().toISOString());
+  if (diagnostic) params.append('metadata[diag]', JSON.stringify(diagnostic));
   params.append('line_items[0][quantity]', '1');
   params.append('line_items[0][price_data][currency]', 'eur');
   params.append('line_items[0][price_data][unit_amount]', String(produit.montant)); // fixé ici, pas côté client

@@ -3,10 +3,12 @@
  * `backend/test_parite_moteurs.py`.
  *
  * Ce script ne réimplémente rien : il pilote la vraie page (web/index.html)
- * comme le ferait un visiteur — il remplit le formulaire, enchaîne les quatre
- * étapes, puis lit l'objet `dernierDiagnostic` produit par le moteur. C'est le
- * seul moyen d'être certain qu'on teste le code réellement servi, et non une
- * copie qui pourrait diverger sans qu'on s'en aperçoive.
+ * comme le ferait un visiteur — il remplit le formulaire, enchaîne les trois
+ * étapes, puis lit l'objet `dernierDiagnostic` produit par `moteur.js`. C'est
+ * le seul moyen d'être certain qu'on teste le code réellement servi, et non
+ * une copie qui pourrait diverger sans qu'on s'en aperçoive. Piloter le DOM
+ * vérifie en outre la correspondance entre les questions posées et l'entrée
+ * réellement transmise au moteur.
  *
  * Mode d'emploi
  * -------------
@@ -19,6 +21,19 @@
  *
  * La sortie est normalisée exactement comme `resultat_normalise()` côté Python.
  */
+async function empreinteTextes(anomalies) {
+  const textes = [
+    anomalies.map((a) => a.figure),
+    anomalies.map((a) => a.titre),
+    anomalies.map((a) => a.vosReponses),
+    anomalies.map((a) => a.calcul),
+    anomalies.map((a) => a.message),
+  ];
+  const octets = new TextEncoder().encode(JSON.stringify(textes));
+  const hash = await crypto.subtle.digest('SHA-256', octets);
+  return [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 async function capturerParite(cas) {
   const $ = (id) => document.getElementById(id);
   const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -26,7 +41,7 @@ async function capturerParite(cas) {
 
   for (const c of cas) {
     // --- Étape 1 : commune et type de bien
-    document.getElementById('start-btn').click();
+    $('start-btn').click();
     $('commune').value = c.label_commune;
     $('type_local').value = c.type_local;
     $('next-btn').click();
@@ -42,18 +57,13 @@ async function capturerParite(cas) {
     $('next-btn').click();
     await attendre(60);
 
-    // --- Étape 3 : éléments de confort
+    // --- Étape 3 : éléments de confort, puis calcul
     document.querySelectorAll('#confort-factures input').forEach((i) => {
       i.checked = c.factures.includes(i.value);
     });
     document.querySelectorAll('#confort-existants input').forEach((i) => {
       i.checked = c.existants.includes(i.value);
     });
-    $('next-btn').click();
-    await attendre(60);
-
-    // --- Étape 4 : montant (facultatif), puis calcul
-    $('taxe_actuelle').value = c.taxe == null ? '' : c.taxe;
     const avant = dernierDiagnostic;
     $('next-btn').click();
     for (let i = 0; i < 100 && dernierDiagnostic === avant; i++) await attendre(50);
@@ -69,7 +79,6 @@ async function capturerParite(cas) {
       if (comps && comps.n >= 5) prixMedian = comps.prixMedian;
     } catch (_) { /* département sans données */ }
 
-    const impact = calculerImpact(d.anomalies, d.taxeActuelle);
     resultats.push({
       id: c.id,
       classification: d.classif.cle,
@@ -80,12 +89,14 @@ async function capturerParite(cas) {
       codes: d.anomalies.map((a) => a.code),
       gravites: d.anomalies.map((a) => a.gravite),
       confiances: d.anomalies.map((a) => a.confiance.niveau),
-      figures: d.anomalies.map((a) => a.figure),
-      messages: d.anomalies.map((a) => a.message),
       n_comparables: d.n,
+      // Empreinte des textes affichés à l'utilisateur (figures, titres, « ce
+      // que vous avez indiqué », « ce qui en est calculé », messages). On
+      // compare une empreinte plutôt que 30 Ko de prose : une divergence de
+      // formulation, même d'un caractère, fait échouer le test, et la capture
+      // se rejoue pour voir le détail.
+      empreinte: await empreinteTextes(d.anomalies),
       prix_median: prixMedian === null ? null : Math.round(prixMedian * 1e6) / 1e6,
-      impact_min: impact ? impact.eurMin : null,
-      impact_max: impact ? impact.eurMax : null,
     });
 
     $('restart-btn').click();

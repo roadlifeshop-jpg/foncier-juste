@@ -1,8 +1,8 @@
 """
 Tests unitaires du moteur de pré-diagnostic.
 
-Ils portent sur les règles elles-mêmes. La vérification que le moteur Python et
-le moteur de production donnent le même résultat est dans
+Ils portent sur les règles elles-mêmes. La vérification que le moteur Python
+et le moteur de production donnent le même résultat est dans
 `test_parite_moteurs.py` — les deux suites sont complémentaires : celle-ci dit
 si la règle est correcte, l'autre si les deux implémentations sont d'accord.
 """
@@ -11,6 +11,8 @@ import unittest
 from pathlib import Path
 
 from diagnostic_engine import (
+    SURFACE_MAX_M2,
+    SURFACE_MIN_M2,
     UserInput,
     charger_market_stats,
     comparables_agreges,
@@ -80,15 +82,9 @@ class TestRegleSurface(unittest.TestCase):
     def test_avec_fiche_ecart_important_gravite_haute(self):
         r = run_diagnostic(entree(
             type_local="Maison", surface_fiche_m2=140, surface_reelle_actuelle_m2=100,
-            taxe_fonciere_annuelle_eur=1800,
         ))
         surf = next(a for a in r["anomalies"] if a["code"] == "surface_surevaluee")
         self.assertEqual(surf["gravite"], "haute")
-        self.assertIsNotNone(r["impact_estime_eur_par_an"])
-        self.assertLess(
-            r["impact_estime_eur_par_an"]["eur_min"],
-            r["impact_estime_eur_par_an"]["eur_max"],
-        )
 
     def test_ecart_entre_5_et_15_pct_gravite_moyenne(self):
         r = run_diagnostic(entree(
@@ -105,7 +101,6 @@ class TestRegleSurface(unittest.TestCase):
         self.assertNotIn("surface_surevaluee", {a["code"] for a in r["anomalies"]})
 
     def test_petit_ecart_pas_de_faux_positif(self):
-        # 2 m² : du bruit de mesure, pas une anomalie.
         r = run_diagnostic(entree(surface_fiche_m2=62, surface_reelle_actuelle_m2=60))
         self.assertNotIn("surface_surevaluee", {a["code"] for a in r["anomalies"]})
 
@@ -178,21 +173,6 @@ class TestIncertitudeEtVente(unittest.TestCase):
         )
         self.assertEqual(mesuree["score_vigilance"], estimee["score_vigilance"])
 
-    def test_source_estimee_ferme_la_vente(self):
-        r = run_diagnostic(entree(
-            type_local="Maison", source_surface="estimee",
-            surface_fiche_m2=130, surface_reelle_actuelle_m2=100,
-        ))
-        self.assertGreater(r["n_signaux_reels"], 0)
-        self.assertFalse(r["vente_autorisee"])
-
-    def test_source_acte_ouvre_la_vente(self):
-        r = run_diagnostic(entree(
-            type_local="Maison", source_surface="acte",
-            surface_fiche_m2=130, surface_reelle_actuelle_m2=100,
-        ))
-        self.assertTrue(r["vente_autorisee"])
-
     def test_sans_fiche_jamais_de_vente(self):
         r = run_diagnostic(entree(
             a_la_fiche=False, type_local="Maison",
@@ -205,6 +185,49 @@ class TestIncertitudeEtVente(unittest.TestCase):
         r = run_diagnostic(entree())
         self.assertEqual([a["gravite"] for a in r["anomalies"]], ["info"])
         self.assertFalse(vente_autorisee(r["anomalies"]))
+
+    # ---- Garde-fou T1 : l'écart de surface seul ne vend pas ----------------
+    # Décision du 16/09/2026 : tant que la comparaison « surface réelle de la
+    # fiche » / « surface habitable mesurée » n'a pas été validée sur de
+    # vraies fiches, un écart de surface peut venir de la question posée.
+
+    def test_ecart_de_surface_seul_n_ouvre_pas_la_vente(self):
+        for source in ("mesuree", "acte"):
+            with self.subTest(source=source):
+                r = run_diagnostic(entree(
+                    type_local="Maison", source_surface=source,
+                    surface_fiche_m2=150, surface_reelle_actuelle_m2=100,
+                ))
+                self.assertIn("surface_surevaluee", {a["code"] for a in r["anomalies"]},
+                              "le signal doit rester affiché")
+                self.assertGreater(r["n_signaux_reels"], 0)
+                self.assertFalse(r["vente_autorisee"],
+                                 "un écart de surface seul ne doit pas ouvrir la vente")
+
+    def test_confort_fiable_ouvre_la_vente(self):
+        r = run_diagnostic(entree(
+            type_local="Maison",
+            elements_confort_factures=["piscine"], elements_confort_existants=[],
+        ))
+        self.assertTrue(r["vente_autorisee"])
+
+    def test_surface_plus_confort_ouvre_la_vente(self):
+        r = run_diagnostic(entree(
+            type_local="Maison", surface_fiche_m2=150, surface_reelle_actuelle_m2=100,
+            elements_confort_factures=["piscine"], elements_confort_existants=[],
+        ))
+        self.assertEqual(r["n_signaux_reels"], 2)
+        self.assertTrue(r["vente_autorisee"])
+
+    def test_confort_non_fiable_plus_surface_ne_vend_pas(self):
+        # Sans fiche : le confort est de confiance faible et la surface n'est
+        # même pas évaluée. Rien ne doit ouvrir la vente.
+        r = run_diagnostic(entree(
+            a_la_fiche=False, type_local="Maison",
+            surface_fiche_m2=150, surface_reelle_actuelle_m2=100,
+            elements_confort_factures=["piscine"], elements_confort_existants=[],
+        ))
+        self.assertFalse(r["vente_autorisee"])
 
 
 class TestClassificationEtRobustesse(unittest.TestCase):
@@ -219,11 +242,15 @@ class TestClassificationEtRobustesse(unittest.TestCase):
         ))
         self.assertEqual(fort["classification"], "fort")
 
-    def test_pas_de_chiffrage_sans_montant_de_taxe(self):
+    def test_aucun_montant_en_euros_nulle_part(self):
+        """L'estimation financière a été retirée : plus aucun champ ne doit la porter."""
         r = run_diagnostic(entree(
-            type_local="Maison", surface_fiche_m2=80, surface_reelle_actuelle_m2=60,
+            type_local="Maison", surface_fiche_m2=140, surface_reelle_actuelle_m2=100,
         ))
-        self.assertIsNone(r["impact_estime_eur_par_an"])
+        self.assertNotIn("impact_estime_eur_par_an", r)
+        texte = repr(r)
+        for mot in ("eur_min", "eur_max", "€/an", "économie"):
+            self.assertNotIn(mot, texte, f"« {mot} » ne doit plus apparaître")
 
     def test_commune_inconnue_degrade_proprement(self):
         r = run_diagnostic(entree(
@@ -238,11 +265,13 @@ class TestClassificationEtRobustesse(unittest.TestCase):
         self.assertEqual(r["marche_local"]["n_transactions_comparables"], 0)
 
     def test_echantillon_faible_pas_de_prix_publie(self):
-        # Moins de 5 transactions : aucune ligne de marché, donc aucun chiffre
-        # présenté comme un repère.
         r = run_diagnostic(entree(code_commune="99999"))
         self.assertNotIn("contexte_marche", {a["code"] for a in r["anomalies"]})
         self.assertIsNone(r["marche_local"]["prix_m2_median"])
+
+    def test_bornes_de_surface_alignees_sur_le_dataset(self):
+        """Les bornes ne sont pas un choix métier : ce sont celles de DVF."""
+        self.assertEqual((SURFACE_MIN_M2, SURFACE_MAX_M2), (8.0, 400.0))
 
 
 class TestParitesNumeriques(unittest.TestCase):
