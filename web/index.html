@@ -1038,7 +1038,7 @@ function blocSignal(a){
     <p class="why"><span class="k">Ce que vous avez indiqué</span>${echappe(a.vosReponses)}</p>
     <p class="why"><span class="k">Ce que nous en avons calculé</span>${echappe(a.calcul)}</p>
     <p class="why"><span class="k">Ce qu'il reste à vérifier</span>${echappe(a.aVerifier)}</p>
-    <p class="conf"><b>${nonValide ? 'Fiabilité de la donnée que vous avez saisie' : 'Niveau de confiance'} :</b> ${echappe(a.confiance.texte)}<br>
+    <p class="conf"><b>${nonValide ? 'Source déclarée' : 'Source de l\u2019information'} :</b> ${echappe(a.confiance.texte)}<br>
     <b>Origine de l'information :</b> ${echappe(a.confiance.origine)}</p>
   </article>`;
 }

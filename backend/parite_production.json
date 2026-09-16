@@ -1,24 +1,496 @@
 [
- {"id":"P01","classification":"aucun","classification_label":"Aucun élément notable détecté","score":5,"vente_autorisee":false,"n_signaux_reels":0,"codes":["contexte_marche"],"gravites":["info"],"confiances":["contexte"],"n_comparables":982,"empreinte":"eaf6480b16cb857bb4b269b6bcf45a2ce8960623cee25a59474267f3a9210f12","prix_median":3170.64},
- {"id":"P02","classification":"aucun","classification_label":"Aucun élément notable détecté","score":5,"vente_autorisee":false,"n_signaux_reels":0,"codes":["contexte_marche"],"gravites":["info"],"confiances":["contexte"],"n_comparables":159,"empreinte":"944c775a24f7e6195cdfc4eabec54c06a91170c9f3abd95ea3c2681061b4d7d7","prix_median":4159.29},
- {"id":"P03","classification":"fort","classification_label":"Vérification fortement recommandée","score":45,"vente_autorisee":false,"n_signaux_reels":1,"codes":["surface_surevaluee","contexte_marche"],"gravites":["haute","info"],"confiances":["elevee","contexte"],"n_comparables":159,"empreinte":"f5d7b4ef2a90d592e569fb95d05730d13f93e3907eb612fbebeb070889e02fd4","prix_median":4159.29},
- {"id":"P04","classification":"modere","classification_label":"Vérification recommandée","score":25,"vente_autorisee":false,"n_signaux_reels":1,"codes":["surface_surevaluee","contexte_marche"],"gravites":["moyenne","info"],"confiances":["elevee","contexte"],"n_comparables":104,"empreinte":"43706b034ece0c0283af787246f1132291957a25a171e6fc9e7f0e5a52743d1b","prix_median":2396.89},
- {"id":"P05","classification":"aucun","classification_label":"Aucun élément notable détecté","score":5,"vente_autorisee":false,"n_signaux_reels":0,"codes":["contexte_marche"],"gravites":["info"],"confiances":["contexte"],"n_comparables":159,"empreinte":"944c775a24f7e6195cdfc4eabec54c06a91170c9f3abd95ea3c2681061b4d7d7","prix_median":4159.29},
- {"id":"P06","classification":"modere","classification_label":"Vérification recommandée","score":25,"vente_autorisee":false,"n_signaux_reels":1,"codes":["surface_surevaluee","contexte_marche"],"gravites":["moyenne","info"],"confiances":["elevee","contexte"],"n_comparables":159,"empreinte":"00a46388cfd7774a2abf0ebcb094f59be967fd924d579a2f71a6b9138a97b82b","prix_median":4159.29},
- {"id":"P07","classification":"aucun","classification_label":"Aucun élément notable détecté","score":5,"vente_autorisee":false,"n_signaux_reels":0,"codes":["contexte_marche"],"gravites":["info"],"confiances":["contexte"],"n_comparables":1035,"empreinte":"ffa7b1568dd67382f4109e3e488201c9e5fa32c889d1f6c2b2153a8c6484d1a0","prix_median":3333.33},
- {"id":"P08","classification":"fort","classification_label":"Vérification fortement recommandée","score":45,"vente_autorisee":false,"n_signaux_reels":1,"codes":["surface_surevaluee","contexte_marche"],"gravites":["haute","info"],"confiances":["faible","contexte"],"n_comparables":159,"empreinte":"f5d7b4ef2a90d592e569fb95d05730d13f93e3907eb612fbebeb070889e02fd4","prix_median":4159.29},
- {"id":"P09","classification":"fort","classification_label":"Vérification fortement recommandée","score":45,"vente_autorisee":false,"n_signaux_reels":1,"codes":["surface_surevaluee","contexte_marche"],"gravites":["haute","info"],"confiances":["moyenne","contexte"],"n_comparables":159,"empreinte":"f5d7b4ef2a90d592e569fb95d05730d13f93e3907eb612fbebeb070889e02fd4","prix_median":4159.29},
- {"id":"P10","classification":"modere","classification_label":"Vérification recommandée","score":25,"vente_autorisee":true,"n_signaux_reels":1,"codes":["elements_confort_obsoletes","contexte_marche"],"gravites":["moyenne","info"],"confiances":["elevee","contexte"],"n_comparables":159,"empreinte":"0c47aa0f0b130b13f882d32173077e3d9d74ba89f9668eea6b222927723ce22b","prix_median":4159.29},
- {"id":"P11","classification":"fort","classification_label":"Vérification fortement recommandée","score":45,"vente_autorisee":true,"n_signaux_reels":1,"codes":["elements_confort_obsoletes","contexte_marche"],"gravites":["haute","info"],"confiances":["elevee","contexte"],"n_comparables":159,"empreinte":"171aa19ee5d30d8a82e7a6d677b4d2b7e32a18224cef435fd6200e2c6ada0562","prix_median":4159.29},
- {"id":"P12","classification":"modere","classification_label":"Vérification recommandée","score":25,"vente_autorisee":false,"n_signaux_reels":1,"codes":["elements_confort_obsoletes","contexte_marche"],"gravites":["moyenne","info"],"confiances":["faible","contexte"],"n_comparables":159,"empreinte":"0c47aa0f0b130b13f882d32173077e3d9d74ba89f9668eea6b222927723ce22b","prix_median":4159.29},
- {"id":"P13","classification":"aucun","classification_label":"Aucun élément notable détecté","score":5,"vente_autorisee":false,"n_signaux_reels":0,"codes":["contexte_marche"],"gravites":["info"],"confiances":["contexte"],"n_comparables":159,"empreinte":"944c775a24f7e6195cdfc4eabec54c06a91170c9f3abd95ea3c2681061b4d7d7","prix_median":4159.29},
- {"id":"P14","classification":"fort","classification_label":"Vérification fortement recommandée","score":85,"vente_autorisee":true,"n_signaux_reels":2,"codes":["surface_surevaluee","elements_confort_obsoletes","contexte_marche"],"gravites":["haute","haute","info"],"confiances":["elevee","elevee","contexte"],"n_comparables":159,"empreinte":"b6fcb148e51e29882bbb3ecafac17e4611fcaf49695a1762fc7dc23fe70f8565","prix_median":4159.29},
- {"id":"P15","classification":"fort","classification_label":"Vérification fortement recommandée","score":65,"vente_autorisee":true,"n_signaux_reels":2,"codes":["surface_surevaluee","elements_confort_obsoletes","contexte_marche"],"gravites":["haute","moyenne","info"],"confiances":["elevee","elevee","contexte"],"n_comparables":7,"empreinte":"ed4e41f88fecb557c32158afa291afd7ee4dbf353a01b9b6a16060f82a1da5e8","prix_median":2906.704286},
- {"id":"P16","classification":"aucun","classification_label":"Aucun élément notable détecté","score":5,"vente_autorisee":false,"n_signaux_reels":0,"codes":["contexte_marche"],"gravites":["info"],"confiances":["contexte"],"n_comparables":13,"empreinte":"cd744fd542e49e7d05752a3ca171e6a8382ba0518b606f58d742c99a4f2cf11a","prix_median":4848.346154},
- {"id":"P17","classification":"aucun","classification_label":"Aucun élément notable détecté","score":5,"vente_autorisee":false,"n_signaux_reels":0,"codes":["contexte_marche"],"gravites":["info"],"confiances":["contexte"],"n_comparables":73,"empreinte":"0905dbbf124899af282c7d7d7c1bda69116af7af048393527616d7c28c6dbb4a","prix_median":4077.92},
- {"id":"P18","classification":"fort","classification_label":"Vérification fortement recommandée","score":45,"vente_autorisee":false,"n_signaux_reels":1,"codes":["surface_surevaluee","contexte_marche"],"gravites":["haute","info"],"confiances":["elevee","contexte"],"n_comparables":159,"empreinte":"f5d7b4ef2a90d592e569fb95d05730d13f93e3907eb612fbebeb070889e02fd4","prix_median":4159.29},
- {"id":"P19","classification":"aucun","classification_label":"Aucun élément notable détecté","score":5,"vente_autorisee":false,"n_signaux_reels":0,"codes":["contexte_marche"],"gravites":["info"],"confiances":["contexte"],"n_comparables":1007,"empreinte":"aa158274236850275f25b89dfb401e125f253165bfdd3731b91227f0d8bb6d26","prix_median":9861.11},
- {"id":"P20","classification":"fort","classification_label":"Vérification fortement recommandée","score":65,"vente_autorisee":true,"n_signaux_reels":2,"codes":["surface_surevaluee","elements_confort_obsoletes","contexte_marche"],"gravites":["haute","moyenne","info"],"confiances":["moyenne","elevee","contexte"],"n_comparables":581,"empreinte":"36995dfa22d0dfe2ce98d1438987e82c86cdd5da14270f6eee5da1b0c18ba25f","prix_median":1923.08},
- {"id":"P21","classification":"fort","classification_label":"Vérification fortement recommandée","score":45,"vente_autorisee":false,"n_signaux_reels":1,"codes":["surface_surevaluee","contexte_marche"],"gravites":["haute","info"],"confiances":["elevee","contexte"],"n_comparables":159,"empreinte":"636452eb12563362e1981b67d5ce81776b0b2dc8e6611f720eabb984e9f2d902","prix_median":4159.29},
- {"id":"P22","classification":"fort","classification_label":"Vérification fortement recommandée","score":65,"vente_autorisee":true,"n_signaux_reels":2,"codes":["surface_surevaluee","elements_confort_obsoletes","contexte_marche"],"gravites":["haute","moyenne","info"],"confiances":["elevee","elevee","contexte"],"n_comparables":159,"empreinte":"0daaaf95d9259aa2c9bc6ff9f0520e36c8a0893b462563205da0f1ff3c412157","prix_median":4159.29}
+ {
+  "id": "P01",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": [
+   "contexte_marche"
+  ],
+  "gravites": [
+   "info"
+  ],
+  "confiances": [
+   "contexte"
+  ],
+  "n_comparables": 982,
+  "empreinte": "e72ec424daccc16f892a8b4b5cfda439ae751b0c411fb8e3f4518f9aaf83984b",
+  "prix_median": 3170.64
+ },
+ {
+  "id": "P02",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": [
+   "contexte_marche"
+  ],
+  "gravites": [
+   "info"
+  ],
+  "confiances": [
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "b99c65be020baf9a1aeaf328460fc2b69afc49e9d8d74e368c759b1c69d2ed63",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P03",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": false,
+  "n_signaux_reels": 1,
+  "codes": [
+   "surface_surevaluee",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "haute",
+   "info"
+  ],
+  "confiances": [
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "b94585aabf81176c331877c515a6b2a368e2543386e3934f2e9c623dab0f9f3d",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P04",
+  "classification": "modere",
+  "classification_label": "Vérification recommandée",
+  "score": 25,
+  "vente_autorisee": false,
+  "n_signaux_reels": 1,
+  "codes": [
+   "surface_surevaluee",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "moyenne",
+   "info"
+  ],
+  "confiances": [
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 104,
+  "empreinte": "fd63a1070a70c3efdaf1e2ef5b0f83eaf531c451648fba4568d9356c14f948ee",
+  "prix_median": 2396.89
+ },
+ {
+  "id": "P05",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": [
+   "contexte_marche"
+  ],
+  "gravites": [
+   "info"
+  ],
+  "confiances": [
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "b99c65be020baf9a1aeaf328460fc2b69afc49e9d8d74e368c759b1c69d2ed63",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P06",
+  "classification": "modere",
+  "classification_label": "Vérification recommandée",
+  "score": 25,
+  "vente_autorisee": false,
+  "n_signaux_reels": 1,
+  "codes": [
+   "surface_surevaluee",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "moyenne",
+   "info"
+  ],
+  "confiances": [
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "2df21be22b45d47c5c4ef509649602ef4ce7303aa348e2cca454f7184c2ee397",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P07",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": [
+   "contexte_marche"
+  ],
+  "gravites": [
+   "info"
+  ],
+  "confiances": [
+   "contexte"
+  ],
+  "n_comparables": 1035,
+  "empreinte": "59e16804aae1c6b88bdbcf6a2261453ceb5850317415379ad1d3ac4e6254eae0",
+  "prix_median": 3333.33
+ },
+ {
+  "id": "P08",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": false,
+  "n_signaux_reels": 1,
+  "codes": [
+   "surface_surevaluee",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "haute",
+   "info"
+  ],
+  "confiances": [
+   "faible",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "03c3e138a4bc41794b100e9875fe9944b4b656b9eaea495db4a263c482f98921",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P09",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": false,
+  "n_signaux_reels": 1,
+  "codes": [
+   "surface_surevaluee",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "haute",
+   "info"
+  ],
+  "confiances": [
+   "moyenne",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "1a5807273e677ed426ec209956a4c107a4183f46e146f4bdc6750c3bb644fe39",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P10",
+  "classification": "modere",
+  "classification_label": "Vérification recommandée",
+  "score": 25,
+  "vente_autorisee": true,
+  "n_signaux_reels": 1,
+  "codes": [
+   "elements_confort_obsoletes",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "moyenne",
+   "info"
+  ],
+  "confiances": [
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "871f43508608cf4a18c03feab0e74d144c8fababbab4131afc1e5ecff654a787",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P11",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": true,
+  "n_signaux_reels": 1,
+  "codes": [
+   "elements_confort_obsoletes",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "haute",
+   "info"
+  ],
+  "confiances": [
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "5f70b3ab6cd2f30d262c1f560a023708012d88d5fa6e3f5efd56b6fb86a2a81d",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P12",
+  "classification": "modere",
+  "classification_label": "Vérification recommandée",
+  "score": 25,
+  "vente_autorisee": false,
+  "n_signaux_reels": 1,
+  "codes": [
+   "elements_confort_obsoletes",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "moyenne",
+   "info"
+  ],
+  "confiances": [
+   "faible",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "16c20338a79cef429748c0de0b0773e499e237a51bf6dd75fbd00b77d74be557",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P13",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": [
+   "contexte_marche"
+  ],
+  "gravites": [
+   "info"
+  ],
+  "confiances": [
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "b99c65be020baf9a1aeaf328460fc2b69afc49e9d8d74e368c759b1c69d2ed63",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P14",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 85,
+  "vente_autorisee": true,
+  "n_signaux_reels": 2,
+  "codes": [
+   "surface_surevaluee",
+   "elements_confort_obsoletes",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "haute",
+   "haute",
+   "info"
+  ],
+  "confiances": [
+   "elevee",
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "6a73588ad2f84ae5215ed5dac4c3eb8c36dafa1fffd320452a68c935dfbc853c",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P15",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 65,
+  "vente_autorisee": true,
+  "n_signaux_reels": 2,
+  "codes": [
+   "surface_surevaluee",
+   "elements_confort_obsoletes",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "haute",
+   "moyenne",
+   "info"
+  ],
+  "confiances": [
+   "elevee",
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 7,
+  "empreinte": "533200776baa4a95122d79f1c8204bd5e9e4f4b2298ff805e40fa7a123b66a31",
+  "prix_median": 2906.704286
+ },
+ {
+  "id": "P16",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": [
+   "contexte_marche"
+  ],
+  "gravites": [
+   "info"
+  ],
+  "confiances": [
+   "contexte"
+  ],
+  "n_comparables": 13,
+  "empreinte": "cfac2e02c1676c4e9b504f3daa50c98e9f8c3085d32bb6cb70a507b7ee092298",
+  "prix_median": 4848.346154
+ },
+ {
+  "id": "P17",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": [
+   "contexte_marche"
+  ],
+  "gravites": [
+   "info"
+  ],
+  "confiances": [
+   "contexte"
+  ],
+  "n_comparables": 73,
+  "empreinte": "5d01257109a8d5e67d49150b7d07d7bff377ff5ebbd54ac2aafed053112ad4a9",
+  "prix_median": 4077.92
+ },
+ {
+  "id": "P18",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": false,
+  "n_signaux_reels": 1,
+  "codes": [
+   "surface_surevaluee",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "haute",
+   "info"
+  ],
+  "confiances": [
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "b94585aabf81176c331877c515a6b2a368e2543386e3934f2e9c623dab0f9f3d",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P19",
+  "classification": "aucun",
+  "classification_label": "Aucun élément notable détecté",
+  "score": 5,
+  "vente_autorisee": false,
+  "n_signaux_reels": 0,
+  "codes": [
+   "contexte_marche"
+  ],
+  "gravites": [
+   "info"
+  ],
+  "confiances": [
+   "contexte"
+  ],
+  "n_comparables": 1007,
+  "empreinte": "38bd69cadf41b186c0896b5f1713b10d5de7c6193f782f434b2114e43e239d49",
+  "prix_median": 9861.11
+ },
+ {
+  "id": "P20",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 65,
+  "vente_autorisee": true,
+  "n_signaux_reels": 2,
+  "codes": [
+   "surface_surevaluee",
+   "elements_confort_obsoletes",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "haute",
+   "moyenne",
+   "info"
+  ],
+  "confiances": [
+   "moyenne",
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 581,
+  "empreinte": "c7e5b0dd5972bc531466a6ac0b5c7c9641d03c3fcec72688529b0e84d56a41f1",
+  "prix_median": 1923.08
+ },
+ {
+  "id": "P21",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 45,
+  "vente_autorisee": false,
+  "n_signaux_reels": 1,
+  "codes": [
+   "surface_surevaluee",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "haute",
+   "info"
+  ],
+  "confiances": [
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "ab384b1e25e3ec0a8873911140524718be9b65b1979d4d82c4b19c2ac53f6251",
+  "prix_median": 4159.29
+ },
+ {
+  "id": "P22",
+  "classification": "fort",
+  "classification_label": "Vérification fortement recommandée",
+  "score": 65,
+  "vente_autorisee": true,
+  "n_signaux_reels": 2,
+  "codes": [
+   "surface_surevaluee",
+   "elements_confort_obsoletes",
+   "contexte_marche"
+  ],
+  "gravites": [
+   "haute",
+   "moyenne",
+   "info"
+  ],
+  "confiances": [
+   "elevee",
+   "elevee",
+   "contexte"
+  ],
+  "n_comparables": 159,
+  "empreinte": "469a4d411b6b74eb35df67501d1cc31d8769d45d369f12558cd41cb1277f136d",
+  "prix_median": 4159.29
+ }
 ]

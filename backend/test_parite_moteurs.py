@@ -60,6 +60,8 @@ def empreinte_textes(anomalies: list[dict]) -> str:
         [a["vosReponses"] for a in anomalies],
         [a["calcul"] for a in anomalies],
         [a["message"] for a in anomalies],
+        [a["confiance"]["texte"] for a in anomalies],
+        [a["confiance"]["origine"] for a in anomalies],
     ]
     brut = json.dumps(textes, ensure_ascii=False, separators=(",", ":"))
     return hashlib.sha256(brut.encode("utf-8")).hexdigest()

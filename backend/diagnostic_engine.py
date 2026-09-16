@@ -181,18 +181,30 @@ SURFACE_MAX_M2 = 400.0
 # Niveaux de confiance — PARITÉ : constantes de web/moteur.js
 # --------------------------------------------------------------------------
 
+# Ces libellés décrivent la SOURCE que l'utilisateur déclare, pas la qualité de
+# ce qu'il a fait. Nous n'avons aucun moyen de contrôler un relevé : dire qu'une
+# mesure est fiable parce que quelqu'un déclare l'avoir faite serait une
+# affirmation que nous ne pouvons pas soutenir.
 CONFIANCE_SURFACE = {
     "mesuree": {
         "niveau": "elevee",
-        "texte": "Élevée — vous avez mesuré cette surface vous-même.",
-        "origine": "Votre relevé, confronté au chiffre que vous avez lu sur votre fiche.",
+        "texte": (
+            "Vous déclarez avoir mesuré cette surface vous-même. C’est la source la "
+            "plus directe, mais nous ne pouvons pas contrôler votre relevé : ce "
+            "constat vaut ce que vaut la mesure."
+        ),
+        "origine": (
+            "Votre relevé, tel que vous nous l’avez communiqué, confronté au chiffre "
+            "que vous avez lu sur votre fiche."
+        ),
     },
     "acte": {
         "niveau": "moyenne",
         "texte": (
-            "Modérée — la surface d’un acte de vente (loi Carrez) ne retient pas "
-            "exactement les mêmes espaces que l’évaluation fiscale. L’écart reste "
-            "exploitable, mais devra être confirmé par une mesure."
+            "Vous déclarez tenir cette surface d’un acte de vente ou d’un diagnostic. "
+            "Une surface loi Carrez ne retient pas exactement les mêmes espaces que "
+            "l’évaluation fiscale : l’écart reste exploitable, mais devra être "
+            "confirmé par une mesure."
         ),
         "origine": (
             "Un document que vous détenez, dont la définition de surface diffère de "
@@ -202,8 +214,8 @@ CONFIANCE_SURFACE = {
     "estimee": {
         "niveau": "faible",
         "texte": (
-            "Faible — surface estimée de mémoire. Ce constat ne suffit pas à fonder "
-            "une réclamation : mesurez avant d’aller plus loin."
+            "Vous déclarez avoir estimé cette surface de mémoire. Ce constat ne suffit "
+            "pas à fonder une réclamation : mesurez avant d’aller plus loin."
         ),
         "origine": "Votre estimation. Aucun document ne l’appuie pour l’instant.",
     },
@@ -211,8 +223,12 @@ CONFIANCE_SURFACE = {
 
 CONFIANCE_CONFORT_AVEC_FICHE = {
     "niveau": "elevee",
-    "texte": "Élevée — ces éléments sont relevés directement sur votre fiche d’évaluation.",
-    "origine": "Votre fiche 6675-M, que vous avez sous les yeux.",
+    "texte": (
+        "Vous déclarez avoir relevé ces éléments sur votre fiche d’évaluation. C’est "
+        "le document qui fait foi, mais nous n’y avons pas accès : vérifiez votre "
+        "relevé avant de vous en prévaloir."
+    ),
+    "origine": "Votre fiche 6675-M, telle que vous l’avez lue.",
 }
 CONFIANCE_CONFORT_SANS_FICHE = {
     "niveau": "faible",

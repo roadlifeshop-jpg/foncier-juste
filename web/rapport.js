@@ -216,7 +216,7 @@ function dessinerPageAnalyse(doc, d, { exemple }) {
       // Le libellé dit ce que la mesure qualifie réellement : la donnée saisie,
       // et non le constat qui en découle.
       w.ligne(
-        `${nonValide ? 'Fiabilité de la donnée que vous avez saisie' : 'Niveau de confiance'} — ${a.confiance.texte}`,
+        `${nonValide ? 'Source déclarée' : 'Source de l\u2019information'} — ${a.confiance.texte}`,
         { taille: 9.5, couleur: [91, 104, 117], espace: 2.5, x: 24 }
       );
       w.ligne(`Origine de l'information — ${a.confiance.origine}`, { taille: 9.5, couleur: [91, 104, 117], espace: 7, x: 24 });
@@ -317,30 +317,64 @@ function genererApercuPDF(d) {
 // Dossier de vérification (49 €) — analyse + pièces + courrier + marche à suivre
 // --------------------------------------------------------------------------
 
-function piecesAJoindre(anomalies) {
-  // L'article R*197-3 du LPF fixe ce qui est exigé à peine d'irrecevabilité ;
-  // le reste relève des pièces qui étayent le fond.
+// Deux listes distinctes, pour deux usages distincts.
+//
+// `piecesCourrier` est destinée au courrier lui-même : des intitulés courts,
+// cochables, que le destinataire adapte à ce qu'il joint réellement. Un
+// courrier qui annonce des pièces absentes dessert son auteur.
+//
+// `conseilsPieces` est destinée à « Marche à suivre » : comment obtenir chaque
+// pièce, ce qu'elle vaut, et quoi faire quand elle manque. Ces explications
+// s'adressent au lecteur, pas à l'administration — elles n'ont rien à faire
+// dans un courrier officiel.
+
+function piecesCourrier(motifs) {
   const pieces = [
-    "À JOINDRE EN PRIORITÉ — l'avis de taxe foncière contesté. L'article R*197-3 du Livre des procédures " +
-    "fiscales demande que la réclamation soit accompagnée de l'avis d'imposition, d'une copie de cet avis ou " +
-    "d'un extrait du rôle. Le même article prévoit que la réclamation peut être régularisée à tout moment par " +
-    "la production de l'une de ces pièces : si vous ne l'avez pas sous la main, ne différez pas votre envoi, " +
-    "surtout si le délai approche — vous pourrez la fournir ensuite.",
-    "Votre fiche d'évaluation (formulaire 6675-M), obtenue gratuitement auprès du service des impôts fonciers ou par la messagerie sécurisée d'impots.gouv.fr.",
+    "Avis de taxe foncière contesté (ou copie, ou extrait du rôle)",
+    "Fiche d'évaluation du local (formulaire 6675-M)",
   ];
-  if (anomalies.some(a => a.code === 'surface_surevaluee')) {
-    pieces.push(
-      "Un justificatif de surface : plan coté, relevé de géomètre-expert, ou acte de vente avec plan annexé. " +
-      "Si vous joignez une attestation Carrez ou Boutin, précisez-le : ces mesures ne retiennent pas le même périmètre que l'évaluation fiscale, et produites sans explication elles peuvent être écartées."
-    );
+  if (motifs.some(a => a.code === 'surface_surevaluee')) {
+    pieces.push("Justificatif de surface : plan coté ou relevé");
   }
-  if (anomalies.some(a => a.code === 'elements_confort_obsoletes')) {
-    pieces.push(
-      "Une preuve datée de la disparition de l'élément : facture de l'entreprise intervenue, permis de démolir ou déclaration préalable, ou photographie aérienne historique de l'IGN (remonterletemps.ign.fr — gratuit, daté). " +
-      "Une attestation sur l'honneur peut accompagner ces pièces, mais ne les remplace pas."
-    );
+  const confort = motifs.find(a => a.code === 'elements_confort_obsoletes');
+  if (confort) {
+    const elements = (confort.figure || '').toLowerCase();
+    pieces.push(`Preuve datée de la disparition${elements ? ' : ' + elements : ''}`);
   }
   return pieces;
+}
+
+function conseilsPieces(motifs) {
+  const conseils = [
+    ["L'avis de taxe foncière contesté",
+     "L'article R*197-3 du Livre des procédures fiscales demande que la réclamation soit accompagnée de " +
+     "l'avis d'imposition, d'une copie de cet avis ou d'un extrait du rôle. Le même article prévoit qu'elle " +
+     "peut être régularisée à tout moment par la production de l'une de ces pièces : si vous ne l'avez pas " +
+     "sous la main, ne différez pas votre envoi, surtout si le délai approche — vous pourrez la fournir " +
+     "ensuite. Retirez alors la ligne correspondante de la liste des pièces jointes."],
+    ["La fiche d'évaluation (formulaire 6675-M)",
+     "Elle s'obtient gratuitement auprès du service des impôts fonciers, ou par la messagerie sécurisée de " +
+     "votre espace particulier sur impots.gouv.fr. C'est le document qui détaille ce que l'administration " +
+     "retient pour votre logement."],
+  ];
+  if (motifs.some(a => a.code === 'surface_surevaluee')) {
+    conseils.push(["Un justificatif de surface",
+     "Plan coté, relevé de géomètre-expert, ou acte de vente avec plan annexé. Si vous joignez une " +
+     "attestation Carrez ou Boutin, dites-le explicitement dans votre courrier : ces mesures ne retiennent " +
+     "pas le même périmètre que l'évaluation fiscale, et produites sans explication elles peuvent être " +
+     "écartées."]);
+  }
+  if (motifs.some(a => a.code === 'elements_confort_obsoletes')) {
+    conseils.push(["Une preuve datée de la disparition",
+     "Facture de l'entreprise intervenue, permis de démolir ou déclaration préalable, ou photographie " +
+     "aérienne historique de l'IGN sur remonterletemps.ign.fr — gratuite et datée, c'est souvent la pièce " +
+     "la plus simple à obtenir. Une attestation sur l'honneur peut les accompagner, mais ne les remplace pas."]);
+  }
+  conseils.push(["Si une pièce vous manque",
+   "Envoyez votre réclamation sans elle plutôt que de laisser passer le délai, et supprimez la ligne " +
+   "correspondante de la liste des pièces jointes. Vous pourrez la transmettre ensuite, par la même voie, " +
+   "en rappelant la référence de votre réclamation."]);
+  return conseils;
 }
 
 function dessinerPageCourrier(doc, d) {
@@ -416,7 +450,11 @@ function dessinerPageCourrier(doc, d) {
   );
 
   w.ligne("Vous trouverez ci-joint les pièces suivantes :", { taille: 10, espace: 4 });
-  piecesAJoindre(motifs).forEach(p => w.ligne(`— ${p}`, { taille: 9.5, espace: 3, x: 24 }));
+  piecesCourrier(motifs).forEach(p => w.ligne(`[   ]  ${p}`, { taille: 10, espace: 3, x: 24 }));
+  w.ligne(
+    "(cochez les pièces que vous joignez effectivement et supprimez les autres lignes avant d'envoyer)",
+    { taille: 8.5, style: 'italic', couleur: [124, 137, 148], espace: 3, x: 24 }
+  );
   w.espace(1);
 
   // La formule de politesse et la signature forment un bloc qu'on réserve, pour
@@ -469,8 +507,27 @@ function dessinerPageDemarche(doc, d) {
     );
   }
 
+  // Les explications sur les pièces vivent ici, et non dans le courrier :
+  // elles s'adressent au lecteur, pas à l'administration.
+  const motifs = d.anomalies.filter(
+    a => a.gravite !== 'info' && !CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code)
+  );
   w.reserver(26);
-  w.ligne('1. Avant d\'envoyer', { taille: 12, style: 'bold', espace: 4 });
+  w.ligne('1. Les pièces à réunir', { taille: 12, style: 'bold', espace: 4 });
+  w.ligne(
+    "Le courrier annonce une liste de pièces jointes, à cocher ou à supprimer selon ce que vous joignez " +
+    "réellement. Voici à quoi chacune sert et comment l'obtenir.",
+    { taille: 10, espace: 5 }
+  );
+  conseilsPieces(motifs).forEach(([titre, texte]) => {
+    w.reserver(22);
+    w.ligne(titre, { taille: 10, style: 'bold', espace: 2.5 });
+    w.ligne(texte, { taille: 9.5, espace: 5, x: 24 });
+  });
+  w.espace(3);
+
+  w.reserver(26);
+  w.ligne('2. Avant d\'envoyer', { taille: 12, style: 'bold', espace: 4 });
   [
     "Relisez le projet de courrier et complétez toutes les mentions entre crochets. Un courrier incomplet retarde le traitement.",
     "Vérifiez que chaque élément que vous avancez est appuyé par une pièce. Une affirmation sans justificatif a peu de chances d'aboutir.",
@@ -480,7 +537,7 @@ function dessinerPageDemarche(doc, d) {
   w.espace(5);
 
   w.reserver(26);
-  w.ligne('2. Où déposer votre réclamation', { taille: 12, style: 'bold', espace: 4 });
+  w.ligne('3. Où déposer votre réclamation', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
     "Deux voies au choix. Par la messagerie sécurisée de votre espace particulier sur impots.gouv.fr, rubrique " +
     "« J'ai une question sur le calcul de mon impôt » — l'envoi y est horodaté automatiquement. Ou par courrier " +
@@ -490,7 +547,7 @@ function dessinerPageDemarche(doc, d) {
   );
 
   w.reserver(26);
-  w.ligne('3. Le délai à ne pas dépasser', { taille: 12, style: 'bold', espace: 4 });
+  w.ligne('4. Le délai à ne pas dépasser', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
     "Pour les impôts directs locaux, la réclamation doit parvenir à l'administration au plus tard le 31 décembre " +
     "de l'année suivant celle, selon le cas, de la mise en recouvrement du rôle, ou de la réalisation de " +
@@ -513,7 +570,7 @@ function dessinerPageDemarche(doc, d) {
   );
 
   w.reserver(26);
-  w.ligne('4. Ce qui se passe ensuite', { taille: 12, style: 'bold', espace: 4 });
+  w.ligne('5. Ce qui se passe ensuite', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
     "L'administration dispose de six mois pour statuer. Si elle ne peut pas tenir ce délai, elle doit vous en " +
     "informer avant son expiration et peut se réserver trois mois supplémentaires au maximum (article R*198-10 " +
@@ -529,7 +586,7 @@ function dessinerPageDemarche(doc, d) {
   );
 
   w.reserver(26);
-  w.ligne('5. Ce que cette démarche ne garantit pas', { taille: 12, style: 'bold', espace: 4 });
+  w.ligne('6. Ce que cette démarche ne garantit pas', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
     "Aucune réclamation ne garantit un dégrèvement. L'administration peut confirmer son évaluation, la corriger " +
     "partiellement, ou constater une insuffisance d'imposition. Foncier·Juste ne peut pas anticiper sa décision et " +

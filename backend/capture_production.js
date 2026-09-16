@@ -28,6 +28,8 @@ async function empreinteTextes(anomalies) {
     anomalies.map((a) => a.vosReponses),
     anomalies.map((a) => a.calcul),
     anomalies.map((a) => a.message),
+    anomalies.map((a) => a.confiance.texte),
+    anomalies.map((a) => a.confiance.origine),
   ];
   const octets = new TextEncoder().encode(JSON.stringify(textes));
   const hash = await crypto.subtle.digest('SHA-256', octets);
