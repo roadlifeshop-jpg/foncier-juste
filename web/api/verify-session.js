@@ -25,6 +25,11 @@ module.exports = async (req, res) => {
       res.status(502).json({ error: data.error?.message || 'Erreur Stripe inconnue' });
       return;
     }
+    // Cette lecture ne filtre AUCUN produit, volontairement : une commande
+    // payée avant le retrait de l'analyse à 29 € doit rester délivrable à son
+    // acheteur. Le retrait de la vente se fait uniquement à la création de la
+    // session, dans create-checkout-session.js.
+    //
     // Les réponses du pré-diagnostic ont été jointes au paiement : elles
     // permettent de reconstruire le document acheté, sur n'importe quel
     // appareil et à tout moment, à partir du seul identifiant de session.

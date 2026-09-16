@@ -1179,10 +1179,16 @@ document.querySelectorAll('.buy-btn').forEach(btn => btn.addEventListener('click
       body: JSON.stringify({ produit, email, diag: dernierDiagnostic.entree }),
     });
     const data = await r.json();
-    if (!r.ok || !data.url) throw new Error(data.error || 'réponse invalide');
+    if (!r.ok || !data.url){
+      // Le serveur refuse explicitement certaines demandes — offre retirée,
+      // produit inconnu. Son message est plus utile qu'un message générique.
+      const e = new Error(data.error || 'réponse invalide');
+      e.messageServeur = data.error;
+      throw e;
+    }
     window.location.href = data.url;
   } catch (e) {
-    hint.textContent = "Le paiement n'a pas pu démarrer. Réessayez dans un instant.";
+    hint.textContent = e.messageServeur || "Le paiement n'a pas pu démarrer. Réessayez dans un instant.";
     console.error(e);
     document.querySelectorAll('.buy-btn').forEach(b => b.disabled = false);
   }

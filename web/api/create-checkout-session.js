@@ -43,11 +43,21 @@ module.exports = async (req, res) => {
   // Vercel parse déjà le JSON en objet si Content-Type: application/json ;
   // ce fallback gère aussi le cas d'un corps encore sous forme de texte.
   const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-  // Seules les offres encore en vente sont acceptées ; toute autre valeur
-  // retombe sur le dossier.
-  const demande = PRODUITS[body.produit];
-  const produitId = demande && !demande.retiree ? body.produit : 'dossier';
+  // Seules les offres encore en vente peuvent donner lieu à un paiement. Toute
+  // autre demande est REFUSÉE, jamais remplacée : créer une session à 49 €
+  // pour qui demande un produit à 29 € serait une surprise de facturation.
+  const produitId = body.produit;
   const produit = PRODUITS[produitId];
+  if (!produit) {
+    res.status(400).json({ error: "Ce produit n'existe pas." });
+    return;
+  }
+  if (produit.retiree) {
+    res.status(410).json({
+      error: "Cette offre n'est plus proposée à la vente. Seul le dossier de vérification à 49 € est disponible.",
+    });
+    return;
+  }
 
   // L'email permet à Stripe d'envoyer le reçu et, surtout, de retrouver le
   // client si la livraison du PDF échoue de son côté (onglet fermé, etc.).
