@@ -1,17 +1,25 @@
 // Fonction serverless Vercel (runtime Node.js — aucune dépendance npm,
 // on appelle directement l'API REST de Stripe avec fetch()).
 //
-// Crée une session de paiement Stripe Checkout pour le rapport complet
-// (29€). Le prix est fixé ICI, côté serveur — jamais envoyé par le client,
-// pour qu'il ne puisse pas être manipulé.
+// Crée une session de paiement Stripe Checkout. Le prix est fixé ICI, côté
+// serveur — jamais envoyé par le client, pour qu'il ne puisse pas être
+// manipulé.
 
 // Catalogue défini ICI, côté serveur — jamais envoyé ni modifiable par le
-// client. Le client ne fait que choisir une clé ("rapport" ou "dossier").
+// client.
+//
+// Une seule offre est vendable depuis le 17/09/2026 : le dossier de
+// vérification. L'analyse seule à 29 € a été retirée — la comparaison section
+// par section avec le résultat gratuit montrait qu'elle n'ajoutait qu'un
+// rappel des réponses déjà saisies. La clé « rapport » reste définie pour que
+// les sessions de paiement antérieures restent lisibles par verify-session.
 const PRODUITS = {
+  // Retirée de la vente. Conservée pour les sessions antérieures.
   rapport: {
-    montant: 2900, // 29,00 €
+    montant: 2900,
     nom: 'Foncier·Juste — Analyse détaillée',
-    description: "Chaque écart repris et expliqué avec sa base réglementaire, les données utilisées, et les transactions comparables de votre commune.",
+    description: "Analyse détaillée des éléments relevés (offre retirée).",
+    retiree: true,
   },
   dossier: {
     montant: 4900, // 49,00 €
@@ -35,7 +43,10 @@ module.exports = async (req, res) => {
   // Vercel parse déjà le JSON en objet si Content-Type: application/json ;
   // ce fallback gère aussi le cas d'un corps encore sous forme de texte.
   const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-  const produitId = PRODUITS[body.produit] ? body.produit : 'rapport';
+  // Seules les offres encore en vente sont acceptées ; toute autre valeur
+  // retombe sur le dossier.
+  const demande = PRODUITS[body.produit];
+  const produitId = demande && !demande.retiree ? body.produit : 'dossier';
   const produit = PRODUITS[produitId];
 
   // L'email permet à Stripe d'envoyer le reçu et, surtout, de retrouver le
