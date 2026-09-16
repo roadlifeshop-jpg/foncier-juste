@@ -1018,8 +1018,11 @@ async function runDiagnostic(){
 const echappe = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function blocSignal(a){
-  const tag = a.gravite === 'haute' ? 'tag-alert' : a.gravite === 'moyenne' ? 'tag-warn' : 'tag-info';
-  const lib = a.gravite === 'haute' ? 'À vérifier en priorité' : a.gravite === 'moyenne' ? 'À vérifier' : 'Contexte';
+  const nonValide = CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code);
+  const tag = nonValide ? 'tag-warn' : a.gravite === 'haute' ? 'tag-alert' : a.gravite === 'moyenne' ? 'tag-warn' : 'tag-info';
+  const lib = nonValide ? 'Constat non validé'
+    : a.gravite === 'haute' ? 'À vérifier en priorité'
+    : a.gravite === 'moyenne' ? 'À vérifier' : 'Contexte';
   return `<article class="signal">
     <div class="signal-head">
       <span class="signal-kind">${echappe(a.kind)}</span>
@@ -1027,16 +1030,16 @@ function blocSignal(a){
     </div>
     <h3>${echappe(a.titre)}</h3>
     <div class="figure">${echappe(a.figure)}</div>
-    <p class="why"><span class="k">Ce que vous avez indiqué</span>${echappe(a.vosReponses)}</p>
-    <p class="why"><span class="k">Ce que nous en avons calculé</span>${echappe(a.calcul)}</p>
-    <p class="why"><span class="k">Ce qu'il reste à vérifier</span>${echappe(a.aVerifier)}</p>
-    <p class="conf"><b>Niveau de confiance :</b> ${echappe(a.confiance.texte)}<br>
-    <b>Origine de l'information :</b> ${echappe(a.confiance.origine)}</p>
-    ${CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code) ? `<p class="conf" style="color:var(--warn)">
+    ${nonValide ? `<p class="conf" style="color:var(--warn);margin-top:10px;border:0;padding:0">
       <b>Constat non validé.</b> Nous vérifions actuellement, sur de vraies fiches d'évaluation, que les
       deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point n'est pas tranché, cet
       élément ne compte pas comme une anomalie : il n'ouvre aucune offre payante et ne figure pas dans le
       projet de courrier si vous achetez le dossier. Il vous indique où regarder, rien de plus.</p>` : ''}
+    <p class="why"><span class="k">Ce que vous avez indiqué</span>${echappe(a.vosReponses)}</p>
+    <p class="why"><span class="k">Ce que nous en avons calculé</span>${echappe(a.calcul)}</p>
+    <p class="why"><span class="k">Ce qu'il reste à vérifier</span>${echappe(a.aVerifier)}</p>
+    <p class="conf"><b>${nonValide ? 'Fiabilité de la donnée que vous avez saisie' : 'Niveau de confiance'} :</b> ${echappe(a.confiance.texte)}<br>
+    <b>Origine de l'information :</b> ${echappe(a.confiance.origine)}</p>
   </article>`;
 }
 

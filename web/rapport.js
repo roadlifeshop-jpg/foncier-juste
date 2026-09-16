@@ -79,6 +79,11 @@ function creerEcrivain(doc, margeGauche, largeur, opts = {}) {
     get y() { return y; },
     set y(v) { y = v; },
     espace(h) { if (y + h > HAUTEUR_UTILE) pageSuivante(); else y += h; },
+    // Réserve une hauteur pour un bloc qui ne doit pas être coupé : si la
+    // place restante est insuffisante, on passe à la page suivante AVANT de
+    // commencer le bloc. Évite qu'une formule de politesse et sa signature se
+    // retrouvent séparées, ou isolées en bas de page.
+    reserver(h) { if (y + h > HAUTEUR_UTILE) pageSuivante(); },
     ligne(texte, o = {}) {
       const { taille = 10, style = 'normal', couleur = [18, 24, 29], espace = 6, x = margeGauche } = o;
       // La mise en forme doit être réappliquée APRÈS un éventuel saut de page :
@@ -190,25 +195,31 @@ function dessinerPageAnalyse(doc, d, { exemple }) {
   if (reels.length) {
     w.ligne('Éléments à vérifier', { taille: 12, style: 'bold', espace: 4 });
     reels.forEach((a, i) => {
+      const nonValide = CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code);
       w.ligne(`${i + 1}. ${a.titre}`, { taille: 11, style: 'bold', espace: 3 });
       w.ligne(`Écart constaté : ${a.figure}`, { taille: 10, style: 'bold', couleur: [33, 65, 79], espace: 3, x: 24 });
+      // Le statut est annoncé AVANT les explications : sans cela, le lecteur
+      // découvrait d'abord un « niveau de confiance élevé » qui semblait porter
+      // sur la conclusion, alors qu'il ne porte que sur la donnée saisie.
+      if (nonValide) {
+        w.ligne(
+          "Statut — constat non validé. Nous vérifions actuellement, sur de vraies fiches d'évaluation, que " +
+          "les deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point n'est pas tranché, " +
+          "cet élément n'est pas présenté comme une anomalie et ne figure pas dans le projet de courrier. Il " +
+          "vous indique où regarder, rien de plus.",
+          { taille: 9, style: 'bold', couleur: [122, 94, 16], espace: 4, x: 24 }
+        );
+      }
       w.ligne(`Ce que vous avez indiqué — ${a.vosReponses}`, { taille: 9.5, espace: 2.5, x: 24 });
       w.ligne(`Ce que nous en avons calculé — ${a.calcul}`, { taille: 9.5, espace: 2.5, x: 24 });
       w.ligne(`Ce qu'il reste à vérifier — ${a.aVerifier}`, { taille: 9.5, espace: 2.5, x: 24 });
-      w.ligne(`Niveau de confiance — ${a.confiance.texte}`, { taille: 9.5, couleur: [91, 104, 117], espace: 2.5, x: 24 });
-      w.ligne(`Origine de l'information — ${a.confiance.origine}`, {
-        taille: 9.5, couleur: [91, 104, 117],
-        espace: CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code) ? 2.5 : 7, x: 24,
-      });
-      if (CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code)) {
-        w.ligne(
-          "Statut — constat non validé. Nous vérifions actuellement, sur de vraies fiches d'évaluation, " +
-          "que les deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point n'est pas " +
-          "tranché, cet élément n'est pas présenté comme une anomalie et ne figure pas dans le projet de " +
-          "courrier. Il vous indique où regarder, rien de plus.",
-          { taille: 9, style: 'bold', couleur: [122, 94, 16], espace: 7, x: 24 }
-        );
-      }
+      // Le libellé dit ce que la mesure qualifie réellement : la donnée saisie,
+      // et non le constat qui en découle.
+      w.ligne(
+        `${nonValide ? 'Fiabilité de la donnée que vous avez saisie' : 'Niveau de confiance'} — ${a.confiance.texte}`,
+        { taille: 9.5, couleur: [91, 104, 117], espace: 2.5, x: 24 }
+      );
+      w.ligne(`Origine de l'information — ${a.confiance.origine}`, { taille: 9.5, couleur: [91, 104, 117], espace: 7, x: 24 });
     });
   } else {
     w.ligne('Éléments à vérifier', { taille: 12, style: 'bold', espace: 3 });
@@ -344,22 +355,22 @@ function dessinerPageCourrier(doc, d) {
 
   const annee = new Date().getFullYear();
   w.espace(2);
-  w.ligne('[Vos NOM et Prénom]', { taille: 10, espace: 3 });
-  w.ligne('[Votre adresse complète]', { taille: 10, espace: 3 });
-  w.ligne("[Votre numéro fiscal — en haut de votre avis d'imposition]", { taille: 10, espace: 9 });
+  w.ligne('[Vos NOM et Prénom]', { taille: 10, espace: 2 });
+  w.ligne('[Votre adresse complète]', { taille: 10, espace: 2 });
+  w.ligne("[Votre numéro fiscal — en haut de votre avis d'imposition]", { taille: 10, espace: 7 });
 
-  w.ligne("À l'attention du Service des Impôts Fonciers", { taille: 10, style: 'bold', espace: 3 });
-  w.ligne("[Adresse du service — indiquée sur votre avis de taxe foncière]", { taille: 10, espace: 9 });
+  w.ligne("À l'attention du Service des Impôts Fonciers", { taille: 10, style: 'bold', espace: 2 });
+  w.ligne("[Adresse du service — indiquée sur votre avis de taxe foncière]", { taille: 10, espace: 7 });
 
-  w.ligne(`Fait à [Ville], le ${new Date().toLocaleDateString('fr-FR')}`, { taille: 10, espace: 8 });
+  w.ligne(`Fait à [Ville], le ${new Date().toLocaleDateString('fr-FR')}`, { taille: 10, espace: 6 });
 
   w.ligne(
     `Objet : réclamation contentieuse relative à la taxe foncière sur les propriétés bâties — ` +
     `avis n° [référence de l'avis contesté], année ${annee} — article L.190 du Livre des procédures fiscales`,
-    { taille: 10, style: 'bold', espace: 8 }
+    { taille: 10, style: 'bold', espace: 6 }
   );
 
-  w.ligne('Madame, Monsieur,', { taille: 10, espace: 6 });
+  w.ligne('Madame, Monsieur,', { taille: 10, espace: 5 });
 
   w.ligne(
     `Je vous prie de bien vouloir procéder à un nouvel examen de l'évaluation retenue pour le bien situé ` +
@@ -388,9 +399,9 @@ function dessinerPageCourrier(doc, d) {
     a => a.gravite !== 'info' && CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code)
   );
   motifs.forEach(a => {
-    w.ligne(`— ${a.message}`, { taille: 10, espace: 4, x: 24 });
+    w.ligne(`— ${a.message}`, { taille: 10, espace: 3, x: 24 });
   });
-  w.espace(2);
+  w.espace(1);
 
   w.ligne(
     "Ces éléments me paraissent susceptibles d'affecter la valeur locative cadastrale servant de base au calcul " +
@@ -405,36 +416,21 @@ function dessinerPageCourrier(doc, d) {
   );
 
   w.ligne("Vous trouverez ci-joint les pièces suivantes :", { taille: 10, espace: 4 });
-  piecesAJoindre(motifs).forEach(p => w.ligne(`— ${p}`, { taille: 9.5, espace: 4, x: 24 }));
-  w.espace(2);
+  piecesAJoindre(motifs).forEach(p => w.ligne(`— ${p}`, { taille: 9.5, espace: 3, x: 24 }));
+  w.espace(1);
 
-  w.ligne("Je reste à votre disposition pour tout élément complémentaire et vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.", { taille: 10, espace: 10 });
+  // La formule de politesse et la signature forment un bloc qu'on réserve, pour
+  // qu'il ne soit ni coupé ni renvoyé seul sur une page suivante alors qu'il
+  // tenait encore. La consigne sur la signature manuscrite est passée dans
+  // « Marche à suivre » : ce n'est pas du texte à recopier, et la garder ici
+  // allongeait le bloc au point de faire déborder la lettre.
+  //
+  // Essai écarté : lister les pièces après la signature, comme dans une lettre
+  // ordinaire. Mesuré — cela repoussait la liste seule sur une page suivante et
+  // dégradait toutes les configurations testées.
+  w.reserver(24);
+  w.ligne("Je reste à votre disposition pour tout élément complémentaire et vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.", { taille: 10, espace: 6 });
   w.ligne('[Signature manuscrite]', { taille: 10, style: 'bold', espace: 4 });
-  w.ligne("La signature manuscrite est exigée par l'article R*197-3 du Livre des procédures fiscales pour une réclamation adressée par courrier.", { taille: 8.5, couleur: [124, 137, 148], espace: 4 });
-
-  if (surfaceEcartee) {
-    w.espace(8);
-    doc.setDrawColor(216, 223, 227);
-    doc.setFillColor(237, 241, 244);
-    const hautBloc = w.y - 5;
-    w.ligne("Pourquoi l'écart de surface ne figure pas dans ce courrier", { taille: 10, style: 'bold', espace: 3, x: 24 });
-    w.ligne(
-      "Votre analyse relève un écart entre la surface lue sur votre fiche et celle que vous avez mesurée. " +
-      "Nous ne l'avons volontairement pas inscrit comme motif : nous ne sommes pas encore certains que ces " +
-      "deux chiffres recouvrent le même périmètre. La fiche décompose le local en parties principales, " +
-      "parties secondaires et dépendances ; si votre total inclut un garage ou une cave que votre mesure " +
-      "exclut, l'écart n'est qu'un artefact.",
-      { taille: 9, espace: 3, x: 24 }
-    );
-    w.ligne(
-      "Avant d'avancer ce motif, reprenez votre fiche et identifiez précisément les lignes que vous avez " +
-      "additionnées, puis mesurez exactement les mêmes espaces. Si l'écart subsiste, il est réel : vous " +
-      "pouvez alors l'ajouter vous-même à la liste ci-dessus, accompagné d'un plan coté ou d'un relevé.",
-      { taille: 9, espace: 4, x: 24 }
-    );
-    doc.setDrawColor(191, 201, 207);
-    doc.line(20, hautBloc, 20, w.y - 4);
-  }
 
   w.finir();
 }
@@ -447,14 +443,43 @@ function dessinerPageDemarche(doc, d) {
   });
   w.y = dessinerEnTete(doc, 'Marche à suivre');
 
+  // La note sur l'écart de surface est une explication au lecteur, pas une
+  // pièce du courrier : sa place est ici, et non au dos de la lettre où elle
+  // laissait la signature isolée sur une page presque vide.
+  const surfaceEcartee = d.anomalies.some(
+    a => a.gravite !== 'info' && CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code)
+  );
+  if (surfaceEcartee) {
+    w.ligne("Pourquoi l'écart de surface ne figure pas dans le courrier", { taille: 12, style: 'bold', espace: 4 });
+    w.ligne(
+      "Votre analyse relève un écart entre la surface lue sur votre fiche et celle que vous avez mesurée. " +
+      "Nous ne l'avons volontairement pas inscrit comme motif : nous ne sommes pas encore certains que ces " +
+      "deux chiffres recouvrent le même périmètre. La fiche décompose le local en parties principales, " +
+      "parties secondaires et dépendances ; si votre total inclut un garage ou une cave que votre mesure " +
+      "exclut, l'écart n'est qu'un artefact.",
+      { taille: 10, espace: 3 }
+    );
+    w.ligne(
+      "Avant d'avancer ce motif, reprenez votre fiche et identifiez précisément les lignes que vous avez " +
+      "additionnées, puis mesurez exactement les mêmes espaces. Si un écart subsiste après cette " +
+      "vérification, il porte alors sur deux surfaces comparables. Cela ne démontre pas pour autant une " +
+      "erreur dans votre évaluation : cela vous donne un élément que vous pouvez soumettre à " +
+      "l'administration, accompagné d'un plan coté ou d'un relevé, en la laissant apprécier.",
+      { taille: 10, espace: 8 }
+    );
+  }
+
+  w.reserver(26);
   w.ligne('1. Avant d\'envoyer', { taille: 12, style: 'bold', espace: 4 });
   [
     "Relisez le projet de courrier et complétez toutes les mentions entre crochets. Un courrier incomplet retarde le traitement.",
     "Vérifiez que chaque élément que vous avancez est appuyé par une pièce. Une affirmation sans justificatif a peu de chances d'aboutir.",
     "Si vous n'êtes pas certain d'un chiffre, retirez-le plutôt que de l'avancer : une inexactitude fragilise tout le dossier.",
+    "Si vous envoyez par courrier, signez le document à la main : l'article R*197-3 du Livre des procédures fiscales l'exige.",
   ].forEach(t => w.ligne(`— ${t}`, { taille: 10, espace: 3 }));
   w.espace(5);
 
+  w.reserver(26);
   w.ligne('2. Où déposer votre réclamation', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
     "Deux voies au choix. Par la messagerie sécurisée de votre espace particulier sur impots.gouv.fr, rubrique " +
@@ -464,6 +489,7 @@ function dessinerPageDemarche(doc, d) {
     { taille: 10, espace: 8 }
   );
 
+  w.reserver(26);
   w.ligne('3. Le délai à ne pas dépasser', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
     "Pour les impôts directs locaux, la réclamation doit parvenir à l'administration au plus tard le 31 décembre " +
@@ -486,6 +512,7 @@ function dessinerPageDemarche(doc, d) {
     { taille: 10, espace: 8 }
   );
 
+  w.reserver(26);
   w.ligne('4. Ce qui se passe ensuite', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
     "L'administration dispose de six mois pour statuer. Si elle ne peut pas tenir ce délai, elle doit vous en " +
@@ -501,6 +528,7 @@ function dessinerPageDemarche(doc, d) {
     { taille: 10, espace: 8 }
   );
 
+  w.reserver(26);
   w.ligne('5. Ce que cette démarche ne garantit pas', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
     "Aucune réclamation ne garantit un dégrèvement. L'administration peut confirmer son évaluation, la corriger " +
