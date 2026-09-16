@@ -29,10 +29,15 @@
 //  - Forme de la réclamation (art. R*197-3 LPF) : mentionner l'imposition
 //    contestée, contenir un exposé sommaire des moyens et conclusions, porter
 //    la signature manuscrite de son auteur, et être accompagnée de l'avis
-//    d'imposition, d'une copie de cet avis ou d'un extrait du rôle — ou, à
-//    défaut, d'une pièce justifiant le montant. Le même article permet la
-//    RÉGULARISATION À TOUT MOMENT par production de l'une de ces pièces : ne
-//    pas présenter l'absence d'avis comme une irrecevabilité acquise.
+//    d'imposition, d'une copie de cet avis ou d'un extrait du rôle. Le même
+//    article permet la RÉGULARISATION À TOUT MOMENT par production de l'une de
+//    ces pièces : ne pas présenter l'absence d'avis comme une irrecevabilité
+//    acquise.
+//    NE PAS citer ici la branche « à défaut, une pièce justifiant le montant
+//    de la retenue ou du versement » : elle ne vise que les impositions
+//    n'ayant donné lieu ni à un rôle ni à un avis de mise en recouvrement. La
+//    taxe foncière est établie par rôle — cette possibilité ne s'applique pas
+//    à notre parcours, et la mentionner induirait l'usager en erreur.
 //  - Instruction : l'administration statue dans les six mois, prolongeables
 //    de trois mois si elle en informe le contribuable (art. R*198-10 LPF).
 //  - Silence de l'administration : il ne vaut PAS acceptation. Le
@@ -305,12 +310,11 @@ function piecesAJoindre(anomalies) {
   // L'article R*197-3 du LPF fixe ce qui est exigé à peine d'irrecevabilité ;
   // le reste relève des pièces qui étayent le fond.
   const pieces = [
-    "À JOINDRE EN PRIORITÉ — l'avis de taxe foncière contesté, ou sa copie. L'article R*197-3 du Livre des " +
-    "procédures fiscales demande que la réclamation soit accompagnée de l'avis d'imposition, d'une copie de cet " +
-    "avis ou d'un extrait du rôle — ou, à défaut, d'une autre pièce justifiant le montant mis à votre charge. " +
-    "Le même article prévoit que la réclamation peut être régularisée à tout moment par la production de l'une " +
-    "de ces pièces : si vous n'avez pas votre avis sous la main, ne différez pas votre envoi, surtout si le " +
-    "délai approche.",
+    "À JOINDRE EN PRIORITÉ — l'avis de taxe foncière contesté. L'article R*197-3 du Livre des procédures " +
+    "fiscales demande que la réclamation soit accompagnée de l'avis d'imposition, d'une copie de cet avis ou " +
+    "d'un extrait du rôle. Le même article prévoit que la réclamation peut être régularisée à tout moment par " +
+    "la production de l'une de ces pièces : si vous ne l'avez pas sous la main, ne différez pas votre envoi, " +
+    "surtout si le délai approche — vous pourrez la fournir ensuite.",
     "Votre fiche d'évaluation (formulaire 6675-M), obtenue gratuitement auprès du service des impôts fonciers ou par la messagerie sécurisée d'impots.gouv.fr.",
   ];
   if (anomalies.some(a => a.code === 'surface_surevaluee')) {
