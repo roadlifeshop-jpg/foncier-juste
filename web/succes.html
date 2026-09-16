@@ -29,6 +29,10 @@ main.center{max-width:620px; margin:0 auto; padding:64px 20px 60px;}
 }
 .lien-reprise code{flex:1; font-size:.76rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; background:none; padding:0;}
 .lien-reprise button{flex-shrink:0; font-size:.8rem; padding:6px 12px;}
+.avertissement{
+  font-size:.85rem; margin-top:12px; padding:11px 13px; border-radius:8px;
+  background:var(--warn-soft); border:1px solid var(--warn-line); color:var(--ink);
+}
 .recu{font-size:.82rem; color:var(--ink-faint); margin-top:14px;}
 .back{display:inline-block; margin-top:20px; font-size:.86rem; color:var(--ink-muted); text-decoration:none;}
 </style>
@@ -54,12 +58,13 @@ main.center{max-width:620px; margin:0 auto; padding:64px 20px 60px;}
 
     <div class="bloc">
       <h2>Conservez ce lien</h2>
-      <p>Il vous permet de retélécharger votre document à tout moment, depuis n'importe quel appareil, même si vous fermez cette page. Mettez-le en favori ou envoyez-le-vous par message.</p>
+      <p>Il vous permet de retélécharger votre document depuis n'importe quel appareil, même après avoir fermé cette page, aussi longtemps que votre commande reste consultable chez notre prestataire de paiement. Mettez-le en favori.</p>
       <div class="lien-reprise">
         <code id="lien-texte">—</code>
         <button class="btn btn-secondary" id="copier-btn" type="button">Copier</button>
       </div>
-      <p class="recu">Vous avez également reçu de Stripe un reçu par email à l'adresse indiquée lors du paiement. Il vaut preuve d'achat&nbsp;: si vous perdez ce lien, il nous permet de retrouver votre commande.</p>
+      <p class="avertissement"><strong>Gardez-le pour vous.</strong> Ce lien ne demande aucun mot de passe&nbsp;: toute personne qui l'obtient peut télécharger votre document et voir les réponses que vous avez saisies. Ne le publiez pas et ne le transférez qu'à quelqu'un de confiance.</p>
+      <p class="recu">Vous avez également reçu un reçu par email à l'adresse indiquée lors du paiement. Il vaut preuve d'achat&nbsp;: si vous perdez ce lien, il nous permet de retrouver votre commande.</p>
     </div>
 
     <div class="bloc">
