@@ -130,6 +130,61 @@ function dessinerEnTete(doc, titre, { exemple, sousTitre } = {}) {
   return y;
 }
 
+// --------------------------------------------------------------------------
+// Enregistrement : correction des dictionnaires de police
+// --------------------------------------------------------------------------
+// jsPDF déclare /FirstChar et /LastChar sur les polices standard sans fournir
+// le tableau /Widths que ces deux entrées annoncent. Les lecteurs qui
+// embarquent leurs propres métriques des 14 polices standard (Aperçu de macOS,
+// PDFium donc Chrome) s'en accommodent. Poppler — utilisé par Evince, Okular,
+// pdftoppm et beaucoup de chaînes de conversion — cherche le tableau promis,
+// ne le trouve pas, et rend des glyphes sans largeur : les lettres se
+// chevauchent et les espaces deviennent irréguliers.
+//
+// On neutralise ces deux entrées en les remplaçant par des espaces de MÊME
+// LONGUEUR. Le dictionnaire redevient celui d'une police standard, que tout
+// lecteur sait mesurer ; et comme aucun octet n'est ajouté ni retiré, la table
+// de références croisées (xref) reste valide sans avoir à la recalculer.
+//
+// Vérifié par `verifierPDF()` ci-dessous, appelé à chaque génération.
+function corrigerDictionnairesPolice(brut) {
+  const corrige = brut
+    .replace(/\/FirstChar \d+/g, (m) => ' '.repeat(m.length))
+    .replace(/\/LastChar \d+/g, (m) => ' '.repeat(m.length));
+  if (corrige.length !== brut.length) {
+    throw new Error('correction des polices : longueur modifiée, xref invalide');
+  }
+  return corrige;
+}
+
+function verifierPDF(brut) {
+  const anomalies = [];
+  if (/\/FirstChar \d/.test(brut)) anomalies.push('/FirstChar subsiste');
+  if (/\/LastChar \d/.test(brut)) anomalies.push('/LastChar subsiste');
+  if (!/\/BaseFont \/Helvetica/.test(brut)) anomalies.push('police Helvetica absente');
+  if (!brut.startsWith('%PDF-')) anomalies.push('en-tête PDF absent');
+  if (!brut.includes('%%EOF')) anomalies.push('marqueur de fin absent');
+  return anomalies;
+}
+
+// Remplace doc.save() : applique la correction, puis déclenche le
+// téléchargement. Exposée pour que les scripts de contrôle puissent
+// l'intercepter sans écrire de fichier.
+function enregistrerPDF(doc, nom) {
+  const brut = corrigerDictionnairesPolice(doc.output());
+  const anomalies = verifierPDF(brut);
+  if (anomalies.length) throw new Error('PDF non conforme : ' + anomalies.join(', '));
+  const octets = new Uint8Array(brut.length);
+  for (let i = 0; i < brut.length; i++) octets[i] = brut.charCodeAt(i) & 0xff;
+  const blob = new Blob([octets], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const lien = document.createElement('a');
+  lien.href = url; lien.download = nom;
+  document.body.appendChild(lien); lien.click(); lien.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  return blob;
+}
+
 function dessinerPiedDePage(doc, texte) {
   doc.setDrawColor(216, 223, 227); doc.line(20, 275, 190, 275);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(124, 137, 148);
@@ -146,6 +201,26 @@ const LIBELLES_ELEMENTS = {
   piscine: 'la piscine', garage: 'le garage',
   dependance: 'la dépendance', veranda: 'la véranda',
 };
+
+// Hauteur qu'occupera un bloc « élément à vérifier », calculée avec les mêmes
+// métriques que l'écrivain. Plafonnée à une page : un bloc plus haut que la
+// page ne peut de toute façon pas être gardé d'un seul tenant, et le réserver
+// provoquerait un saut de page inutile.
+function hauteurBlocSignal(doc, a, nonValide) {
+  const morceaux = (texte, taille, indent) => {
+    doc.setFontSize(taille);
+    return doc.splitTextToSize(texte, 170 - indent).length * (taille / 2.6);
+  };
+  let h = morceaux(`1. ${a.titre}`, 11, 0) + 3;
+  h += morceaux(`Écart constaté : ${a.figure}`, 10, 4) + 3;
+  if (nonValide) h += morceaux('Statut — constat non validé. '.repeat(1) + a.aVerifier, 9, 4) + 4;
+  h += morceaux(`Ce que vous avez indiqué — ${a.vosReponses}`, 9.5, 4) + 2.5;
+  h += morceaux(`Ce que nous en avons calculé — ${a.calcul}`, 9.5, 4) + 2.5;
+  h += morceaux(`Ce qu'il reste à vérifier — ${a.aVerifier}`, 9.5, 4) + 2.5;
+  h += morceaux(`Source déclarée — ${a.confiance.texte}`, 9.5, 4) + 2.5;
+  h += morceaux(`Origine de l'information — ${a.confiance.origine}`, 9.5, 4) + 7;
+  return Math.min(h, HAUTEUR_UTILE - HAUT_DE_PAGE);
+}
 
 // --------------------------------------------------------------------------
 // Page 1 — l'analyse
@@ -196,6 +271,11 @@ function dessinerPageAnalyse(doc, d, { exemple }) {
     w.ligne('Éléments à vérifier', { taille: 12, style: 'bold', espace: 4 });
     reels.forEach((a, i) => {
       const nonValide = CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code);
+      // Un élément se lit d'un bloc : on mesure sa hauteur réelle et on la
+      // réserve, pour qu'il ne soit pas coupé au milieu. Sans cela, la
+      // dernière ligne — « Origine de l'information » — se retrouvait seule en
+      // tête de la page suivante.
+      w.reserver(hauteurBlocSignal(doc, a, nonValide));
       w.ligne(`${i + 1}. ${a.titre}`, { taille: 11, style: 'bold', espace: 3 });
       w.ligne(`Écart constaté : ${a.figure}`, { taille: 10, style: 'bold', couleur: [33, 65, 79], espace: 3, x: 24 });
       // Le statut est annoncé AVANT les explications : sans cela, le lecteur
@@ -213,8 +293,11 @@ function dessinerPageAnalyse(doc, d, { exemple }) {
       w.ligne(`Ce que vous avez indiqué — ${a.vosReponses}`, { taille: 9.5, espace: 2.5, x: 24 });
       w.ligne(`Ce que nous en avons calculé — ${a.calcul}`, { taille: 9.5, espace: 2.5, x: 24 });
       w.ligne(`Ce qu'il reste à vérifier — ${a.aVerifier}`, { taille: 9.5, espace: 2.5, x: 24 });
-      // Le libellé dit ce que la mesure qualifie réellement : la donnée saisie,
-      // et non le constat qui en découle.
+      // Le libellé dit ce que la mesure qualifie réellement : la source
+      // déclarée, et non le constat qui en découle. Les deux lignes forment un
+      // couple : réservées ensemble, pour qu'« Origine de l'information » ne se
+      // retrouve pas seule en tête de la page suivante.
+      w.reserver(26);
       w.ligne(
         `${nonValide ? 'Source déclarée' : 'Source de l\u2019information'} — ${a.confiance.texte}`,
         { taille: 9.5, couleur: [91, 104, 117], espace: 2.5, x: 24 }
@@ -261,7 +344,7 @@ function genererRapportPDF(d, opts = {}) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   dessinerPageAnalyse(doc, d, { exemple });
-  doc.save(exemple ? `foncier-juste-exemple-${d.commune.code_commune}.pdf` : `foncier-juste-analyse-${d.commune.code_commune}.pdf`);
+  enregistrerPDF(doc, exemple ? `foncier-juste-exemple-${d.commune.code_commune}.pdf` : `foncier-juste-analyse-${d.commune.code_commune}.pdf`);
 }
 
 // --------------------------------------------------------------------------
@@ -310,7 +393,7 @@ function genererApercuPDF(d) {
   doc.text(doc.splitTextToSize("Votre pré-diagnostic reste consultable gratuitement sur le site. Aucun montant d'économie n'est annoncé, ici ni ailleurs : nous ne savons pas le calculer.", 160), 25, w.y + 9);
 
   w.finir();
-  doc.save('foncier-juste-apercu.pdf');
+  enregistrerPDF(doc, 'foncier-juste-apercu.pdf');
 }
 
 // --------------------------------------------------------------------------
@@ -605,5 +688,5 @@ function genererDossierPDF(d, opts = {}) {
   dessinerPageAnalyse(doc, d, { exemple });
   dessinerPageCourrier(doc, d);
   dessinerPageDemarche(doc, d);
-  doc.save(exemple ? `foncier-juste-dossier-exemple-${d.commune.code_commune}.pdf` : `foncier-juste-dossier-${d.commune.code_commune}.pdf`);
+  enregistrerPDF(doc, exemple ? `foncier-juste-dossier-exemple-${d.commune.code_commune}.pdf` : `foncier-juste-dossier-${d.commune.code_commune}.pdf`);
 }
