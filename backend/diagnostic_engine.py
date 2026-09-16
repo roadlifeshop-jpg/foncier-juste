@@ -224,7 +224,7 @@ CONFIANCE_SURFACE = {
 CONFIANCE_CONFORT_AVEC_FICHE = {
     "niveau": "elevee",
     "texte": (
-        "Vous déclarez avoir relevé ces éléments sur votre fiche d’évaluation. C’est "
+        "Vous déclarez avoir lu cette information sur votre fiche d’évaluation. C’est "
         "le document qui fait foi, mais nous n’y avons pas accès : vérifiez votre "
         "relevé avant de vous en prévaloir."
     ),

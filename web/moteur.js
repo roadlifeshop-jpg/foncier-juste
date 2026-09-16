@@ -95,7 +95,7 @@ const CONFIANCE_SURFACE = {
 
 const CONFIANCE_CONFORT_AVEC_FICHE = {
   niveau: 'elevee',
-  texte: 'Vous déclarez avoir relevé ces éléments sur votre fiche d’évaluation. C’est le document qui fait foi, mais nous n’y avons pas accès : vérifiez votre relevé avant de vous en prévaloir.',
+  texte: 'Vous déclarez avoir lu cette information sur votre fiche d’évaluation. C’est le document qui fait foi, mais nous n’y avons pas accès : vérifiez votre relevé avant de vous en prévaloir.',
   origine: 'Votre fiche 6675-M, telle que vous l’avez lue.',
 };
 const CONFIANCE_CONFORT_SANS_FICHE = {
