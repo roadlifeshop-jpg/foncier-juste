@@ -19,15 +19,20 @@
 // POINTS JURIDIQUES — vérifiés sur sources officielles le 16/09/2026
 // ------------------------------------------------------------------
 //  - Délai de réclamation, impôts directs locaux : au plus tard le
-//    31 décembre de l'année suivant celle de la mise en recouvrement du rôle
-//    ou de la réalisation de l'événement motivant la réclamation
-//    (art. R*196-2 LPF ; BOI-CTX-PREA-10-30). En pratique cela ouvre l'année
-//    en cours et, au plus, la précédente — et NON « toutes les années non
-//    prescrites », mention qui figurait à tort dans une version antérieure.
-//  - Forme de la réclamation : mentionner l'imposition contestée, contenir un
-//    exposé sommaire des moyens et conclusions, porter la signature
-//    manuscrite de son auteur, et être accompagnée de l'avis d'imposition ou
-//    de sa copie (art. R*197-3 LPF), à peine d'irrecevabilité.
+//    31 décembre de l'année suivant celle, SELON LE CAS, de la mise en
+//    recouvrement du rôle OU de la réalisation de l'événement motivant la
+//    réclamation (art. R*196-2 LPF ; BOI-CTX-PREA-10-30). Une version
+//    antérieure affirmait qu'on ne peut jamais remonter au-delà de l'année
+//    précédente : c'était trop absolu, cela ignorait le second point de
+//    départ. Le texte dit désormais ce qui est courant, et renvoie au service
+//    des impôts fonciers pour le reste — nous ne concluons pas à sa place.
+//  - Forme de la réclamation (art. R*197-3 LPF) : mentionner l'imposition
+//    contestée, contenir un exposé sommaire des moyens et conclusions, porter
+//    la signature manuscrite de son auteur, et être accompagnée de l'avis
+//    d'imposition, d'une copie de cet avis ou d'un extrait du rôle — ou, à
+//    défaut, d'une pièce justifiant le montant. Le même article permet la
+//    RÉGULARISATION À TOUT MOMENT par production de l'une de ces pièces : ne
+//    pas présenter l'absence d'avis comme une irrecevabilité acquise.
 //  - Instruction : l'administration statue dans les six mois, prolongeables
 //    de trois mois si elle en informe le contribuable (art. R*198-10 LPF).
 //  - Silence de l'administration : il ne vaut PAS acceptation. Le
@@ -71,12 +76,19 @@ function creerEcrivain(doc, margeGauche, largeur, opts = {}) {
     espace(h) { if (y + h > HAUTEUR_UTILE) pageSuivante(); else y += h; },
     ligne(texte, o = {}) {
       const { taille = 10, style = 'normal', couleur = [18, 24, 29], espace = 6, x = margeGauche } = o;
-      doc.setFont('helvetica', style);
-      doc.setFontSize(taille);
-      doc.setTextColor(...couleur);
+      // La mise en forme doit être réappliquée APRÈS un éventuel saut de page :
+      // pageSuivante() dessine l'en-tête « (suite) » en italique gris, et sans
+      // cette seconde application la ligne qui déclenche le saut héritait de
+      // cette fonte — défaut repéré à la relecture visuelle du PDF.
+      const appliquer = () => {
+        doc.setFont('helvetica', style);
+        doc.setFontSize(taille);
+        doc.setTextColor(...couleur);
+      };
+      appliquer();
       const morceaux = doc.splitTextToSize(texte, largeur - (x - margeGauche));
       const hauteur = morceaux.length * (taille / 2.6) + espace;
-      if (y + hauteur > HAUTEUR_UTILE) pageSuivante();
+      if (y + hauteur > HAUTEUR_UTILE) { pageSuivante(); appliquer(); }
       doc.text(morceaux, x, y);
       y += hauteur;
     },
@@ -293,7 +305,12 @@ function piecesAJoindre(anomalies) {
   // L'article R*197-3 du LPF fixe ce qui est exigé à peine d'irrecevabilité ;
   // le reste relève des pièces qui étayent le fond.
   const pieces = [
-    "OBLIGATOIRE — l'avis de taxe foncière contesté, ou sa copie. L'article R*197-3 du Livre des procédures fiscales le rend indispensable : sans lui, la réclamation peut être écartée sans examen.",
+    "À JOINDRE EN PRIORITÉ — l'avis de taxe foncière contesté, ou sa copie. L'article R*197-3 du Livre des " +
+    "procédures fiscales demande que la réclamation soit accompagnée de l'avis d'imposition, d'une copie de cet " +
+    "avis ou d'un extrait du rôle — ou, à défaut, d'une autre pièce justifiant le montant mis à votre charge. " +
+    "Le même article prévoit que la réclamation peut être régularisée à tout moment par la production de l'une " +
+    "de ces pièces : si vous n'avez pas votre avis sous la main, ne différez pas votre envoi, surtout si le " +
+    "délai approche.",
     "Votre fiche d'évaluation (formulaire 6675-M), obtenue gratuitement auprès du service des impôts fonciers ou par la messagerie sécurisée d'impots.gouv.fr.",
   ];
   if (anomalies.some(a => a.code === 'surface_surevaluee')) {
@@ -446,14 +463,22 @@ function dessinerPageDemarche(doc, d) {
   w.ligne('3. Le délai à ne pas dépasser', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
     "Pour les impôts directs locaux, la réclamation doit parvenir à l'administration au plus tard le 31 décembre " +
-    "de l'année suivant celle de la mise en recouvrement du rôle, ou celle de l'événement qui motive la " +
-    "réclamation (article R*196-2 du Livre des procédures fiscales).",
+    "de l'année suivant celle, selon le cas, de la mise en recouvrement du rôle, ou de la réalisation de " +
+    "l'événement qui motive la réclamation (article R*196-2 du Livre des procédures fiscales).",
     { taille: 10, espace: 4 }
   );
   w.ligne(
-    "Concrètement, ce délai vous ouvre l'avis de l'année en cours et, selon la date, celui de l'année précédente. " +
-    "Il ne permet pas de remonter au-delà : contrairement à ce qu'on lit parfois, une réclamation de taxe foncière " +
-    "ne porte pas sur « toutes les années non prescrites ».",
+    "Dans la situation la plus courante — vous contestez un avis que vous venez de recevoir — c'est le premier " +
+    "point de départ qui s'applique : le délai couvre alors l'avis de l'année en cours et, selon le moment, celui " +
+    "de l'année précédente.",
+    { taille: 10, espace: 4 }
+  );
+  w.ligne(
+    "Le second point de départ peut ouvrir un délai distinct lorsqu'un événement postérieur justifie la " +
+    "réclamation. Ce que recouvre exactement cette notion s'apprécie au cas par cas et relève de l'administration, " +
+    "puis le cas échéant du juge : nous ne pouvons pas le déterminer à votre place. Si vous pensez être dans " +
+    "cette situation, exposez-la dans votre courrier et interrogez votre service des impôts fonciers avant de " +
+    "renoncer à réclamer.",
     { taille: 10, espace: 8 }
   );
 
