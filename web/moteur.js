@@ -100,12 +100,12 @@ const CONFIANCE_CONFORT_AVEC_FICHE = {
 };
 const CONFIANCE_CONFORT_SANS_FICHE = {
   niveau: 'faible',
-  texte: 'Faible — vous avez répondu de mémoire. Ce que l’administration prend réellement en compte ne figure que sur la fiche 6675-M ; tant que vous ne l’avez pas lue, ce constat reste une hypothèse.',
+  texte: 'Vous avez répondu de mémoire, sans consulter votre fiche. Ce que l’administration prend réellement en compte n’y figure pas ailleurs : tant que vous ne l’avez pas lue, ce constat reste une hypothèse.',
   origine: 'Votre déclaration seule.',
 };
 const CONFIANCE_MARCHE = {
   niveau: 'contexte',
-  texte: 'Élément de contexte, versable à un dossier. Ce n’est pas un motif de réclamation.',
+  texte: 'Donnée publique, que vous pouvez verser à un dossier pour situer votre bien. Ce n’est pas un motif de réclamation.',
   origine: 'Le fichier public DVF des ventes réellement enregistrées en 2024.',
 };
 
@@ -174,10 +174,10 @@ function calculerDiagnostic(e, stats){
         gravite: ecartPct > SURFACE_GRAVITE_HAUTE_PCT ? 'haute' : 'moyenne',
         kind: 'Surface',
         titre: 'Les deux surfaces que vous avez saisies ne concordent pas',
-        figure: `${ecart.toFixed(0)} m² d'écart · ${ecartPct.toFixed(0)} %`,
+        figure: `${ecart.toFixed(0)} m² · ${ecartPct.toFixed(0)} % de la surface mesurée`,
         vosReponses: `Vous avez relevé ${surfFiche.toFixed(0)} m² sur votre fiche d'évaluation et mesuré ${surfReelle.toFixed(0)} m² aujourd'hui.`,
         calcul: `Différence : ${ecart.toFixed(0)} m², soit ${ecartPct.toFixed(0)} % de la surface mesurée.`,
-        aVerifier: "Plusieurs explications sont possibles et une seule est une anomalie : les deux chiffres ne couvrent peut-être pas les mêmes pièces, la fiche n'a peut-être pas été mise à jour après des travaux, ou la mesure est peut-être imprécise. Cet écart ne démontre rien à lui seul — il indique où regarder.",
+        aVerifier: "Trois explications au moins sont possibles, et une seule serait une anomalie : les deux chiffres ne couvrent peut-être pas les mêmes pièces, la fiche n'a peut-être pas été mise à jour après des travaux, ou la mesure est approximative. Commencez par vérifier lesquelles des pièces de votre logement entrent dans chacun des deux chiffres.",
         confiance: conf,
         message: `La surface réelle relevée sur la fiche (${surfFiche.toFixed(0)} m²) dépasse de ${ecart.toFixed(0)} m² (${ecartPct.toFixed(0)} %) la surface habitable mesurée déclarée (${surfReelle.toFixed(0)} m²).`,
       });
@@ -202,10 +202,14 @@ function calculerDiagnostic(e, stats){
       vosReponses: obsoletes.length > 1
         ? `Vous avez indiqué que ces éléments entrent dans votre évaluation alors qu'ils n’existent plus aujourd'hui : ${obsoletes.join(', ')}.`
         : `Vous avez indiqué que cet élément entre dans votre évaluation alors qu'il n’existe plus aujourd'hui : ${obsoletes.join(', ')}.`,
-      calcul: 'Aucun calcul : c’est la comparaison directe de vos deux réponses.',
+      calcul: obsoletes.length > 1
+        ? 'Vos deux réponses se contredisent : ces éléments sont portés à votre évaluation mais n’existent plus.'
+        : 'Vos deux réponses se contredisent : cet élément est porté à votre évaluation mais n’existe plus.',
       aVerifier: "Aucune mise à jour n'est automatique : ni une démolition, ni le comblement d'une piscine ne sont signalés d'office aux services fiscaux. Reste à confirmer, sur votre fiche, que l'élément y figure bien — et à pouvoir dater sa disparition.",
       confiance: e.f ? CONFIANCE_CONFORT_AVEC_FICHE : CONFIANCE_CONFORT_SANS_FICHE,
-      message: `Ces éléments sont pris en compte dans votre évaluation mais n'existeraient plus : ${obsoletes.join(', ')}.`,
+      message: obsoletes.length > 1
+        ? `Les éléments suivants sont pris en compte dans mon évaluation alors qu'ils n'existent plus : ${obsoletes.join(', ')}.`
+        : `L'élément suivant est pris en compte dans mon évaluation alors qu'il n'existe plus : ${obsoletes.join(', ')}.`,
     });
   }
 

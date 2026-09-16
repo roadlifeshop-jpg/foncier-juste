@@ -331,6 +331,7 @@ input::placeholder{color:var(--ink-faint);}
      tiers, et aucune possibilité qu'un CDN compromis exécute du code sur la
      page qui manipule vos réponses. -->
 <script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/polices.js"></script>
 <script src="moteur.js"></script>
 <script src="rapport.js"></script>
 </head>
@@ -452,14 +453,14 @@ input::placeholder{color:var(--ink-faint);}
               <option value="acte" selected>Elle vient de mon acte de vente ou d'un diagnostic</option>
               <option value="estimee">C'est une estimation de mémoire</option>
             </select>
-            <div class="hint">Une donnée incertaine ne crée jamais d'anomalie chez nous&nbsp;; elle réduit la confiance que nous accordons au résultat, et nous vous le disons.</div>
+            <div class="hint">Nous ne fabriquons jamais un signal à partir d'un chiffre approximatif. Une réponse incertaine réduit seulement le crédit que nous accordons au constat — et nous l'écrivons noir sur blanc dans le résultat.</div>
           </div>
         </div>
 
         <div class="step" data-step="3" hidden>
           <div class="step-label">Étape 3 sur 3</div>
           <h2>Les éléments de confort</h2>
-          <p class="intro">Une piscine comblée, un garage démoli ou une dépendance disparue continuent d'être facturés tant que la disparition n'a pas été déclarée. C'est l'anomalie la plus simple à démontrer.</p>
+          <p class="intro">Rien ne se met à jour tout seul : un élément disparu continue d'entrer dans le calcul tant que personne ne l'a signalé. C'est le point le plus simple à démontrer, et le plus souvent négligé.</p>
 
           <fieldset class="field">
             <legend class="lab" id="lab-factures">Éléments pris en compte dans votre évaluation</legend>
@@ -720,7 +721,7 @@ input::placeholder{color:var(--ink-faint);}
   <section class="band">
     <div class="shell">
       <h2>Voir ce que dit votre situation</h2>
-      <p>Le pré-diagnostic est gratuit et sans engagement. Si rien ne justifie une réclamation, nous vous le dirons — et nous ne vous proposerons rien.</p>
+      <p>Gratuit, sans engagement, et sans conclusion forcée : si votre situation ne justifie aucune démarche, vous repartez avec cette réponse-là et rien à acheter.</p>
       <div class="cta-row">
         <button class="btn-primary" id="start-btn-2">Lancer le pré-diagnostic</button>
       </div>
@@ -764,7 +765,7 @@ input::placeholder{color:var(--ink-faint);}
         </details>
         <details>
           <summary>Pourquoi payer, alors que la réclamation est gratuite&nbsp;?</summary>
-          <div class="ans"><p>La démarche est effectivement gratuite et ne nécessite aucun avocat. Ce que nous vendons, c'est le travail entre le constat et le dossier&nbsp;: les écarts formulés dans les termes de l'administration, les références réglementaires exactes, les pièces à joindre, les délais. Vous pouvez tout à fait le faire seul — le guide de ce site vous y aide, gratuitement.</p></div>
+          <div class="ans"><p>La démarche est effectivement gratuite et ne nécessite aucun avocat. Ce que vous payez, c'est la mise en forme&nbsp;: vos constats reformulés dans les termes de l'administration, les références réglementaires exactes, les pièces adaptées à votre cas et les délais à respecter. Vous pouvez tout à fait le faire seul — le guide de ce site vous y aide, gratuitement.</p></div>
         </details>
         <details>
           <summary>Puis-je contester directement, sans passer par vous&nbsp;?</summary>
@@ -1029,17 +1030,18 @@ function blocSignal(a){
       <span class="signal-tag ${tag}">${lib}</span>
     </div>
     <h3>${echappe(a.titre)}</h3>
-    <div class="figure">${echappe(a.figure)}</div>
+    <div class="signal-kind" style="margin-top:10px">${a.code === 'elements_confort_obsoletes' ? 'Élément concerné' : a.gravite === 'info' ? 'Repère' : 'Écart constaté'}</div>
+    <div class="figure" style="margin-top:2px">${echappe(a.figure)}</div>
     ${nonValide ? `<p class="conf" style="color:var(--warn);margin-top:10px;border:0;padding:0">
       <b>Constat non validé.</b> Nous vérifions actuellement, sur de vraies fiches d'évaluation, que les
       deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point n'est pas tranché, cet
       élément ne compte pas comme une anomalie : il n'ouvre aucune offre payante et ne figure pas dans le
       projet de courrier si vous achetez le dossier. Il vous indique où regarder, rien de plus.</p>` : ''}
     <p class="why"><span class="k">Ce que vous avez indiqué</span>${echappe(a.vosReponses)}</p>
-    <p class="why"><span class="k">Ce que nous en avons calculé</span>${echappe(a.calcul)}</p>
+    <p class="why"><span class="k">Ce que nous en déduisons</span>${echappe(a.calcul)}</p>
     <p class="why"><span class="k">Ce qu'il reste à vérifier</span>${echappe(a.aVerifier)}</p>
-    <p class="conf"><b>${nonValide ? 'Source déclarée' : 'Source de l\u2019information'} :</b> ${echappe(a.confiance.texte)}<br>
-    <b>Origine de l'information :</b> ${echappe(a.confiance.origine)}</p>
+    <p class="conf"><b>Ce que vaut ce constat :</b> ${echappe(a.confiance.texte)}<br>
+    <b>D'où vient l'information :</b> ${echappe(a.confiance.origine)}</p>
   </article>`;
 }
 

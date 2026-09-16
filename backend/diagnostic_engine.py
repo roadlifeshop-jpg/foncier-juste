@@ -233,15 +233,18 @@ CONFIANCE_CONFORT_AVEC_FICHE = {
 CONFIANCE_CONFORT_SANS_FICHE = {
     "niveau": "faible",
     "texte": (
-        "Faible — vous avez répondu de mémoire. Ce que l’administration prend "
-        "réellement en compte ne figure que sur la fiche 6675-M ; tant que vous ne "
-        "l’avez pas lue, ce constat reste une hypothèse."
+        "Vous avez répondu de mémoire, sans consulter votre fiche. Ce que "
+        "l’administration prend réellement en compte n’y figure pas ailleurs : tant "
+        "que vous ne l’avez pas lue, ce constat reste une hypothèse."
     ),
     "origine": "Votre déclaration seule.",
 }
 CONFIANCE_MARCHE = {
     "niveau": "contexte",
-    "texte": "Élément de contexte, versable à un dossier. Ce n’est pas un motif de réclamation.",
+    "texte": (
+        "Donnée publique, que vous pouvez verser à un dossier pour situer votre bien. "
+        "Ce n’est pas un motif de réclamation."
+    ),
     "origine": "Le fichier public DVF des ventes réellement enregistrées en 2024.",
 }
 
@@ -277,7 +280,7 @@ def _check_surface(u: UserInput) -> Optional[dict]:
         "gravite": "haute" if ecart_pct > SURFACE_GRAVITE_HAUTE_PCT else "moyenne",
         "kind": "Surface",
         "titre": "Les deux surfaces que vous avez saisies ne concordent pas",
-        "figure": f"{fixed0(ecart)} m² d'écart · {fixed0(ecart_pct)} %",
+        "figure": f"{fixed0(ecart)} m² · {fixed0(ecart_pct)} % de la surface mesurée",
         "vosReponses": (
             f"Vous avez relevé {fixed0(u.surface_fiche_m2)} m² sur votre fiche d'évaluation "
             f"et mesuré {fixed0(u.surface_reelle_actuelle_m2)} m² aujourd'hui."
@@ -286,10 +289,10 @@ def _check_surface(u: UserInput) -> Optional[dict]:
             f"Différence : {fixed0(ecart)} m², soit {fixed0(ecart_pct)} % de la surface mesurée."
         ),
         "aVerifier": (
-            "Plusieurs explications sont possibles et une seule est une anomalie : les deux "
-            "chiffres ne couvrent peut-être pas les mêmes pièces, la fiche n'a peut-être pas "
-            "été mise à jour après des travaux, ou la mesure est peut-être imprécise. Cet écart "
-            "ne démontre rien à lui seul — il indique où regarder."
+            "Trois explications au moins sont possibles, et une seule serait une anomalie : les "
+            "deux chiffres ne couvrent peut-être pas les mêmes pièces, la fiche n'a peut-être pas "
+            "été mise à jour après des travaux, ou la mesure est approximative. Commencez par "
+            "vérifier lesquelles des pièces de votre logement entrent dans chacun des deux chiffres."
         ),
         "confiance": conf,
         "message": (
@@ -323,7 +326,12 @@ def _check_elements_confort(u: UserInput) -> Optional[dict]:
             "Vous avez indiqué que cet élément entre dans votre évaluation alors qu'il "
             f"n’existe plus aujourd'hui : {', '.join(obsoletes)}."
         ),
-        "calcul": "Aucun calcul : c’est la comparaison directe de vos deux réponses.",
+        "calcul": (
+            "Vos deux réponses se contredisent : "
+            + ("ces éléments sont portés" if pluriel else "cet élément est porté")
+            + " à votre évaluation mais "
+            + ("n’existent plus." if pluriel else "n’existe plus.")
+        ),
         "aVerifier": (
             "Aucune mise à jour n'est automatique : ni une démolition, ni le comblement d'une "
             "piscine ne sont signalés d'office aux services fiscaux. Reste à confirmer, sur "
@@ -331,8 +339,11 @@ def _check_elements_confort(u: UserInput) -> Optional[dict]:
         ),
         "confiance": CONFIANCE_CONFORT_AVEC_FICHE if u.a_la_fiche else CONFIANCE_CONFORT_SANS_FICHE,
         "message": (
-            "Ces éléments sont pris en compte dans votre évaluation mais n'existeraient "
-            f"plus : {', '.join(obsoletes)}."
+            f"Les éléments suivants sont pris en compte dans mon évaluation alors qu'ils "
+            f"n'existent plus : {', '.join(obsoletes)}."
+            if pluriel else
+            f"L'élément suivant est pris en compte dans mon évaluation alors qu'il "
+            f"n'existe plus : {', '.join(obsoletes)}."
         ),
     }
 

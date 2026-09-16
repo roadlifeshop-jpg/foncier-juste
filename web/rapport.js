@@ -66,7 +66,7 @@ function creerEcrivain(doc, margeGauche, largeur, opts = {}) {
     doc.addPage();
     y = HAUT_DE_PAGE;
     if (titreSuite) {
-      doc.setFont('helvetica', 'italic');
+      doc.setFont(POLICE_NOM, 'normal');
       doc.setFontSize(8.5);
       doc.setTextColor(120, 128, 136);
       doc.text(`${titreSuite} (suite)`, margeGauche, y - 8);
@@ -91,7 +91,7 @@ function creerEcrivain(doc, margeGauche, largeur, opts = {}) {
       // cette seconde application la ligne qui déclenche le saut héritait de
       // cette fonte — défaut repéré à la relecture visuelle du PDF.
       const appliquer = () => {
-        doc.setFont('helvetica', style);
+        doc.setFont(POLICE_NOM, style === 'bold' ? 'bold' : 'normal');
         doc.setFontSize(taille);
         doc.setTextColor(...couleur);
       };
@@ -110,19 +110,19 @@ function dessinerEnTete(doc, titre, { exemple, sousTitre } = {}) {
   doc.setFillColor(33, 65, 79);
   doc.rect(0, 0, 210, 16, 'F');
   doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+  doc.setFont(POLICE_NOM, 'bold'); doc.setFontSize(13);
   doc.text(titre, 20, 10.5);
 
   let y = 28;
   if (exemple) {
     doc.setTextColor(150, 39, 31);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+    doc.setFont(POLICE_NOM, 'bold'); doc.setFontSize(9);
     doc.text('EXEMPLE — généré gratuitement, ne constitue pas le document payant', 20, y);
     y += 10;
   }
   if (sousTitre) {
     doc.setTextColor(120, 128, 136);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    doc.setFont(POLICE_NOM, 'normal'); doc.setFontSize(9);
     const l = doc.splitTextToSize(sousTitre, 170);
     doc.text(l, 20, y);
     y += l.length * 4 + 6;
@@ -131,47 +131,62 @@ function dessinerEnTete(doc, titre, { exemple, sousTitre } = {}) {
 }
 
 // --------------------------------------------------------------------------
-// Enregistrement : correction des dictionnaires de police
+// Enregistrement
 // --------------------------------------------------------------------------
-// jsPDF déclare /FirstChar et /LastChar sur les polices standard sans fournir
-// le tableau /Widths que ces deux entrées annoncent. Les lecteurs qui
-// embarquent leurs propres métriques des 14 polices standard (Aperçu de macOS,
-// PDFium donc Chrome) s'en accommodent. Poppler — utilisé par Evince, Okular,
-// pdftoppm et beaucoup de chaînes de conversion — cherche le tableau promis,
-// ne le trouve pas, et rend des glyphes sans largeur : les lettres se
-// chevauchent et les espaces deviennent irréguliers.
+// Les documents embarquent leur police (voir vendor/polices.js). Sans cela, un
+// PDF s'appuie sur les 14 polices dites standard, que chaque lecteur est censé
+// fournir : en pratique certains substituent une police système aux métriques
+// différentes, ce qui déforme l'espacement. Un document destiné à être imprimé
+// et adressé à une administration ne peut pas dépendre de ce que le lecteur du
+// destinataire a installé.
 //
-// On neutralise ces deux entrées en les remplaçant par des espaces de MÊME
-// LONGUEUR. Le dictionnaire redevient celui d'une police standard, que tout
-// lecteur sait mesurer ; et comme aucun octet n'est ajouté ni retiré, la table
-// de références croisées (xref) reste valide sans avoir à la recalculer.
-//
-// Vérifié par `verifierPDF()` ci-dessous, appelé à chaque génération.
-function corrigerDictionnairesPolice(brut) {
-  const corrige = brut
-    .replace(/\/FirstChar \d+/g, (m) => ' '.repeat(m.length))
-    .replace(/\/LastChar \d+/g, (m) => ' '.repeat(m.length));
-  if (corrige.length !== brut.length) {
-    throw new Error('correction des polices : longueur modifiée, xref invalide');
-  }
-  return corrige;
-}
-
+// verifierPDF() refuse d'écrire un fichier qui ne contiendrait pas sa police.
 function verifierPDF(brut) {
   const anomalies = [];
-  if (/\/FirstChar \d/.test(brut)) anomalies.push('/FirstChar subsiste');
-  if (/\/LastChar \d/.test(brut)) anomalies.push('/LastChar subsiste');
-  if (!/\/BaseFont \/Helvetica/.test(brut)) anomalies.push('police Helvetica absente');
+  if (!/\/FontFile2/.test(brut)) anomalies.push('aucune police embarquée');
+  if (!/\/FontDescriptor/.test(brut)) anomalies.push('descripteur de police absent');
+  // Police composite (Type0/Identity-H) : les largeurs sont dans /W, pas /Widths.
+  if (!/\/W\s*\[/.test(brut) && !/\/Widths/.test(brut)) anomalies.push('table de largeurs absente');
+  // Sans /ToUnicode, le texte du PDF ne serait plus ni copiable ni recherchable.
+  if (!/\/ToUnicode/.test(brut)) anomalies.push('table ToUnicode absente');
+  if (/\/BaseFont \/(Helvetica|Courier|Times|Symbol|ZapfDingbats)/.test(brut)) {
+    anomalies.push('police standard non embarquée encore référencée');
+  }
   if (!brut.startsWith('%PDF-')) anomalies.push('en-tête PDF absent');
   if (!brut.includes('%%EOF')) anomalies.push('marqueur de fin absent');
   return anomalies;
 }
 
-// Remplace doc.save() : applique la correction, puis déclenche le
-// téléchargement. Exposée pour que les scripts de contrôle puissent
-// l'intercepter sans écrire de fichier.
+// Crée un document prêt à écrire : format A4, police embarquée, aucune des
+// 14 polices standard dans la sortie, et des propriétés lisibles dans le
+// panneau « Informations » du lecteur.
+function nouveauDocument(titre, sujet) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
+  installerPolices(doc);
+  doc.setProperties({
+    title: titre || 'Foncier·Juste',
+    subject: sujet || 'Pré-diagnostic de taxe foncière',
+    author: 'Foncier·Juste',
+    creator: 'Foncier·Juste',
+  });
+  return doc;
+}
+
+// Nom de fichier lisible par le destinataire : ni code INSEE, ni identifiant
+// technique. « Foncier-Juste_Dossier-de-verification_Nantes_2026-09-17.pdf ».
+function nomDeFichier(prefixe, d) {
+  const sansAccent = (t) => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const maintenant = new Date();
+  const jour = [maintenant.getFullYear(), String(maintenant.getMonth() + 1).padStart(2, '0'),
+    String(maintenant.getDate()).padStart(2, '0')].join('-');
+  return `Foncier-Juste_${prefixe}_${sansAccent(d.commune.commune)}_${jour}.pdf`;
+}
+
+// Remplace doc.save() : contrôle le document, puis déclenche le téléchargement.
 function enregistrerPDF(doc, nom) {
-  const brut = corrigerDictionnairesPolice(doc.output());
+  const brut = doc.output();
   const anomalies = verifierPDF(brut);
   if (anomalies.length) throw new Error('PDF non conforme : ' + anomalies.join(', '));
   const octets = new Uint8Array(brut.length);
@@ -187,7 +202,7 @@ function enregistrerPDF(doc, nom) {
 
 function dessinerPiedDePage(doc, texte) {
   doc.setDrawColor(216, 223, 227); doc.line(20, 275, 190, 275);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(124, 137, 148);
+  doc.setFont(POLICE_NOM, 'normal'); doc.setFontSize(7.5); doc.setTextColor(124, 137, 148);
   doc.text(doc.splitTextToSize(texte, 170), 20, 280);
 }
 
@@ -202,23 +217,47 @@ const LIBELLES_ELEMENTS = {
   dependance: 'la dépendance', veranda: 'la véranda',
 };
 
-// Hauteur qu'occupera un bloc « élément à vérifier », calculée avec les mêmes
-// métriques que l'écrivain. Plafonnée à une page : un bloc plus haut que la
-// page ne peut de toute façon pas être gardé d'un seul tenant, et le réserver
-// provoquerait un saut de page inutile.
-function hauteurBlocSignal(doc, a, nonValide) {
-  const morceaux = (texte, taille, indent) => {
-    doc.setFontSize(taille);
-    return doc.splitTextToSize(texte, 170 - indent).length * (taille / 2.6);
-  };
-  let h = morceaux(`1. ${a.titre}`, 11, 0) + 3;
-  h += morceaux(`Écart constaté : ${a.figure}`, 10, 4) + 3;
-  if (nonValide) h += morceaux('Statut — constat non validé. '.repeat(1) + a.aVerifier, 9, 4) + 4;
-  h += morceaux(`Ce que vous avez indiqué — ${a.vosReponses}`, 9.5, 4) + 2.5;
-  h += morceaux(`Ce que nous en avons calculé — ${a.calcul}`, 9.5, 4) + 2.5;
-  h += morceaux(`Ce qu'il reste à vérifier — ${a.aVerifier}`, 9.5, 4) + 2.5;
-  h += morceaux(`Source déclarée — ${a.confiance.texte}`, 9.5, 4) + 2.5;
-  h += morceaux(`Origine de l'information — ${a.confiance.origine}`, 9.5, 4) + 7;
+// Description d'un bloc « élément à vérifier ». Une seule source : la même
+// liste sert à MESURER la hauteur du bloc et à le DESSINER. Tant qu'elles
+// étaient écrites deux fois, l'estimation divergeait du tracé et le bloc
+// basculait de page alors qu'il tenait encore.
+function lignesBlocSignal(a, index, nonValide, avecCourrier) {
+  const lignes = [
+    { texte: `${index}. ${a.titre}`, taille: 11, style: 'bold', espace: 3 },
+    { texte: `${a.code === 'elements_confort_obsoletes' ? 'Élément concerné' : 'Écart constaté'} : ${a.figure}`,
+      taille: 10, style: 'bold', couleur: [33, 65, 79], espace: 3, x: 24 },
+  ];
+  if (nonValide) {
+    lignes.push({
+      texte: "Statut — constat non validé. Nous vérifions actuellement, sur de vraies fiches d'évaluation, que " +
+        "les deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point n'est pas tranché, " +
+        "nous ne le présentons pas comme une anomalie" +
+        (avecCourrier ? " et il ne figure pas dans le projet de courrier" : "") + ".",
+      taille: 9, style: 'bold', couleur: [122, 94, 16], espace: 4, x: 24,
+    });
+  }
+  lignes.push(
+    { texte: `Ce que vous avez indiqué — ${a.vosReponses}`, taille: 9.5, espace: 2.5, x: 24 },
+    { texte: `Ce que nous en déduisons — ${a.calcul}`, taille: 9.5, espace: 2.5, x: 24 },
+    { texte: `Ce qu'il reste à vérifier — ${a.aVerifier}`, taille: 9.5, espace: 2.5, x: 24 },
+    { texte: `Ce que vaut ce constat — ${a.confiance.texte}`, taille: 9.5, couleur: [91, 104, 117], espace: 2.5, x: 24 },
+    { texte: `D'où vient l'information — ${a.confiance.origine}`, taille: 9.5, couleur: [91, 104, 117], espace: 7, x: 24 },
+  );
+  return lignes;
+}
+
+// Hauteur du bloc, calculée avec exactement les mêmes métriques que l'écrivain.
+// Plafonnée à une page : un bloc plus haut ne peut de toute façon pas rester
+// d'un seul tenant, et le réserver provoquerait un saut de page inutile.
+function hauteurBloc(doc, lignes, margeGauche, largeur) {
+  let h = 0;
+  for (const l of lignes) {
+    doc.setFont(POLICE_NOM, l.style === 'bold' ? 'bold' : 'normal');
+    doc.setFontSize(l.taille);
+    const x = l.x || margeGauche;
+    const n = doc.splitTextToSize(l.texte, largeur - (x - margeGauche)).length;
+    h += n * (l.taille / 2.6) + l.espace;
+  }
   return Math.min(h, HAUTEUR_UTILE - HAUT_DE_PAGE);
 }
 
@@ -226,7 +265,7 @@ function hauteurBlocSignal(doc, a, nonValide) {
 // Page 1 — l'analyse
 // --------------------------------------------------------------------------
 
-function dessinerPageAnalyse(doc, d, { exemple }) {
+function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
   const titre = exemple ? 'Foncier·Juste — Pré-diagnostic' : 'Foncier·Juste — Analyse détaillée';
   const w = creerEcrivain(doc, 20, 170, { pied: PIED_ANALYSE, titreSuite: 'Analyse détaillée' });
   w.y = dessinerEnTete(doc, titre, { exemple });
@@ -254,14 +293,14 @@ function dessinerPageAnalyse(doc, d, { exemple }) {
   w.ligne('Données utilisées pour cette analyse', { taille: 12, style: 'bold', espace: 3 });
   w.ligne(
     d.avecFiche
-      ? `Fiche d'évaluation 6675-M : consultée par vos soins. Surface réelle relevée : ${Number(d.surfFiche).toFixed(0)} m².`
+      ? `Fiche d'évaluation 6675-M : vous l'aviez sous les yeux. Surface réelle qui y figure : ${Number(d.surfFiche).toFixed(0)} m².`
       : "Fiche d'évaluation 6675-M : non consultée. Aucune comparaison de surface n'a donc été possible.",
     { taille: 10, espace: 3 }
   );
-  w.ligne(`Surface habitable mesurée aujourd'hui : ${Number(d.surfReelle).toFixed(0)} m² (${
-    d.sourceSurface === 'mesuree' ? 'mesurée par vos soins'
+  w.ligne(`Surface habitable aujourd'hui : ${Number(d.surfReelle).toFixed(0)} m², ${
+    d.sourceSurface === 'mesuree' ? 'que vous déclarez avoir mesurée vous-même'
     : d.sourceSurface === 'acte' ? 'issue de votre acte de vente ou d\'un diagnostic'
-    : 'estimée de mémoire'}).`, { taille: 10, espace: 3 });
+    : 'estimée de mémoire'}.`, { taille: 10, espace: 3 });
   const ef = (d.entree && d.entree.ef) || [];
   const ee = (d.entree && d.entree.ee) || [];
   w.ligne(`Éléments portés à l'évaluation selon vos réponses : ${ef.length ? ef.join(', ') : 'aucun'}. Existant aujourd'hui : ${ee.length ? ee.join(', ') : 'aucun'}.`, { taille: 10, espace: 8 });
@@ -271,38 +310,11 @@ function dessinerPageAnalyse(doc, d, { exemple }) {
     w.ligne('Éléments à vérifier', { taille: 12, style: 'bold', espace: 4 });
     reels.forEach((a, i) => {
       const nonValide = CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code);
-      // Un élément se lit d'un bloc : on mesure sa hauteur réelle et on la
-      // réserve, pour qu'il ne soit pas coupé au milieu. Sans cela, la
-      // dernière ligne — « Origine de l'information » — se retrouvait seule en
-      // tête de la page suivante.
-      w.reserver(hauteurBlocSignal(doc, a, nonValide));
-      w.ligne(`${i + 1}. ${a.titre}`, { taille: 11, style: 'bold', espace: 3 });
-      w.ligne(`Écart constaté : ${a.figure}`, { taille: 10, style: 'bold', couleur: [33, 65, 79], espace: 3, x: 24 });
-      // Le statut est annoncé AVANT les explications : sans cela, le lecteur
-      // découvrait d'abord un « niveau de confiance élevé » qui semblait porter
-      // sur la conclusion, alors qu'il ne porte que sur la donnée saisie.
-      if (nonValide) {
-        w.ligne(
-          "Statut — constat non validé. Nous vérifions actuellement, sur de vraies fiches d'évaluation, que " +
-          "les deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point n'est pas tranché, " +
-          "cet élément n'est pas présenté comme une anomalie et ne figure pas dans le projet de courrier. Il " +
-          "vous indique où regarder, rien de plus.",
-          { taille: 9, style: 'bold', couleur: [122, 94, 16], espace: 4, x: 24 }
-        );
-      }
-      w.ligne(`Ce que vous avez indiqué — ${a.vosReponses}`, { taille: 9.5, espace: 2.5, x: 24 });
-      w.ligne(`Ce que nous en avons calculé — ${a.calcul}`, { taille: 9.5, espace: 2.5, x: 24 });
-      w.ligne(`Ce qu'il reste à vérifier — ${a.aVerifier}`, { taille: 9.5, espace: 2.5, x: 24 });
-      // Le libellé dit ce que la mesure qualifie réellement : la source
-      // déclarée, et non le constat qui en découle. Les deux lignes forment un
-      // couple : réservées ensemble, pour qu'« Origine de l'information » ne se
-      // retrouve pas seule en tête de la page suivante.
-      w.reserver(26);
-      w.ligne(
-        `${nonValide ? 'Source déclarée' : 'Source de l\u2019information'} — ${a.confiance.texte}`,
-        { taille: 9.5, couleur: [91, 104, 117], espace: 2.5, x: 24 }
-      );
-      w.ligne(`Origine de l'information — ${a.confiance.origine}`, { taille: 9.5, couleur: [91, 104, 117], espace: 7, x: 24 });
+      const lignes = lignesBlocSignal(a, i + 1, nonValide, avecCourrier);
+      // Un élément se lit d'un bloc : on réserve sa hauteur exacte pour qu'il
+      // ne soit pas coupé au milieu.
+      w.reserver(hauteurBloc(doc, lignes, 20, 170));
+      lignes.forEach((l) => w.ligne(l.texte, l));
     });
   } else {
     w.ligne('Éléments à vérifier', { taille: 12, style: 'bold', espace: 3 });
@@ -314,7 +326,7 @@ function dessinerPageAnalyse(doc, d, { exemple }) {
     w.ligne('Contexte immobilier de votre commune', { taille: 12, style: 'bold', espace: 3 });
     contexte.forEach(a => {
       w.ligne(`${a.titre} — ${a.figure}`, { taille: 10, style: 'bold', espace: 2.5 });
-      w.ligne(a.aVerifier, { taille: 9.5, couleur: [91, 104, 117], espace: 7 });
+      w.ligne(`Ce que cela change pour votre taxe — ${a.aVerifier}`, { taille: 9.5, couleur: [91, 104, 117], espace: 7 });
     });
   }
 
@@ -341,10 +353,10 @@ function dessinerPageAnalyse(doc, d, { exemple }) {
 
 function genererRapportPDF(d, opts = {}) {
   const exemple = opts.exemple !== false;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const doc = nouveauDocument(exemple ? 'Foncier·Juste — Pré-diagnostic' : 'Foncier·Juste — Analyse détaillée',
+    'Éléments de votre évaluation foncière qui méritent une vérification');
   dessinerPageAnalyse(doc, d, { exemple });
-  enregistrerPDF(doc, exemple ? `foncier-juste-exemple-${d.commune.code_commune}.pdf` : `foncier-juste-analyse-${d.commune.code_commune}.pdf`);
+  enregistrerPDF(doc, nomDeFichier(exemple ? 'Exemple' : 'Analyse-detaillee', d));
 }
 
 // --------------------------------------------------------------------------
@@ -353,8 +365,7 @@ function genererRapportPDF(d, opts = {}) {
 // --------------------------------------------------------------------------
 
 function genererApercuPDF(d) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const doc = nouveauDocument('Foncier·Juste — Aperçu du dossier', 'Démonstration de format');
   const w = creerEcrivain(doc, 20, 170, {
     pied: "Aperçu de format, sans valeur juridique. Les analyses et le projet de courrier ne figurent que dans le document complet.",
   });
@@ -376,7 +387,7 @@ function genererApercuPDF(d) {
   };
 
   w.ligne(`Éléments à vérifier relevés : ${d.anomalies.filter(a => a.gravite !== 'info').length}`, { taille: 11, style: 'bold', espace: 6 });
-  masque('Chaque élément, expliqué : ce que vous avez indiqué, ce qui en est calculé, ce qu\'il reste à vérifier', 2);
+  masque('Chaque élément, expliqué : ce que vous avez indiqué, ce que nous en déduisons, ce qu\'il reste à vérifier', 2);
   masque('Les données exactes utilisées pour votre bien', 2);
   masque('Les documents à réunir, adaptés à votre situation', 2);
   masque('Votre projet de courrier, à relire et compléter', 3);
@@ -387,13 +398,13 @@ function genererApercuPDF(d) {
   doc.setFillColor(247, 240, 218);
   doc.roundedRect(20, w.y - 4, 170, 24, 2, 2, 'FD');
   doc.setTextColor(110, 84, 14);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.setFont(POLICE_NOM, 'bold'); doc.setFontSize(10);
   doc.text('Le document complet contient ces sections renseignées pour votre bien.', 25, w.y + 3);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-  doc.text(doc.splitTextToSize("Votre pré-diagnostic reste consultable gratuitement sur le site. Aucun montant d'économie n'est annoncé, ici ni ailleurs : nous ne savons pas le calculer.", 160), 25, w.y + 9);
+  doc.setFont(POLICE_NOM, 'normal'); doc.setFontSize(9);
+  doc.text(doc.splitTextToSize("Votre pré-diagnostic reste consultable gratuitement sur le site. Aucun montant d'économie n'est annoncé, ici ni ailleurs : il dépend d'un recalcul que seule l'administration peut faire.", 160), 25, w.y + 9);
 
   w.finir();
-  enregistrerPDF(doc, 'foncier-juste-apercu.pdf');
+  enregistrerPDF(doc, nomDeFichier('Apercu-du-dossier', d));
 }
 
 // --------------------------------------------------------------------------
@@ -683,10 +694,10 @@ function dessinerPageDemarche(doc, d) {
 
 function genererDossierPDF(d, opts = {}) {
   const exemple = opts.exemple !== false;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  dessinerPageAnalyse(doc, d, { exemple });
+  const doc = nouveauDocument(exemple ? 'Foncier·Juste — Pré-diagnostic' : 'Foncier·Juste — Dossier de vérification',
+    'Analyse, projet de courrier et marche à suivre');
+  dessinerPageAnalyse(doc, d, { exemple, avecCourrier: true });
   dessinerPageCourrier(doc, d);
   dessinerPageDemarche(doc, d);
-  enregistrerPDF(doc, exemple ? `foncier-juste-dossier-exemple-${d.commune.code_commune}.pdf` : `foncier-juste-dossier-${d.commune.code_commune}.pdf`);
+  enregistrerPDF(doc, nomDeFichier(exemple ? 'Dossier-exemple' : 'Dossier-de-verification', d));
 }
