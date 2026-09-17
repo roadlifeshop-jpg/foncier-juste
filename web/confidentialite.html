@@ -40,39 +40,48 @@
   </div>
 
   <h2>Ce que nous traitons</h2>
+  <p>Trois outils, et pour chacun ce qui est traité, quand, et pourquoi. <b>Aucun paiement n'est
+  proposé sur ce site&nbsp;:</b> il n'y a donc ni donnée bancaire, ni adresse email demandée, ni compte
+  à créer.</p>
   <div class="tablewrap">
-    <table>
+    <table class="tableau-adaptatif">
       <thead><tr><th>Donnée</th><th>Quand</th><th>Finalité</th><th>Base légale</th></tr></thead>
       <tbody>
         <tr>
-          <td>Réponses au pré-diagnostic (commune, type de bien, surfaces, éléments de confort)</td>
-          <td>Pendant le pré-diagnostic</td>
-          <td>Établir le résultat</td>
-          <td>Exécution du service demandé — traitement effectué dans votre navigateur, jamais transmis à un serveur</td>
+          <td data-label="Donnée">Vos réponses sur la taxe foncière&nbsp;: commune, type de bien, surfaces, éléments de confort</td>
+          <td data-label="Quand">Pendant le parcours, dans votre navigateur</td>
+          <td data-label="Finalité">Établir le résultat affiché et, si vous le demandez, le PDF récapitulatif</td>
+          <td data-label="Base légale">Exécution du service demandé. <b>Le calcul a lieu dans votre navigateur et ces réponses ne sont transmises à aucun serveur.</b></td>
         </tr>
         <tr>
-          <td>Étape du parcours atteinte, et nombre d'éléments relevés à l'affichage du résultat</td>
-          <td>Pendant le pré-diagnostic</td>
-          <td>Savoir à quel moment les visiteurs abandonnent, pour corriger le parcours</td>
-          <td>Intérêt légitime — sans cookie, sans identifiant, sans surface ni commune</td>
+          <td data-label="Donnée">Vos abonnements saisis&nbsp;: nom, montant, périodicité, dates</td>
+          <td data-label="Quand">Pendant l'usage de l'outil, puis conservés sur votre appareil jusqu'à effacement</td>
+          <td data-label="Finalité">Calculer les totaux et retrouver votre liste à la visite suivante</td>
+          <td data-label="Base légale">Exécution du service demandé. <b>Stockage local de votre navigateur uniquement</b>&nbsp;; nous n'y avons aucun accès.</td>
         </tr>
         <tr>
-          <td>Département du bien</td>
-          <td>Pendant le pré-diagnostic</td>
-          <td>Conséquence technique : votre navigateur télécharge le fichier de données de ce département, et cette requête figure dans les journaux de notre hébergeur</td>
-          <td>Exécution du service demandé</td>
+          <td data-label="Donnée">Vos réponses sur un achat défectueux&nbsp;: type de bien, état, dates, vendeur, problème</td>
+          <td data-label="Quand">Pendant le parcours, dans votre navigateur</td>
+          <td data-label="Finalité">Calculer où vous en êtes dans les délais et lister les voies à vérifier</td>
+          <td data-label="Base légale">Exécution du service demandé. <b>Rien n'est transmis ni conservé</b>&nbsp;: quitter la page efface tout.</td>
         </tr>
         <tr>
-          <td>Adresse email, et réponses au questionnaire</td>
-          <td><strong>En cas d'achat uniquement</strong></td>
-          <td>Délivrer le document, permettre son retéléchargement ultérieur depuis n'importe quel appareil, émettre le reçu</td>
-          <td>Exécution du contrat</td>
+          <td data-label="Donnée">Étape du parcours atteinte, et — au résultat de la taxe foncière — le nombre d'éléments relevés</td>
+          <td data-label="Quand">À trois moments&nbsp;: page vue, résultat affiché, outil utilisé</td>
+          <td data-label="Finalité">Savoir où les visiteurs s'arrêtent, pour corriger le parcours</td>
+          <td data-label="Base légale">Intérêt légitime. Sans cookie, sans identifiant, et sans aucune valeur que vous avez saisie — ni commune, ni surface, ni montant.</td>
         </tr>
         <tr>
-          <td>Informations de paiement</td>
-          <td>En cas d'achat uniquement</td>
-          <td>Encaisser</td>
-          <td>Exécution du contrat — traitées intégralement par Stripe, jamais par nous</td>
+          <td data-label="Donnée">Adresse IP, horodatage et chemin demandé</td>
+          <td data-label="Quand">À chaque requête, y compris pour une simple page</td>
+          <td data-label="Finalité">Servir le site&nbsp;: c'est le fonctionnement de tout hébergement</td>
+          <td data-label="Base légale">Intérêt légitime. Reçue et journalisée par notre hébergeur&nbsp;; <b>nous ne la lisons pas et ne la croisons avec rien</b>.</td>
+        </tr>
+        <tr>
+          <td data-label="Donnée">Département du bien étudié</td>
+          <td data-label="Quand">Uniquement dans les 20 départements où nous disposons de données de ventes</td>
+          <td data-label="Finalité">Conséquence technique&nbsp;: votre navigateur télécharge le fichier de marché de ce département, et cette requête figure dans les journaux de l'hébergeur</td>
+          <td data-label="Base légale">Exécution du service demandé. Ailleurs, aucun fichier départemental n'est demandé.</td>
         </tr>
       </tbody>
     </table>
@@ -100,32 +109,32 @@
   durée.</p>
 
   <div class="tablewrap">
-    <table>
+    <table class="tableau-adaptatif">
       <thead><tr><th>Ce qui existe</th><th>Où</th><th>Combien de temps</th><th>Qui en décide</th></tr></thead>
       <tbody>
         <tr>
-          <td><b>Vos saisies de l'outil abonnements</b> — noms, montants, périodicités, dates que vous entrez</td>
-          <td>Le stockage local de votre navigateur, <b>sur votre appareil</b>. Rien n'est envoyé nulle part.</td>
-          <td><b>Sans limite&nbsp;: jusqu'à ce que vous les effaciez.</b> Aucune expiration automatique.</td>
-          <td><b>Vous.</b> Le bouton « Tout effacer » de l'outil les supprime, comme la suppression des données du site dans votre navigateur. Nous n'y avons aucun accès.</td>
+          <td data-label="Ce qui existe"><b>Vos saisies de l'outil abonnements</b> — noms, montants, périodicités, dates que vous entrez</td>
+          <td data-label="Où">Le stockage local de votre navigateur, <b>sur votre appareil</b>. Rien n'est envoyé nulle part.</td>
+          <td data-label="Combien de temps"><b>Sans limite&nbsp;: jusqu'à ce que vous les effaciez.</b> Aucune expiration automatique.</td>
+          <td data-label="Qui en décide"><b>Vous.</b> Le bouton « Tout effacer » de l'outil les supprime, comme la suppression des données du site dans votre navigateur. Nous n'y avons aucun accès.</td>
         </tr>
         <tr>
-          <td><b>Les journaux d'exécution de l'hébergeur</b> — adresse IP, horodatage, chemin demandé, et les lignes de mesure d'étape que nous écrivons</td>
-          <td>Les serveurs de <b>Vercel Inc.</b> (États-Unis)</td>
-          <td><b>Une heure</b> sur le plan gratuit que nous utilisons. <span class="meta">Durée relevée dans la documentation de Vercel le 17 septembre 2026&nbsp;; elle passerait à un jour sur un plan payant, et cette page serait alors corrigée.</span></td>
-          <td><b>Vercel.</b> Nous ne pouvons ni la prolonger ni la raccourcir.</td>
+          <td data-label="Ce qui existe"><b>Les journaux d'exécution de l'hébergeur</b> — adresse IP, horodatage, chemin demandé, et les lignes de mesure d'étape que nous écrivons</td>
+          <td data-label="Où">Les serveurs de <b>Vercel Inc.</b> (États-Unis)</td>
+          <td data-label="Combien de temps"><b>Une heure</b> sur le plan gratuit que nous utilisons. <span class="meta">Durée relevée dans la documentation de Vercel le 17 septembre 2026&nbsp;; elle passerait à un jour sur un plan payant, et cette page serait alors corrigée.</span></td>
+          <td data-label="Qui en décide"><b>Vercel.</b> Nous ne pouvons ni la prolonger ni la raccourcir.</td>
         </tr>
         <tr>
-          <td><b>Les autres traces éventuelles de l'hébergeur</b> — comptage de requêtes pour la facturation, protection contre les abus, statistiques internes</td>
-          <td>Vercel Inc.</td>
-          <td><b>Durée que nous ne pouvons pas confirmer.</b> Nous n'avons pas trouvé, pour ce plan, de document qui la fixe&nbsp;: nous préférons l'écrire plutôt que d'avancer un chiffre. La <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">politique de confidentialité de Vercel</a> fait foi.</td>
-          <td><b>Vercel.</b></td>
+          <td data-label="Ce qui existe"><b>Les autres traces éventuelles de l'hébergeur</b> — comptage de requêtes pour la facturation, protection contre les abus, statistiques internes</td>
+          <td data-label="Où">Vercel Inc.</td>
+          <td data-label="Combien de temps"><b>Durée que nous ne pouvons pas confirmer.</b> Nous n'avons pas trouvé, pour ce plan, de document qui la fixe&nbsp;: nous préférons l'écrire plutôt que d'avancer un chiffre. La <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">politique de confidentialité de Vercel</a> fait foi.</td>
+          <td data-label="Qui en décide"><b>Vercel.</b></td>
         </tr>
         <tr>
-          <td><b>Les données de paiement</b></td>
-          <td>Stripe</td>
-          <td><b>Aucune commande réelle n'existe.</b> La clé de paiement déployée est une clé de <b>test</b> — vérifié le 18 septembre 2026&nbsp;: aucun encaissement réel n'a jamais été possible. Seules subsistent des sessions d'essai, sans client réel, et plus aucun paiement n'est proposé sur le site.</td>
-          <td><b>Stripe</b>, pour ces sessions d'essai.</td>
+          <td data-label="Ce qui existe"><b>Les données de paiement</b></td>
+          <td data-label="Où">Stripe</td>
+          <td data-label="Combien de temps"><b>Aucune commande réelle n'existe.</b> La clé de paiement déployée est une clé de <b>test</b> — vérifié le 18 septembre 2026&nbsp;: aucun encaissement réel n'a jamais été possible. Seules subsistent des sessions d'essai, sans client réel, et plus aucun paiement n'est proposé sur le site.</td>
+          <td data-label="Qui en décide"><b>Stripe</b>, pour ces sessions d'essai.</td>
         </tr>
       </tbody>
     </table>
@@ -149,7 +158,7 @@
   <h2>Destinataires</h2>
   <ul>
     <li><strong>Stripe Payments Europe Ltd</strong> — prestataire de paiement. <strong>Plus aucun paiement n'est proposé sur le site&nbsp;:</strong> ce destinataire ne reçoit donc plus rien. Il ne concerne que les commandes passées avant le retrait de l'offre payante.</li>
-    <li><strong>Vercel Inc.</strong> — hébergeur. Journalise les requêtes reçues, avec adresse IP et horodatage, y compris celle du fichier de données de votre département.</li>
+    <li><strong>Vercel Inc.</strong> — hébergeur, États-Unis. Journalise les requêtes reçues, avec adresse IP et horodatage&nbsp;: les pages, la liste nationale des communes, et — dans les 20 départements couverts par nos données de ventes seulement — le fichier de marché du département concerné.</li>
   </ul>
   <p>Aucune donnée n'est vendue ni cédée à d'autres tiers.</p>
 

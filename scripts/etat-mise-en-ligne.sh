@@ -27,3 +27,7 @@ curl -s --max-time 20 https://foncier-juste.vercel.app/ | grep -o '<title>[^<]*<
 printf "  /abonnements.html -> HTTP "
 curl -s -o /dev/null -w '%{http_code}\n' --max-time 20 https://foncier-juste.vercel.app/abonnements.html || echo "?"
 echo "  (404 = ancienne version en ligne, 200 = refonte en ligne)"
+echo
+echo "Champs légaux encore vides :"
+grep -c data-fill web/*.html | grep -v ':0' | sed 's/^/  /'
+echo "  détail : grep -n data-fill web/*.html"

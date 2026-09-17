@@ -37,7 +37,7 @@
      du texte courant relevé : l'ancien gris de corps passait juste les seuils,
      ce qui était visible sur grand écran. */
   --bg:#F5F6F4; --surface:#FFFFFF; --surface-2:#EBEDEA; --surface-3:#DFE3E0;
-  --ink:#0B1620; --ink-muted:#4B5864; --ink-faint:#78858F;
+  --ink:#0B1620; --ink-muted:#4B5864; --ink-faint:#626C76;
   --line:#D8DDD9; --line-strong:#B9C2BC;
   --accent:#0F3D56; --accent-ink:#FFFFFF; --accent-soft:#E2EDF3; --accent-line:#A9C7D8;
   --gold:#8A6520; --gold-soft:#F4EEE1;
@@ -291,6 +291,26 @@ th,td{text-align:left; padding:12px 14px; border-bottom:1px solid var(--line); v
 th{font-size:.72rem; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);}
 tbody tr:last-child td{border-bottom:none;}
 td.nombre,th.nombre{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+
+/* ---------- Tableaux adaptatifs ----------
+   Trois ou quatre colonnes sur 390 px donnent des colonnes de vingt caractères
+   et une dernière qui semble coupée. Sous 700 px, chaque ligne devient donc un
+   bloc, et l'intitulé de colonne passe au-dessus de la valeur (attribut
+   data-label). Sur ordinateur, le tableau reste un tableau : c'est là qu'il
+   sert, pour comparer les lignes entre elles. */
+@media(max-width:700px){
+  .tableau-adaptatif thead{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+  .tableau-adaptatif tbody tr{display:block; padding:16px 0 6px; border-bottom:1px solid var(--line);}
+  .tableau-adaptatif tbody tr:last-child{border-bottom:none;}
+  .tableau-adaptatif td{display:block; border:none; padding:0 14px 11px;}
+  .tableau-adaptatif td:first-child{font-weight:600; color:var(--ink);}
+  .tableau-adaptatif td::before{
+    content:attr(data-label); display:block; font-size:.67rem; font-weight:700;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:3px;
+  }
+  .tableau-adaptatif td.nombre{text-align:left;}
+  .tablewrap:has(.tableau-adaptatif), .tableau-enveloppe:has(.tableau-adaptatif){overflow-x:visible;}
+}
 
 /* ---------- Source d'une règle ---------- */
 .source{

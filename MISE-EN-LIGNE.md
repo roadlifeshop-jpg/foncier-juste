@@ -78,13 +78,21 @@ professionnel de mettre à disposition du public, et le contact que l'article 13
 du RGPD exige dès lors que des données sont traitées — ici les journaux de
 l'hébergeur, qui contiennent des adresses IP.
 
-| À fournir | Emplacement | Pourquoi avant la fusion |
+| À fournir | Où, dans la page | Pourquoi avant la fusion |
 |---|---|---|
-| **Nom et prénoms** | `mentions-legales.html:40` | LCEN art. 1-1, I, 1° |
-| **Adresse** (domicile ou domiciliation) | `mentions-legales.html:42` | LCEN art. 1-1, I, 1° |
-| **Téléphone** | `mentions-legales.html:43` | LCEN art. 1-1, I, 1° — explicitement exigé depuis la loi du 21 mai 2024 |
-| **Directeur de la publication** | `mentions-legales.html:45` | LCEN art. 1-1, I, 3° |
-| **Email de contact** | `mentions-legales.html:44`, `confidentialite.html` | exercice des droits RGPD (art. 13) ; c'est aussi le contact de l'éditeur |
+| **Nom et prénoms** | mentions légales, bloc « Éditeur du site », champ `[Nom / raison sociale]` | LCEN art. 1-1, I, 1° |
+| **Adresse** (domicile ou domiciliation) | même bloc, champ `[adresse]` | LCEN art. 1-1, I, 1° |
+| **Téléphone** | même bloc, champ `[numéro à publier…]` | LCEN art. 1-1, I, 1° — explicitement exigé depuis la loi du 21 mai 2024 |
+| **Directeur de la publication** | même bloc, champ `[nom]` | LCEN art. 1-1, I, 3° |
+| **Email de contact** | même bloc, champ `[email]` — **et** page Confidentialité, section « Vos droits » | exercice des droits RGPD (art. 13) ; c'est aussi le contact de l'éditeur |
+
+**Les emplacements ne sont plus désignés par un numéro de ligne&nbsp;:** ceux
+d'une version précédente de ce document avaient glissé de cinq lignes à la
+retouche suivante. Ils se retrouvent par leur libellé&nbsp;:
+
+```bash
+grep -n data-fill web/*.html
+```
 
 Le bandeau « brouillon non finalisé » de la page mentions légales dit
 honnêtement que le document n'est pas valable. **Il ne remplace pas les
@@ -92,18 +100,18 @@ informations manquantes** : un avertissement n'est pas une identification.
 
 ### À compléter dès l'immatriculation, pas avant la fusion
 
-| À fournir | Emplacement | Quand |
+| À fournir | Où, dans la page | Quand |
 |---|---|---|
-| **Statut juridique** | `mentions-legales.html:40` | dès qu'il existe |
-| **SIRET** | `mentions-legales.html:41` | dès l'immatriculation — l'article 1-1 demande le numéro d'inscription « le cas échéant » |
+| **Statut juridique** | mentions légales, champ `[statut : auto-entrepreneur / société]` | dès qu'il existe |
+| **SIRET** | mentions légales, champ `[à compléter après immatriculation…]` | dès l'immatriculation — l'article 1-1 demande le numéro d'inscription « le cas échéant » |
 
 ### Seulement s'il y a de nouveau une vente
 
-| À fournir | Emplacement |
+| À fournir | Où, dans la page |
 |---|---|
-| **Régime de TVA** | `cgv.html:49` |
-| **Médiateur de la consommation** | `cgv.html:78` |
-| **Email de réclamation** | `cgv.html:74` |
+| **Régime de TVA** | CGV, section « Prix » |
+| **Médiateur de la consommation** | CGV, section « Médiation de la consommation » |
+| **Email de réclamation** | CGV, section « Réclamations et litiges » |
 
 Ces trois-là ne bloquent pas la mise en ligne d'un site gratuit. Les CGV
 décrivent une offre retirée&nbsp;; leur bandeau le dit.
