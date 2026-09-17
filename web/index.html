@@ -326,6 +326,125 @@ input::placeholder{color:var(--ink-faint);}
   .disclaimer{padding-inline:18px;}
   .wizard-nav button{flex:1;}
 }
+
+/* ==========================================================================
+   Hiérarchie — révision du 17/09/2026, avant le test T1.
+   Aucun jeton de palette ni de typographie n'est ajouté : seuls la taille,
+   l'espace et le contraste changent, pour que la page dise d'elle-même ce
+   qui est un motif et ce qui ne l'est pas.
+   ========================================================================== */
+
+/* ---------- Premier écran ---------- */
+.hero .lede{font-size:1.08rem; color:var(--ink); max-width:46ch;}
+.hero-what{list-style:none; margin:22px 0 0; padding:0; display:grid; gap:10px; max-width:52ch;}
+.hero-what li{
+  display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:baseline;
+  font-size:.95rem; color:var(--ink-muted);
+}
+.hero-what li::before{
+  content:counter(etape); counter-increment:etape;
+  font-size:.7rem; font-weight:700; font-variant-numeric:tabular-nums; color:var(--accent);
+  background:var(--accent-soft); border:1px solid var(--accent-line);
+  width:21px; height:21px; border-radius:50%; display:grid; place-items:center;
+}
+.hero-what{counter-reset:etape;}
+.hero-what b{color:var(--ink); font-weight:600;}
+.hero-not{
+  margin-top:16px; max-width:52ch; font-size:.9rem; line-height:1.55; color:var(--ink-muted);
+  border-left:2px solid var(--line-strong); padding-left:14px;
+}
+.hero-not b{color:var(--ink); font-weight:600;}
+.prereq{
+  margin-top:20px; max-width:52ch; background:var(--surface); border:1px solid var(--line);
+  border-radius:11px; padding:16px 18px;
+}
+.prereq dl{margin:0; display:grid; gap:11px;}
+.prereq dt{
+  font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:2px;
+}
+.prereq dd{margin:0; font-size:.88rem; line-height:1.55; color:var(--ink-muted);}
+.prereq dd b{color:var(--ink); font-weight:600;}
+.hero .cta-row{margin-top:26px;}
+.hero .trust-row{margin-top:22px;}
+
+/* ---------- Questionnaire : confort de lecture et de saisie ---------- */
+.step > p.intro{font-size:.95rem; max-width:52ch;}
+.hint-bloc{margin-top:8px; display:grid; gap:9px; max-width:60ch;}
+.hint-bloc p{
+  margin:0; font-size:.84rem; line-height:1.6; color:var(--ink-muted);
+  padding-left:13px; border-left:2px solid var(--line);
+}
+.hint-bloc p b{color:var(--ink); font-weight:600; display:block; margin-bottom:1px;}
+.hint-bloc p.attention{border-left-color:var(--warn-line);}
+.hint-bloc p.attention b{color:var(--warn);}
+.hint-bloc p.encours{border-left-color:var(--accent-line);}
+.hint-bloc p.encours b{color:var(--accent);}
+.wizard-nav{align-items:center;}
+.wizard-nav .btn-primary{min-height:50px; padding-inline:26px; font-size:1rem;}
+.wizard-nav .btn-secondary{min-height:50px;}
+@media(max-width:560px){
+  .wizard-nav{flex-direction:column-reverse; align-items:stretch; gap:10px;}
+  .wizard-nav button{width:100%;}
+  .choice label{padding:15px 16px;}
+  .check-grid{grid-template-columns:1fr;}
+  .check-grid label{padding:14px 14px;}
+  select,input[type=number],input[type=text],input[type=email]{padding:14px 14px;}
+}
+
+/* ---------- Résultat : deux niveaux visuels ----------
+   Un motif retenu et une observation non validée ne peuvent pas se
+   ressembler. Le premier porte le chiffre ; la seconde est mise en retrait. */
+.groupe-t{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:16px 24px 0; font-size:.72rem; font-weight:700; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink-faint);
+}
+.groupe-t .compte{letter-spacing:0; text-transform:none; font-weight:500; font-size:.8rem;}
+.groupe-obs{background:var(--surface-2); border-top:1px solid var(--line);}
+.groupe-obs .groupe-t{color:var(--warn);}
+.groupe-obs .signal{border-bottom:none;}
+.groupe-obs .signal h3{font-size:.98rem; color:var(--ink-muted);}
+.signal .figure-sm{
+  font-size:1.05rem; font-weight:600; font-variant-numeric:tabular-nums;
+  color:var(--ink-muted); margin-top:2px;
+}
+.obs-note{
+  margin-top:10px; font-size:.86rem; line-height:1.6; color:var(--ink-muted);
+  background:var(--warn-soft); border:1px solid var(--warn-line); border-radius:9px; padding:12px 14px;
+}
+.obs-note b{color:var(--warn); font-weight:600;}
+.verdict .sum{font-size:1rem; color:var(--ink);}
+.verdict .sum-detail{margin-top:6px; font-size:.9rem; color:var(--ink-muted);}
+
+/* ---------- Offre ---------- */
+.offers h3.lead{font-size:1.3rem;}
+.offers > p.lead-p{max-width:60ch;}
+.offer-top{display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+.offer .price{margin-top:0;}
+.offer-sec{margin-top:18px; padding-top:16px; border-top:1px solid var(--line);}
+.offer-sec:first-of-type{border-top:none; padding-top:0;}
+.offer-sec-t{
+  font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:10px;
+}
+.offer-sec ul{margin:0; padding:0; list-style:none; display:grid; gap:9px; font-size:.89rem;}
+.offer-sec li{display:grid; grid-template-columns:15px 1fr; gap:10px; align-items:start;}
+.offer-sec li::before{font-weight:700; font-size:.9rem; line-height:1.5;}
+.offer-sec .adds li{font-weight:500; color:var(--ink);}
+.offer-sec .adds li::before{content:"+"; color:var(--accent);}
+.offer-sec .todo li{color:var(--ink-muted);}
+.offer-sec .todo li::before{content:"→"; color:var(--ink-faint); font-weight:600;}
+.offer-sec.deja{margin-top:16px; padding:14px 15px; border-top:none; background:var(--surface-2); border-radius:9px;}
+.offer-sec.deja .offer-sec-t{color:var(--ok); margin-bottom:8px;}
+.offer-sec .free li{color:var(--ink-muted); font-size:.85rem;}
+.offer-sec .free li::before{content:"✓"; color:var(--ok);}
+.offer-caveat{
+  margin-top:16px; font-size:.84rem; line-height:1.6; color:var(--ink-muted);
+  border-left:2px solid var(--line-strong); padding-left:12px;
+}
+.offer .go{margin-top:20px;}
+.offer .go button{min-height:52px; font-size:1rem;}
 </style>
 <!-- jsPDF est servi depuis ce site, pas depuis un CDN : aucune requête vers un
      tiers, et aucune possibilité qu'un CDN compromis exécute du code sur la
@@ -349,18 +468,44 @@ input::placeholder{color:var(--ink-faint);}
   <section class="hero shell">
     <h1>Votre taxe foncière mérite-t-elle d'être vérifiée&nbsp;?</h1>
     <p class="lede">
-      En quelques minutes, identifiez les informations de votre bien qui pourraient mériter une
-      vérification. Foncier·Juste compare ce que vous relevez vous-même sur votre fiche d'évaluation
-      à la réalité actuelle de votre logement. Nous n'avons aucun accès à votre dossier fiscal&nbsp;:
-      tout part de ce que vous saisissez. Quand il n'y a rien à vérifier, nous vous le disons aussi.
+      Vous décrivez votre logement. À partir de vos seules réponses, nous signalons les informations
+      qui méritent d'être vérifiées — et nous le disons aussi quand il n'y a rien à signaler.
+    </p>
+    <ol class="hero-what">
+      <li><span><b>Vous décrivez votre bien</b> — commune, surfaces, éléments de confort.</span></li>
+      <li><span><b>Nous signalons ce qui mérite une vérification</b>, à partir de ce que vous avez saisi.</span></li>
+    </ol>
+    <p class="hero-not">
+      <b>Ce que nous ne faisons pas.</b> Nous ne consultons pas votre dossier fiscal et nous ne
+      pouvons pas établir que votre taxe est erronée. Foncier·Juste est un service privé, sans lien
+      avec l'administration.
     </p>
     <div class="cta-row">
       <button class="btn-primary" id="start-btn">Lancer le pré-diagnostic gratuit</button>
       <a class="btn btn-secondary" href="#fonctionnement">Comment ça fonctionne</a>
     </div>
+    <div class="prereq">
+      <dl>
+        <div>
+          <dt>Ce qu'il faut avoir sous les yeux</dt>
+          <dd><b>Votre fiche d'évaluation (formulaire 6675-M)</b>, pour une vérification complète.
+            Elle s'obtient gratuitement sur impots.gouv.fr. Sans elle, le parcours reste possible,
+            mais nous ne comparons aucune surface : le résultat est alors limité.</dd>
+        </div>
+        <div>
+          <dt>Durée</dt>
+          <dd><b>Environ 2 minutes</b> si vous avez déjà la fiche. Sinon, comptez le temps de la
+            demander avant de revenir.</dd>
+        </div>
+        <div>
+          <dt>Ce que vous obtenez</dt>
+          <dd>Un résultat <b>gratuit et complet</b>, affiché à l'écran, sans inscription.</dd>
+        </div>
+      </dl>
+    </div>
     <div class="trust-row">
       <span>Gratuit, sans inscription</span>
-      <span>Environ 2 minutes</span>
+      <span>Aucun accès à votre dossier fiscal</span>
       <span>Vos réponses restent dans votre navigateur</span>
     </div>
   </section>
@@ -421,17 +566,22 @@ input::placeholder{color:var(--ink-faint);}
           <div class="field" id="champ-fiche" hidden>
             <label for="surf_fiche">Surface réelle totale indiquée sur la fiche</label>
             <div class="unit" data-unit="m²"><input type="number" id="surf_fiche" min="8" max="400" step="1" inputmode="numeric" placeholder="ex : 104"></div>
-            <div class="hint">
-              <b>Où la trouver.</b> La fiche décompose votre logement partie par partie, avec pour
-              chacune une colonne <b>« surface réelle »</b>. Additionnez ces surfaces, ou reprenez le
-              total si la fiche l'indique. C'est un nombre de mètres carrés bruts, sans correction.<br><br>
-              <b>Ne saisissez pas la surface pondérée.</b> Elle figure plus bas sur la même fiche, après
-              les correctifs et les équivalences superficielles — environ 5&nbsp;m² pour une baignoire,
-              3&nbsp;m² pour un WC, 2&nbsp;m² par pièce pour le chauffage central. Sur une fiche
-              parfaitement exacte, elle dépasse normalement la surface mesurée de 20 à 40&nbsp;%.
-              La comparer à un relevé au mètre produirait un écart qui ne veut rien dire.<br><br>
-              <b>Comment les distinguer&nbsp;:</b> si le chiffre que vous lisez est nettement plus grand que
-              ce que vous mesurez chez vous, c'est très probablement la pondérée — ce n'est pas celle-là.
+            <div class="hint-bloc">
+              <p><b>Où la trouver</b>
+                La fiche décompose votre logement partie par partie, avec pour chacune une colonne
+                « surface réelle ». Additionnez ces surfaces, ou reprenez le total si la fiche
+                l'indique. C'est un nombre de mètres carrés bruts, sans correction.</p>
+              <p class="attention"><b>Ce n'est pas la surface pondérée</b>
+                Celle-ci figure plus bas sur la même fiche, après correctifs et équivalences
+                (environ 5&nbsp;m² pour une baignoire, 3&nbsp;m² pour un WC, 2&nbsp;m² par pièce
+                chauffée). Elle dépasse normalement la surface mesurée de 20 à 40&nbsp;%&nbsp;: si le
+                chiffre lu est nettement plus grand que ce que vous mesurez chez vous, ce n'est pas
+                celui-là.</p>
+              <p class="encours"><b>Point que nous vérifions actuellement</b>
+                Nous contrôlons, sur de vraies fiches, quelles parties du logement entrent dans
+                chacun des deux chiffres que nous vous demandons. Tant que ce point n'est pas tranché,
+                un écart entre eux peut venir de la question que nous posons plutôt que de votre
+                situation.</p>
             </div>
           </div>
 
@@ -440,9 +590,8 @@ input::placeholder{color:var(--ink-faint);}
             <div class="unit" data-unit="m²"><input type="number" id="surf_reelle" min="8" max="400" step="1" inputmode="numeric" placeholder="ex : 108"></div>
             <div class="hint">
               Mesurée au sol, à l'intérieur des murs, pièces habitables uniquement — hors garage, cave,
-              et combles non aménagés. C'est le chiffre à confronter à la surface réelle de la fiche&nbsp;:
-              deux grandeurs de même nature, donc comparables. Si vous ne l'avez jamais mesurée,
-              reprenez la surface de votre acte de vente et indiquez-le juste en dessous.
+              et combles non aménagés. Si vous ne l'avez jamais mesurée, reprenez la surface de votre
+              acte de vente et indiquez-le juste en dessous.
             </div>
           </div>
 
@@ -502,6 +651,7 @@ input::placeholder{color:var(--ink-faint);}
           <div>
             <h2 id="verdict-titre">—</h2>
             <p class="sum" id="verdict-sum"></p>
+            <p class="sum-detail" id="verdict-detail" hidden></p>
           </div>
         </div>
       </div>
@@ -530,31 +680,56 @@ input::placeholder{color:var(--ink-faint);}
            donnée suffisamment fiable. Voir `venteAutorisee()`. -->
       <div class="offers" id="zone-vente" hidden>
         <div class="eyebrow">Aller plus loin</div>
-        <h3 class="lead">Voici ce que nous pouvons faire pour vous</h3>
+        <h3 class="lead">Déposer une demande, avec le dossier de vérification</h3>
         <p class="lead-p">
-          Le pré-diagnostic ci-dessus est à vous, gratuitement et intégralement&nbsp;: nous ne cachons
-          aucune conclusion derrière un paiement, et il n'existe pas de version payante de ce que vous
-          venez de lire. Ce que le dossier ajoute, c'est ce qu'il faut pour déposer une demande —
-          le courrier, les pièces, les délais. <b>Nous ne promettons aucune économie et ne pouvons pas
-          en calculer une&nbsp;</b>: elle dépend d'un recalcul que seule l'administration peut faire.
+          <b>Le résultat ci-dessus est gratuit et complet&nbsp;;</b> il n'en existe pas de version
+          payante, et aucune conclusion n'est retenue derrière un paiement. Le dossier ne le répète
+          pas&nbsp;: il ajoute ce qu'il faut pour déposer une demande.
         </p>
 
         <div class="offer-grid offre-unique">
           <div class="offer main">
-            <h4>Dossier de vérification</h4>
-            <div class="price num">49 €</div>
+            <div class="offer-top">
+              <h4>Dossier de vérification</h4>
+              <div class="price num">49 €</div>
+            </div>
             <p class="for">Pour passer du constat à une demande correctement formée.</p>
-            <ul>
-              <li>Chaque élément repris : ce que vous avez indiqué, ce que nous en déduisons, ce qu'il reste à vérifier</li>
-              <li>Ce que vaut chaque constat, et d'où vient l'information</li>
-              <li class="plus">Un projet de courrier, à relire, compléter et signer</li>
-              <li class="plus">Les pièces à réunir pour votre situation, et comment les obtenir</li>
-              <li class="plus">Où déposer, et le délai à ne pas dépasser</li>
-              <li class="plus">Ce que la démarche ne garantit pas</li>
-            </ul>
+
+            <div class="offer-sec">
+              <div class="offer-sec-t">Ce que le dossier ajoute</div>
+              <ul class="adds">
+                <li>Un projet de courrier rédigé pour votre situation, avec les articles applicables</li>
+                <li>La liste des pièces à joindre, et comment obtenir celles qui vous manquent</li>
+                <li>La marche à suivre : à qui adresser la demande, et sous quelle forme</li>
+                <li>Le délai à ne pas dépasser, et le texte qui le fixe</li>
+              </ul>
+            </div>
+
+            <div class="offer-sec">
+              <div class="offer-sec-t">Ce que vous devrez faire vous-même</div>
+              <ul class="todo">
+                <li>Relire le courrier, le compléter avec vos références d'avis, le signer à la main</li>
+                <li>Réunir les pièces justificatives et les joindre</li>
+                <li>Déposer la demande et en suivre l'issue</li>
+              </ul>
+            </div>
+
+            <div class="offer-sec deja">
+              <div class="offer-sec-t">Déjà inclus dans le résultat gratuit ci-dessus</div>
+              <ul class="free">
+                <li>Chaque élément repris : ce que vous avez indiqué, ce que nous en déduisons, ce qu'il reste à vérifier</li>
+                <li>Ce que vaut chaque constat, et d'où vient l'information</li>
+              </ul>
+            </div>
+
+            <p class="offer-caveat">
+              <b>Aucun remboursement n'est garanti.</b> Seule l'administration peut recalculer une
+              valeur locative cadastrale&nbsp;: nous ne pouvons ni prévoir sa décision, ni chiffrer
+              une économie. Le dossier vous permet de demander une vérification, pas de l'obtenir.
+            </p>
+
             <div class="go"><button class="btn-primary buy-btn" data-produit="dossier">Obtenir mon dossier — 49 €</button></div>
           </div>
-        </div>
         </div>
 
         <div class="pay-form">
@@ -1007,8 +1182,11 @@ async function runDiagnostic(){
 
 const echappe = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-function blocSignal(a){
+function blocSignal(a, opts = {}){
   const nonValide = CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code);
+  // Un constat non validé n'a pas droit au grand chiffre : il n'est pas un
+  // motif, et la mise en page ne doit pas suggérer le contraire.
+  const classeFigure = nonValide ? 'figure-sm' : 'figure';
   const tag = nonValide ? 'tag-warn' : a.gravite === 'haute' ? 'tag-alert' : a.gravite === 'moyenne' ? 'tag-warn' : 'tag-info';
   const lib = nonValide ? 'Constat non validé'
     : a.gravite === 'haute' ? 'À vérifier en priorité'
@@ -1020,12 +1198,12 @@ function blocSignal(a){
     </div>
     <h3>${echappe(a.titre)}</h3>
     <div class="signal-kind" style="margin-top:10px">${a.code === 'elements_confort_obsoletes' ? 'Élément concerné' : a.gravite === 'info' ? 'Repère' : 'Écart constaté'}</div>
-    <div class="figure" style="margin-top:2px">${echappe(a.figure)}</div>
-    ${nonValide ? `<p class="conf" style="color:var(--warn);margin-top:10px;border:0;padding:0">
-      <b>Constat non validé.</b> Nous vérifions actuellement, sur de vraies fiches d'évaluation, que les
-      deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point n'est pas tranché, cet
-      élément ne compte pas comme une anomalie : il n'ouvre aucune offre payante et ne figure pas dans le
-      projet de courrier si vous achetez le dossier. Il vous indique où regarder, rien de plus.</p>` : ''}
+    <div class="${classeFigure}" style="margin-top:2px">${echappe(a.figure)}</div>
+    ${nonValide ? `<p class="obs-note">
+      <b>Ce constat n'est pas retenu comme motif.</b> Nous vérifions actuellement, sur de vraies fiches
+      d'évaluation, que les deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point
+      n'est pas tranché, cet élément n'ouvre aucune offre payante et ne figure pas dans le projet de
+      courrier si vous achetez le dossier. Il vous indique où regarder, rien de plus.</p>` : ''}
     <p class="why"><span class="k">Ce que vous avez indiqué</span>${echappe(a.vosReponses)}</p>
     <p class="why"><span class="k">Ce que nous en déduisons</span>${echappe(a.calcul)}</p>
     <p class="why"><span class="k">Ce qu'il reste à vérifier</span>${echappe(a.aVerifier)}</p>
@@ -1042,21 +1220,60 @@ function renderResults(d){
   const reels = anomalies.filter(a => a.gravite !== 'info');
   const contexte = anomalies.filter(a => a.gravite === 'info');
 
-  // 1 & 2 — Conclusion, puis nombre d'éléments
+  // Deux natures différentes, jamais additionnées : ce qui constitue un motif
+  // de vérification, et ce qui n'est qu'une observation tant que la
+  // comparaison des surfaces n'a pas été validée sur de vraies fiches.
+  const retenus = reels.filter(a => !CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code));
+  const observations = reels.filter(a => CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code));
+  const pluriel = (n, s, p) => `${n} ${n > 1 ? p : s}`;
+
+  // 1 & 2 — Conclusion, puis ce qui est retenu et ce qui ne l'est pas
   const bloc = $('verdict');
   bloc.className = 'verdict ' + classif.ton;
   $('verdict-titre').textContent = classif.label;
-  $('verdict-sum').textContent = reels.length === 0
-    ? (avecFiche
-        ? "Avec les chiffres de votre fiche d'évaluation, nous n'identifions aucun élément appelant une vérification."
-        : "Avec les informations fournies, nous n'identifions aucun élément appelant une vérification approfondie.")
-    : reels.length === 1
-      ? "Nous avons identifié 1 élément qui mérite une vérification."
-      : `Nous avons identifié ${reels.length} éléments qui méritent une vérification.`;
+
+  const sum = $('verdict-sum');
+  const detail = $('verdict-detail');
+  if (reels.length === 0){
+    sum.textContent = avecFiche
+      ? "Avec les chiffres de votre fiche d'évaluation, nous n'identifions aucun élément appelant une vérification."
+      : "Avec les informations fournies, nous n'identifions aucun élément appelant une vérification approfondie.";
+    detail.textContent = '';
+    detail.hidden = true;
+  } else if (retenus.length === 0){
+    sum.textContent = "Aucun élément n'est retenu comme motif de vérification à ce stade.";
+    detail.textContent = observations.length === 1
+      ? "Une observation complémentaire figure ci-dessous : elle vous indique où regarder, mais elle ne constitue pas un motif tant que nous n'avons pas validé la comparaison des surfaces."
+      : "Des observations complémentaires figurent ci-dessous : elles vous indiquent où regarder, mais ne constituent pas des motifs tant que nous n'avons pas validé la comparaison des surfaces.";
+    detail.hidden = false;
+  } else {
+    sum.textContent = `Nous retenons ${pluriel(retenus.length, 'piste à vérifier', 'pistes à vérifier')}.`;
+    detail.textContent = observations.length
+      ? `S'y ajoute ${pluriel(observations.length, 'observation qui ne compte pas comme motif', 'observations qui ne comptent pas comme motifs')}, présentée plus bas, à part.`
+      : '';
+    detail.hidden = !observations.length;
+  }
 
   // 3, 4, 5 — Chaque signal, avec ce qui vient de vous, ce qui est calculé,
-  // ce qui reste à vérifier, et d'où vient l'information.
-  $('signaux').innerHTML = reels.map(blocSignal).join('')
+  // ce qui reste à vérifier, et d'où vient l'information. Les motifs retenus
+  // d'abord ; les observations ensuite, en retrait.
+  const groupe = (titre, compte, items, classe) =>
+    `<section class="${classe}">
+       <div class="groupe-t"><span>${titre}</span><span class="compte">${compte}</span></div>
+       ${items}
+     </section>`;
+  const html =
+    (retenus.length
+      ? groupe('Pistes à vérifier',
+               pluriel(retenus.length, 'élément retenu', 'éléments retenus'),
+               retenus.map(a => blocSignal(a)).join(''), 'groupe')
+      : '') +
+    (observations.length
+      ? groupe('Observation complémentaire — non retenue comme motif',
+               'ne déclenche aucune offre',
+               observations.map(a => blocSignal(a)).join(''), 'groupe groupe-obs')
+      : '');
+  $('signaux').innerHTML = html
     || `<div class="block"><p>Aucun élément relevé à partir de vos réponses.</p></div>`;
 
   // 6 — Ce que cela signifie, et ne signifie pas
