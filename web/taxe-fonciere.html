@@ -538,11 +538,14 @@ function majAvisCouverture(){
       n'aurez simplement pas l'indication de prix au m² affichée en marge du résultat.</p>`);
   }
   if (communeChoisie.aVerifier){
-    messages.push(`<p><b>Particularités locales non vérifiées.</b> ${communeChoisie.dept_nom} relève de
-      dispositions propres — droit local d'Alsace-Moselle, ou régime des départements d'outre-mer — que
-      nous n'avons pas contrôlées. Les règles que nous appliquons sont celles du régime général du Code
-      général des impôts. Traitez le résultat comme une piste à confirmer auprès de votre service des
-      impôts fonciers.</p>`);
+    const alsaceMoselle = ['57', '67', '68'].includes(communeChoisie.code_dept);
+    messages.push(`<p><b>Particularités locales non vérifiées.</b> ${communeChoisie.dept_nom} relève ${
+      alsaceMoselle
+        ? "du droit local d'Alsace-Moselle"
+        : "du régime des départements et régions d'outre-mer"
+      }, dont nous n'avons pas contrôlé les dispositions propres en matière de taxe foncière. Les règles
+      que nous appliquons sont celles du régime général du Code général des impôts. Traitez le résultat
+      comme une piste à confirmer auprès de votre service des impôts fonciers.</p>`);
   }
   boite.className = communeChoisie.aVerifier ? 'encart prudence' : 'encart';
   boite.innerHTML = messages.join('');
@@ -571,7 +574,15 @@ function filtrerCommunes(){
 }
 document.getElementById('commune').addEventListener('input', () => {
   clearTimeout(minuteurFiltre);
-  minuteurFiltre = setTimeout(filtrerCommunes, 90);
+  minuteurFiltre = setTimeout(() => {
+    filtrerCommunes();
+    // L'avis de couverture doit s'afficher AVANT de quitter l'étape : rempli
+    // seulement au clic sur « Continuer », il n'aurait jamais été lu, l'étape
+    // étant masquée juste après.
+    const choix = communesIndex.get(document.getElementById('commune').value.trim());
+    if (choix){ communeChoisie = choix; majAvisCouverture(); }
+    else { document.getElementById('avis-couverture').hidden = true; }
+  }, 90);
 });
 
 /* =========================================================================
