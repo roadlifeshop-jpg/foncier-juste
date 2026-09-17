@@ -120,9 +120,13 @@ strong,b{font-weight:600;}
 .site-head{background:var(--surface); border-bottom:1px solid var(--line); position:relative;}
 .site-head::before{content:""; position:absolute; inset:0 0 auto; height:3px; background:var(--gold);}
 .site-head .shell{display:flex; align-items:center; gap:20px; padding-block:15px 14px; flex-wrap:wrap;}
+/* inline-block et non inline-flex : la baseline de marque est un <small> en
+   display:block, qui doit passer SOUS le nom. En flex, il devenait un item
+   voisin et s'affichait à côté. */
 .brand{
-  display:inline-flex; align-items:baseline; gap:2px; font-family:'Spectral',Georgia,serif;
-  font-weight:600; font-size:1.18rem; color:var(--ink); text-decoration:none; letter-spacing:-.012em;
+  display:inline-block; font-family:'Spectral',Georgia,serif;
+  font-weight:600; font-size:1.18rem; line-height:1.15; color:var(--ink);
+  text-decoration:none; letter-spacing:-.012em;
 }
 .brand .dot{color:var(--gold); font-size:1.25em; line-height:0;}
 .brand small{
