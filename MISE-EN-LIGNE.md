@@ -6,16 +6,23 @@ fusionné ni déployé.**
 | | |
 |---|---|
 | Branche de travail | `refonte-trois-outils` |
-| Miroir court (même commit) | `trois-outils` |
-| Commit de tête de la branche | `015b9a9` (`015b9a92e97be9d2b6ebad7ea63e9a4f0adbd4c8`) |
-| `main` — local et distant | `52ab6ac` (`52ab6ac29b59d6774f30509b2ae817a6e6e50fe1`), identiques |
-| Commits d'écart | **8** |
-| Production actuelle | déploiement de `52ab6ac`, servi sur foncier-juste.vercel.app |
+| Miroir court, même commit | `trois-outils` |
+| `main` — local et distant | `52ab6ac` (`52ab6ac29b59d6774f30509b2ae817a6e6e50fe1`) |
+| Production actuelle | déploiement de `52ab6ac` |
 
-> Les chiffres de ce tableau se revérifient par
-> `git rev-parse main refonte-trois-outils` et
-> `git rev-list --count main..refonte-trois-outils`. Toute nouvelle poussée sur
-> la branche les périme : les relire avant d'agir.
+**Le commit de tête de la branche et le nombre de commits d'écart ne sont pas
+écrits ici, volontairement.** Ce document en portait deux, et ils se sont
+périmés à la poussée suivante. Ils se lisent à la demande :
+
+```bash
+sh scripts/etat-mise-en-ligne.sh
+```
+
+Ce script imprime les deux têtes, l'écart réel, l'alignement de la branche avec
+son miroir, l'adresse de prévisualisation et la version actuellement servie en
+production. **Le lancer avant toute décision.** Seul `main` est cité en dur
+ci-dessus, parce qu'il ne bougera pas avant la fusion — et s'il a bougé, le
+script le dira.
 
 ---
 
@@ -28,11 +35,10 @@ Adresse stable de la branche, indépendante du dernier commit :
 https://foncier-juste-git-trois-outils-roadlifeshop-6695.vercel.app
 ```
 
-Adresse du commit `015b9a9` précisément :
-
-```
-https://foncier-juste-3co2ko3hl-roadlifeshop-6695.vercel.app
-```
+Vercel crée aussi une adresse par commit, de la forme
+`foncier-juste-<identifiant>-roadlifeshop-6695.vercel.app`. Elle se périme à
+chaque poussée&nbsp;: préférer l'adresse de branche ci-dessus, qui suit
+toujours le dernier commit.
 
 **Ces adresses demandent une connexion Vercel** : la protection des
 déploiements de prévisualisation est active sur le projet. Connecté au compte,
@@ -42,8 +48,9 @@ lien qui contourne la protection, ou Settings → Deployment Protection permet d
 la désactiver pour les prévisualisations.
 
 Où retrouver ces liens à la main : vercel.com → projet **foncier-juste** →
-onglet **Deployments** → la ligne dont la branche est `trois-outils` et le
-commit `015b9a9` → bouton **Visit**, ou menu ⋯ → **Copy URL**.
+onglet **Deployments** → la ligne la plus récente dont la branche est
+`trois-outils` — son commit doit être celui qu'imprime
+`sh scripts/etat-mise-en-ligne.sh` → bouton **Visit**, ou menu ⋯ → **Copy URL**.
 
 ## 2. Avant le feu vert — ce qui ne dépend pas de moi
 
