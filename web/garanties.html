@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Produit défectueux, garanties, réparation — quelles voies restent ouvertes</title>
-<meta name="description" content="Quatre questions pour savoir quelles démarches restent ouvertes après un achat défectueux : rétractation, garantie légale de conformité, vice caché. Pièces à réunir et limites, avec les textes applicables.">
+<meta name="description" content="Six questions pour savoir quelles démarches restent ouvertes après un achat défectueux : rétractation, garantie légale de conformité, vice caché. Pièces à réunir et limites, avec les textes applicables.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/garanties.html">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230F3D56'/><path d='M8 22V10h4l4 6 4-6h4v12' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 25.5h16' stroke='%238A6520' stroke-width='2.4' stroke-linecap='round'/></svg>">
@@ -56,8 +56,8 @@
     <div class="eyebrow">Outil 3 sur 3 — gratuit, sans inscription</div>
     <h1>Un achat défectueux&nbsp;: quelles voies restent ouvertes&nbsp;?</h1>
     <p class="lede">
-      Quatre questions. Le résultat dépend surtout de la date d'achat et de la nature du vendeur — ce
-      sont elles qui ouvrent ou ferment chaque voie.
+      Six questions. Le résultat dépend surtout de la date de livraison et de la nature du vendeur —
+      ce sont elles qui ouvrent ou ferment chaque voie.
     </p>
     <p class="limite-courte">
       <b>Cet outil n'engage aucune démarche et ne dit pas si la vôtre aboutira.</b> Il indique les voies
@@ -67,7 +67,7 @@
 
   <section class="shell-lire" id="formulaire">
     <div class="forme">
-      <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Votre situation, en six réponses</h2>
+      <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Votre situation</h2>
       <p class="aide" style="margin-top:4px">Aucune n'est envoyée nulle part&nbsp;: le calcul se fait dans votre navigateur.</p>
       <form id="forme-g" novalidate>
         <div class="forme-grille">
@@ -80,12 +80,19 @@
             <label for="g-etat">Il était…</label>
             <select id="g-etat"></select>
           </div>
-          <div class="champ">
+          <div class="champ plein">
             <label for="g-date">Date d'achat</label>
             <input type="date" id="g-date">
             <p class="aide date-lue" id="g-date-lue" hidden></p>
-            <p class="aide">Le format affiché entre les barres obliques suit la langue de votre navigateur&nbsp;; la date retenue est confirmée en clair dès que vous la saisissez.</p>
-            <p class="aide">Retenez la date de réception si elle est plus tardive&nbsp;: les délais courent depuis la délivrance.</p>
+            <p class="aide">Le format affiché suit la langue de votre navigateur&nbsp;; la date retenue est confirmée en clair dès la saisie.</p>
+            <div class="cases-fines" style="margin-top:12px">
+              <label><input type="checkbox" id="g-livre-plus-tard"><span>Le bien m'a été <b>livré plus tard</b> que la date d'achat<span class="d">Les délais légaux courent depuis la livraison, pas depuis la commande. Sans cette date, ils sont approximatifs.</span></span></label>
+            </div>
+            <div id="g-zone-reception" hidden style="margin-top:12px">
+              <label for="g-date-reception" style="font-size:.9rem; font-weight:600">Date de réception du bien</label>
+              <input type="date" id="g-date-reception">
+              <p class="aide date-lue" id="g-date-reception-lue" hidden></p>
+            </div>
             <p class="erreur-champ" id="g-e-date" hidden></p>
           </div>
           <div class="champ">
@@ -219,8 +226,16 @@ function relireDate(champ, cible){
   p.textContent = 'Date comprise : ' + d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) + '.';
   p.hidden = false;
 }
-$('g-date').addEventListener('change', () => relireDate('g-date', 'g-date-lue'));
-$('g-date').addEventListener('input', () => relireDate('g-date', 'g-date-lue'));
+[['g-date', 'g-date-lue'], ['g-date-reception', 'g-date-reception-lue']].forEach(([c, t]) => {
+  $(c).addEventListener('change', () => relireDate(c, t));
+  $(c).addEventListener('input', () => relireDate(c, t));
+});
+$('g-livre-plus-tard').addEventListener('change', () => {
+  const coche = $('g-livre-plus-tard').checked;
+  $('g-zone-reception').hidden = !coche;
+  if (!coche){ $('g-date-reception').value = ''; $('g-date-reception-lue').hidden = true; }
+  else $('g-date-reception').focus();
+});
 
 $('forme-g').addEventListener('submit', ev => {
   ev.preventDefault();
@@ -228,6 +243,7 @@ $('forme-g').addEventListener('submit', ev => {
   const r = {
     categorie: $('g-categorie').value, etat: $('g-etat').value, vendeur: $('g-vendeur').value,
     canal: $('g-canal').value, probleme: $('g-probleme').value, dateAchat: $('g-date').value,
+    dateReception: $('g-livre-plus-tard').checked ? $('g-date-reception').value : '',
   };
   const res = orienter(r, AUJ);
   if (res.invalide){
@@ -237,8 +253,14 @@ $('forme-g').addEventListener('submit', ev => {
     return;
   }
 
-  $('g-faits').innerHTML = res.faits.map(f =>
-    `<div class="fait"><h3>${ech(f.titre)}</h3><p>${ech(f.texte)}</p></div>`).join('');
+  $('g-faits').innerHTML =
+    (res.approximatif
+      ? `<div class="encart prudence" style="margin-top:12px"><p><b>Délais approximatifs.</b> Ils partent
+         de votre date d'achat, faute de date de livraison. Un bien reçu plus tard vous laisse
+         <b>plus</b> de temps, jamais moins — mais si vous êtes proche d'une échéance, cochez
+         « livré plus tard » et donnez la date.</p></div>`
+      : '') +
+    res.faits.map(f => `<div class="fait"><h3>${ech(f.titre)}</h3><p>${ech(f.texte)}</p></div>`).join('');
 
   const voies = res.voies.filter(v => v.titre);
   $('g-voies').innerHTML = voies.length ? voies.map((v, i) =>
@@ -269,6 +291,10 @@ $('g-reset').addEventListener('click', () => {
   $('g-resultat').hidden = true;
   $('g-reset').hidden = true;
   $('g-date').value = '';
+  $('g-date-reception').value = '';
+  $('g-livre-plus-tard').checked = false;
+  $('g-zone-reception').hidden = true;
+  $('g-date-lue').hidden = true; $('g-date-reception-lue').hidden = true;
   $('forme-g').scrollIntoView({ behavior: 'smooth', block: 'center' });
   $('g-categorie').focus();
 });

@@ -12,6 +12,13 @@
 <style>
 /* Composants propres à cet outil. Le système de design, les jetons de palette
    et les composants partagés vivent dans base.css : rien n'est dupliqué ici. */
+.schema{margin-top:10px; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r); padding:12px 14px;}
+.schema summary{font-size:.92rem; font-weight:600; color:var(--accent); cursor:pointer;}
+.schema[open] summary{margin-bottom:10px;}
+.schema table{font-size:.86rem;}
+.schema th,.schema td{padding:9px 11px;}
+.schema-avert{font-size:.86rem; line-height:1.55; color:var(--ink-muted); margin-top:10px;}
+.schema-avert b{color:var(--ink);}
 .hint-bloc{margin-top:8px; display:grid; gap:9px; max-width:62ch;}
 .hint-bloc p{margin:0; font-size:.88rem; line-height:1.6; color:var(--ink-muted); padding-left:13px; border-left:2px solid var(--line);}
 .hint-bloc p b{color:var(--ink); font-weight:600; display:block; margin-bottom:1px;}
@@ -122,7 +129,9 @@
         <div class="etape" data-step="1">
           <div class="etape-label">Étape 1 sur 3</div>
           <h2>Votre bien</h2>
-          <p class="intro">Nous commençons par situer le logement, pour pouvoir le comparer à des ventes réelles du même secteur.</p>
+          <p class="intro">Nous commençons par situer le logement. Dans certaines communes, nous pouvons
+          aussi afficher un repère de prix issu des ventes enregistrées&nbsp;— une indication de marché,
+          sans rapport avec le calcul de votre taxe.</p>
           <div class="champ">
             <label for="commune">Commune</label>
             <input type="text" id="commune" list="communes-list" placeholder="Tapez les premières lettres…" autocomplete="off" spellcheck="false">
@@ -158,16 +167,50 @@
               </label>
             </div>
             <div class="encart info" id="notice-sans-fiche">
-              <b>Sans la fiche, nous ne comparerons aucune surface.</b> La surface retenue pour votre
-              évaluation ne figure ni sur votre avis d'imposition ni sur votre acte de vente&nbsp;: elle
-              n'existe que sur le formulaire 6675-M. Nous préférons ne rien calculer plutôt que de
-              comparer deux chiffres qui ne mesurent pas la même chose.
+              <p style="margin-top:0"><b>Sans la fiche, aucune surface ne sera comparée</b> — la surface
+              retenue par l'administration n'existe que sur ce document, ni sur votre avis d'imposition ni
+              sur votre acte de vente. Nous préférons ne rien calculer plutôt que de comparer deux
+              chiffres qui ne mesurent pas la même chose.</p>
+              <p><b>Ce qui reste possible aujourd'hui, sans elle&nbsp;:</b> signaler un élément de confort
+              qui n'existe plus (piscine comblée, dépendance démolie, véranda retirée) — c'est le motif le
+              plus simple à documenter, et il ne dépend d'aucune surface. Vous repartirez aussi avec la
+              marche à suivre et les délais.</p>
+              <p><b>Comment l'obtenir, gratuitement&nbsp;:</b> depuis la messagerie sécurisée de votre
+              espace particulier sur impots.gouv.fr, en demandant « la fiche d'évaluation (6675-M) de mon
+              local », ou directement auprès de votre centre des impôts fonciers. <b>Ne cherchez pas de
+              PDF à télécharger&nbsp;:</b> il n'en existe pas. Ce n'est pas un formulaire vierge mais un
+              dossier déjà rempli, propre à votre bien, que l'administration vous transmet sur demande.</p>
             </div>
           </fieldset>
 
           <div class="champ" id="champ-fiche" hidden>
             <label for="surf_fiche">Surface réelle totale indiquée sur la fiche</label>
             <div class="unit" data-unit="m²"><input type="number" id="surf_fiche" min="8" max="400" step="1" inputmode="numeric" placeholder="ex : 104"></div>
+            <details class="schema">
+              <summary>Voir où lire ce chiffre sur la fiche</summary>
+              <p class="schema-avert"><b>Schéma de lecture, pas une reproduction.</b> Nous ne montrons pas
+              d'image de fiche&nbsp;: la vôtre est un document nominatif, et il n'existe aucun modèle
+              vierge publié. Le tableau ci-dessous reprend les rubriques que la fiche comporte, dans
+              l'ordre où elles apparaissent, d'après les articles 324 L à 324 V de l'annexe III au code
+              général des impôts et les commentaires du BOFiP.</p>
+              <div class="tableau-enveloppe">
+                <table>
+                  <thead><tr><th>Rubrique de la fiche</th><th>Ce qu'on y lit</th><th class="nombre">À saisir ici&nbsp;?</th></tr></thead>
+                  <tbody>
+                    <tr><td>Désignation du local</td><td>Adresse, références cadastrales, nature du local</td><td class="nombre">non</td></tr>
+                    <tr><td>Catégorie</td><td>Le classement de 1 à 8, qui traduit le niveau de confort général</td><td class="nombre">non</td></tr>
+                    <tr><td><b>Surface réelle</b>, partie par partie</td><td>Des mètres carrés bruts, sans correction. C'est la seule rubrique en mètres carrés réels.</td><td class="nombre"><b>oui</b></td></tr>
+                    <tr><td>Correctifs</td><td>Coefficients d'importance, d'entretien, de situation — des multiplicateurs, pas des surfaces</td><td class="nombre">non</td></tr>
+                    <tr><td>Équivalences superficielles</td><td>Des mètres carrés fictifs ajoutés pour les éléments de confort</td><td class="nombre">non</td></tr>
+                    <tr><td>Surface pondérée</td><td>Le résultat du calcul&nbsp;: surface réelle corrigée, plus les équivalences. Normalement 20 à 40&nbsp;% au-dessus de la surface mesurée.</td><td class="nombre">non</td></tr>
+                    <tr><td>Valeur locative</td><td>Un montant en euros, base de l'imposition</td><td class="nombre">non</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="schema-avert">Le repère le plus sûr&nbsp;: <b>si le chiffre que vous lisez est
+              nettement plus grand que ce que vous mesurez chez vous, c'est la surface pondérée</b> —
+              ce n'est pas celle-là.</p>
+            </details>
             <div class="hint-bloc">
               <p><b>Où la trouver</b>
                 La fiche décompose votre logement partie par partie, avec pour chacune une colonne
@@ -260,16 +303,13 @@
             </div>
           </div>
 
-          <div class="bloc">
-            <h3>1. Les faits, tels qu'ils découlent de vos réponses</h3>
-            <p>Rien ici n'est interprété&nbsp;: ce sont les chiffres que vous venez de saisir, repris tels quels.</p>
-            <dl class="faits-liste" id="faits-donnees"></dl>
+
+          <div class="bloc" style="padding-bottom:0; border-bottom:none">
+            <h3>1. Ce que vos réponses permettent de signaler</h3>
           </div>
-
           <div id="signaux"></div>
-
           <div class="bloc">
-            <h3>Ce que ce résultat signifie — et ce qu'il ne signifie pas</h3>
+            <h3>2. Ce qui reste incertain, et ce que nous ne savons pas</h3>
             <p id="limite-texte"></p>
             <div class="encart limite">
               <p><b>Aucune correction et aucun remboursement ne sont garantis.</b> Ce site ne consulte pas
@@ -277,20 +317,26 @@
               que l'administration décidera. Une réclamation peut être rejetée, même fondée sur un élément
               exact.</p>
             </div>
-          </div>
-
           <div class="bloc">
-            <h3>Les documents utiles</h3>
-            <p>Réunir ces pièces avant d'écrire fait plus pour un dossier que n'importe quelle formulation.</p>
-            <ul id="documents-contenu"></ul>
-          </div>
-
-          <div class="bloc">
-            <h3>Les démarches possibles, et leurs délais</h3>
+            <h3>3. La prochaine démarche, et son délai</h3>
             <p>La réclamation est gratuite et n'exige aucun avocat. Voici le cadre exact, avec ses sources.</p>
             <div id="action-contenu"></div>
             <div id="demarches-sources"></div>
           </div>
+          <div class="bloc">
+            <h3>4. Les documents à réunir avant d'écrire</h3>
+            <p>Réunir ces pièces avant d'écrire fait plus pour un dossier que n'importe quelle formulation.</p>
+            <ul id="documents-contenu"></ul>
+          </div>
+          <div class="bloc">
+            <h3>5. Ce que vous avez saisi, repris tel quel</h3>
+            <p>Rien ici n'est interprété&nbsp;: ce sont les chiffres que vous venez de saisir, repris tels quels.</p>
+            <dl class="faits-liste" id="faits-donnees"></dl>
+          </div>
+
+          </div>
+
+
 
           <div class="bloc">
             <h3>Emporter le récapitulatif</h3>
@@ -337,7 +383,10 @@
           à votre dossier fiscal&nbsp;: tout part de ce que vous avez saisi.</p>
         </div>
         <div class="cote-carte" id="contexte-carte" hidden>
-          <h3>Contexte de marché</h3>
+          <h3>Repère de marché — secondaire</h3>
+          <p class="recap-vide" style="margin-bottom:10px"><b>Sans valeur de diagnostic fiscal.</b> La
+          taxe foncière repose sur une valeur locative de 1970 revalorisée, pas sur les prix de vente
+          actuels&nbsp;: ce repère ne dit jamais que votre imposition est trop élevée.</p>
           <div id="contexte-marche"></div>
         </div>
       </aside>
@@ -529,23 +578,21 @@ function chargerCommunes(){
 function majAvisCouverture(){
   const boite = document.getElementById('avis-couverture');
   if (!communeChoisie){ boite.hidden = true; return; }
+  // Résumé en une ou deux lignes, détail accessible : un pavé à cet endroit
+  // repousse la suite du formulaire et se fait sauter.
   const messages = [];
   if (!communeChoisie.marche){
-    messages.push(`<p><b>Pas de repère de prix pour ${communeChoisie.commune}.</b> Nos données de ventes
-      (DVF 2024) ne couvrent que 20 départements, et seulement les communes où des ventes ont été
-      enregistrées. <b>Cela ne limite en rien le diagnostic&nbsp;:</b> l'écart de surface et les éléments
-      de confort disparus se calculent uniquement à partir de vos réponses et de votre fiche. Vous
-      n'aurez simplement pas l'indication de prix au m² affichée en marge du résultat.</p>`);
+    messages.push(`<p><b>Pas de repère de prix pour ${communeChoisie.commune}</b> — le diagnostic reste
+      complet. Seule l'indication de marché affichée en marge du résultat manquera.
+      <a href="#couverture">Pourquoi</a>.</p>`);
   }
   if (communeChoisie.aVerifier){
     const alsaceMoselle = ['57', '67', '68'].includes(communeChoisie.code_dept);
-    messages.push(`<p><b>Particularités locales non vérifiées.</b> ${communeChoisie.dept_nom} relève ${
-      alsaceMoselle
+    messages.push(`<p><b>${communeChoisie.dept_nom}&nbsp;: particularités locales non vérifiées.</b> Nous
+      appliquons les règles du régime général&nbsp;; celles ${alsaceMoselle
         ? "du droit local d'Alsace-Moselle"
-        : "du régime des départements et régions d'outre-mer"
-      }, dont nous n'avons pas contrôlé les dispositions propres en matière de taxe foncière. Les règles
-      que nous appliquons sont celles du régime général du Code général des impôts. Traitez le résultat
-      comme une piste à confirmer auprès de votre service des impôts fonciers.</p>`);
+        : "propres aux départements d'outre-mer"}, nous ne les avons pas contrôlées. Le résultat est à
+      confirmer auprès de votre service des impôts fonciers. <a href="#couverture">Détail et sources</a>.</p>`);
   }
   boite.className = communeChoisie.aVerifier ? 'encart prudence' : 'encart';
   boite.innerHTML = messages.join('');

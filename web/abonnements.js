@@ -266,10 +266,12 @@ function pistes(ligne, aujourdhui) {
   }
 
   if (!out.length) {
+    // Formulé comme une action, pas comme un manque : c'est le cas le plus
+    // fréquent d'une première saisie, et l'utilisateur doit savoir quoi faire.
     out.push({
       type: 'verification', regle: null,
-      titre: "Rien à signaler avec ces seules informations",
-      texte: "Renseignez l'échéance, la durée d'engagement ou le mode de souscription pour que nous puissions indiquer les vérifications pertinentes. Sans ces éléments, nous ne pouvons rien en dire d'utile.",
+      titre: "Prochaine étape : retrouvez trois informations dans votre contrat",
+      texte: "Avec le montant seul, nous savons déjà ce que cet abonnement coûte par mois et par an — c'est un fait utile. Pour aller plus loin, cherchez dans votre contrat ou vos courriels : la date de prochaine échéance, la durée d'engagement s'il en existe une, et si vous avez souscrit en ligne. Ces trois éléments déterminent ce que vous pouvez faire, et l'outil l'indiquera dès que vous les aurez saisis.",
     });
   }
   return out;

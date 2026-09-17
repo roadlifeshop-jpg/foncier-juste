@@ -248,6 +248,58 @@ SCRIPT_TESTS = r"""
   vrai("règle durée : annonce les deux ans quel que soit l'état",
        /neuf, reconditionné ou d'occasion/i.test(REGLES['conformite-duree'].titre));
 
+
+  /* ---- Date de délivrance : le point de départ réel des délais ---------
+     Sans elle, l'outil doit annoncer des délais APPROXIMATIFS plutôt que de
+     laisser l'utilisateur rectifier un résultat présenté comme exact. */
+  const socle = { categorie:'electro_grand', canal:'distance', probleme:'panne_apres',
+                 etat:'neuf', vendeur:'pro' };
+  const sansLivraison = orienter({ ...socle, dateAchat: reculeMois(AUJ, 14) }, AUJ);
+  vrai("sans date de livraison : délais marqués approximatifs", sansLivraison.approximatif === true);
+  vrai("sans date de livraison : le fait le dit", /approximatif/i.test(sansLivraison.faits[0].titre + sansLivraison.faits[0].texte));
+  vrai("sans date de livraison : le sens de l'écart est donné (jamais moins de temps)",
+       /plus de temps|plus\b[^.]*jamais moins/i.test(sansLivraison.faits[0].texte));
+  vrai("sans date de livraison : une limite dédiée est ajoutée",
+       sansLivraison.limites.some(l => /approximatifs/i.test(l)));
+
+  const avecLivraison = orienter({ ...socle, dateAchat: reculeMois(AUJ, 14), dateReception: reculeMois(AUJ, 13) }, AUJ);
+  vrai("avec date de livraison : délais exacts", avecLivraison.approximatif === false);
+  eq("avec date de livraison : le décompte part d'elle", avecLivraison.mois, 13);
+  vrai("avec date de livraison : le fait nomme la livraison", /livraison/i.test(avecLivraison.faits[0].titre.toLowerCase() + avecLivraison.faits[0].texte.toLowerCase()));
+  vrai("avec date de livraison : plus de limite « approximatif »",
+       !avecLivraison.limites.some(l => /approximatifs/i.test(l)));
+
+  /* La livraison tardive peut rouvrir un droit : achetée à 24 mois, livrée à
+     23, la garantie est encore ouverte. C'est exactement le cas que
+     l'utilisateur ne devrait pas avoir à rectifier lui-même. */
+  const limite24 = orienter({ ...socle, dateAchat: reculeMois(AUJ, 24) }, AUJ);
+  const limite24livre = orienter({ ...socle, dateAchat: reculeMois(AUJ, 24), dateReception: reculeMois(AUJ, 23) }, AUJ);
+  vrai("achat à 24 mois sans livraison : garantie présentée comme fermée",
+       !limite24.voies.some(v => v.regle === 'conformite-duree'));
+  vrai("livré à 23 mois : garantie encore ouverte",
+       limite24livre.voies.some(v => v.regle === 'conformite-duree'));
+
+  /* Rétractation : 20 jours après l'achat mais 3 jours après la réception. */
+  const retr = orienter({ ...socle, dateAchat: '2026-08-28', dateReception: '2026-09-14' }, AUJ);
+  vrai("rétractation ouverte d'après la réception, pas l'achat",
+       retr.voies.some(v => v.regle === 'retractation-14-jours'));
+
+  /* Occasion : la bascule du 12e mois suit aussi la livraison. */
+  const occLivre = m => orienter({ categorie:'electro_grand', canal:'magasin', probleme:'panne_apres',
+                                   etat:'occasion', vendeur:'pro', dateAchat: reculeMois(AUJ, m + 2),
+                                   dateReception: reculeMois(AUJ, m) }, AUJ);
+  vrai("occasion livrée il y a 11 mois : présomption active",
+       occLivre(11).voies.some(v => v.regle === 'conformite-presomption'));
+  vrai("occasion livrée il y a 13 mois : présomption terminée, garantie ouverte",
+       !occLivre(13).voies.some(v => v.regle === 'conformite-presomption') &&
+       occLivre(13).voies.some(v => v.regle === 'conformite-duree'));
+
+  /* Dates incohérentes : refusées avec un message utile. */
+  vrai("réception antérieure à l'achat : refusée",
+       /précède la date d'achat/.test(orienter({ ...socle, dateAchat:'2026-05-01', dateReception:'2026-04-01' }, AUJ).invalide || ''));
+  vrai("réception dans le futur : refusée",
+       /futur/.test(orienter({ ...socle, dateAchat:'2026-09-01', dateReception:'2027-01-01' }, AUJ).invalide || ''));
+
   return T;
 }
 """

@@ -73,7 +73,17 @@ function dateFrG(d) { return d.toLocaleDateString('fr-FR'); }
 /* --------------------------------------------------------------------------
    Orientation.
    `r` : { categorie, etat, vendeur, canal, probleme, dateAchat (ISO),
-           dateDecouverte (ISO, optionnelle) }
+           dateReception (ISO, optionnelle) }
+
+   LA DATE QUI COMPTE EST CELLE DE LA DÉLIVRANCE, pas celle de la commande.
+   Demander la date d'achat seule obligeait l'utilisateur à rectifier lui-même
+   un résultat présenté comme précis — ce qui est exactement ce qu'un outil
+   doit éviter. Deux comportements, donc :
+     — date de réception fournie : tous les délais partent d'elle, et le
+       résultat est présenté comme exact ;
+     — date de réception absente : les délais partent de l'achat et sont
+       présentés comme APPROXIMATIFS, avec le sens de l'écart indiqué (une
+       livraison plus tardive vous laisse plus de temps, jamais moins).
    -------------------------------------------------------------------------- */
 function orienter(r, aujourdhui) {
   const faits = [];
@@ -88,17 +98,31 @@ function orienter(r, aujourdhui) {
   if (achat > aujourdhui) {
     return { invalide: "La date d'achat est dans le futur. Vérifiez-la : les délais se comptent depuis la délivrance.", faits, voies, pieces: [], limites };
   }
+  const reception = versDateG(r.dateReception);
+  if (reception && reception > aujourdhui) {
+    return { invalide: "La date de réception est dans le futur. Si le bien n'est pas encore livré, aucun délai n'a commencé à courir.", faits, voies, pieces: [], limites };
+  }
+  if (reception && reception < achat) {
+    return { invalide: "La date de réception précède la date d'achat. Vérifiez les deux : les délais courent depuis la livraison.", faits, voies, pieces: [], limites };
+  }
 
-  const mois = moisRevolus(achat, aujourdhui);
-  const jours = joursRevolus(achat, aujourdhui);
+  // Point de départ réel des délais, et son degré de certitude.
+  const depart = reception || achat;
+  const approximatif = !reception;
+  const mois = moisRevolus(depart, aujourdhui);
+  const jours = joursRevolus(depart, aujourdhui);
   const neuf = r.etat === 'neuf';
   const pro = r.vendeur === 'pro';
   const presomptionMois = neuf ? 24 : 12;
 
   // ---- Faits : ce qui découle des dates, sans interprétation -------------
   faits.push({
-    titre: `Achat il y a ${mois} mois`,
-    texte: `Date saisie : ${dateFrG(achat)}, soit ${jours} jour${jours > 1 ? 's' : ''}. Les délais ci-dessous sont comptés depuis cette date. La loi les compte depuis la délivrance du bien : si vous l'avez reçu plus tard, décalez d'autant.`,
+    titre: approximatif
+      ? `Environ ${mois} mois depuis l'achat — délais approximatifs`
+      : `${mois} mois depuis la livraison`,
+    texte: approximatif
+      ? `Date d'achat saisie : ${dateFrG(achat)}, soit ${jours} jour${jours > 1 ? 's' : ''}. La loi compte les délais depuis la DÉLIVRANCE du bien, que vous ne nous avez pas indiquée : tous les délais ci-dessous sont donc approximatifs. L'écart joue toujours en votre faveur — si vous avez reçu le bien plus tard, il vous reste plus de temps que ce que nous affichons, jamais moins. Renseignez la date de réception pour un décompte exact.`
+      : `Livraison le ${dateFrG(reception)} (achat le ${dateFrG(achat)}), soit ${jours} jour${jours > 1 ? 's' : ''}. C'est bien cette date de délivrance que la loi retient, et c'est celle que nous utilisons.`,
   });
 
   if (pro) {
@@ -109,7 +133,7 @@ function orienter(r, aujourdhui) {
         ? `Dans le délai de deux ans de la garantie légale de conformité`
         : `Au-delà des deux ans de la garantie légale de conformité`,
       texte: dansDeuxAns
-        ? `Il reste environ ${24 - mois} mois sur les deux ans, durée identique que le bien soit neuf, reconditionné ou d'occasion. ${dansPresomption
+        ? `Il reste environ ${24 - mois} mois sur les deux ans${approximatif ? ' (décompte approximatif, faute de date de livraison)' : ''}, durée identique que le bien soit neuf, reconditionné ou d'occasion. ${dansPresomption
             ? `Vous êtes aussi dans la fenêtre de présomption d'antériorité, qui dure ${presomptionMois} mois pour un bien ${neuf ? 'neuf' : "d'occasion"} : vous n'avez rien à prouver, c'est au vendeur de démontrer que le défaut n'existait pas à la délivrance.`
             : `La présomption d'antériorité, elle, est terminée : elle ne durait que ${presomptionMois} mois pour un bien ${neuf ? 'neuf' : "d'occasion"}, et vous êtes à ${mois} mois. La garantie reste ouverte, mais la preuve a changé de camp : c'est désormais à vous d'établir que le défaut existait déjà lors de la vente.`}`
         : `Cette voie paraît fermée d'après la date saisie : les deux ans sont écoulés. Deux autres restent à regarder : une garantie commerciale éventuelle, et le vice caché, dont le délai se compte à partir de la découverte et non de l'achat.`,
@@ -124,13 +148,15 @@ function orienter(r, aujourdhui) {
       voies.push({
         priorite: 1, regle: 'retractation-14-jours',
         titre: "Rétractation — la voie la plus simple, si elle est ouverte",
-        texte: `D'après votre date, vous êtes à ${jours} jour${jours > 1 ? 's' : ''} de l'achat. Le délai légal est de quatorze jours et ne demande aucun motif. Attention : il court depuis la réception du bien, pas depuis la commande — si vous avez reçu le colis plus tard, vous avez plus de temps que ce décompte. Vérifiez aussi que votre achat n'entre pas dans les exclusions.`,
+        texte: `Vous êtes à ${jours} jour${jours > 1 ? 's' : ''} de ${approximatif ? "l'achat" : 'la réception'}. Le délai légal est de quatorze jours et ne demande aucun motif.${approximatif ? " Il court depuis la réception du bien, pas depuis la commande : si le colis est arrivé plus tard, il vous reste davantage de temps que ce décompte." : ''} Vérifiez aussi que votre achat n'entre pas dans les exclusions.`,
       });
       pieces.add("La confirmation de commande et la preuve de la date de réception");
     } else {
       faits.push({
         titre: "Délai de rétractation probablement expiré",
-        texte: `Quatorze jours après l'achat, il est en principe passé — sauf si la réception est bien plus tardive, ou si le vendeur offre mieux que la loi. Cela ne change rien aux garanties, qui sont indépendantes.`,
+        texte: approximatif
+          ? "Quatorze jours après l'achat, il est en principe passé — sauf si la réception a été bien plus tardive, ou si le vendeur offre mieux que la loi. Renseignez la date de réception pour lever le doute. Cela ne change rien aux garanties, qui sont indépendantes."
+          : "Quatorze jours après la réception, il est passé — sauf si le vendeur offre mieux que la loi. Cela ne change rien aux garanties, qui sont indépendantes.",
       });
     }
   }
@@ -196,6 +222,9 @@ function orienter(r, aujourdhui) {
   }
 
   // ---- Limites, toujours affichées --------------------------------------
+  if (approximatif) {
+    limites.push("Les délais affichés partent de la date d'achat, faute de date de livraison : ils sont approximatifs. Un bien reçu plus tard vous laisse plus de temps, jamais moins — mais à quelques jours d'une échéance, renseignez la date de réception.");
+  }
   limites.push("Ce site n'a accès à aucun dossier : tout ce qui précède découle uniquement de ce que vous venez de saisir.");
   limites.push("Nous ne pouvons pas dire si votre demande aboutira. La cause réelle d'une panne, le contenu exact de votre contrat et l'état du bien ne sont pas connus de nous.");
   if (r.etat === 'occasion' && pro) {
@@ -205,7 +234,7 @@ function orienter(r, aujourdhui) {
   }
 
   voies.sort((a, b) => a.priorite - b.priorite);
-  return { invalide: null, faits, voies, pieces: [...pieces], limites, mois, jours };
+  return { invalide: null, faits, voies, pieces: [...pieces], limites, mois, jours, approximatif, depart };
 }
 
 if (typeof module !== 'undefined' && module.exports) {
