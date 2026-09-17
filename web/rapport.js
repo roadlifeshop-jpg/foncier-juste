@@ -273,21 +273,42 @@ function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
   const reels = d.anomalies.filter(a => a.gravite !== 'info');
   const contexte = d.anomalies.filter(a => a.gravite === 'info');
 
+  // PARITÉ D'AFFICHAGE AVEC L'ÉCRAN — le document acheté ne doit jamais
+  // contredire la page qui l'a précédé. Deux natures distinctes, jamais
+  // additionnées : ce qui est retenu comme motif, et ce qui ne l'est pas tant
+  // que la comparaison des surfaces n'a pas été validée sur de vraies fiches.
+  // Les motifs retenus passent devant. Le moteur, lui, est inchangé : on ne
+  // fait que trier et formuler ce qu'il a produit.
+  const retenus = reels.filter(a => !CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code));
+  const observations = reels.filter(a => CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code));
+  const ordonnes = retenus.concat(observations);
+
   // 1 — Synthèse
   w.ligne(`Établi le ${new Date().toLocaleDateString('fr-FR')}`, { taille: 9, couleur: [124, 137, 148], espace: 2 });
   w.ligne(`Bien étudié : ${d.commune.commune} (${d.commune.code_postal}) · ${d.type}`, { taille: 9, couleur: [124, 137, 148], espace: 8 });
 
   w.ligne('Synthèse', { taille: 14, style: 'bold', espace: 3 });
-  const couleur = d.score >= 40 ? [150, 39, 31] : d.score >= 20 ? [122, 94, 16] : [44, 99, 73];
-  w.ligne(d.classifLabel || 'Aucun élément notable détecté', { taille: 12, style: 'bold', couleur, espace: 4 });
+  const sansMotifRetenu = reels.length > 0 && retenus.length === 0;
+  const couleur = sansMotifRetenu ? [122, 94, 16]
+    : d.score >= 40 ? [150, 39, 31] : d.score >= 20 ? [122, 94, 16] : [44, 99, 73];
   w.ligne(
-    reels.length === 0
-      ? "Aucun élément appelant une vérification n'a été relevé à partir de vos réponses."
-      : reels.length === 1
-        ? "Un élément de votre situation mérite d'être vérifié. Il est détaillé ci-dessous."
-        : `${reels.length} éléments de votre situation méritent d'être vérifiés. Ils sont détaillés ci-dessous.`,
-    { taille: 10, espace: 6 }
+    sansMotifRetenu ? 'Aucun motif retenu à ce stade' : (d.classifLabel || 'Aucun élément notable détecté'),
+    { taille: 12, style: 'bold', couleur, espace: 4 }
   );
+  const phraseSynthese = () => {
+    if (reels.length === 0) return "Aucun élément appelant une vérification n'a été relevé à partir de vos réponses.";
+    const nb = (n, s, p) => `${n} ${n > 1 ? p : s}`;
+    if (retenus.length === 0) {
+      return observations.length === 1
+        ? "Un écart a été relevé entre vos deux surfaces. Il mérite votre attention, mais il n'est pas retenu comme motif : il est présenté plus bas, à part."
+        : "Des écarts ont été relevés entre vos surfaces. Ils méritent votre attention, mais ne sont pas retenus comme motifs : ils sont présentés plus bas, à part.";
+    }
+    const base = `${nb(retenus.length, 'piste est retenue', 'pistes sont retenues')} pour vérification.`;
+    return observations.length
+      ? `${base} S'y ajoute ${nb(observations.length, 'observation qui ne compte pas comme motif', 'observations qui ne comptent pas comme motifs')}, présentée séparément.`
+      : `${base} Le détail figure ci-dessous.`;
+  };
+  w.ligne(phraseSynthese(), { taille: 10, espace: 6 });
 
   // 2 — Données utilisées
   w.ligne('Données utilisées pour cette analyse', { taille: 12, style: 'bold', espace: 3 });
@@ -307,9 +328,17 @@ function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
 
   // 3 — Chaque élément détecté
   if (reels.length) {
-    w.ligne('Éléments à vérifier', { taille: 12, style: 'bold', espace: 4 });
-    reels.forEach((a, i) => {
+    w.ligne(retenus.length ? 'Pistes à vérifier' : 'Ce que nous avons relevé', { taille: 12, style: 'bold', espace: 4 });
+    let intertitrePose = false;
+    ordonnes.forEach((a, i) => {
       const nonValide = CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code);
+      // Un intertitre sépare les deux natures : sans lui, le sommaire
+      // laisserait croire que tout ce qui suit est un motif.
+      if (nonValide && retenus.length && !intertitrePose) {
+        intertitrePose = true;
+        w.ligne('Observation complémentaire — non retenue comme motif',
+                { taille: 11, style: 'bold', couleur: [122, 94, 16], espace: 4 });
+      }
       const lignes = lignesBlocSignal(a, i + 1, nonValide, avecCourrier);
       // Un élément se lit d'un bloc : on réserve sa hauteur exacte pour qu'il
       // ne soit pas coupé au milieu.
@@ -386,7 +415,11 @@ function genererApercuPDF(d) {
     w.espace(4);
   };
 
-  w.ligne(`Éléments à vérifier relevés : ${d.anomalies.filter(a => a.gravite !== 'info').length}`, { taille: 11, style: 'bold', espace: 6 });
+  // Aperçu gratuit : on annonce le nombre de PISTES RETENUES, pas le total des
+  // éléments relevés — un constat non retenu ne se vend pas.
+  w.ligne(`Pistes retenues pour vérification : ${
+    d.anomalies.filter(a => a.gravite !== 'info' && !CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code)).length
+  }`, { taille: 11, style: 'bold', espace: 6 });
   masque('Chaque élément, expliqué : ce que vous avez indiqué, ce que nous en déduisons, ce qu\'il reste à vérifier', 2);
   masque('Les données exactes utilisées pour votre bien', 2);
   masque('Les documents à réunir, adaptés à votre situation', 2);

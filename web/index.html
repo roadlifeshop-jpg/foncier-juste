@@ -785,7 +785,7 @@ input::placeholder{color:var(--ink-faint);}
           <div class="marker num">01</div>
           <div>
             <h3>Vous décrivez votre situation</h3>
-            <p>Quatre étapes, environ deux minutes. Nous vous demandons d'où vient chaque chiffre que vous saisissez, parce qu'une donnée approximative ne vaut pas une donnée lue sur un document officiel.</p>
+            <p>Trois étapes — votre commune, vos surfaces, vos éléments de confort — et environ deux minutes si vous avez votre fiche d'évaluation sous les yeux. Nous vous demandons d'où vient chaque chiffre que vous saisissez, parce qu'une donnée approximative ne vaut pas une donnée lue sur un document officiel.</p>
           </div>
         </div>
         <div class="row">
@@ -1228,9 +1228,20 @@ function renderResults(d){
   const pluriel = (n, s, p) => `${n} ${n > 1 ? p : s}`;
 
   // 1 & 2 — Conclusion, puis ce qui est retenu et ce qui ne l'est pas
+  //
+  // Le moteur classe la situation à partir de son score, qui tient compte de
+  // l'écart de surface. Quand cet écart est le SEUL élément relevé, le libellé
+  // qu'il renvoie (« Vérification fortement recommandée ») contredirait la
+  // ligne suivante, puisque rien n'est retenu comme motif. On affiche alors un
+  // titre conforme au statut réel. Le score, la classification et la règle de
+  // vente sont inchangés : seule la formulation affichée l'est, et le détail
+  // juste en dessous explique ce qui reste à regarder.
   const bloc = $('verdict');
-  bloc.className = 'verdict ' + classif.ton;
-  $('verdict-titre').textContent = classif.label;
+  const sansMotifRetenu = reels.length > 0 && retenus.length === 0;
+  bloc.className = 'verdict ' + (sansMotifRetenu ? 't-warn' : classif.ton);
+  $('verdict-titre').textContent = sansMotifRetenu
+    ? 'Aucun motif retenu à ce stade'
+    : classif.label;
 
   const sum = $('verdict-sum');
   const detail = $('verdict-detail');
@@ -1241,10 +1252,10 @@ function renderResults(d){
     detail.textContent = '';
     detail.hidden = true;
   } else if (retenus.length === 0){
-    sum.textContent = "Aucun élément n'est retenu comme motif de vérification à ce stade.";
-    detail.textContent = observations.length === 1
-      ? "Une observation complémentaire figure ci-dessous : elle vous indique où regarder, mais elle ne constitue pas un motif tant que nous n'avons pas validé la comparaison des surfaces."
-      : "Des observations complémentaires figurent ci-dessous : elles vous indiquent où regarder, mais ne constituent pas des motifs tant que nous n'avons pas validé la comparaison des surfaces.";
+    sum.textContent = observations.length === 1
+      ? "Nous avons relevé un écart entre vos deux surfaces. Il mérite votre attention, mais il ne compte pas comme motif."
+      : "Nous avons relevé des écarts entre vos surfaces. Ils méritent votre attention, mais ne comptent pas comme motifs.";
+    detail.textContent = "Tant que nous n'avons pas vérifié, sur de vraies fiches, que les deux surfaces comparées recouvrent bien le même périmètre, cet écart vous indique où regarder sans rien établir. Le détail figure ci-dessous.";
     detail.hidden = false;
   } else {
     sum.textContent = `Nous retenons ${pluriel(retenus.length, 'piste à vérifier', 'pistes à vérifier')}.`;
