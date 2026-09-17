@@ -59,22 +59,22 @@
       Quatre questions. Le résultat dépend surtout de la date d'achat et de la nature du vendeur — ce
       sont elles qui ouvrent ou ferment chaque voie.
     </p>
-    <div class="encart limite">
-      <h3>Ce que cet outil ne fait pas</h3>
-      <p>Il <b>n'engage aucune démarche</b> et ne dit pas si la vôtre aboutira&nbsp;: la cause réelle
-      d'une panne, l'état du bien et le contenu exact de votre contrat ne nous sont pas connus. Il
-      indique les voies à vérifier et les pièces à réunir.</p>
-    </div>
+    <p class="limite-courte">
+      <b>Cet outil n'engage aucune démarche et ne dit pas si la vôtre aboutira.</b> Il indique les voies
+      à vérifier et les pièces à réunir. <a href="#limites-outil">Ce que cela signifie exactement</a>.
+    </p>
   </section>
 
-  <section class="shell-lire">
+  <section class="shell-lire" id="formulaire">
     <div class="forme">
-      <h2 style="font-size:1.12rem; font-family:'Archivo',sans-serif; font-weight:600">Votre situation</h2>
+      <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Votre situation, en six réponses</h2>
+      <p class="aide" style="margin-top:4px">Aucune n'est envoyée nulle part&nbsp;: le calcul se fait dans votre navigateur.</p>
       <form id="forme-g" novalidate>
         <div class="forme-grille">
           <div class="champ">
             <label for="g-categorie">De quel bien s'agit-il&nbsp;?</label>
             <select id="g-categorie"></select>
+            <p class="aide">La catégorie ne change aucun délai&nbsp;: « Autre » convient si rien ne correspond.</p>
           </div>
           <div class="champ">
             <label for="g-etat">Il était…</label>
@@ -83,8 +83,9 @@
           <div class="champ">
             <label for="g-date">Date d'achat</label>
             <input type="date" id="g-date">
-            <p class="aide">Si vous avez reçu le bien plus tard, retenez la date de réception&nbsp;: la loi
-            compte les délais depuis la délivrance.</p>
+            <p class="aide date-lue" id="g-date-lue" hidden></p>
+            <p class="aide">Le format affiché entre les barres obliques suit la langue de votre navigateur&nbsp;; la date retenue est confirmée en clair dès que vous la saisissez.</p>
+            <p class="aide">Retenez la date de réception si elle est plus tardive&nbsp;: les délais courent depuis la délivrance.</p>
             <p class="erreur-champ" id="g-e-date" hidden></p>
           </div>
           <div class="champ">
@@ -94,6 +95,7 @@
           <div class="champ">
             <label for="g-canal">Achat effectué</label>
             <select id="g-canal"></select>
+            <p class="aide">En magasin, aucun délai légal de rétractation — contrairement à un achat à distance.</p>
           </div>
           <div class="champ plein">
             <label for="g-probleme">Que se passe-t-il&nbsp;?</label>
@@ -143,6 +145,26 @@
       </div>
     </div>
   </section>
+
+  <section class="band pale" id="limites-outil">
+    <div class="shell-lire">
+      <div class="eyebrow">Les limites, en entier</div>
+      <h2>Ce que cet outil ne fait pas</h2>
+      <p>Il <b>n'engage aucune démarche</b> à votre place, ne contacte aucun vendeur et ne dit pas si la
+      vôtre aboutira. La cause réelle d'une panne, l'état du bien et le contenu exact de votre contrat
+      ne nous sont pas connus&nbsp;: nous ne travaillons que sur les quelques réponses que vous
+      saisissez.</p>
+      <p>Il ne calcule <b>aucun montant</b>&nbsp;: ni valeur du bien, ni indemnité, ni remboursement.
+      Une garantie légale ouvre un droit à la réparation ou au remplacement, pas automatiquement au
+      remboursement&nbsp;; ce que vous obtiendrez dépend de la discussion avec le vendeur et, en cas de
+      blocage, d'un juge.</p>
+      <p>Il ne tranche pas les cas qui dépendent d'une exception que nous ne connaissons pas. Quand
+      c'est le cas, il le dit et indique ce qu'il faut regarder — plutôt que de décider à votre
+      place.</p>
+      <p>Dépense·Juste est un service privé, sans lien avec l'administration ni avec aucun vendeur. Pour
+      un litige engagé, une association de consommateurs ou un conciliateur de justice sont gratuits.</p>
+    </div>
+  </section>
 </main>
 
 <footer class="site-foot">
@@ -185,6 +207,20 @@ remplir('g-canal', CANAUX, 'magasin');
 remplir('g-probleme', PROBLEMES, 'panne_apres');
 
 $('g-directive').innerHTML = citer('droit-reparation-ue');
+
+/* Le format affiché par un champ date suit la langue du NAVIGATEUR, pas celle
+   de la page : un navigateur en anglais montre mm/dd/yyyy. La valeur reçue est
+   toujours en aaaa-mm-jj, donc l'interprétation ne dépend pas de ce format —
+   mais l'utilisateur, lui, a besoin de voir ce que nous avons compris. */
+function relireDate(champ, cible){
+  const d = versDateG($(champ).value);
+  const p = $(cible);
+  if (!d){ p.hidden = true; return; }
+  p.textContent = 'Date comprise : ' + d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) + '.';
+  p.hidden = false;
+}
+$('g-date').addEventListener('change', () => relireDate('g-date', 'g-date-lue'));
+$('g-date').addEventListener('input', () => relireDate('g-date', 'g-date-lue'));
 
 $('forme-g').addEventListener('submit', ev => {
   ev.preventDefault();

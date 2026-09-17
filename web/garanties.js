@@ -15,37 +15,37 @@
    ========================================================================== */
 
 const VENDEURS = {
-  pro:        "Un professionnel (magasin, site marchand, artisan)",
-  particulier:"Un particulier (annonce, brocante, de la main à la main)",
-  inconnu:    "Je ne sais pas / autre",
+  pro:        "Un professionnel",
+  particulier:"Un particulier",
+  inconnu:    "Je ne sais pas",
 };
 
 const CANAUX = {
-  distance:  "À distance (site, application, téléphone)",
+  distance:  "À distance",
   magasin:   "En magasin",
-  domicile:  "À domicile ou dans un salon (démarchage)",
+  domicile:  "À domicile, démarchage",
 };
 
-const ETATS = { neuf: "Neuf", occasion: "D'occasion ou reconditionné" };
+const ETATS = { neuf: "Neuf", occasion: "D'occasion" };
 
 const PROBLEMES = {
-  panne_apres:   "Il a fonctionné, puis il est tombé en panne",
-  defaut_reception:"Il était déjà défectueux à la réception",
-  non_conforme:  "Il ne correspond pas à la description ou à l'usage annoncé",
-  usure:         "Il s'use anormalement vite",
-  casse:         "Je l'ai fait tomber, mouillé, ou mal utilisé",
-  regret:        "Il fonctionne, mais je ne le veux plus",
+  panne_apres:   "Il est tombé en panne",
+  defaut_reception:"Défectueux à la réception",
+  non_conforme:  "Pas conforme à l'annonce",
+  usure:         "Il s'use trop vite",
+  casse:         "Je l'ai cassé ou mal utilisé",
+  regret:        "Il marche, je n'en veux plus",
 };
 
 const CATEGORIES_BIEN = {
-  electro_grand: "Gros électroménager (lave-linge, réfrigérateur…)",
+  electro_grand: "Gros électroménager",
   electro_petit: "Petit électroménager",
-  informatique:  "Informatique, téléphone, tablette",
+  informatique:  "Informatique, téléphone",
   image_son:     "Image et son",
   meuble:        "Meuble, literie",
   bricolage:     "Outillage, jardin",
-  mobilite:      "Vélo, trottinette, véhicule non motorisé",
-  vetement:      "Vêtement, chaussure, accessoire",
+  mobilite:      "Vélo, trottinette",
+  vetement:      "Vêtement, chaussure",
   autre:         "Autre",
 };
 

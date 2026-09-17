@@ -11,7 +11,8 @@
 <link rel="stylesheet" href="base.css">
 <style>
 /* Composants propres à cet outil. */
-.deux-colonnes{display:grid; gap:24px; align-items:start; margin-top:28px;}
+.deux-colonnes{display:grid; gap:24px; align-items:start; margin-top:24px;}
+@media(max-width:560px){ .deux-colonnes{margin-top:14px; gap:18px;} }
 @media(min-width:980px){ .deux-colonnes{grid-template-columns:minmax(0,1fr) 340px;} .colonne-cote{position:sticky; top:22px;} }
 
 .totaux{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px;}
@@ -79,14 +80,11 @@
       Vous les saisissez à la main&nbsp;; l'outil calcule le coût par mois et par an, paiements annuels
       compris, et indique les vérifications utiles avant de résilier.
     </p>
-    <div class="encart limite">
-      <h3>Deux limites, dites tout de suite</h3>
-      <p><b>Aucune connexion bancaire, aucun relevé à fournir.</b> Rien n'est deviné&nbsp;: l'outil ne
-      connaît que ce que vous tapez, et tout reste dans votre navigateur.</p>
-      <p><b>Nous ne pouvons pas dire qu'un contrat donné est résiliable aujourd'hui.</b> Cela dépend de
-      ses conditions, que nous ne lisons pas. L'outil distingue toujours ce qu'il <b>calcule</b> de ce
-      qu'il vous invite à <b>vérifier</b>.</p>
-    </div>
+    <p class="limite-courte">
+      <b>Aucune connexion bancaire</b>, et nous ne pouvons pas dire qu'un contrat donné est résiliable —
+      cela dépend de ses conditions, que nous ne lisons pas.
+      <a href="#limites-outil">Ce que cela signifie exactement</a>.
+    </p>
   </section>
 
   <section class="shell">
@@ -120,6 +118,8 @@
               <div class="champ">
                 <label for="f-echeance">Prochaine échéance <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
                 <input type="date" id="f-echeance">
+                <p class="aide date-lue" id="f-echeance-lue" hidden></p>
+                <p class="aide">Le format affiché entre les barres obliques suit la langue de votre navigateur&nbsp;; la date retenue est confirmée en clair dès que vous la saisissez.</p>
                 <p class="aide">Date de fin de la période en cours. Sert à situer la fenêtre pendant
                 laquelle l'information sur la reconduction doit vous parvenir.</p>
                 <p class="erreur-champ" id="e-echeance" hidden></p>
@@ -127,6 +127,7 @@
               <div class="champ">
                 <label for="f-eng-debut">Début de l'engagement <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
                 <input type="date" id="f-eng-debut">
+                <p class="aide date-lue" id="f-eng-debut-lue" hidden></p>
                 <div style="margin-top:9px">
                   <label for="f-eng-mois" style="font-size:.9rem">Durée de l'engagement, en mois</label>
                   <input type="number" id="f-eng-mois" min="1" max="120" step="1" inputmode="numeric" placeholder="ex : 24">
@@ -184,7 +185,27 @@
     </div>
   </section>
 
-  <section class="band" style="margin-top:52px">
+  <section class="band pale" id="limites-outil" style="margin-top:44px">
+    <div class="shell-lire">
+      <div class="eyebrow">Les limites, en entier</div>
+      <h2>Ce que cet outil ne fait pas</h2>
+      <p><b>Aucune connexion bancaire, aucun relevé à fournir.</b> Rien n'est deviné ni détecté&nbsp;:
+      l'outil ne connaît que ce que vous tapez. La liste est enregistrée dans le stockage local de cet
+      appareil, n'est envoyée à aucun serveur, et disparaîtra si vous videz les données du site.</p>
+      <p><b>Il ne peut pas dire qu'un contrat donné est résiliable aujourd'hui.</b> Cela dépend de ses
+      conditions — durée d'engagement, préavis, clauses particulières — que nous ne lisons pas. Les
+      règles citées pèsent sur le professionnel&nbsp;; aucune ne rend un contrat résiliable à elle
+      seule.</p>
+      <p><b>Il ne calcule aucune économie.</b> Le total annuel est un fait, tiré de votre saisie.
+      L'« hypothèse d'arrêt » suppose que les abonnements marqués soient effectivement arrêtés&nbsp;:
+      un engagement en cours, un préavis ou des frais de résiliation peuvent la réduire, voire l'annuler
+      pour l'année en cours.</p>
+      <p><b>Le mensuel affiché est une moyenne lissée.</b> Un abonnement payé une fois par an ne coûte
+      rien onze mois sur douze&nbsp;; le chiffre sert à comparer, pas à prévoir un prélèvement.</p>
+    </div>
+  </section>
+
+  <section class="band">
     <div class="shell-lire">
       <div class="eyebrow">Les règles applicables</div>
       <h2>Ce que la loi impose, et à qui</h2>
@@ -305,6 +326,7 @@ function lireForme(){
 
 function viderForme(){
   ['f-nom','f-montant','f-echeance','f-eng-debut','f-eng-mois'].forEach(i => { $(i).value = ''; });
+  ['f-echeance-lue','f-eng-debut-lue'].forEach(i => { $(i).hidden = true; });
   $('f-en-ligne').checked = false; $('f-recent').checked = false;
   $('f-periodicite').value = 'mensuelle'; $('f-categorie').value = 'streaming';
   majAidePeriodicite();
@@ -340,6 +362,8 @@ function editer(id){
   $('f-en-ligne').checked = !!l.souscritEnLigne;
   $('f-recent').checked = !!l.recent;
   majAidePeriodicite();
+  relireDate('f-echeance', 'f-echeance-lue');
+  relireDate('f-eng-debut', 'f-eng-debut-lue');
   $('forme-titre').textContent = 'Modifier « ' + l.nom + ' »';
   $('f-valider').textContent = 'Enregistrer';
   $('f-annuler').hidden = false;
@@ -431,6 +455,21 @@ $('liste').addEventListener('click', ev => {
   if (b.dataset.action === 'editer') editer(id);
   else if (b.dataset.action === 'supprimer') supprimer(id);
   else if (b.dataset.action === 'arret') basculerArret(id);
+});
+
+/* Écho des dates, indépendant de la locale du navigateur : voir .date-lue
+   dans base.css. La valeur d'un champ type=date est toujours en aaaa-mm-jj,
+   mais son affichage suit la langue du navigateur. */
+function relireDate(champ, cible){
+  const d = versDate($(champ).value);
+  const p = $(cible);
+  if (!d){ p.hidden = true; return; }
+  p.textContent = 'Date comprise : ' + d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) + '.';
+  p.hidden = false;
+}
+[['f-echeance','f-echeance-lue'], ['f-eng-debut','f-eng-debut-lue']].forEach(([c, t]) => {
+  $(c).addEventListener('change', () => relireDate(c, t));
+  $(c).addEventListener('input', () => relireDate(c, t));
 });
 
 charger();

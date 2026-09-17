@@ -163,6 +163,14 @@ strong,b{font-weight:600;}
 .encart.info{border-left-color:var(--accent); background:var(--accent-soft);}
 .encart.prudence{border-left-color:var(--warn-line); background:var(--warn-soft);}
 .encart.limite{border-left-color:var(--gold); background:var(--gold-soft);}
+/* Limite essentielle, en une ligne, juste au-dessus de l'action. L'explication
+   complète vit plus bas dans la page : l'encadré entier repoussait le bouton
+   sous la ligne de flottaison sur téléphone. */
+.limite-courte{
+  margin-top:16px; max-width:54ch; font-size:.93rem; line-height:1.55; color:var(--ink-muted);
+  padding-left:13px; border-left:3px solid var(--gold);
+}
+.limite-courte b{color:var(--ink); font-weight:600;}
 .encart > :first-child{margin-top:0;}
 .encart p{font-size:.94rem; color:var(--ink-muted); max-width:62ch;}
 .encart b{color:var(--ink);}
@@ -187,7 +195,8 @@ strong,b{font-weight:600;}
 .band{border-top:1px solid var(--line); padding-block:52px;}
 .band.pale{background:var(--surface);}
 .band > .shell > p, .band > .shell-lire > p{color:var(--ink-muted);}
-.hero{padding-block:56px 46px;}
+.hero{padding-block:56px 40px;}
+@media(max-width:560px){ .hero{padding-block:30px 22px;} .band{padding-block:36px;} }
 .hero .lede{margin-top:18px; font-size:1.14rem; max-width:44ch; color:var(--ink);}
 
 /* ---------- Formulaires ---------- */
@@ -203,12 +212,18 @@ select,input[type=text],input[type=number],input[type=email],input[type=date],te
   border-radius:var(--r); border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);
   min-height:50px;
 }
+select{padding-right:38px; text-overflow:ellipsis;}
 select:hover,input:hover,textarea:hover{border-color:var(--ink-faint);}
 input::placeholder{color:var(--ink-faint);}
 .unite{position:relative;}
 .unite input{padding-right:48px;}
 .unite::after{content:attr(data-unite); position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:.9rem; color:var(--ink-faint); pointer-events:none;}
 .erreur-champ{margin-top:7px; font-size:.88rem; font-weight:500; color:var(--alert);}
+/* Écho de la date saisie, en français. Le format affiché par un champ
+   type=date suit la langue du navigateur — un navigateur en anglais montre
+   mm/dd/yyyy — alors que la valeur transmise est toujours en aaaa-mm-jj.
+   L'écho lève l'ambiguïté pour l'utilisateur sans dépendre de sa locale. */
+.date-lue{color:var(--accent); font-weight:500;}
 
 .choix{display:grid; gap:9px;}
 .choix label{

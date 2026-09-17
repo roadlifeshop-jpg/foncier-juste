@@ -94,26 +94,21 @@
     <h1>Votre taxe foncière mérite-t-elle d'être vérifiée&nbsp;?</h1>
     <p class="lede">
       Vous décrivez votre logement. À partir de vos seules réponses, nous signalons ce qui mérite
-      d'être vérifié sur votre fiche d'évaluation — et nous le disons aussi quand il n'y a rien à
-      signaler.
+      d'être vérifié sur votre fiche d'évaluation — et nous le disons aussi quand il n'y a rien.
     </p>
-    <div class="encart limite">
-      <h3>Ce que cet outil ne fait pas</h3>
-      <p>Nous n'avons <b>aucun accès à votre dossier fiscal</b> et nous ne pouvons pas établir que votre
-      taxe est erronée. <b>Aucune correction ni aucun remboursement n'est garanti</b>&nbsp;: seule
-      l'administration peut recalculer une valeur locative, et nous ne pouvons ni prévoir sa décision ni
-      chiffrer une économie. Dépense·Juste est un service privé, sans lien avec l'administration.</p>
-    </div>
+    <p class="limite-courte">
+      <b>Aucune correction ni aucun remboursement n'est garanti</b>, et nous n'avons aucun accès à votre
+      dossier fiscal. <a href="#limites-outil">Ce que cela signifie exactement</a>.
+    </p>
     <div class="cta-row">
       <button class="btn-primary" id="start-btn">Commencer — 3 étapes</button>
       <a class="btn btn-secondary" href="guide-erreurs-taxe-fonciere.html">Lire le guide d'abord</a>
     </div>
-    <div class="encart">
-      <p><b>Ce qu'il faut avoir sous les yeux&nbsp;:</b> votre fiche d'évaluation (formulaire 6675-M),
-      pour une vérification complète. Elle s'obtient gratuitement sur impots.gouv.fr. Sans elle, le
-      parcours reste possible mais nous ne comparons aucune surface. <b>Environ 2 minutes</b> si vous
-      avez déjà la fiche.</p>
-    </div>
+    <p class="aide" style="max-width:56ch; margin-top:16px">
+      Prévoyez votre <b>fiche d'évaluation (formulaire 6675-M)</b>&nbsp;: environ 2 minutes avec elle sous
+      les yeux. Sans elle, le parcours reste possible mais aucune surface n'est comparée. Elle s'obtient
+      gratuitement sur impots.gouv.fr.
+    </p>
   </section>
 
 <!-- ====================== QUESTIONNAIRE ====================== -->
@@ -345,6 +340,36 @@
           <div id="contexte-marche"></div>
         </div>
       </aside>
+    </div>
+  </section>
+
+  <section class="band pale" id="limites-outil">
+    <div class="shell-lire">
+      <div class="eyebrow">Les limites, en entier</div>
+      <h2>Ce que cet outil ne fait pas</h2>
+      <p>Nous n'avons <b>aucun accès à votre dossier fiscal</b> et nous ne pouvons pas établir que votre
+      taxe est erronée. <b>Aucune correction ni aucun remboursement n'est garanti</b>&nbsp;: seule
+      l'administration peut recalculer une valeur locative, et nous ne pouvons ni prévoir sa décision ni
+      chiffrer une économie. Une réclamation peut être rejetée, même fondée sur un élément exact.</p>
+      <p>Dépense·Juste est un service privé, sans lien avec l'administration. Il n'engage aucune démarche
+      à votre place et ne vous représente devant personne.</p>
+      <p>Notre analyse ne porte ni sur votre catégorie de confort (l'échelle de 1 à 8 de la fiche), ni sur
+      le local de référence retenu pour votre commune. Ce sont deux sources d'erreur réelles que nous ne
+      savons pas contrôler automatiquement&nbsp;; le résultat vous invite à les vérifier vous-même.</p>
+
+      <h3 id="couverture">Couverture&nbsp;: 20 départements, et ce qui en dépend exactement</h3>
+      <p>Le questionnaire ne propose que les communes de 20 départements — 06, 13, 21, 30, 31, 33, 34, 35,
+      38, 42, 44, 49, 51, 59, 63, 69, 72, 75, 76 et 83, soit 7&nbsp;134 communes. Hors de ces
+      départements, la première étape ne peut pas être validée.</p>
+      <p><b>Pourquoi cette limite.</b> La liste des communes est construite à partir de nos données de
+      marché (DVF 2024). Or ces données ne servent qu'à <b>une seule chose</b>&nbsp;: le repère de prix
+      affiché en marge du résultat, qui n'est jamais un motif de réclamation. <b>Les deux contrôles qui
+      comptent — l'écart de surface et les éléments de confort disparus — n'en dépendent pas&nbsp;:</b>
+      ils se calculent uniquement à partir de vos réponses et de votre fiche.</p>
+      <p>La limite est donc celle du référentiel de communes, pas celle du diagnostic. L'étendre suppose
+      d'embarquer la liste nationale des communes. Les règles appliquées, elles, valent partout en France
+      métropolitaine sauf dans le Bas-Rhin, le Haut-Rhin et la Moselle, où le régime du Livre foncier
+      diffère.</p>
     </div>
   </section>
 
