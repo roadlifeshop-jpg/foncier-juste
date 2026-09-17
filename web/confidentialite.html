@@ -8,16 +8,19 @@
 <link rel="canonical" href="https://foncier-juste.vercel.app/confidentialite.html">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230F3D56'/><path d='M7 16.5 16 8.5l9 8' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 23.5h16' stroke='%23C8A15A' stroke-width='2.6' stroke-linecap='round'/></svg>">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:wght@500;600&display=swap">
 <link rel="stylesheet" href="base.css">
 </head>
 <body>
 
 <header class="site-head">
   <div class="shell">
-    <a class="brand" href="index.html">Foncier<span class="dot">·</span>Juste</a>
-    <a class="head-link" href="index.html">Retour au site</a>
+    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Vérifier ce que vous payez</small></a>
+    <nav class="nav" aria-label="Outils">
+      <a href="taxe-fonciere.html">Taxe foncière</a>
+      <a href="abonnements.html">Abonnements</a>
+      <a href="garanties.html">Garanties</a>
+      <a href="sources.html">Sources</a>
+    </nav>
   </div>
 </header>
 
@@ -80,20 +83,23 @@
     <li>Aucun cookie de mesure d'audience, aucun traceur publicitaire.</li>
     <li>Aucun identifiant de visiteur, aucune reconstitution de parcours individuel.</li>
     <li>Aucune donnée bancaire : nous ne voyons jamais votre numéro de carte.</li>
-    <li>Aucun script chargé depuis un serveur tiers : la bibliothèque qui produit les documents PDF est hébergée avec ce site.</li>
+    <li>Aucun script et aucune police chargés depuis un serveur tiers : la bibliothèque qui produit les documents PDF et les polices de caractères sont hébergées avec ce site.</li>
+    <li>Aucune connexion à vos comptes bancaires, dans aucun des trois outils.</li>
+    <li>Ce que vous saisissez dans l'outil abonnements reste dans votre navigateur (stockage local de cet appareil) et n'est envoyé à aucun serveur.</li>
   </ul>
 
   <h2>Ressources chargées depuis un tiers</h2>
-  <p>Les polices de caractères de ce site proviennent de <strong>Google Fonts</strong> (googleapis.com et gstatic.com). À ce titre, Google reçoit votre adresse IP et votre navigateur lors du chargement des pages. Aucune autre ressource externe n'est utilisée.</p>
+  <p><strong>Aucune.</strong> Les polices de caractères sont désormais servies depuis ce site, et non plus
+  depuis Google Fonts&nbsp;: Google ne reçoit plus votre adresse IP. Aucune ressource externe — police,
+  script, image, mesure d'audience — n'est chargée depuis un autre domaine.</p>
 
   <h2>Durée de conservation</h2>
   <p><span data-fill>[À définir — par exemple 3 ans après le dernier contact, conformément aux recommandations de la CNIL, et 10 ans pour les pièces comptables liées à une vente]</span></p>
 
   <h2>Destinataires</h2>
   <ul>
-    <li><strong>Stripe Payments Europe Ltd</strong> — prestataire de paiement. Reçoit, en cas d'achat, votre adresse email, le montant, et vos réponses au questionnaire jointes à la transaction pour permettre la redélivrance du document.</li>
+    <li><strong>Stripe Payments Europe Ltd</strong> — prestataire de paiement. <strong>Plus aucun paiement n'est proposé sur le site&nbsp;:</strong> ce destinataire ne reçoit donc plus rien. Il ne concerne que les commandes passées avant le retrait de l'offre payante.</li>
     <li><strong>Vercel Inc.</strong> — hébergeur. Journalise les requêtes reçues, avec adresse IP et horodatage, y compris celle du fichier de données de votre département.</li>
-    <li><strong>Google</strong> — fourniture des polices de caractères. Reçoit votre adresse IP lors du chargement des pages.</li>
   </ul>
   <p>Aucune donnée n'est vendue ni cédée à d'autres tiers.</p>
 
@@ -103,11 +109,19 @@
 
 <footer class="site-foot">
   <div class="shell">
-    <div class="links">
-      <a href="index.html">Accueil</a>
-      <a href="guide-erreurs-taxe-fonciere.html">Guide</a>
-      <a href="mentions-legales.html">Mentions légales</a>
-      <a href="cgv.html">CGV</a>
+    <div class="cols">
+      <div><h4>Les trois outils</h4><ul>
+        <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
+        <li><a href="abonnements.html">Abonnements et contrats</a></li>
+        <li><a href="garanties.html">Garanties et réparation</a></li></ul></div>
+      <div><h4>Comprendre</h4><ul>
+        <li><a href="guide-erreurs-taxe-fonciere.html">Erreurs fréquentes de taxe foncière</a></li>
+        <li><a href="resilier-un-abonnement.html">Résilier un abonnement</a></li>
+        <li><a href="produit-defectueux-que-faire.html">Un produit tombe en panne</a></li>
+        <li><a href="sources.html">Toutes les sources</a></li></ul></div>
+      <div><h4>Le site</h4><ul>
+        <li><a href="mentions-legales.html">Mentions légales</a></li>
+        <li><a href="confidentialite.html">Confidentialité</a></li></ul></div>
     </div>
   </div>
 </footer>

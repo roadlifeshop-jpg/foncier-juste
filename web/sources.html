@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sources et dates de vérification</title>
+<meta name="description" content="Toutes les règles citées par les outils du site, avec leur texte exact, la source officielle, la date d'application et la date de dernière vérification. Le droit applicable y est distingué des réformes à venir.">
+<link rel="canonical" href="https://foncier-juste.vercel.app/sources.html">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230F3D56'/><path d='M8 22V10h4l4 6 4-6h4v12' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 25.5h16' stroke='%238A6520' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="base.css">
+<style>
+.regle{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px 22px; margin-top:14px;}
+.regle.attente{border-color:var(--warn-line); background:var(--warn-soft);}
+.regle h3{font-size:1.06rem; font-family:'Spectral',Georgia,serif; font-weight:600;}
+.regle .ref{margin-top:6px; font-size:.86rem; font-weight:600; color:var(--accent);}
+.regle p{margin-top:9px; font-size:.94rem; color:var(--ink-muted);}
+.regle ul{margin-top:7px; font-size:.9rem; color:var(--ink-muted);}
+.regle .dates{margin-top:13px; padding-top:11px; border-top:1px dashed var(--line); font-size:.85rem; color:var(--ink-faint);}
+</style>
+<script src="regles.js"></script>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="shell">
+    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Vérifier ce que vous payez</small></a>
+    <nav class="nav" aria-label="Outils">
+      <a href="taxe-fonciere.html">Taxe foncière</a>
+      <a href="abonnements.html">Abonnements</a>
+      <a href="garanties.html">Garanties</a>
+      <a href="sources.html" aria-current="page">Sources</a>
+    </nav>
+  </div>
+</header>
+
+<main class="shell-lire doc">
+  <div class="eyebrow">Vérifiable</div>
+  <h1>Sources et dates de vérification</h1>
+  <p>Chaque règle que les outils citent figure ici, avec son texte exact, la source officielle, la date
+  à partir de laquelle elle s'applique et la date à laquelle nous l'avons relue. Aucun outil du site
+  n'écrit une règle de droit ailleurs que dans ce registre&nbsp;: ce qui est affiché aux utilisateurs
+  vient nécessairement de cette liste.</p>
+
+  <div class="warn">
+    <strong>Ce que cette page ne remplace pas.</strong> Un texte de loi cité hors de son contexte ne
+    décide pas d'un cas particulier. Les exceptions signalées ci-dessous sont les principales, pas toutes.
+    Pour un litige engagé, une association de consommateurs, un conciliateur de justice ou un avocat
+    reste l'interlocuteur pertinent.
+  </div>
+
+  <h2>Droit applicable aujourd'hui</h2>
+  <div id="liste-vigueur"></div>
+
+  <h2>Réformes annoncées, non applicables</h2>
+  <p>Distinguées volontairement. Une règle qui figure dans cette section n'est utilisée par aucun calcul
+  et par aucune orientation du site.</p>
+  <div id="liste-attente"></div>
+
+  <h2>Données publiques utilisées</h2>
+  <ul>
+    <li><b>DVF — Demandes de valeurs foncières</b>, DGFiP, publiées sur data.gouv.fr sous licence
+    ouverte. Millésime 2024&nbsp;: 20 départements, 379 171 transactions retenues après filtrage.
+    Utilisées uniquement pour situer un bien dans son marché local, jamais comme preuve qu'une taxe est
+    juste ou injuste.</li>
+    <li><b>API Découpage administratif</b> de l'État (geo.api.gouv.fr) — noms de communes et codes
+    postaux, 7 134 communes couvertes.</li>
+  </ul>
+
+  <h2>Comment ce registre est tenu</h2>
+  <p>Le fichier <code>regles.js</code> contient une entrée par règle, avec les champs&nbsp;: texte,
+  source, statut, date d'application, date de vérification, personnes concernées, exceptions. Une règle
+  dont le statut n'est pas « en vigueur » ne peut pas être présentée comme applicable&nbsp;: les outils
+  l'affichent dans un bloc distinct, au futur. Quand une source change, c'est cette entrée qui est mise
+  à jour, et la date de vérification avec elle.</p>
+</main>
+
+<footer class="site-foot">
+  <div class="shell">
+    <div class="cols">
+      <div><h4>Les trois outils</h4><ul>
+        <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
+        <li><a href="abonnements.html">Abonnements et contrats</a></li>
+        <li><a href="garanties.html">Garanties et réparation</a></li></ul></div>
+      <div><h4>Comprendre</h4><ul>
+        <li><a href="guide-erreurs-taxe-fonciere.html">Erreurs fréquentes de taxe foncière</a></li>
+        <li><a href="resilier-un-abonnement.html">Résilier un abonnement</a></li>
+        <li><a href="produit-defectueux-que-faire.html">Un produit tombe en panne</a></li></ul></div>
+      <div><h4>Le site</h4><ul>
+        <li><a href="mentions-legales.html">Mentions légales</a></li>
+        <li><a href="confidentialite.html">Confidentialité</a></li></ul></div>
+    </div>
+    <p class="fine">Service d'information gratuit. Ne constitue ni un conseil juridique ou fiscal
+    personnalisé, ni une garantie de résultat.</p>
+  </div>
+</footer>
+
+<script>
+const ech = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+function carteRegle(cle, r){
+  const attente = r.statut !== 'en vigueur';
+  const etiquette = r.statut === 'en vigueur'
+    ? `<span class="etiquette et-ok">En vigueur${r.applicable ? ' depuis le ' + dateFr(r.applicable) : ''}</span>`
+    : r.statut === 'non-transpose'
+      ? `<span class="etiquette et-warn">Non transposée en droit français</span>`
+      : `<span class="etiquette et-warn">Réforme attendue</span>`;
+  return `<article class="regle${attente ? ' attente' : ''}" id="${ech(cle)}">
+    ${etiquette}
+    <h3 style="margin-top:10px">${ech(r.titre)}</h3>
+    <div class="ref">${ech(r.texte)}</div>
+    <p><b>Qui est concerné&nbsp;:</b> ${ech(r.concerne)}</p>
+    ${r.exceptions && r.exceptions.length
+      ? `<p><b>Principales exceptions et limites&nbsp;:</b></p><ul>${r.exceptions.map(e => `<li>${ech(e)}</li>`).join('')}</ul>`
+      : ''}
+    <p class="dates">
+      Source&nbsp;: <a href="${ech(r.source.url)}" target="_blank" rel="noopener">${ech(r.source.nom)}</a><br>
+      ${r.applicable ? 'Applicable depuis le ' + dateFr(r.applicable) + ' · ' : ''}Vérifié le ${dateFr(r.verifiee)}
+    </p>
+  </article>`;
+}
+
+const entrees = Object.entries(REGLES);
+document.getElementById('liste-vigueur').innerHTML =
+  entrees.filter(([, r]) => r.statut === 'en vigueur').map(([c, r]) => carteRegle(c, r)).join('');
+document.getElementById('liste-attente').innerHTML =
+  entrees.filter(([, r]) => r.statut !== 'en vigueur').map(([c, r]) => carteRegle(c, r)).join('')
+  || '<p>Aucune réforme en attente n\'est suivie pour l\'instant.</p>';
+</script>
+</body>
+</html>

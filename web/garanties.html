@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Produit défectueux, garanties, réparation — quelles voies restent ouvertes</title>
+<meta name="description" content="Quatre questions pour savoir quelles démarches restent ouvertes après un achat défectueux : rétractation, garantie légale de conformité, vice caché. Pièces à réunir et limites, avec les textes applicables.">
+<link rel="canonical" href="https://foncier-juste.vercel.app/garanties.html">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230F3D56'/><path d='M8 22V10h4l4 6 4-6h4v12' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 25.5h16' stroke='%238A6520' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="base.css">
+<style>
+.forme{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px 26px;}
+@media(max-width:560px){ .forme{padding:18px;} }
+.forme-grille{display:grid; gap:0 20px; grid-template-columns:1fr;}
+@media(min-width:680px){ .forme-grille{grid-template-columns:1fr 1fr;} .forme-grille .plein{grid-column:1 / -1;} }
+.resultat{margin-top:30px;}
+.fait{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:var(--r); padding:15px 17px; margin-top:12px;}
+.fait h3{font-size:1rem;} .fait p{margin-top:5px; font-size:.93rem; color:var(--ink-muted);}
+.voie{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px 22px; margin-top:14px;}
+.voie .rang{font-size:.68rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--gold);}
+.voie h3{margin-top:5px; font-size:1.1rem; font-family:'Spectral',Georgia,serif; font-weight:600;}
+.voie p{margin-top:8px; font-size:.95rem; color:var(--ink-muted);}
+.voie details{margin-top:12px;}
+.voie summary{font-size:.88rem; font-weight:600; color:var(--accent); cursor:pointer;}
+.pieces{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px 22px; margin-top:14px;}
+.pieces ul{margin-top:10px;}
+.pieces li{font-size:.95rem; color:var(--ink-muted);}
+.avenir{background:var(--warn-soft); border:1px solid var(--warn-line); border-radius:var(--r-lg); padding:20px 22px; margin-top:14px;}
+.avenir h3{font-size:1.04rem; color:var(--warn);}
+.avenir p{margin-top:8px; font-size:.94rem; color:var(--ink-muted);}
+.limites-liste{list-style:none; margin:12px 0 0; padding:0;}
+.limites-liste li{position:relative; padding-left:20px; margin-bottom:9px; font-size:.94rem; color:var(--ink-muted);}
+.limites-liste li::before{content:"—"; position:absolute; left:0; color:var(--ink-faint);}
+.bandeau-statut{display:flex; gap:12px; flex-wrap:wrap; margin-top:6px;}
+</style>
+<script src="regles.js"></script>
+<script src="garanties.js"></script>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="shell">
+    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Vérifier ce que vous payez</small></a>
+    <nav class="nav" aria-label="Outils">
+      <a href="taxe-fonciere.html">Taxe foncière</a>
+      <a href="abonnements.html">Abonnements</a>
+      <a href="garanties.html" aria-current="page">Garanties</a>
+      <a href="sources.html">Sources</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero shell">
+    <div class="eyebrow">Outil 3 sur 3 — gratuit, sans inscription</div>
+    <h1>Un achat défectueux&nbsp;: quelles voies restent ouvertes&nbsp;?</h1>
+    <p class="lede">
+      Quatre questions. Le résultat dépend surtout de la date d'achat et de la nature du vendeur — ce
+      sont elles qui ouvrent ou ferment chaque voie.
+    </p>
+    <div class="encart limite">
+      <h3>Ce que cet outil ne fait pas</h3>
+      <p>Il <b>n'engage aucune démarche</b> et ne dit pas si la vôtre aboutira&nbsp;: la cause réelle
+      d'une panne, l'état du bien et le contenu exact de votre contrat ne nous sont pas connus. Il
+      indique les voies à vérifier et les pièces à réunir.</p>
+    </div>
+  </section>
+
+  <section class="shell-lire">
+    <div class="forme">
+      <h2 style="font-size:1.12rem; font-family:'Archivo',sans-serif; font-weight:600">Votre situation</h2>
+      <form id="forme-g" novalidate>
+        <div class="forme-grille">
+          <div class="champ">
+            <label for="g-categorie">De quel bien s'agit-il&nbsp;?</label>
+            <select id="g-categorie"></select>
+          </div>
+          <div class="champ">
+            <label for="g-etat">Il était…</label>
+            <select id="g-etat"></select>
+          </div>
+          <div class="champ">
+            <label for="g-date">Date d'achat</label>
+            <input type="date" id="g-date">
+            <p class="aide">Si vous avez reçu le bien plus tard, retenez la date de réception&nbsp;: la loi
+            compte les délais depuis la délivrance.</p>
+            <p class="erreur-champ" id="g-e-date" hidden></p>
+          </div>
+          <div class="champ">
+            <label for="g-vendeur">Vendu par</label>
+            <select id="g-vendeur"></select>
+          </div>
+          <div class="champ">
+            <label for="g-canal">Achat effectué</label>
+            <select id="g-canal"></select>
+          </div>
+          <div class="champ plein">
+            <label for="g-probleme">Que se passe-t-il&nbsp;?</label>
+            <select id="g-probleme"></select>
+          </div>
+        </div>
+        <div class="cta-row">
+          <button type="submit" class="btn-primary">Voir les voies possibles</button>
+          <button type="button" class="btn-secondary" id="g-reset" hidden>Recommencer</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="resultat" id="g-resultat" hidden aria-live="polite">
+      <h2>Ce que vos réponses permettent de dire</h2>
+      <p class="aide" style="max-width:60ch">Deux catégories, jamais mélangées&nbsp;: les <b>faits</b>
+      découlent des dates que vous venez de saisir&nbsp;; les <b>voies possibles</b> sont des
+      possibilités juridiques à vérifier, chacune avec sa source.</p>
+
+      <h3 style="margin-top:26px; font-family:'Spectral',Georgia,serif; font-size:1.22rem">Les faits</h3>
+      <div id="g-faits"></div>
+
+      <h3 style="margin-top:30px; font-family:'Spectral',Georgia,serif; font-size:1.22rem">Les voies possibles, à vérifier</h3>
+      <div id="g-voies"></div>
+
+      <h3 style="margin-top:30px; font-family:'Spectral',Georgia,serif; font-size:1.22rem">Les pièces à réunir</h3>
+      <div class="pieces"><p>Réunir ces éléments avant d'écrire compte plus que la formulation du courrier.</p>
+        <ul id="g-pieces"></ul></div>
+
+      <h3 style="margin-top:30px; font-family:'Spectral',Georgia,serif; font-size:1.22rem">Ce que nous ne pouvons pas conclure</h3>
+      <div class="encart limite"><ul class="limites-liste" id="g-limites"></ul></div>
+
+      <h3 style="margin-top:30px; font-family:'Spectral',Georgia,serif; font-size:1.22rem">Une réforme annoncée, pas encore applicable</h3>
+      <div class="avenir">
+        <h3>Droit à la réparation européen</h3>
+        <p>La directive européenne prévoit notamment une obligation de réparer certains produits hors
+        garantie et une prolongation de douze mois après réparation. <b>La France ne l'a pas transposée
+        à ce jour&nbsp;:</b> ces droits ne peuvent pas être invoqués devant un vendeur français, et cet
+        outil ne les utilise dans aucun de ses raisonnements. Nous le signalerons ici quand les textes
+        français paraîtront.</p>
+        <div id="g-directive"></div>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn btn-secondary" href="produit-defectueux-que-faire.html">Comment se déroule une demande</a>
+        <a class="btn btn-secondary" href="abonnements.html">Passer aux abonnements</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="shell">
+    <div class="cols">
+      <div><h4>Les trois outils</h4><ul>
+        <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
+        <li><a href="abonnements.html">Abonnements et contrats</a></li>
+        <li><a href="garanties.html">Garanties et réparation</a></li></ul></div>
+      <div><h4>Comprendre</h4><ul>
+        <li><a href="guide-erreurs-taxe-fonciere.html">Erreurs fréquentes de taxe foncière</a></li>
+        <li><a href="resilier-un-abonnement.html">Résilier un abonnement</a></li>
+        <li><a href="produit-defectueux-que-faire.html">Un produit tombe en panne</a></li>
+        <li><a href="sources.html">Toutes les sources</a></li></ul></div>
+      <div><h4>Le site</h4><ul>
+        <li><a href="mentions-legales.html">Mentions légales</a></li>
+        <li><a href="confidentialite.html">Confidentialité</a></li></ul></div>
+    </div>
+    <p class="fine">Service d'information gratuit. Ne constitue ni un conseil juridique personnalisé, ni
+    une garantie de résultat.</p>
+  </div>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const AUJ = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+const ech = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+function remplir(id, table, defaut){
+  const sel = $(id);
+  Object.entries(table).forEach(([k, v]) => {
+    const o = document.createElement('option'); o.value = k; o.textContent = v; sel.appendChild(o);
+  });
+  if (defaut) sel.value = defaut;
+}
+remplir('g-categorie', CATEGORIES_BIEN, 'electro_grand');
+remplir('g-etat', ETATS, 'neuf');
+remplir('g-vendeur', VENDEURS, 'pro');
+remplir('g-canal', CANAUX, 'magasin');
+remplir('g-probleme', PROBLEMES, 'panne_apres');
+
+$('g-directive').innerHTML = citer('droit-reparation-ue');
+
+$('forme-g').addEventListener('submit', ev => {
+  ev.preventDefault();
+  $('g-e-date').hidden = true;
+  const r = {
+    categorie: $('g-categorie').value, etat: $('g-etat').value, vendeur: $('g-vendeur').value,
+    canal: $('g-canal').value, probleme: $('g-probleme').value, dateAchat: $('g-date').value,
+  };
+  const res = orienter(r, AUJ);
+  if (res.invalide){
+    $('g-e-date').textContent = res.invalide;
+    $('g-e-date').hidden = false;
+    $('g-date').focus();
+    return;
+  }
+
+  $('g-faits').innerHTML = res.faits.map(f =>
+    `<div class="fait"><h3>${ech(f.titre)}</h3><p>${ech(f.texte)}</p></div>`).join('');
+
+  const voies = res.voies.filter(v => v.titre);
+  $('g-voies').innerHTML = voies.length ? voies.map((v, i) =>
+    `<article class="voie">
+       <div class="rang">Voie ${i + 1}</div>
+       <h3>${ech(v.titre)}</h3>
+       <p>${ech(v.texte)}</p>
+       ${v.regle ? `<details><summary>Voir le texte applicable et sa source</summary>${citer(v.regle)}</details>` : ''}
+     </article>`).join('')
+    : `<div class="encart prudence"><p><b>Aucune voie ne se dégage de ces réponses.</b> Cela ne veut pas
+       dire qu'il n'y en a pas&nbsp;: cela veut dire que ce que vous avez décrit sort de ce que nous
+       savons traiter. Un geste commercial, une assurance ou une association de consommateurs restent
+       des pistes.</p></div>`;
+
+  $('g-pieces').innerHTML = res.pieces.length
+    ? res.pieces.map(p => `<li>${ech(p)}</li>`).join('')
+    : `<li>Conservez au minimum la preuve d'achat et une description écrite du problème.</li>`;
+
+  $('g-limites').innerHTML = res.limites.map(l => `<li>${ech(l)}</li>`).join('');
+
+  $('g-resultat').hidden = false;
+  $('g-reset').hidden = false;
+  $('g-resultat').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'resultat_affiche' })], { type: 'application/json' })); } catch (_) {}
+});
+
+$('g-reset').addEventListener('click', () => {
+  $('g-resultat').hidden = true;
+  $('g-reset').hidden = true;
+  $('g-date').value = '';
+  $('forme-g').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  $('g-categorie').focus();
+});
+
+try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
+</script>
+</body>
+</html>

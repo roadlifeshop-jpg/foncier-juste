@@ -3,1424 +3,237 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Vérifier sa taxe foncière : pré-diagnostic gratuit — Foncier·Juste</title>
-<meta name="description" content="Pré-diagnostic gratuit : identifiez les éléments de votre évaluation foncière qui méritent une vérification (surface retenue, éléments de confort), à partir de votre fiche 6675-M et des données publiques DVF.">
+<title>Dépense·Juste — vérifier ce que vous payez</title>
+<meta name="description" content="Trois outils gratuits pour repérer des dépenses à vérifier, réduire ou éviter : taxe foncière, abonnements et contrats, achats défectueux et garanties. Sans compte, sans connexion bancaire, sans promesse d'économie.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Foncier·Juste">
-<meta property="og:title" content="Votre taxe foncière mérite-t-elle d'être vérifiée ?">
-<meta property="og:description" content="Un pré-diagnostic gratuit qui vous dit quels éléments de votre évaluation foncière méritent un contrôle — et vous le dit aussi quand il n'y a rien à vérifier.">
-<meta property="og:url" content="https://foncier-juste.vercel.app/">
-<meta property="og:locale" content="fr_FR">
-<meta name="twitter:card" content="summary">
-<!-- Le site reste volontairement hors index tant que les mentions légales ne
-     portent pas un SIRET réel. Pour l'ouvrir : retirer cette ligne ET remplacer
-     le Disallow de robots.txt. Ne pas faire l'un sans l'autre. -->
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230F3D56'/><path d='M7 16.5 16 8.5l9 8' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 23.5h16' stroke='%23C8A15A' stroke-width='2.6' stroke-linecap='round'/></svg>">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:wght@500;600&display=swap">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Foncier·Juste",
-  "applicationCategory": "FinanceApplication",
-  "operatingSystem": "Web",
-  "inLanguage": "fr-FR",
-  "description": "Pré-diagnostic gratuit des anomalies possibles dans l'évaluation foncière d'un logement, à partir de la fiche d'évaluation 6675-M et des transactions publiques DVF.",
-  "areaServed": "FR",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
-}
-</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230F3D56'/><path d='M8 22V10h4l4 6 4-6h4v12' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 25.5h16' stroke='%238A6520' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="base.css">
 <style>
-/* ==========================================================================
-   Jetons de couleur. Toute la palette claire est définie sur :root nu ;
-   les blocs sombres ne redéfinissent QUE des jetons, jamais des composants.
-   ========================================================================== */
-:root{
-  --bg:#F6F7F8; --surface:#FFFFFF; --surface-2:#EDF0F3; --surface-3:#E3E8EC;
-  --ink:#0E1721; --ink-muted:#5B6875; --ink-faint:#8996A3;
-  --line:#DCE2E8; --line-strong:#C3CDD6;
-  --accent:#0F3D56; --accent-ink:#FFFFFF; --accent-soft:#E4EEF4; --accent-line:#B9D2E0;
-  --gold:#9A7328;
-  --ok:#1E6B4B; --ok-soft:#E4F0E9; --ok-line:#B6D6C6;
-  --warn:#8A5A12; --warn-soft:#F7EDD9; --warn-line:#E0C58C;
-  --alert:#A03325; --alert-soft:#F9E6E2; --alert-line:#E6BCB4;
-  --ring:0 0 0 3px rgba(15,61,86,.18);
-  --lift:0 1px 1px rgba(14,23,33,.04), 0 10px 30px -18px rgba(14,23,33,.35);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0C1218; --surface:#121A22; --surface-2:#18222B; --surface-3:#1F2B35;
-    --ink:#E7EDF2; --ink-muted:#94A3B0; --ink-faint:#71808D;
-    --line:#243039; --line-strong:#33424E;
-    --accent:#84BAD7; --accent-ink:#08121A; --accent-soft:#142936; --accent-line:#28485C;
-    --gold:#C9A263;
-    --ok:#6FC49B; --ok-soft:#10261E; --ok-line:#224535;
-    --warn:#DCAC5C; --warn-soft:#2A2113; --warn-line:#4A3A1C;
-    --alert:#E7907F; --alert-soft:#2C1A17; --alert-line:#4C2C25;
-    --ring:0 0 0 3px rgba(132,186,215,.25);
-    --lift:0 1px 1px rgba(0,0,0,.3), 0 10px 30px -18px rgba(0,0,0,.8);
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0C1218; --surface:#121A22; --surface-2:#18222B; --surface-3:#1F2B35;
-  --ink:#E7EDF2; --ink-muted:#94A3B0; --ink-faint:#71808D;
-  --line:#243039; --line-strong:#33424E;
-  --accent:#84BAD7; --accent-ink:#08121A; --accent-soft:#142936; --accent-line:#28485C;
-  --gold:#C9A263;
-  --ok:#6FC49B; --ok-soft:#10261E; --ok-line:#224535;
-  --warn:#DCAC5C; --warn-soft:#2A2113; --warn-line:#4A3A1C;
-  --alert:#E7907F; --alert-soft:#2C1A17; --alert-line:#4C2C25;
-  --ring:0 0 0 3px rgba(132,186,215,.25);
-  --lift:0 1px 1px rgba(0,0,0,.3), 0 10px 30px -18px rgba(0,0,0,.8);
-}
-
-*{box-sizing:border-box;}
-html{-webkit-text-size-adjust:100%;}
-body{
-  margin:0; background:var(--bg); color:var(--ink);
-  font-family:'Archivo',system-ui,-apple-system,sans-serif;
-  font-size:16px; line-height:1.6; letter-spacing:-.003em;
-  -webkit-font-smoothing:antialiased;
-}
-.shell{max-width:780px; margin:0 auto; padding-inline:20px;}
-h1,h2,h3{font-family:'Spectral',Georgia,serif; font-weight:600; line-height:1.18; text-wrap:balance; margin:0;}
-p{margin:0; max-width:64ch;}
-a{color:var(--accent); text-decoration-thickness:1px; text-underline-offset:2px;}
-:focus-visible{outline:none; box-shadow:var(--ring); border-radius:6px;}
-.num{font-variant-numeric:tabular-nums;}
-.eyebrow{
-  font-size:.7rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
-  color:var(--ink-faint); margin-bottom:12px;
-}
-
-/* ---------- En-tête ---------- */
-.site-head{border-bottom:1px solid var(--line); background:var(--surface);}
-.site-head .shell{display:flex; align-items:center; justify-content:space-between; gap:16px; padding-block:16px;}
-.brand{display:inline-flex; align-items:baseline; gap:1px; font-family:'Spectral',serif; font-weight:600; font-size:1.12rem; color:var(--ink); text-decoration:none;}
-.brand .dot{color:var(--gold); font-size:1.3em; line-height:0;}
-.head-link{font-size:.85rem; font-weight:500; color:var(--ink-muted); text-decoration:none;}
-.head-link:hover{color:var(--ink);}
-
-/* ---------- Hero ---------- */
-.hero{padding-block:56px 44px;}
-.hero h1{font-size:clamp(1.85rem,5.2vw,2.6rem); letter-spacing:-.02em;}
-.hero .lede{margin-top:18px; font-size:1.05rem; color:var(--ink-muted); max-width:56ch;}
-.cta-row{display:flex; flex-wrap:wrap; gap:12px; margin-top:28px;}
-
-button,.btn{
-  font-family:inherit; font-size:.94rem; font-weight:600; letter-spacing:-.005em;
-  border-radius:8px; border:1px solid transparent; padding:12px 20px; cursor:pointer;
-  text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  transition:background-color .15s ease, border-color .15s ease, transform .1s ease;
-}
-.btn-primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
-.btn-primary:hover{background:color-mix(in srgb,var(--accent) 88%,var(--ink));}
-.btn-secondary{background:var(--surface); color:var(--ink); border-color:var(--line-strong);}
-.btn-secondary:hover{border-color:var(--ink-faint);}
-button:active{transform:translateY(1px);}
-button:disabled{opacity:.45; cursor:not-allowed; transform:none;}
-
-.trust-row{
-  display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:28px; padding-top:20px;
-  border-top:1px solid var(--line); font-size:.83rem; color:var(--ink-muted);
-}
-.trust-row span{display:inline-flex; align-items:center; gap:7px;}
-.trust-row span::before{content:""; width:5px; height:5px; border-radius:50%; background:var(--gold); flex-shrink:0;}
-
-/* ---------- Sections éditoriales ---------- */
-.band{border-top:1px solid var(--line); padding-block:52px;}
-.band h2{font-size:1.5rem; letter-spacing:-.015em;}
-.band > .shell > p{margin-top:14px; color:var(--ink-muted);}
-
-.rows{margin-top:28px; display:grid; gap:0;}
-.row{display:grid; grid-template-columns:auto 1fr; gap:18px; padding-block:20px; border-top:1px solid var(--line);}
-.row:first-child{border-top:none; padding-top:4px;}
-.row .marker{
-  font-size:.78rem; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums;
-  padding-top:3px; min-width:22px;
-}
-.row h3{font-size:1.02rem; font-family:'Archivo',sans-serif; font-weight:600; letter-spacing:-.01em;}
-.row p{margin-top:6px; font-size:.92rem; color:var(--ink-muted);}
-
-.limit-list{margin:26px 0 0; padding:0; list-style:none; display:grid; gap:14px;}
-.limit-list li{
-  padding-left:20px; position:relative; font-size:.93rem; color:var(--ink-muted); max-width:64ch;
-}
-.limit-list li::before{
-  content:""; position:absolute; left:0; top:.62em; width:9px; height:1.5px; background:var(--line-strong);
-}
-.limit-list b{color:var(--ink); font-weight:600;}
-
-.sources{margin-top:26px; display:grid; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
-.sources div{background:var(--surface); padding:16px 18px;}
-.sources dt{font-size:.78rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint);}
-.sources dd{margin:6px 0 0; font-size:.92rem; color:var(--ink-muted);}
-.sources dd b{color:var(--ink); font-weight:600;}
-
-/* ---------- Questionnaire ---------- */
-.panel{
-  background:var(--surface); border:1px solid var(--line); border-radius:14px;
-  box-shadow:var(--lift); overflow:hidden;
-}
-.panel-head{padding:20px 24px 0;}
-.panel-body{padding:4px 24px 24px;}
-.progress{display:flex; gap:5px; margin-bottom:22px;}
-.progress i{height:3px; flex:1; background:var(--surface-3); border-radius:2px; transition:background-color .25s ease;}
-.progress i.done{background:var(--accent);}
-@media (prefers-reduced-motion:reduce){*{transition:none !important; animation:none !important;}}
-
-.step-label{font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint);}
-.step h2{font-size:1.28rem; margin-top:6px;}
-.step > p.intro{margin-top:8px; font-size:.92rem; color:var(--ink-muted);}
-
-fieldset{border:none; margin:0; padding:0;}
-legend{padding:0;}
-.field{margin-top:22px;}
-.field > label, legend.lab{display:block; font-size:.92rem; font-weight:600; margin-bottom:7px; letter-spacing:-.005em;}
-.hint{font-size:.82rem; line-height:1.55; color:var(--ink-muted); margin-top:7px; max-width:60ch;}
-.hint b{color:var(--ink); font-weight:600;}
-select,input[type=number],input[type=text],input[type=email]{
-  /* 16px minimum : en dessous, iOS Safari zoome au focus et laisse
-     l'utilisateur zoomé pour tout le reste du formulaire. */
-  width:100%; font-family:inherit; font-size:16px; line-height:1.4; padding:11px 13px;
-  border-radius:8px; border:1px solid var(--line-strong); background:var(--bg); color:var(--ink);
-  transition:border-color .15s ease;
-}
-select:hover,input:hover{border-color:var(--ink-faint);}
-input::placeholder{color:var(--ink-faint);}
-.unit{position:relative;}
-.unit input{padding-right:44px;}
-.unit::after{
-  content:attr(data-unit); position:absolute; right:13px; top:50%; transform:translateY(-50%);
-  font-size:.85rem; color:var(--ink-faint); pointer-events:none;
-}
-
-.choice{display:grid; gap:8px;}
-.choice label{
-  display:flex; gap:11px; align-items:flex-start; padding:13px 15px; border-radius:9px;
-  border:1px solid var(--line-strong); background:var(--bg); cursor:pointer; font-size:.9rem;
-  transition:border-color .15s ease, background-color .15s ease;
-}
-.choice label:hover{border-color:var(--ink-faint);}
-.choice input{margin:2px 0 0; width:17px; height:17px; flex-shrink:0; accent-color:var(--accent);}
-.choice label:has(input:checked){border-color:var(--accent); background:var(--accent-soft);}
-.choice .t{font-weight:600;}
-.choice .d{display:block; font-weight:400; color:var(--ink-muted); font-size:.85rem; margin-top:2px;}
-
-.check-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:8px;}
-.check-grid label{
-  display:flex; align-items:center; gap:9px; font-size:.89rem; font-weight:500;
-  background:var(--bg); border:1px solid var(--line-strong); padding:10px 12px; border-radius:8px; cursor:pointer;
-  transition:border-color .15s ease, background-color .15s ease;
-}
-.check-grid label:has(input:checked){border-color:var(--accent); background:var(--accent-soft);}
-.check-grid input{width:16px; height:16px; accent-color:var(--accent); flex-shrink:0;}
-
-.notice{
-  margin-top:18px; padding:14px 16px; border-radius:9px; font-size:.87rem; line-height:1.55;
-  background:var(--accent-soft); border:1px solid var(--accent-line); color:var(--ink);
-}
-.notice b{font-weight:600;}
-.wizard-nav{display:flex; justify-content:space-between; gap:12px; margin-top:28px; padding-top:20px; border-top:1px solid var(--line);}
-
-/* ---------- Résultat ---------- */
-.verdict{padding:26px 24px; border-bottom:1px solid var(--line);}
-.verdict-top{display:flex; align-items:flex-start; gap:14px;}
-.pip{width:13px; height:13px; border-radius:50%; flex-shrink:0; margin-top:7px;}
-.verdict h2{font-size:1.45rem; letter-spacing:-.015em;}
-.verdict .sum{margin-top:8px; font-size:.97rem; color:var(--ink-muted);}
-.t-ok .pip{background:var(--ok);} .t-ok h2{color:var(--ok);}
-.t-warn .pip{background:var(--warn);} .t-warn h2{color:var(--warn);}
-.t-alert .pip{background:var(--alert);} .t-alert h2{color:var(--alert);}
-
-.signal{padding:22px 24px; border-bottom:1px solid var(--line);}
-.signal-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;}
-.signal-kind{font-size:.7rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint);}
-.signal-tag{font-size:.72rem; font-weight:700; letter-spacing:.04em; padding:3px 9px; border-radius:20px; white-space:nowrap;}
-.tag-alert{background:var(--alert-soft); color:var(--alert); border:1px solid var(--alert-line);}
-.tag-warn{background:var(--warn-soft); color:var(--warn); border:1px solid var(--warn-line);}
-.tag-info{background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line);}
-.signal h3{font-size:1.05rem; font-family:'Archivo',sans-serif; font-weight:600; margin-top:9px; letter-spacing:-.01em;}
-.signal .figure{font-size:1.6rem; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.02em; margin-top:10px;}
-.signal .why{margin-top:10px; font-size:.91rem; color:var(--ink-muted);}
-.signal .why .k{display:block; font-size:.72rem; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:3px;}
-.signal .conf{margin-top:14px; padding-top:12px; border-top:1px dashed var(--line); font-size:.86rem; color:var(--ink-muted);}
-
-.block{padding:22px 24px; border-bottom:1px solid var(--line);}
-.block:last-child{border-bottom:none;}
-.block h3{font-size:1rem; font-family:'Archivo',sans-serif; font-weight:600; letter-spacing:-.01em;}
-.block p{margin-top:8px; font-size:.91rem; color:var(--ink-muted);}
-.block ol,.block ul{margin:12px 0 0; padding-left:20px; font-size:.91rem; color:var(--ink-muted);}
-.block li{margin-bottom:8px;}
-.block li b{color:var(--ink); font-weight:600;}
-
-.impact{margin-top:14px; padding:15px 17px; border-radius:9px; background:var(--surface-2); border:1px solid var(--line);}
-.impact .amount{font-size:1.5rem; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.02em; display:block;}
-.impact .cav{font-size:.8rem; color:var(--ink-muted); margin-top:3px; display:block;}
-
-.stance{padding:24px; background:var(--ok-soft); border-bottom:1px solid var(--line);}
-.stance h3{font-size:1.1rem; color:var(--ok); font-family:'Spectral',serif; font-weight:600;}
-.stance p{margin-top:9px; font-size:.92rem;}
-.stance ul{margin:14px 0 0; padding-left:20px; font-size:.92rem;}
-.stance li{margin-bottom:9px;}
-
-/* ---------- Offres ---------- */
-.offers{padding:24px; background:var(--surface-2); border-bottom:1px solid var(--line);}
-.offers > .eyebrow{margin-bottom:6px;}
-.offers h3.lead{font-size:1.2rem; font-family:'Spectral',serif;}
-.offers > p.lead-p{margin-top:8px; font-size:.92rem; color:var(--ink-muted);}
-.offer-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin-top:20px; align-items:start;}
-.offer{background:var(--surface); border:1px solid var(--line); border-radius:11px; padding:20px; display:flex; flex-direction:column; height:100%;}
-.offer.main{border-color:var(--accent); border-width:1.5px;}
-.offer h4{font-family:'Archivo',sans-serif; font-size:1rem; font-weight:600; margin:0;}
-.offer .price{font-size:1.75rem; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.025em; margin-top:6px;}
-.offer .for{font-size:.85rem; color:var(--ink-muted); margin-top:8px;}
-.offer ul{list-style:none; margin:16px 0 20px; padding:0; font-size:.87rem; display:grid; gap:9px;}
-.offer li{display:grid; grid-template-columns:16px 1fr; gap:9px; align-items:start;}
-.offer li::before{content:"✓"; color:var(--ok); font-weight:700; font-size:.9rem; line-height:1.45;}
-.offer li.plus{font-weight:600;} .offer li.plus::before{content:"+"; color:var(--accent);}
-.offer .go{margin-top:auto;}
-.offer .go button{width:100%;}
-
-.pay-form{margin-top:20px; padding-top:20px; border-top:1px solid var(--line-strong);}
-.consent{display:flex; gap:11px; align-items:flex-start; font-size:.84rem; line-height:1.55; color:var(--ink-muted); cursor:pointer; margin-top:14px;}
-.consent input{margin-top:3px; width:16px; height:16px; flex-shrink:0; accent-color:var(--accent);}
-.form-err{margin-top:12px; font-size:.86rem; color:var(--alert); font-weight:500;}
-.after-pay{margin-top:14px; font-size:.82rem; color:var(--ink-muted);}
-
-.foot-actions{padding:20px 24px; display:flex; flex-wrap:wrap; gap:10px;}
-.disclaimer{padding:0 24px 22px; font-size:.81rem; color:var(--ink-muted);}
-
-/* ---------- FAQ ---------- */
-.faq{margin-top:26px; border-top:1px solid var(--line);}
-.faq details{border-bottom:1px solid var(--line);}
-.faq summary{
-  list-style:none; cursor:pointer; padding:17px 34px 17px 0; position:relative;
-  font-size:.96rem; font-weight:600; letter-spacing:-.005em;
-}
-.faq summary::-webkit-details-marker{display:none;}
-.faq summary::after{
-  content:""; position:absolute; right:6px; top:50%; width:8px; height:8px; margin-top:-6px;
-  border-right:1.5px solid var(--ink-faint); border-bottom:1.5px solid var(--ink-faint);
-  transform:rotate(45deg); transition:transform .2s ease;
-}
-.faq details[open] summary::after{transform:rotate(-135deg); margin-top:-2px;}
-.faq .ans{padding:0 0 18px; font-size:.91rem; color:var(--ink-muted);}
-.faq .ans p + p{margin-top:10px;}
-
-/* ---------- Pied ---------- */
-.site-foot{border-top:1px solid var(--line); background:var(--surface); margin-top:56px; padding-block:30px 40px;}
-.site-foot .links{display:flex; flex-wrap:wrap; gap:8px 18px; font-size:.86rem;}
-.site-foot .links a{color:var(--ink-muted); text-decoration:none;}
-.site-foot .links a:hover{color:var(--ink); text-decoration:underline;}
-.site-foot .fine{margin-top:18px; font-size:.79rem; color:var(--ink-faint); max-width:70ch;}
-.site-foot .fine + .fine{margin-top:9px;}
-.site-foot .fine b{color:var(--ink-muted); font-weight:600;}
-
-@media(max-width:520px){
-  .panel-head,.panel-body{padding-inline:18px;}
-  .verdict,.signal,.block,.offers,.stance,.foot-actions{padding-inline:18px;}
-  .disclaimer{padding-inline:18px;}
-  .wizard-nav button{flex:1;}
-}
-
-/* ==========================================================================
-   Hiérarchie — révision du 17/09/2026, avant le test T1.
-   Aucun jeton de palette ni de typographie n'est ajouté : seuls la taille,
-   l'espace et le contraste changent, pour que la page dise d'elle-même ce
-   qui est un motif et ce qui ne l'est pas.
-   ========================================================================== */
-
-/* ---------- Premier écran ---------- */
-.hero .lede{font-size:1.08rem; color:var(--ink); max-width:46ch;}
-.hero-what{list-style:none; margin:22px 0 0; padding:0; display:grid; gap:10px; max-width:52ch;}
-.hero-what li{
-  display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:baseline;
-  font-size:.95rem; color:var(--ink-muted);
-}
-.hero-what li::before{
-  content:counter(etape); counter-increment:etape;
-  font-size:.7rem; font-weight:700; font-variant-numeric:tabular-nums; color:var(--accent);
-  background:var(--accent-soft); border:1px solid var(--accent-line);
-  width:21px; height:21px; border-radius:50%; display:grid; place-items:center;
-}
-.hero-what{counter-reset:etape;}
-.hero-what b{color:var(--ink); font-weight:600;}
-.hero-not{
-  margin-top:16px; max-width:52ch; font-size:.9rem; line-height:1.55; color:var(--ink-muted);
-  border-left:2px solid var(--line-strong); padding-left:14px;
-}
-.hero-not b{color:var(--ink); font-weight:600;}
-.prereq{
-  margin-top:20px; max-width:52ch; background:var(--surface); border:1px solid var(--line);
-  border-radius:11px; padding:16px 18px;
-}
-.prereq dl{margin:0; display:grid; gap:11px;}
-.prereq dt{
-  font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
-  color:var(--ink-faint); margin-bottom:2px;
-}
-.prereq dd{margin:0; font-size:.88rem; line-height:1.55; color:var(--ink-muted);}
-.prereq dd b{color:var(--ink); font-weight:600;}
-.hero .cta-row{margin-top:26px;}
-.hero .trust-row{margin-top:22px;}
-
-/* ---------- Questionnaire : confort de lecture et de saisie ---------- */
-.step > p.intro{font-size:.95rem; max-width:52ch;}
-.hint-bloc{margin-top:8px; display:grid; gap:9px; max-width:60ch;}
-.hint-bloc p{
-  margin:0; font-size:.84rem; line-height:1.6; color:var(--ink-muted);
-  padding-left:13px; border-left:2px solid var(--line);
-}
-.hint-bloc p b{color:var(--ink); font-weight:600; display:block; margin-bottom:1px;}
-.hint-bloc p.attention{border-left-color:var(--warn-line);}
-.hint-bloc p.attention b{color:var(--warn);}
-.hint-bloc p.encours{border-left-color:var(--accent-line);}
-.hint-bloc p.encours b{color:var(--accent);}
-.wizard-nav{align-items:center;}
-.wizard-nav .btn-primary{min-height:50px; padding-inline:26px; font-size:1rem;}
-.wizard-nav .btn-secondary{min-height:50px;}
-@media(max-width:560px){
-  .wizard-nav{flex-direction:column-reverse; align-items:stretch; gap:10px;}
-  .wizard-nav button{width:100%;}
-  .choice label{padding:15px 16px;}
-  .check-grid{grid-template-columns:1fr;}
-  .check-grid label{padding:14px 14px;}
-  select,input[type=number],input[type=text],input[type=email]{padding:14px 14px;}
-}
-
-/* ---------- Résultat : deux niveaux visuels ----------
-   Un motif retenu et une observation non validée ne peuvent pas se
-   ressembler. Le premier porte le chiffre ; la seconde est mise en retrait. */
-.groupe-t{
-  display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;
-  padding:16px 24px 0; font-size:.72rem; font-weight:700; letter-spacing:.13em;
-  text-transform:uppercase; color:var(--ink-faint);
-}
-.groupe-t .compte{letter-spacing:0; text-transform:none; font-weight:500; font-size:.8rem;}
-.groupe-obs{background:var(--surface-2); border-top:1px solid var(--line);}
-.groupe-obs .groupe-t{color:var(--warn);}
-.groupe-obs .signal{border-bottom:none;}
-.groupe-obs .signal h3{font-size:.98rem; color:var(--ink-muted);}
-.signal .figure-sm{
-  font-size:1.05rem; font-weight:600; font-variant-numeric:tabular-nums;
-  color:var(--ink-muted); margin-top:2px;
-}
-.obs-note{
-  margin-top:10px; font-size:.86rem; line-height:1.6; color:var(--ink-muted);
-  background:var(--warn-soft); border:1px solid var(--warn-line); border-radius:9px; padding:12px 14px;
-}
-.obs-note b{color:var(--warn); font-weight:600;}
-.verdict .sum{font-size:1rem; color:var(--ink);}
-.verdict .sum-detail{margin-top:6px; font-size:.9rem; color:var(--ink-muted);}
-
-/* ---------- Offre ---------- */
-.offers h3.lead{font-size:1.3rem;}
-.offers > p.lead-p{max-width:60ch;}
-.offer-top{display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;}
-.offer .price{margin-top:0;}
-.offer-sec{margin-top:18px; padding-top:16px; border-top:1px solid var(--line);}
-.offer-sec:first-of-type{border-top:none; padding-top:0;}
-.offer-sec-t{
-  font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
-  color:var(--ink-faint); margin-bottom:10px;
-}
-.offer-sec ul{margin:0; padding:0; list-style:none; display:grid; gap:9px; font-size:.89rem;}
-.offer-sec li{display:grid; grid-template-columns:15px 1fr; gap:10px; align-items:start;}
-.offer-sec li::before{font-weight:700; font-size:.9rem; line-height:1.5;}
-.offer-sec .adds li{font-weight:500; color:var(--ink);}
-.offer-sec .adds li::before{content:"+"; color:var(--accent);}
-.offer-sec .todo li{color:var(--ink-muted);}
-.offer-sec .todo li::before{content:"→"; color:var(--ink-faint); font-weight:600;}
-.offer-sec.deja{margin-top:16px; padding:14px 15px; border-top:none; background:var(--surface-2); border-radius:9px;}
-.offer-sec.deja .offer-sec-t{color:var(--ok); margin-bottom:8px;}
-.offer-sec .free li{color:var(--ink-muted); font-size:.85rem;}
-.offer-sec .free li::before{content:"✓"; color:var(--ok);}
-.offer-caveat{
-  margin-top:16px; font-size:.84rem; line-height:1.6; color:var(--ink-muted);
-  border-left:2px solid var(--line-strong); padding-left:12px;
-}
-.offer .go{margin-top:20px;}
-.offer .go button{min-height:52px; font-size:1rem;}
+/* Composants propres à l'accueil. Les jetons et les composants partagés
+   restent dans base.css : aucun n'est redéfini ici. */
+.hero-accueil{padding-block:62px 40px;}
+.hero-accueil h1{max-width:20ch;}
+.hero-accueil .lede{font-size:1.2rem; max-width:48ch;}
+.trois{display:grid; gap:1px; margin-top:34px; background:var(--line); border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden;}
+@media(min-width:880px){ .trois{grid-template-columns:repeat(3,1fr);} }
+.outil{background:var(--surface); padding:26px 24px 24px; display:flex; flex-direction:column;}
+.outil .rang{font-size:.7rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--gold); margin-bottom:12px;}
+.outil h2{font-size:1.28rem; letter-spacing:-.016em;}
+.outil .quoi{margin-top:11px; font-size:.95rem; color:var(--ink-muted); flex:1;}
+.outil .pour{margin-top:14px; font-size:.86rem; color:var(--ink-faint);}
+.outil .lien{margin-top:20px;}
+.outil .lien a{width:100%;}
+.exemple{margin-top:16px; padding:14px 16px; background:var(--surface-2); border-radius:var(--r); font-size:.88rem; color:var(--ink-muted);}
+.exemple .marque{display:inline-block; font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--warn); background:var(--warn-soft); border:1px solid var(--warn-line); border-radius:3px; padding:2px 7px; margin-bottom:8px;}
+.exemple b{color:var(--ink);}
+.principes{display:grid; gap:18px; margin-top:28px;}
+@media(min-width:760px){ .principes{grid-template-columns:repeat(2,1fr);} }
+.principe{padding-left:16px; border-left:2px solid var(--line-strong);}
+.principe h3{font-size:1rem;}
+.principe p{margin-top:6px; font-size:.94rem; color:var(--ink-muted); max-width:52ch;}
+.principe.fort{border-left-color:var(--gold);}
 </style>
-<!-- jsPDF est servi depuis ce site, pas depuis un CDN : aucune requête vers un
-     tiers, et aucune possibilité qu'un CDN compromis exécute du code sur la
-     page qui manipule vos réponses. -->
-<script src="vendor/jspdf.umd.min.js"></script>
-<script src="vendor/polices.js"></script>
-<script src="moteur.js"></script>
-<script src="rapport.js"></script>
 </head>
 <body>
 
 <header class="site-head">
   <div class="shell">
-    <a class="brand" href="/">Foncier<span class="dot">·</span>Juste</a>
-    <a class="head-link" href="#methode">Notre méthode</a>
+    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Vérifier ce que vous payez</small></a>
+    <nav class="nav" aria-label="Outils">
+      <a href="taxe-fonciere.html">Taxe foncière</a>
+      <a href="abonnements.html">Abonnements</a>
+      <a href="garanties.html">Garanties</a>
+      <a href="sources.html">Sources</a>
+    </nav>
   </div>
 </header>
 
 <main>
-
-  <section class="hero shell">
-    <h1>Votre taxe foncière mérite-t-elle d'être vérifiée&nbsp;?</h1>
+  <section class="hero-accueil shell">
+    <div class="eyebrow">Trois outils gratuits</div>
+    <h1>Vérifier ce que vous payez, avant de payer plus</h1>
     <p class="lede">
-      Vous décrivez votre logement. À partir de vos seules réponses, nous signalons les informations
-      qui méritent d'être vérifiées — et nous le disons aussi quand il n'y a rien à signaler.
+      Des dépenses se reconduisent sans qu'on les revoie, des droits s'éteignent sans qu'on les
+      exerce. Ces outils vous aident à repérer ce qui mérite un contrôle, et à savoir quelle démarche
+      existe. Propriétaire ou locataire, sans compte et sans rien à payer.
     </p>
-    <ol class="hero-what">
-      <li><span><b>Vous décrivez votre bien</b> — commune, surfaces, éléments de confort.</span></li>
-      <li><span><b>Nous signalons ce qui mérite une vérification</b>, à partir de ce que vous avez saisi.</span></li>
-    </ol>
-    <p class="hero-not">
-      <b>Ce que nous ne faisons pas.</b> Nous ne consultons pas votre dossier fiscal et nous ne
-      pouvons pas établir que votre taxe est erronée. Foncier·Juste est un service privé, sans lien
-      avec l'administration.
-    </p>
-    <div class="cta-row">
-      <button class="btn-primary" id="start-btn">Lancer le pré-diagnostic gratuit</button>
-      <a class="btn btn-secondary" href="#fonctionnement">Comment ça fonctionne</a>
-    </div>
-    <div class="prereq">
-      <dl>
-        <div>
-          <dt>Ce qu'il faut avoir sous les yeux</dt>
-          <dd><b>Votre fiche d'évaluation (formulaire 6675-M)</b>, pour une vérification complète.
-            Elle s'obtient gratuitement sur impots.gouv.fr. Sans elle, le parcours reste possible,
-            mais nous ne comparons aucune surface : le résultat est alors limité.</dd>
+
+    <div class="trois">
+      <article class="outil">
+        <div class="rang">Outil 1</div>
+        <h2>Taxe foncière</h2>
+        <p class="quoi">Vous décrivez votre logement&nbsp;; nous signalons ce qui mérite d'être vérifié sur
+        votre fiche d'évaluation — un élément facturé qui n'existe plus, par exemple — et les démarches
+        possibles, avec leurs délais.</p>
+        <p class="pour">Pour les propriétaires. 20 départements couverts. Environ 2 minutes avec la fiche
+        6675-M sous les yeux.</p>
+        <div class="exemple">
+          <span class="marque">Exemple fictif</span>
+          Une piscine déclarée à la construction, comblée depuis, figure toujours parmi les éléments
+          facturés. <b>Ce que l'outil dit&nbsp;:</b> l'élément est à vérifier sur la fiche, voici les
+          pièces qui datent une disparition et le délai de réclamation. <b>Ce qu'il ne dit pas&nbsp;:</b>
+          combien vous récupérerez — cela dépend d'un recalcul que seule l'administration peut faire.
         </div>
-        <div>
-          <dt>Durée</dt>
-          <dd><b>Environ 2 minutes</b> si vous avez déjà la fiche. Sinon, comptez le temps de la
-            demander avant de revenir.</dd>
+        <div class="lien"><a class="btn btn-primary" href="taxe-fonciere.html">Ouvrir l'outil</a></div>
+      </article>
+
+      <article class="outil">
+        <div class="rang">Outil 2</div>
+        <h2>Abonnements et contrats</h2>
+        <p class="quoi">Vous saisissez vos abonnements à la main&nbsp;; l'outil calcule ce qu'ils coûtent
+        par mois et par an, y compris les paiements annuels, et indique les vérifications utiles avant de
+        résilier&nbsp;: échéance, engagement, mode de souscription.</p>
+        <p class="pour">Pour tout le monde. Aucun relevé bancaire, aucune connexion à votre banque&nbsp;:
+        la saisie reste dans votre navigateur.</p>
+        <div class="exemple">
+          <span class="marque">Exemple fictif</span>
+          Quatre abonnements saisis, dont un payé 99&nbsp;€ une fois par an. <b>Ce que l'outil dit&nbsp;:</b>
+          le total réel est de 47,25&nbsp;€ par mois et 567&nbsp;€ par an&nbsp;; l'un des contrats arrive à
+          échéance dans deux mois, période où l'information sur la non-reconduction doit vous parvenir.
+          <b>Ce qu'il ne dit pas&nbsp;:</b> qu'un contrat donné est résiliable — cela dépend de ses
+          conditions, que nous ne lisons pas.
         </div>
-        <div>
-          <dt>Ce que vous obtenez</dt>
-          <dd>Un résultat <b>gratuit et complet</b>, affiché à l'écran, sans inscription.</dd>
+        <div class="lien"><a class="btn btn-primary" href="abonnements.html">Ouvrir l'outil</a></div>
+      </article>
+
+      <article class="outil">
+        <div class="rang">Outil 3</div>
+        <h2>Garanties et réparation</h2>
+        <p class="quoi">Un achat tombe en panne, arrive cassé ou ne correspond pas&nbsp;? Quatre questions
+        suffisent pour savoir quelles voies restent ouvertes — rétractation, garantie légale, vice
+        caché — les pièces à réunir et ce qui est exclu.</p>
+        <p class="pour">Pour tout le monde. Le résultat dépend surtout de la date d'achat et du type de
+        vendeur.</p>
+        <div class="exemple">
+          <span class="marque">Exemple fictif</span>
+          Un lave-linge acheté neuf en magasin il y a quatorze mois s'arrête de fonctionner.
+          <b>Ce que l'outil dit&nbsp;:</b> on est dans les deux ans de la garantie légale de conformité et
+          dans la fenêtre de présomption de vingt-quatre mois, donc c'est au vendeur de prouver que le
+          défaut ne venait pas de la livraison&nbsp;; voici les pièces à réunir. <b>Ce qu'il ne dit
+          pas&nbsp;:</b> si la demande aboutira — la cause réelle de la panne nous est inconnue.
         </div>
-      </dl>
-    </div>
-    <div class="trust-row">
-      <span>Gratuit, sans inscription</span>
-      <span>Aucun accès à votre dossier fiscal</span>
-      <span>Vos réponses restent dans votre navigateur</span>
-    </div>
-  </section>
-
-  <!-- ====================== QUESTIONNAIRE ====================== -->
-  <section class="shell" id="diagnostic" hidden>
-    <div class="panel">
-      <div class="panel-head">
-        <div class="progress" role="presentation"><i id="p1"></i><i id="p2"></i><i id="p3"></i></div>
-      </div>
-      <div class="panel-body">
-
-        <div class="step" data-step="1">
-          <div class="step-label">Étape 1 sur 3</div>
-          <h2>Votre bien</h2>
-          <p class="intro">Nous commençons par situer le logement, pour pouvoir le comparer à des ventes réelles du même secteur.</p>
-          <div class="field">
-            <label for="commune">Commune</label>
-            <input type="text" id="commune" list="communes-list" placeholder="Tapez les premières lettres…" autocomplete="off" spellcheck="false">
-            <datalist id="communes-list"></datalist>
-            <div class="hint" id="commune-hint">Chargement des communes couvertes…</div>
-          </div>
-          <div class="field">
-            <label for="type_local">Type de bien</label>
-            <select id="type_local">
-              <option value="Maison">Maison</option>
-              <option value="Appartement">Appartement</option>
-            </select>
-            <div class="hint">Le pré-diagnostic porte sur les locaux d'habitation. Les locaux professionnels obéissent à d'autres règles d'évaluation.</div>
-          </div>
-        </div>
-
-        <div class="step" data-step="2" hidden>
-          <div class="step-label">Étape 2 sur 3</div>
-          <h2>Les surfaces</h2>
-          <p class="intro">C'est l'étape décisive. Une surface n'a de sens que comparée à une surface de même nature&nbsp;: nous vous demandons donc précisément laquelle vous saisissez.</p>
-
-          <fieldset class="field">
-            <legend class="lab">Avez-vous votre fiche d'évaluation (formulaire 6675-M) sous les yeux&nbsp;?</legend>
-            <div class="choice">
-              <label>
-                <input type="radio" name="fiche" value="oui" id="fiche-oui">
-                <span><span class="t">Oui, je l'ai</span><span class="d">Vous pouvez y lire les chiffres réellement retenus par l'administration.</span></span>
-              </label>
-              <label>
-                <input type="radio" name="fiche" value="non" id="fiche-non" checked>
-                <span><span class="t">Non, pas encore</span><span class="d">Elle s'obtient gratuitement sur impots.gouv.fr. Le pré-diagnostic reste possible, mais il sera limité.</span></span>
-              </label>
-            </div>
-            <div class="notice" id="notice-sans-fiche">
-              <b>Sans la fiche, nous ne comparerons aucune surface.</b> La surface retenue pour votre
-              évaluation ne figure ni sur votre avis d'imposition ni sur votre acte de vente&nbsp;: elle
-              n'existe que sur le formulaire 6675-M. Nous préférons ne rien calculer plutôt que de
-              comparer deux chiffres qui ne mesurent pas la même chose.
-            </div>
-          </fieldset>
-
-          <div class="field" id="champ-fiche" hidden>
-            <label for="surf_fiche">Surface réelle totale indiquée sur la fiche</label>
-            <div class="unit" data-unit="m²"><input type="number" id="surf_fiche" min="8" max="400" step="1" inputmode="numeric" placeholder="ex : 104"></div>
-            <div class="hint-bloc">
-              <p><b>Où la trouver</b>
-                La fiche décompose votre logement partie par partie, avec pour chacune une colonne
-                « surface réelle ». Additionnez ces surfaces, ou reprenez le total si la fiche
-                l'indique. C'est un nombre de mètres carrés bruts, sans correction.</p>
-              <p class="attention"><b>Ce n'est pas la surface pondérée</b>
-                Celle-ci figure plus bas sur la même fiche, après correctifs et équivalences
-                (environ 5&nbsp;m² pour une baignoire, 3&nbsp;m² pour un WC, 2&nbsp;m² par pièce
-                chauffée). Elle dépasse normalement la surface mesurée de 20 à 40&nbsp;%&nbsp;: si le
-                chiffre lu est nettement plus grand que ce que vous mesurez chez vous, ce n'est pas
-                celui-là.</p>
-              <p class="encours"><b>Point que nous vérifions actuellement</b>
-                Nous contrôlons, sur de vraies fiches, quelles parties du logement entrent dans
-                chacun des deux chiffres que nous vous demandons. Tant que ce point n'est pas tranché,
-                un écart entre eux peut venir de la question que nous posons plutôt que de votre
-                situation.</p>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="surf_reelle">Surface habitable du bien aujourd'hui</label>
-            <div class="unit" data-unit="m²"><input type="number" id="surf_reelle" min="8" max="400" step="1" inputmode="numeric" placeholder="ex : 108"></div>
-            <div class="hint">
-              Mesurée au sol, à l'intérieur des murs, pièces habitables uniquement — hors garage, cave,
-              et combles non aménagés. Si vous ne l'avez jamais mesurée, reprenez la surface de votre
-              acte de vente et indiquez-le juste en dessous.
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="certitude">D'où vient la surface que vous venez de saisir&nbsp;?</label>
-            <select id="certitude">
-              <option value="mesuree">Je l'ai mesurée moi-même, au mètre</option>
-              <option value="acte" selected>Elle vient de mon acte de vente ou d'un diagnostic</option>
-              <option value="estimee">C'est une estimation de mémoire</option>
-            </select>
-            <div class="hint">Nous ne fabriquons jamais un signal à partir d'un chiffre approximatif. Une réponse incertaine réduit seulement le crédit que nous accordons au constat — et nous l'écrivons noir sur blanc dans le résultat.</div>
-          </div>
-        </div>
-
-        <div class="step" data-step="3" hidden>
-          <div class="step-label">Étape 3 sur 3</div>
-          <h2>Les éléments de confort</h2>
-          <p class="intro">Rien ne se met à jour tout seul : un élément disparu continue d'entrer dans le calcul tant que personne ne l'a signalé. C'est le point le plus simple à démontrer, et le plus souvent négligé.</p>
-
-          <fieldset class="field">
-            <legend class="lab" id="lab-factures">Éléments pris en compte dans votre évaluation</legend>
-            <div class="check-grid" id="confort-factures">
-              <label><input type="checkbox" value="piscine"> Piscine</label>
-              <label><input type="checkbox" value="garage"> Garage</label>
-              <label><input type="checkbox" value="dependance"> Dépendance</label>
-              <label><input type="checkbox" value="veranda"> Véranda</label>
-            </div>
-            <div class="hint" id="hint-factures">À votre connaissance&nbsp;: ce qui a été déclaré à la construction, lors de travaux, ou repris dans l'acte d'achat.</div>
-          </fieldset>
-
-          <fieldset class="field">
-            <legend class="lab">Éléments qui existent réellement aujourd'hui</legend>
-            <div class="check-grid" id="confort-existants">
-              <label><input type="checkbox" value="piscine"> Piscine</label>
-              <label><input type="checkbox" value="garage"> Garage</label>
-              <label><input type="checkbox" value="dependance"> Dépendance</label>
-              <label><input type="checkbox" value="veranda"> Véranda</label>
-            </div>
-            <div class="hint">Ne cochez que ce qui est physiquement présent sur la propriété au moment où vous répondez.</div>
-          </fieldset>
-        </div>
-
-        <div class="wizard-nav">
-          <button class="btn-secondary" id="back-btn" hidden>Précédent</button>
-          <button class="btn-primary" id="next-btn" style="margin-left:auto">Continuer</button>
-        </div>
-      </div>
+        <div class="lien"><a class="btn btn-primary" href="garanties.html">Ouvrir l'outil</a></div>
+      </article>
     </div>
   </section>
 
-  <!-- ====================== RÉSULTAT ====================== -->
-  <section class="shell" id="resultats" hidden aria-live="polite">
-    <div class="panel">
-      <div class="verdict" id="verdict">
-        <div class="verdict-top">
-          <span class="pip"></span>
-          <div>
-            <h2 id="verdict-titre">—</h2>
-            <p class="sum" id="verdict-sum"></p>
-            <p class="sum-detail" id="verdict-detail" hidden></p>
-          </div>
-        </div>
-      </div>
-
-      <div id="signaux"></div>
-
-      <div class="block">
-        <h3>Ce que ce résultat signifie — et ce qu'il ne signifie pas</h3>
-        <p id="limite-texte">
-          Ce résultat n'établit pas que votre taxe foncière est incorrecte. Il indique que certains
-          éléments méritent d'être vérifiés sur votre fiche d'évaluation officielle. Seule
-          l'administration fiscale peut recalculer une valeur locative cadastrale.
-        </p>
-      </div>
-
-      <div class="block" id="prochaine-action">
-        <h3>Ce que nous vous recommandons de faire maintenant</h3>
-        <div id="action-contenu"></div>
-      </div>
-
-      <!-- Contexte de marché : présenté après les signaux et les limites,
-           parce que ce n'est pas un motif de réclamation. -->
-      <div id="contexte-marche"></div>
-
-      <!-- Affiché uniquement quand un signal existe ET qu'il repose sur une
-           donnée suffisamment fiable. Voir `venteAutorisee()`. -->
-      <div class="offers" id="zone-vente" hidden>
-        <div class="eyebrow">Aller plus loin</div>
-        <h3 class="lead">Déposer une demande, avec le dossier de vérification</h3>
-        <p class="lead-p">
-          <b>Le résultat ci-dessus est gratuit et complet&nbsp;;</b> il n'en existe pas de version
-          payante, et aucune conclusion n'est retenue derrière un paiement. Le dossier ne le répète
-          pas&nbsp;: il ajoute ce qu'il faut pour déposer une demande.
-        </p>
-
-        <div class="offer-grid offre-unique">
-          <div class="offer main">
-            <div class="offer-top">
-              <h4>Dossier de vérification</h4>
-              <div class="price num">49 €</div>
-            </div>
-            <p class="for">Pour passer du constat à une demande correctement formée.</p>
-
-            <div class="offer-sec">
-              <div class="offer-sec-t">Ce que le dossier ajoute</div>
-              <ul class="adds">
-                <li>Un projet de courrier rédigé pour votre situation, avec les articles applicables</li>
-                <li>La liste des pièces à joindre, et comment obtenir celles qui vous manquent</li>
-                <li>La marche à suivre : à qui adresser la demande, et sous quelle forme</li>
-                <li>Le délai à ne pas dépasser, et le texte qui le fixe</li>
-              </ul>
-            </div>
-
-            <div class="offer-sec">
-              <div class="offer-sec-t">Ce que vous devrez faire vous-même</div>
-              <ul class="todo">
-                <li>Relire le courrier, le compléter avec vos références d'avis, le signer à la main</li>
-                <li>Réunir les pièces justificatives et les joindre</li>
-                <li>Déposer la demande et en suivre l'issue</li>
-              </ul>
-            </div>
-
-            <div class="offer-sec deja">
-              <div class="offer-sec-t">Déjà inclus dans le résultat gratuit ci-dessus</div>
-              <ul class="free">
-                <li>Chaque élément repris : ce que vous avez indiqué, ce que nous en déduisons, ce qu'il reste à vérifier</li>
-                <li>Ce que vaut chaque constat, et d'où vient l'information</li>
-              </ul>
-            </div>
-
-            <p class="offer-caveat">
-              <b>Aucun remboursement n'est garanti.</b> Seule l'administration peut recalculer une
-              valeur locative cadastrale&nbsp;: nous ne pouvons ni prévoir sa décision, ni chiffrer
-              une économie. Le dossier vous permet de demander une vérification, pas de l'obtenir.
-            </p>
-
-            <div class="go"><button class="btn-primary buy-btn" data-produit="dossier">Obtenir mon dossier — 49 €</button></div>
-          </div>
-        </div>
-
-        <div class="pay-form">
-          <div class="field" style="margin-top:0">
-            <label for="email_client">Votre email</label>
-            <input type="email" id="email_client" placeholder="vous@exemple.fr" autocomplete="email">
-            <div class="hint">Sert au reçu Stripe et à vous retrouver si le téléchargement échoue. Rien d'autre.</div>
-            <div class="hint" style="margin-top:8px">
-              <b>Ce qui est transmis avec votre paiement&nbsp;:</b> vos réponses au questionnaire
-              (commune, type de bien, surfaces, éléments cochés) accompagnent la transaction chez
-              Stripe. C'est ce qui nous permet de reconstruire votre document si vous fermez cette
-              page — depuis n'importe quel appareil, et à tout moment. Pendant tout le pré-diagnostic
-              gratuit, rien n'a quitté votre navigateur.
-            </div>
-          </div>
-          <label class="consent">
-            <input type="checkbox" id="consent-retractation">
-            <span>J'accepte que le document me soit fourni immédiatement et je renonce expressément à
-            mon droit de rétractation de 14 jours, conformément à l'article L221-28 du Code de la
-            consommation. J'ai lu les <a href="cgv.html" target="_blank" rel="noopener">CGV</a>.</span>
-          </label>
-          <p class="form-err" id="achat-erreur" hidden></p>
-          <p class="after-pay">Paiement par Stripe. Nous ne voyons jamais votre numéro de carte. Le document se télécharge dès le paiement confirmé, et la page suivante vous donne un lien de retéléchargement à conserver — il ne demande aucun mot de passe, gardez-le pour vous.</p>
-        </div>
-      </div>
-
-      <!-- Affiché dans tous les autres cas : rien à réclamer, ou signal non documenté. -->
-      <div class="stance" id="zone-sans-signal" hidden>
-        <h3 id="stance-titre">Nous ne vous vendons rien aujourd'hui</h3>
-        <div id="stance-contenu"></div>
-      </div>
-
-      <div class="foot-actions">
-        <button class="btn-secondary" id="preview-pdf-btn">Voir la structure du dossier</button>
-        <button class="btn-secondary" id="restart-btn">Refaire le pré-diagnostic</button>
-      </div>
-      <p class="disclaimer" id="pdf-hint" hidden></p>
-      <p class="disclaimer">
-        Pré-diagnostic indicatif. Il ne remplace ni votre fiche d'évaluation officielle
-        (formulaire 6675-M, disponible gratuitement sur impots.gouv.fr), ni une vérification par les
-        services fiscaux, ni un conseil juridique personnalisé.
-      </p>
-    </div>
-  </section>
-
-  <!-- ====================== ÉDITORIAL ====================== -->
-  <section class="band" id="fonctionnement">
+  <section class="band pale">
     <div class="shell">
-      <div class="eyebrow">Fonctionnement</div>
-      <h2>Du questionnaire au résultat, sans inscription</h2>
-      <div class="rows">
-        <div class="row">
-          <div class="marker num">01</div>
-          <div>
-            <h3>Vous décrivez votre situation</h3>
-            <p>Trois étapes — votre commune, vos surfaces, vos éléments de confort — et environ deux minutes si vous avez votre fiche d'évaluation sous les yeux. Nous vous demandons d'où vient chaque chiffre que vous saisissez, parce qu'une donnée approximative ne vaut pas une donnée lue sur un document officiel.</p>
-          </div>
+      <div class="eyebrow">Ce que ce site fait, et ne fait pas</div>
+      <h2>Aucune promesse que nous ne pouvons pas tenir</h2>
+      <div class="principes">
+        <div class="principe fort">
+          <h3>Aucune économie annoncée, aucun remboursement garanti</h3>
+          <p>Un outil qui chiffrerait votre gain devrait connaître la décision de votre administration, de
+          votre opérateur ou de votre vendeur. Aucun ne la connaît. Nous disons ce qui mérite un contrôle
+          et quelle démarche existe&nbsp;; l'issue ne nous appartient pas.</p>
         </div>
-        <div class="row">
-          <div class="marker num">02</div>
-          <div>
-            <h3>Nous croisons les données disponibles</h3>
-            <p>Vos réponses sont confrontées aux règles d'évaluation du Code général des impôts et aux ventes réellement enregistrées dans votre commune, issues du fichier public DVF.</p>
-          </div>
+        <div class="principe fort">
+          <h3>Un calcul et une possibilité juridique ne sont pas la même chose</h3>
+          <p>Un total d'abonnements ou un nombre de mois depuis un achat sont des faits&nbsp;: ils
+          découlent de ce que vous saisissez. Savoir si un contrat peut être rompu ou une garantie
+          invoquée dépend de pièces que nous ne lisons pas. Les deux sont toujours présentés séparément,
+          et étiquetés.</p>
         </div>
-        <div class="row">
-          <div class="marker num">03</div>
-          <div>
-            <h3>Nous indiquons ce qui mérite un contrôle</h3>
-            <p>Chaque élément relevé est présenté séparément, avec la raison pour laquelle il attire notre attention et le niveau de confiance que nous lui accordons. Sans élément probant, nous ne vous proposons rien.</p>
-          </div>
+        <div class="principe">
+          <h3>Rien à créer, rien à connecter</h3>
+          <p>Pas de compte, pas de paiement, pas d'accès à vos comptes bancaires. Les trois outils
+          calculent dans votre navigateur&nbsp;; ce que vous saisissez y reste.</p>
+        </div>
+        <div class="principe">
+          <h3>Un service privé, pas un site officiel</h3>
+          <p>Dépense·Juste n'a aucun lien avec l'administration, ni avec aucun opérateur ou vendeur. Nous
+          n'engageons aucune démarche à votre place et ne vous représentons devant personne.</p>
+        </div>
+        <div class="principe">
+          <h3>Des sources datées, pas des affirmations</h3>
+          <p>Chaque règle affichée porte son texte, sa source officielle, sa date d'application et la date
+          à laquelle nous l'avons vérifiée. Ce qui n'est pas encore applicable est signalé comme tel.
+          <a href="sources.html">Voir toutes les sources</a>.</p>
+        </div>
+        <div class="principe">
+          <h3>Ni témoignage, ni chiffre de réussite</h3>
+          <p>Le site n'affiche aucun avis, aucun cas client et aucune statistique de succès. Les exemples
+          ci-dessus sont fictifs et marqués comme tels&nbsp;: ils montrent la forme d'un résultat, pas un
+          résultat obtenu.</p>
         </div>
       </div>
     </div>
   </section>
 
   <section class="band">
-    <div class="shell">
-      <div class="eyebrow">Périmètre</div>
-      <h2>Ce que nous vérifions</h2>
-      <div class="rows">
-        <div class="row">
-          <div class="marker">—</div>
-          <div>
-            <h3>La surface retenue pour votre évaluation</h3>
-            <p>Comparée à la surface réellement habitable aujourd'hui. Une division, une démolition ou une erreur de report ancienne peuvent laisser une surface excédentaire dans le calcul pendant des années.</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="marker">—</div>
-          <div>
-            <h3>Les éléments de confort facturés</h3>
-            <p>Une piscine comblée, un garage démoli, une véranda supprimée restent comptés tant que leur disparition n'a pas été déclarée. C'est l'écart le plus fréquent et le plus facile à prouver.</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="marker">—</div>
-          <div>
-            <h3>Le contexte immobilier de votre commune</h3>
-            <p>Les transactions réelles récentes autour de chez vous, pour situer votre bien. C'est un élément de contexte utile à un dossier — jamais une preuve, dans un sens comme dans l'autre.</p>
-          </div>
-        </div>
+    <div class="shell-lire">
+      <div class="eyebrow">Comprendre avant d'agir</div>
+      <h2>Quelques réponses précises</h2>
+      <div class="cartes">
+        <article class="carte">
+          <div class="carte-num">Taxe foncière</div>
+          <h3>Les erreurs fréquentes, et comment les vérifier</h3>
+          <p>Ce que contient la fiche 6675-M, pourquoi la surface pondérée dépasse normalement la surface
+          mesurée, et quelles erreurs se rencontrent réellement.</p>
+          <div class="apres"><a href="guide-erreurs-taxe-fonciere.html">Lire le guide</a></div>
+        </article>
+        <article class="carte">
+          <div class="carte-num">Abonnements</div>
+          <h3>Résilier un abonnement&nbsp;: ce que la loi impose</h3>
+          <p>La résiliation en ligne, l'information avant reconduction tacite, l'engagement de plus de
+          douze mois. Ce qui est une obligation du professionnel, et ce qui dépend de votre contrat.</p>
+          <div class="apres"><a href="resilier-un-abonnement.html">Lire la page</a></div>
+        </article>
+        <article class="carte">
+          <div class="carte-num">Garanties</div>
+          <h3>Un produit tombe en panne&nbsp;: quelle garantie&nbsp;?</h3>
+          <p>Garantie légale de conformité, vice caché, garantie commerciale&nbsp;: à qui s'adresser, dans
+          quel délai, avec quelles preuves. Et où en est le droit à la réparation européen.</p>
+          <div class="apres"><a href="produit-defectueux-que-faire.html">Lire la page</a></div>
+        </article>
       </div>
     </div>
   </section>
-
-  <section class="band">
-    <div class="shell">
-      <div class="eyebrow">Limites assumées</div>
-      <h2>Ce que Foncier·Juste ne peut pas déterminer</h2>
-      <p>Un outil qui prétendrait tout détecter mentirait. Voici précisément ce qui nous échappe, pour que vous sachiez ce que vaut notre résultat.</p>
-      <ul class="limit-list">
-        <li><b>La catégorie de confort</b> (classée de 1 à 8) est fixée par comparaison avec un local de référence de votre commune. Un classement trop favorable à l'administration est l'une des erreurs les plus coûteuses, et elle est indétectable sans votre fiche d'évaluation sous les yeux.</li>
-        <li><b>Le local de référence</b> lui-même peut être obsolète ou mal choisi. Cette contestation est réelle mais technique&nbsp;: elle suppose de consulter les procès-verbaux d'évaluation communaux, ce que nous ne faisons pas.</li>
-        <li><b>Les petits écarts de surface.</b> Notre règle exige au moins 5&nbsp;m² d'écart&nbsp;; un écart de 4&nbsp;m² sur un logement de 40&nbsp;m² représente pourtant 10&nbsp;%. Cette limite est connue, documentée, et sera réévaluée à l'issue de nos tests en cours.</li>
-        <li><b>Les coefficients d'entretien et de situation</b> appliqués à votre bien relèvent d'une appréciation de l'administration que nous ne recalculons pas.</li>
-        <li><b>La couverture géographique</b> est aujourd'hui de 20 départements, ceux qui concentrent les principales agglomérations françaises. L'Alsace et la Moselle sont exclues&nbsp;: elles relèvent du Livre foncier, avec des règles distinctes.</li>
-        <li><b>Le service est en cours de validation.</b> Notre moteur est actuellement confronté à de vraies fiches d'évaluation afin de mesurer sa fiabilité. Nous préférons l'écrire plutôt que d'afficher une assurance que nous n'avons pas encore.</li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="band" id="methode">
-    <div class="shell">
-      <div class="eyebrow">Méthode et sources</div>
-      <h2>Pourquoi nous faire confiance</h2>
-      <p>Parce que vous pouvez vérifier chacune de nos affirmations à la source, sans nous croire sur parole.</p>
-      <dl class="sources">
-        <div>
-          <dt>Règles appliquées</dt>
-          <dd><b>Articles 324 L à 324 V de l'annexe III au Code général des impôts</b> — méthode d'évaluation des locaux d'habitation : surface pondérée, équivalences superficielles, coefficients. Commentés au BOFiP sous la référence BOI-IF-TFB-20-10-20-50.</dd>
-        </div>
-        <div>
-          <dt>Données de marché</dt>
-          <dd><b>DVF — Demandes de valeurs foncières</b>, publiées par la DGFiP sur data.gouv.fr. Ventes réellement enregistrées en 2024, 20 départements, 379 000 transactions retenues après filtrage.</dd>
-        </div>
-        <div>
-          <dt>Référentiel des communes</dt>
-          <dd><b>API Découpage administratif</b> de l'État (geo.api.gouv.fr) — noms de communes et codes postaux officiels, 7 134 communes couvertes.</dd>
-        </div>
-        <div>
-          <dt>Cadre de la réclamation</dt>
-          <dd><b>Livre des procédures fiscales</b> — article L.190 (contentieux de l'assiette de l'impôt), article R*196-2 (délais de réclamation), article R*197-3 (forme, pièces et régularisation), article R*198-10 (délai d'instruction). La réclamation préalable est gratuite et n'impose pas de recourir à un avocat.</dd>
-        </div>
-        <div>
-          <dt>Vos données</dt>
-          <dd><b>Le pré-diagnostic gratuit est calculé dans votre navigateur.</b> Vos réponses ne sont envoyées à aucun serveur. Nous mesurons l'étape du parcours atteinte et, à l'affichage du résultat, le nombre d'éléments relevés — sans cookie, sans identifiant, sans surface ni commune. Le fichier de données que votre navigateur télécharge révèle en revanche le département concerné. <b>En cas d'achat seulement</b>, vos réponses accompagnent le paiement chez Stripe, afin que votre document puisse vous être redélivré. Détail complet sur la <a href="confidentialite.html">page Confidentialité</a>.</dd>
-        </div>
-      </dl>
-    </div>
-  </section>
-
-  <section class="band">
-    <div class="shell">
-      <h2>Voir ce que dit votre situation</h2>
-      <p>Gratuit, sans engagement, et sans conclusion forcée : si votre situation ne justifie aucune démarche, vous repartez avec cette réponse-là et rien à acheter.</p>
-      <div class="cta-row">
-        <button class="btn-primary" id="start-btn-2">Lancer le pré-diagnostic</button>
-      </div>
-    </div>
-  </section>
-
-  <section class="band">
-    <div class="shell">
-      <div class="eyebrow">Questions fréquentes</div>
-      <h2>Ce qu'on nous demande le plus</h2>
-      <div class="faq">
-        <details>
-          <summary>Garantissez-vous que ma taxe foncière est incorrecte&nbsp;?</summary>
-          <div class="ans"><p>Non, et personne ne peut le garantir sans recalculer votre valeur locative cadastrale — ce que seule l'administration fiscale est en mesure de faire. Nous identifions des éléments qui méritent une vérification. C'est une orientation, pas un verdict.</p></div>
-        </details>
-        <details>
-          <summary>Qu'est-ce que la fiche 6675-M, et comment l'obtenir&nbsp;?</summary>
-          <div class="ans">
-            <p>C'est la fiche d'évaluation de votre logement&nbsp;: le document interne de l'administration qui détaille la surface retenue, la catégorie de confort attribuée et les éléments comptabilisés. C'est la seule pièce qui permet de savoir ce qui vous est réellement facturé.</p>
-            <p>Elle s'obtient gratuitement depuis votre espace particulier sur impots.gouv.fr, par la messagerie sécurisée, en demandant la fiche d'évaluation de votre local.</p>
-          </div>
-        </details>
-        <details>
-          <summary>Qu'est-ce que DVF, et à quoi cela sert-il ici&nbsp;?</summary>
-          <div class="ans"><p>DVF rassemble les ventes immobilières réellement enregistrées par la DGFiP, publiées en open data. Nous nous en servons pour situer votre bien dans son marché local. Ce n'est jamais une preuve que votre taxe est juste ou injuste&nbsp;: la taxe foncière repose sur une valeur locative de 1970 revalorisée, pas sur le prix de vente actuel.</p></div>
-        </details>
-        <details>
-          <summary>Pourquoi me demandez-vous d'où vient chaque chiffre&nbsp;?</summary>
-          <div class="ans"><p>Parce qu'une surface estimée de mémoire et une surface lue sur un document officiel ne se valent pas. Une donnée incertaine ne crée jamais d'anomalie chez nous&nbsp;: elle abaisse la confiance accordée au résultat, et nous vous le signalons explicitement.</p></div>
-        </details>
-        <details>
-          <summary>Mes réponses sont-elles conservées&nbsp;?</summary>
-          <div class="ans">
-            <p>Pendant le pré-diagnostic gratuit, non : le calcul s'effectue entièrement dans votre navigateur et vos réponses ne sont transmises à aucun serveur. Nous enregistrons l'étape du parcours atteinte et le nombre d'éléments relevés, sans cookie ni identifiant. Le fichier de données que votre navigateur télécharge indique le département concerné, mais ni votre commune ni vos surfaces.</p>
-            <p>Si vous achetez un document, alors oui : votre adresse email et vos réponses au questionnaire accompagnent le paiement chez Stripe. C'est ce qui nous permet de vous redélivrer votre document si vous fermez la page — sans cela, un achat perdu serait définitivement perdu.</p>
-          </div>
-        </details>
-        <details>
-          <summary>Que se passe-t-il si aucun élément n'est détecté&nbsp;?</summary>
-          <div class="ans"><p>Nous vous le disons et nous ne vous proposons rien à acheter. Vendre un dossier de réclamation à quelqu'un qui n'a rien à réclamer n'aurait aucun sens. Vous repartez avec la marche à suivre pour vérifier vous-même, gratuitement.</p></div>
-        </details>
-        <details>
-          <summary>Pourquoi payer, alors que la réclamation est gratuite&nbsp;?</summary>
-          <div class="ans"><p>La démarche est effectivement gratuite et ne nécessite aucun avocat. Ce que vous payez, c'est la mise en forme&nbsp;: vos constats reformulés dans les termes de l'administration, les références réglementaires exactes, les pièces adaptées à votre cas et les délais à respecter. Vous pouvez tout à fait le faire seul — le guide de ce site vous y aide, gratuitement.</p></div>
-        </details>
-        <details>
-          <summary>Puis-je contester directement, sans passer par vous&nbsp;?</summary>
-          <div class="ans"><p>Oui, et c'est un droit. La réclamation contentieuse s'adresse au service des impôts fonciers, par courrier ou depuis la messagerie sécurisée d'impots.gouv.fr. Elle est gratuite et ne requiert pas d'avocat (articles R*190-1 et L.190 du Livre des procédures fiscales).</p></div>
-        </details>
-        <details>
-          <summary>Et après avoir déposé ma réclamation&nbsp;?</summary>
-          <div class="ans"><p>L'administration dispose en principe de six mois pour répondre, prolongeables de trois mois si elle vous en informe. Passé ce délai sans réponse, le silence vaut rejet implicite et le tribunal administratif peut être saisi. En cas de rejet explicite, le délai de recours est de deux mois à compter de sa notification.</p></div>
-        </details>
-      </div>
-    </div>
-  </section>
-
 </main>
 
 <footer class="site-foot">
   <div class="shell">
-    <div class="links">
-      <a href="guide-erreurs-taxe-fonciere.html">Guide des erreurs fréquentes</a>
-      <a href="mentions-legales.html">Mentions légales</a>
-      <a href="confidentialite.html">Confidentialité</a>
-      <a href="cgv.html">CGV</a>
+    <div class="cols">
+      <div>
+        <h4>Les trois outils</h4>
+        <ul>
+          <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
+          <li><a href="abonnements.html">Abonnements et contrats</a></li>
+          <li><a href="garanties.html">Garanties et réparation</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Comprendre</h4>
+        <ul>
+          <li><a href="guide-erreurs-taxe-fonciere.html">Erreurs fréquentes de taxe foncière</a></li>
+          <li><a href="resilier-un-abonnement.html">Résilier un abonnement</a></li>
+          <li><a href="produit-defectueux-que-faire.html">Un produit tombe en panne</a></li>
+          <li><a href="sources.html">Toutes les sources</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Le site</h4>
+        <ul>
+          <li><a href="mentions-legales.html">Mentions légales</a></li>
+          <li><a href="confidentialite.html">Confidentialité</a></li>
+        </ul>
+      </div>
     </div>
-    <p class="fine">
-      <b>Couverture actuelle&nbsp;:</b> 20 départements — Paris, Lyon, Marseille, Nice, Toulouse, Nantes,
-      Bordeaux, Lille, Rennes, Montpellier, Rouen et Le Havre, Reims, Saint-Étienne, Toulon, Grenoble,
-      Dijon, Angers, Nîmes, Clermont-Ferrand, Le Mans. Données de marché&nbsp;: DVF 2024 (data.gouv.fr).
-    </p>
-    <p class="fine">
-      Foncier·Juste est un service d'information. Il ne constitue ni un conseil fiscal personnalisé,
-      ni une prestation d'avocat ou d'expert-comptable, ni une garantie de résultat.
-    </p>
+    <p class="fine"><b>Nom provisoire.</b> Ce site s'appelait Foncier·Juste lorsqu'il ne traitait que la
+    taxe foncière. « Dépense·Juste » est un positionnement de travail, utilisé le temps de vérifier la
+    disponibilité d'un nom et d'un domaine. Rien n'est arrêté.</p>
+    <p class="fine">Service d'information gratuit. Ne constitue ni un conseil juridique ou fiscal
+    personnalisé, ni une garantie de résultat. Aucune donnée n'est vendue ni cédée.</p>
   </div>
 </footer>
-
 <script>
-/* =========================================================================
-   Index des communes. Le moteur lui-même vit dans moteur.js — il est partagé
-   avec succes.html, qui doit pouvoir reconstruire un document acheté.
-   ========================================================================= */
-let communesIndex = new Map();  // "Commune (CP)" -> {code_commune, code_dept, ...}
-let dernierDiagnostic = null;
-
-/* Mesure du funnel — volontairement minimale : pas de cookie, pas
-   d'identifiant, aucune surface, aucune commune. Seulement l'étape atteinte,
-   plus, à l'affichage du résultat, le nombre d'éléments relevés. */
-function track(evenement, meta = {}) {
-  try {
-    navigator.sendBeacon?.('/api/track', new Blob(
-      [JSON.stringify({ e: evenement, ...meta })], { type: 'application/json' }
-    ));
-  } catch (_) { /* la mesure ne doit jamais casser le parcours */ }
-}
-track('page_vue');
-
-fetch('communes.json').then(r => r.json()).then(communes => {
-  const list = document.getElementById('communes-list');
-  const frag = document.createDocumentFragment();
-  // Une entrée par code postal : une commune en a souvent plusieurs
-  // (Grenoble = 38000 ET 38100, Nantes en a quatre).
-  communes.forEach(c => {
-    (c.codes_postaux || []).forEach(cp => {
-      const label = `${c.commune} (${cp})`;
-      communesIndex.set(label, { ...c, code_postal_choisi: cp });
-      const opt = document.createElement('option');
-      opt.value = label;
-      frag.appendChild(opt);
-    });
-  });
-  list.appendChild(frag);
-  document.getElementById('commune-hint').textContent =
-    `${communes.length} communes couvertes, réparties sur 20 départements.`;
-}).catch(() => {
-  document.getElementById('commune-hint').textContent =
-    "Impossible de charger la liste des communes. Rechargez la page dans un instant.";
-});
-
-/* =========================================================================
-   Navigation du questionnaire
-   ========================================================================= */
-const steps = [...document.querySelectorAll('.step')];
-let current = 0;
-let communeChoisie = null;
-
-const $ = id => document.getElementById(id);
-
-function renderProgress(){
-  [1,2,3].forEach(n => $('p'+n).classList.toggle('done', n <= current + 1));
-}
-function showStep(i){
-  steps.forEach((s, idx) => s.hidden = idx !== i);
-  $('back-btn').hidden = i === 0;
-  $('next-btn').textContent = i === steps.length - 1 ? 'Voir mon résultat' : 'Continuer';
-  renderProgress();
-}
-function demarrer(){
-  $('diagnostic').hidden = false;
-  $('resultats').hidden = true;
-  current = 0; showStep(current);
-  $('diagnostic').scrollIntoView({ behavior:'smooth', block:'start' });
-  track('diagnostic_demarre');
-}
-$('start-btn').addEventListener('click', demarrer);
-$('start-btn-2').addEventListener('click', demarrer);
-$('back-btn').addEventListener('click', () => { if (current > 0){ current--; showStep(current); } });
-$('restart-btn').addEventListener('click', demarrer);
-
-/* La présence de la fiche 6675-M gouverne tout le questionnaire : c'est le
-   seul document où figurent la surface retenue et les éléments comptabilisés.
-   Sans elle, on n'invente pas ces chiffres — on adapte les questions. */
-function aLaFiche(){ return $('fiche-oui').checked; }
-
-function majModeFiche(){
-  const avec = aLaFiche();
-  $('champ-fiche').hidden = !avec;
-  $('notice-sans-fiche').hidden = avec;
-  $('lab-factures').textContent = avec
-    ? 'Éléments listés sur votre fiche d’évaluation'
-    : 'Éléments pris en compte dans votre évaluation';
-  $('hint-factures').textContent = avec
-    ? 'Reprenez exactement les éléments mentionnés dans le cadre « éléments de confort » de la fiche.'
-    : 'À votre connaissance : ce qui a été déclaré à la construction, lors de travaux, ou repris dans l’acte d’achat.';
-}
-document.querySelectorAll('input[name=fiche]').forEach(r => r.addEventListener('change', majModeFiche));
-majModeFiche();
-
-/* Validation des surfaces. Les bornes ne sont pas un choix métier : ce sont
-   celles du jeu de données DVF (8 à 400 m²), donc le domaine sur lequel le
-   produit sait réellement travailler. Elles étaient déjà déclarées dans le
-   HTML mais n'étaient pas appliquées : une faute de frappe (1300 au lieu de
-   130) produisait un résultat absurde. */
-function validerSurface(champ, obligatoire){
-  const hint = champ.parentElement.nextElementSibling;
-  const brut = champ.value.trim();
-  const v = parseFloat(brut);
-  const echouer = (msg) => { hint.dataset.erreur = msg; hint.style.color = 'var(--alert)'; champ.focus(); return false; };
-  if (!brut){
-    if (!obligatoire) return true;
-    return echouer('obligatoire');
-  }
-  if (!Number.isFinite(v) || v <= 0) return echouer('invalide');
-  if (v < SURFACE_MIN_M2 || v > SURFACE_MAX_M2) return echouer('hors bornes');
-  hint.style.color = '';
-  delete hint.dataset.erreur;
-  return true;
-}
-
-function messageSurface(champ, texte){
-  const hint = champ.parentElement.nextElementSibling;
-  hint.style.color = 'var(--alert)';
-  hint.textContent = texte;
-}
-
-const HINT_ORIGINAL = new Map();
-function memoriserHint(id){
-  const champ = $(id);
-  const hint = champ.parentElement.nextElementSibling;
-  if (!HINT_ORIGINAL.has(id)) HINT_ORIGINAL.set(id, hint.innerHTML);
-}
-function restaurerHint(id){
-  const champ = $(id);
-  const hint = champ.parentElement.nextElementSibling;
-  if (HINT_ORIGINAL.has(id)){ hint.innerHTML = HINT_ORIGINAL.get(id); hint.style.color = ''; }
-}
-['surf_fiche','surf_reelle'].forEach(memoriserHint);
-
-function controlerEtape2(){
-  ['surf_fiche','surf_reelle'].forEach(restaurerHint);
-  const sr = $('surf_reelle'), sf = $('surf_fiche');
-  const vr = parseFloat(sr.value);
-  if (!sr.value.trim() || !Number.isFinite(vr) || vr <= 0){
-    messageSurface(sr, "Indiquez la surface habitable actuelle : c'est elle qui sert de point de comparaison.");
-    sr.focus(); return false;
-  }
-  if (vr < SURFACE_MIN_M2 || vr > SURFACE_MAX_M2){
-    messageSurface(sr, `Cette surface doit être comprise entre ${SURFACE_MIN_M2} et ${SURFACE_MAX_M2} m² — c'est le domaine sur lequel nous disposons de données comparables. Vérifiez votre saisie.`);
-    sr.focus(); return false;
-  }
-  if (aLaFiche()){
-    const vf = parseFloat(sf.value);
-    if (!sf.value.trim() || !Number.isFinite(vf) || vf <= 0){
-      messageSurface(sf, "Indiquez la surface réelle lue sur votre fiche, ou revenez à « Non, pas encore » si vous ne l'avez pas.");
-      sf.focus(); return false;
-    }
-    if (vf < SURFACE_MIN_M2 || vf > SURFACE_MAX_M2){
-      messageSurface(sf, `Cette surface doit être comprise entre ${SURFACE_MIN_M2} et ${SURFACE_MAX_M2} m². Au-delà, vérifiez que vous n'avez pas repris la surface pondérée ou ajouté un chiffre de trop.`);
-      sf.focus(); return false;
-    }
-  }
-  return true;
-}
-
-$('next-btn').addEventListener('click', async () => {
-  if (current === 0){
-    const saisie = $('commune').value.trim();
-    const hint = $('commune-hint');
-    communeChoisie = communesIndex.get(saisie);
-    if (!communeChoisie){
-      hint.textContent = "Choisissez une commune dans la liste proposée : tapez quelques lettres, puis sélectionnez.";
-      hint.style.color = 'var(--alert)';
-      $('commune').focus();
-      return;
-    }
-    // Confirme ce qui a été compris : 87 communes de la base portent un nom
-    // partagé avec une commune d'un autre département.
-    hint.style.color = 'var(--ok)';
-    hint.textContent = communeChoisie.dept_nom
-      ? `${communeChoisie.commune} — ${communeChoisie.dept_nom}`
-      : communeChoisie.commune;
-    statsPourDepartement(communeChoisie.code_dept).catch(() => {});
-  }
-  if (current === 1 && !controlerEtape2()) return;
-
-  track(`etape_${current + 1}_validee`);
-  if (current < steps.length - 1){ current++; showStep(current); }
-  else { await runDiagnostic(); }
-});
-
-/* =========================================================================
-   Lecture des réponses -> objet d'entrée du moteur.
-   C'est exactement cet objet qui sera transmis à Stripe en cas d'achat,
-   pour que le document puisse être reconstruit plus tard. Rien de plus.
-   ========================================================================= */
-function lireEntree(){
-  return {
-    cc: communeChoisie.code_commune,
-    cn: communeChoisie.commune,
-    cp: communeChoisie.code_postal_choisi || (communeChoisie.codes_postaux || [])[0] || '',
-    cd: communeChoisie.code_dept,
-    t: $('type_local').value,
-    f: aLaFiche() ? 1 : 0,
-    sf: aLaFiche() ? (parseFloat($('surf_fiche').value) || 0) : null,
-    sr: parseFloat($('surf_reelle').value) || 0,
-    ss: $('certitude').value,
-    ef: [...document.querySelectorAll('#confort-factures input:checked')].map(i => i.value),
-    ee: [...document.querySelectorAll('#confort-existants input:checked')].map(i => i.value),
-  };
-}
-
-async function runDiagnostic(){
-  const entree = lireEntree();
-  let stats = null;
-  try { stats = await statsPourDepartement(entree.cd); }
-  catch (e) { /* département sans données : on continue sans repère de marché */ }
-  dernierDiagnostic = calculerDiagnostic(entree, stats);
-  renderResults(dernierDiagnostic);
-}
-
-/* ========================================================================= */
-
-const echappe = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-function blocSignal(a, opts = {}){
-  const nonValide = CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code);
-  // Un constat non validé n'a pas droit au grand chiffre : il n'est pas un
-  // motif, et la mise en page ne doit pas suggérer le contraire.
-  const classeFigure = nonValide ? 'figure-sm' : 'figure';
-  const tag = nonValide ? 'tag-warn' : a.gravite === 'haute' ? 'tag-alert' : a.gravite === 'moyenne' ? 'tag-warn' : 'tag-info';
-  const lib = nonValide ? 'Constat non validé'
-    : a.gravite === 'haute' ? 'À vérifier en priorité'
-    : a.gravite === 'moyenne' ? 'À vérifier' : 'Contexte';
-  return `<article class="signal">
-    <div class="signal-head">
-      <span class="signal-kind">${echappe(a.kind)}</span>
-      <span class="signal-tag ${tag}">${lib}</span>
-    </div>
-    <h3>${echappe(a.titre)}</h3>
-    <div class="signal-kind" style="margin-top:10px">${a.code === 'elements_confort_obsoletes' ? 'Élément concerné' : a.gravite === 'info' ? 'Repère' : 'Écart constaté'}</div>
-    <div class="${classeFigure}" style="margin-top:2px">${echappe(a.figure)}</div>
-    ${nonValide ? `<p class="obs-note">
-      <b>Ce constat n'est pas retenu comme motif.</b> Nous vérifions actuellement, sur de vraies fiches
-      d'évaluation, que les deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point
-      n'est pas tranché, cet élément n'ouvre aucune offre payante et ne figure pas dans le projet de
-      courrier si vous achetez le dossier. Il vous indique où regarder, rien de plus.</p>` : ''}
-    <p class="why"><span class="k">Ce que vous avez indiqué</span>${echappe(a.vosReponses)}</p>
-    <p class="why"><span class="k">Ce que nous en déduisons</span>${echappe(a.calcul)}</p>
-    <p class="why"><span class="k">Ce qu'il reste à vérifier</span>${echappe(a.aVerifier)}</p>
-    <p class="conf"><b>Ce que vaut ce constat :</b> ${echappe(a.confiance.texte)}<br>
-    <b>D'où vient l'information :</b> ${echappe(a.confiance.origine)}</p>
-  </article>`;
-}
-
-function renderResults(d){
-  const { anomalies, classif, avecFiche } = d;
-  $('diagnostic').hidden = true;
-  $('resultats').hidden = false;
-
-  const reels = anomalies.filter(a => a.gravite !== 'info');
-  const contexte = anomalies.filter(a => a.gravite === 'info');
-
-  // Deux natures différentes, jamais additionnées : ce qui constitue un motif
-  // de vérification, et ce qui n'est qu'une observation tant que la
-  // comparaison des surfaces n'a pas été validée sur de vraies fiches.
-  const retenus = reels.filter(a => !CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code));
-  const observations = reels.filter(a => CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code));
-  const pluriel = (n, s, p) => `${n} ${n > 1 ? p : s}`;
-
-  // 1 & 2 — Conclusion, puis ce qui est retenu et ce qui ne l'est pas
-  //
-  // Le moteur classe la situation à partir de son score, qui tient compte de
-  // l'écart de surface. Quand cet écart est le SEUL élément relevé, le libellé
-  // qu'il renvoie (« Vérification fortement recommandée ») contredirait la
-  // ligne suivante, puisque rien n'est retenu comme motif. On affiche alors un
-  // titre conforme au statut réel. Le score, la classification et la règle de
-  // vente sont inchangés : seule la formulation affichée l'est, et le détail
-  // juste en dessous explique ce qui reste à regarder.
-  const bloc = $('verdict');
-  const sansMotifRetenu = reels.length > 0 && retenus.length === 0;
-  bloc.className = 'verdict ' + (sansMotifRetenu ? 't-warn' : classif.ton);
-  $('verdict-titre').textContent = sansMotifRetenu
-    ? 'Aucun motif retenu à ce stade'
-    : classif.label;
-
-  const sum = $('verdict-sum');
-  const detail = $('verdict-detail');
-  if (reels.length === 0){
-    sum.textContent = avecFiche
-      ? "Avec les chiffres de votre fiche d'évaluation, nous n'identifions aucun élément appelant une vérification."
-      : "Avec les informations fournies, nous n'identifions aucun élément appelant une vérification approfondie.";
-    detail.textContent = '';
-    detail.hidden = true;
-  } else if (retenus.length === 0){
-    sum.textContent = observations.length === 1
-      ? "Nous avons relevé un écart entre vos deux surfaces. Il mérite votre attention, mais il ne compte pas comme motif."
-      : "Nous avons relevé des écarts entre vos surfaces. Ils méritent votre attention, mais ne comptent pas comme motifs.";
-    detail.textContent = "Tant que nous n'avons pas vérifié, sur de vraies fiches, que les deux surfaces comparées recouvrent bien le même périmètre, cet écart vous indique où regarder sans rien établir. Le détail figure ci-dessous.";
-    detail.hidden = false;
-  } else {
-    sum.textContent = `Nous retenons ${pluriel(retenus.length, 'piste à vérifier', 'pistes à vérifier')}.`;
-    detail.textContent = observations.length
-      ? `S'y ajoute ${pluriel(observations.length, 'observation qui ne compte pas comme motif', 'observations qui ne comptent pas comme motifs')}, présentée plus bas, à part.`
-      : '';
-    detail.hidden = !observations.length;
-  }
-
-  // 3, 4, 5 — Chaque signal, avec ce qui vient de vous, ce qui est calculé,
-  // ce qui reste à vérifier, et d'où vient l'information. Les motifs retenus
-  // d'abord ; les observations ensuite, en retrait.
-  const groupe = (titre, compte, items, classe) =>
-    `<section class="${classe}">
-       <div class="groupe-t"><span>${titre}</span><span class="compte">${compte}</span></div>
-       ${items}
-     </section>`;
-  const html =
-    (retenus.length
-      ? groupe('Pistes à vérifier',
-               pluriel(retenus.length, 'élément retenu', 'éléments retenus'),
-               retenus.map(a => blocSignal(a)).join(''), 'groupe')
-      : '') +
-    (observations.length
-      ? groupe('Observation complémentaire — non retenue comme motif',
-               'ne déclenche aucune offre',
-               observations.map(a => blocSignal(a)).join(''), 'groupe groupe-obs')
-      : '');
-  $('signaux').innerHTML = html
-    || `<div class="block"><p>Aucun élément relevé à partir de vos réponses.</p></div>`;
-
-  // 6 — Ce que cela signifie, et ne signifie pas
-  $('limite-texte').textContent = avecFiche
-    ? "Ce résultat n'établit pas que votre taxe foncière est incorrecte, et nous ne pouvons pas le savoir : nous n'avons accès ni à votre dossier fiscal, ni au raisonnement de l'administration. Tout ce qui précède est calculé à partir des chiffres que vous avez saisis. Seule l'administration fiscale peut recalculer une valeur locative cadastrale, et notre analyse ne porte ni sur votre catégorie de confort, ni sur le local de référence retenu pour votre commune."
-    : "Ce résultat est partiel, et volontairement. Sans votre fiche d'évaluation, nous n'avons comparé aucune surface : la surface retenue par l'administration ne figure sur aucun autre document. Ce que vous lisez ici est une orientation construite à partir de vos seules déclarations, pas un diagnostic.";
-
-  // 7 — Prochaines étapes
-  $('action-contenu').innerHTML = avecFiche
-    ? `<ol>
-         <li><b>Vérifiez la catégorie de confort</b> inscrite sur votre fiche (échelle de 1 à 8). Nous ne savons pas la contrôler automatiquement, et un classement trop favorable à l'administration compte parmi les erreurs les plus coûteuses.</li>
-         <li><b>Mesurez vous-même les pièces</b> si ce n'est pas déjà fait : un plan coté ou un relevé daté constitue la pièce maîtresse d'une contestation portant sur la surface.</li>
-         <li><b>Réunissez vos preuves</b> pour chaque élément disparu : facture de démolition, permis de démolir, ou photographie aérienne datée sur remonterletemps.ign.fr — c'est gratuit et daté.</li>
-         <li><b>Respectez le délai</b> : pour un avis que vous venez de recevoir, la réclamation se dépose au plus tard le 31 décembre de l'année suivant sa mise en recouvrement. L'article R*196-2 du Livre des procédures fiscales prévoit un second point de départ lorsqu'un événement postérieur motive la réclamation — si vous pensez être dans ce cas, interrogez votre service des impôts fonciers.</li>
-       </ol>`
-    : `<ol>
-         <li><b>Demandez votre fiche d'évaluation (formulaire 6675-M)</b> depuis votre espace particulier sur impots.gouv.fr, par la messagerie sécurisée. C'est gratuit, et c'est le seul document qui indique la surface et les éléments réellement retenus.</li>
-         <li><b>Lisez-y la ligne « surface réelle »</b>, et non la surface pondérée : cette dernière intègre des équivalences (baignoire, WC, chauffage central) et dépasse normalement la surface mesurée de 20 à 40 %.</li>
-         <li><b>Vérifiez la catégorie de confort</b> attribuée à votre logement, sur l'échelle de 1 à 8.</li>
-         <li><b>Revenez ici avec ces chiffres</b> : le pré-diagnostic deviendra alors réellement exploitable.</li>
-       </ol>`;
-
-  // 8 — Contexte de marché, après les limites : ce n'est pas un motif.
-  $('contexte-marche').innerHTML = contexte.map(blocSignal).join('');
-
-  // 9 — Offre, ou refus de vendre
-  const vente = d.vente;
-  $('zone-vente').hidden = !vente;
-  $('zone-sans-signal').hidden = vente;
-
-  if (!vente){
-    const aUnSignal = reels.length > 0;
-    const seulementSurface = aUnSignal && reels.every(a => a.code === 'surface_surevaluee');
-    $('stance-titre').textContent = aUnSignal
-      ? 'Nous ne vous vendons rien pour l’instant'
-      : 'Nous ne vous vendons rien aujourd’hui';
-    $('stance-contenu').innerHTML = seulementSurface
-      ? `<p>Nous avons relevé un écart entre vos deux surfaces, et il mérite que vous le regardiez de près. Mais nous ne vous vendons pas de dossier sur cette seule base, pour une raison que nous préférons vous dire franchement&nbsp;: <b>nous ne sommes pas encore certains que les deux chiffres comparés recouvrent exactement le même périmètre.</b></p>
-         <p>La fiche d'évaluation décompose le logement en plusieurs parties, et nous vérifions actuellement, sur de vraies fiches, laquelle doit être comparée à une surface habitable mesurée. Tant que ce point n'est pas tranché, un écart de surface peut venir de la question que nous vous avons posée plutôt que de votre situation.</p>
-         <p><b>Ce que vous pouvez faire dès maintenant&nbsp;:</b> reprenez votre fiche, vérifiez quelles pièces sont comptées dans la ligne « surface réelle », et comparez-la à la même liste de pièces chez vous. Si l'écart persiste, il est réel.</p>
-         <a class="btn btn-secondary" href="guide-erreurs-taxe-fonciere.html">Lire le guide des erreurs fréquentes</a>`
-      : aUnSignal
-      ? `<p>Nous avons bien relevé quelque chose, mais la donnée sur laquelle cela repose n'est pas assez solide pour construire un dossier. Une réclamation s'appuie sur des pièces&nbsp;: la fiche d'évaluation en fait partie, et un chiffre approximatif ne tient pas devant l'administration.</p>
-         <p>Vous vendre un dossier aujourd'hui reviendrait à vous vendre un dossier que vous ne pourriez pas déposer. Récupérez d'abord les éléments manquants ci-dessus, puis revenez&nbsp;: c'est gratuit, et ça ne prend que quelques jours.</p>
-         <a class="btn btn-secondary" href="guide-erreurs-taxe-fonciere.html" style="margin-top:6px">Lire le guide des erreurs fréquentes</a>`
-      : `<p>Avec ce que vous nous avez indiqué, aucun élément ne justifie d'engager une réclamation. Payer pour contester n'aurait aucun sens dans votre situation, et nous préférons vous le dire.</p>
-         <p><b>Ce que vous pouvez faire gratuitement, si vous souhaitez aller plus loin&nbsp;:</b></p>
-         <ul>
-           <li>Demander votre <b>fiche d'évaluation (formulaire 6675-M)</b> sur impots.gouv.fr, par la messagerie sécurisée de votre espace particulier.</li>
-           <li>Y contrôler la <b>catégorie de confort</b> (de 1 à 8)&nbsp;: c'est l'erreur que notre questionnaire ne sait pas détecter, et l'une des plus coûteuses.</li>
-           <li>Revenir refaire le pré-diagnostic si la fiche révèle quelque chose d'inattendu.</li>
-         </ul>
-         <a class="btn btn-secondary" href="guide-erreurs-taxe-fonciere.html">Lire le guide des erreurs fréquentes</a>`;
-  }
-
-  $('resultats').scrollIntoView({ behavior:'smooth', block:'start' });
-  track('resultat_affiche', { signal: vente, anomalies: reels.length });
-  if (vente) track('offre_vue');
-}
-
-/* =========================================================================
-   Aperçu du livrable — montre la STRUCTURE, jamais le contenu.
-   Ne jamais l'enrichir sans se demander s'il redevient un substitut gratuit.
-   ========================================================================= */
-$('preview-pdf-btn').addEventListener('click', () => {
-  if (!dernierDiagnostic) return;
-  const hint = $('pdf-hint');
-  hint.hidden = false;
-  hint.textContent = 'Génération de l’aperçu…';
-  track('apercu_demande');
-  setTimeout(() => {
-    try { genererApercuPDF(dernierDiagnostic); hint.hidden = true; }
-    catch (e) {
-      hint.textContent = "Impossible de générer l'aperçu. Rechargez la page et réessayez.";
-      console.error(e);
-    }
-  }, 50);
-});
-
-/* =========================================================================
-   Paiement (Stripe Checkout)
-   -------------------------------------------------------------------------
-   Vos réponses sont transmises ICI, et seulement ici : au moment de l'achat,
-   elles accompagnent le paiement afin que le document puisse vous être
-   redélivré plus tard, depuis n'importe quel appareil. Pendant tout le
-   pré-diagnostic gratuit, rien n'a quitté le navigateur.
-   ========================================================================= */
-document.querySelectorAll('.buy-btn').forEach(btn => btn.addEventListener('click', async () => {
-  if (!dernierDiagnostic) return;
-  const produit = btn.dataset.produit;
-  const erreur = $('achat-erreur');
-  const email = $('email_client').value.trim();
-  const consent = $('consent-retractation').checked;
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-    erreur.hidden = false;
-    erreur.textContent = "Indiquez une adresse email valide : c'est elle qui vous permet de récupérer votre document.";
-    $('email_client').focus();
-    return;
-  }
-  if (!consent){
-    erreur.hidden = false;
-    erreur.textContent = "Cochez la case de renonciation au droit de rétractation pour recevoir le document immédiatement.";
-    return;
-  }
-  erreur.hidden = true;
-
-  document.querySelectorAll('.buy-btn').forEach(b => b.disabled = true);
-  const hint = $('pdf-hint');
-  hint.hidden = false;
-  hint.textContent = 'Redirection vers le paiement sécurisé…';
-  track('paiement_demarre', { produit });
-  try {
-    // Copie locale : confort de récupération immédiate si l'utilisateur
-    // revient sur ce même navigateur. Ce n'est PAS la garantie de livraison —
-    // celle-ci repose sur les réponses jointes au paiement.
-    try { localStorage.setItem('fj_dernier_diagnostic', JSON.stringify(dernierDiagnostic.entree)); } catch (_) {}
-    const r = await fetch('/api/create-checkout-session', {
-      method:'POST', headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ produit, email, diag: dernierDiagnostic.entree }),
-    });
-    const data = await r.json();
-    if (!r.ok || !data.url){
-      // Le serveur refuse explicitement certaines demandes — offre retirée,
-      // produit inconnu. Son message est plus utile qu'un message générique.
-      const e = new Error(data.error || 'réponse invalide');
-      e.messageServeur = data.error;
-      throw e;
-    }
-    window.location.href = data.url;
-  } catch (e) {
-    hint.textContent = e.messageServeur || "Le paiement n'a pas pu démarrer. Réessayez dans un instant.";
-    console.error(e);
-    document.querySelectorAll('.buy-btn').forEach(b => b.disabled = false);
-  }
-}));
+/* Mesure minimale, réutilisant /api/track : aucun cookie, aucun identifiant,
+   aucune donnée saisie. Voir web/api/track.js. */
+try {
+  navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' }));
+} catch (_) {}
 </script>
 </body>
 </html>

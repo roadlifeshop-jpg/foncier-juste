@@ -77,6 +77,10 @@ const EVENEMENTS_AUTORISES = new Set([
   'paiement_demarre',
   'paiement_reussi',
   'document_telecharge',
+  // Ajoutés avec les outils « abonnements » et « garanties » : même principe,
+  // aucun cookie, aucun identifiant, aucune donnée saisie. On ne mesure que
+  // le fait qu'un outil a servi, jamais son contenu.
+  'outil_utilise',
 ]);
 
 module.exports = async (req, res) => {

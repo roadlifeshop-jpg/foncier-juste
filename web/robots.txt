@@ -1,15 +1,17 @@
 # Le site est volontairement fermé aux moteurs tant que les mentions légales
-# ne portent pas un SIRET réel (voir mentions-legales.html).
+# ne portent pas un SIRET réel (voir mentions-legales.html) et tant que le nom
+# définitif n'est pas arrêté.
 #
 # Pour l'ouvrir au public, DEUX changements sont nécessaires, jamais un seul :
 #   1. remplacer le bloc ci-dessous par :
 #        User-agent: *
 #        Allow: /
-#        Sitemap: https://foncier-juste.vercel.app/sitemap.xml
+#        Sitemap: https://<domaine>/sitemap.xml
 #   2. retirer la balise <meta name="robots" content="noindex, nofollow"> de
-#      index.html et de guide-erreurs-taxe-fonciere.html.
-# Les pages légales (mentions, CGV, confidentialité) et succes.html restent
-# en noindex dans tous les cas : elles n'ont rien à faire dans un index.
+#      CHAQUE page (index, taxe-fonciere, abonnements, garanties, sources,
+#      resilier-un-abonnement, produit-defectueux-que-faire, guide, cgv,
+#      mentions-legales, confidentialite).
+# Le fichier robots.txt seul n'empêche pas l'indexation d'une page déjà connue.
 
 User-agent: *
 Disallow: /
