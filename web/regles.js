@@ -46,7 +46,7 @@ const REGLES = {
   },
 
   'conformite-presomption': {
-    titre: "Pendant 24 mois pour un bien neuf et 12 mois pour un bien d'occasion, le défaut est présumé exister depuis la délivrance : vous n'avez rien à prouver, c'est au vendeur de démontrer le contraire. Passé ce délai, la garantie reste ouverte jusqu'à deux ans, mais c'est à vous d'établir que le défaut existait déjà lors de la vente.",
+    titre: "Pendant 24 mois pour un bien neuf et 12 mois pour un bien d'occasion, le défaut est présumé exister depuis la délivrance : vous n'avez pas à prouver qu'il existait déjà lors de la délivrance, c'est au vendeur de démontrer le contraire. Passé ce délai, la garantie reste ouverte jusqu'à deux ans, mais c'est à vous d'établir que le défaut existait déjà lors de la vente.",
     texte: "Article L217-7 du code de la consommation",
     source: { nom: 'Service-Public — Achat d\'un produit : garantie légale de conformité (fiche F11094)',
               url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F11094' },

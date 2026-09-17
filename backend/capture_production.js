@@ -41,6 +41,17 @@ async function capturerParite(cas) {
   const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
   const resultats = [];
 
+  // Le référentiel de communes est désormais chargé à la demande, au clic sur
+  // « Commencer » : sans cette attente, la première étape ne se valide pas et
+  // la capture repart avec un diagnostic nul.
+  $('start-btn').click();
+  for (let i = 0; i < 300 && (typeof communesIndex === 'undefined' || communesIndex.size === 0); i++) {
+    await attendre(100);
+  }
+  if (typeof communesIndex === 'undefined' || communesIndex.size === 0) {
+    throw new Error('référentiel de communes non chargé : capture impossible');
+  }
+
   for (const c of cas) {
     // --- Étape 1 : commune et type de bien
     $('start-btn').click();

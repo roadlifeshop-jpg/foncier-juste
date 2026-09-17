@@ -306,6 +306,7 @@
 
           <div class="bloc" style="padding-bottom:0; border-bottom:none">
             <h3>1. Ce que vos réponses permettent de signaler</h3>
+            <div class="encart prudence" id="signaux-preambule" hidden></div>
           </div>
           <div id="signaux"></div>
           <div class="bloc">
@@ -860,6 +861,21 @@ function renderResults(d){
   const retenus = reels.filter(a => !CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code));
   const observations = reels.filter(a => CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code));
   const pluriel = (n, s, p) => `${n} ${n > 1 ? p : s}`;
+
+  // Préambule du premier bloc : sans la fiche, tout ce qui suit est une
+  // hypothèse. Le dire ICI, avant le premier constat, plutôt que de le laisser
+  // à la ligne « ce que vaut ce constat » en bas de bloc.
+  const preambule = $('signaux-preambule');
+  preambule.hidden = avecFiche;
+  if (!avecFiche){
+    preambule.innerHTML = `<p style="margin-top:0"><b>À lire avant ce qui suit&nbsp;: ce sont des
+      hypothèses, pas des constats.</b> Vous n'avez pas consulté votre fiche d'évaluation, donc nous ne
+      savons pas ce que l'administration retient réellement pour votre logement. Ce que vous lisez
+      ci-dessous découle de vos seules réponses et indique <b>où regarder</b>.</p>
+      <p><b>Pour confirmer&nbsp;:</b> demandez votre fiche d'évaluation (formulaire 6675-M), gratuitement,
+      par la messagerie sécurisée de votre espace sur impots.gouv.fr. Revenez ensuite ici avec ses
+      chiffres — le résultat deviendra exploitable.</p>`;
+  }
 
   // 1 & 2 — Conclusion, puis ce qui est retenu et ce qui ne l'est pas
   //

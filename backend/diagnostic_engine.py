@@ -319,18 +319,41 @@ def _check_elements_confort(u: UserInput) -> Optional[dict]:
             else "Un élément que vous avez déclaré n’existe plus"
         ),
         "figure": " · ".join(libelles),
+        # PARITÉ : mêmes textes côté JS, conditionnés de la même façon.
+        # Sans la fiche, l'utilisateur n'a PAS vu ce que l'administration
+        # retient : affirmer que l'élément « entre dans son évaluation » ou que
+        # ses réponses « se contredisent » serait affirmer ce qu'il ne peut pas
+        # savoir. On formule une hypothèse, et on dit comment la confirmer.
         "vosReponses": (
-            "Vous avez indiqué que ces éléments entrent dans votre évaluation alors qu'ils "
-            f"n’existent plus aujourd'hui : {', '.join(obsoletes)}."
-            if pluriel else
-            "Vous avez indiqué que cet élément entre dans votre évaluation alors qu'il "
-            f"n’existe plus aujourd'hui : {', '.join(obsoletes)}."
+            (
+                "Vous avez indiqué que ces éléments entrent dans votre évaluation alors qu'ils "
+                f"n’existent plus aujourd'hui : {', '.join(obsoletes)}."
+                if pluriel else
+                "Vous avez indiqué que cet élément entre dans votre évaluation alors qu'il "
+                f"n’existe plus aujourd'hui : {', '.join(obsoletes)}."
+            ) if u.a_la_fiche else (
+                "Vous avez indiqué de mémoire, sans consulter votre fiche, que ces éléments "
+                f"entrent dans votre évaluation alors qu'ils n’existent plus aujourd'hui : {', '.join(obsoletes)}."
+                if pluriel else
+                "Vous avez indiqué de mémoire, sans consulter votre fiche, que cet élément "
+                f"entre dans votre évaluation alors qu'il n’existe plus aujourd'hui : {', '.join(obsoletes)}."
+            )
         ),
         "calcul": (
-            "Vos deux réponses se contredisent : "
-            + ("ces éléments sont portés" if pluriel else "cet élément est porté")
-            + " à votre évaluation mais "
-            + ("n’existent plus." if pluriel else "n’existe plus.")
+            (
+                "Vos deux réponses se contredisent : "
+                + ("ces éléments sont portés" if pluriel else "cet élément est porté")
+                + " à votre évaluation mais "
+                + ("n’existent plus." if pluriel else "n’existe plus.")
+            ) if u.a_la_fiche else (
+                "Hypothèse à confirmer, et non contradiction établie : "
+                + ("SI ces éléments figurent sur votre fiche d’évaluation, ils entrent encore "
+                   "dans le calcul alors qu’ils n’existent plus."
+                   if pluriel else
+                   "SI cet élément figure sur votre fiche d’évaluation, il entre encore dans le "
+                   "calcul alors qu’il n’existe plus.")
+                + " Seule la fiche permet de le savoir — demandez-la, c’est gratuit."
+            )
         ),
         "aVerifier": (
             "Aucune mise à jour n'est automatique : ni une démolition, ni le comblement d'une "

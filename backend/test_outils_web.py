@@ -209,8 +209,12 @@ SCRIPT_TESTS = r"""
        /preuve a changé de camp|à vous d'établir/i.test(occ(13).faits.map(f => f.texte).join(' ')));
   vrai("occasion 13 mois : la limite dit que la voie ne se ferme pas",
        occ(13).limites.some(l => /charge de la preuve qui se déplace/i.test(l)));
-  vrai("occasion 11 mois : le texte dit que rien n'est à prouver",
-       /rien à prouver|au vendeur de démontrer/i.test(occ(11).faits.map(f => f.texte).join(' ')));
+  vrai("occasion 11 mois : la présomption est formulée précisément",
+       /pas à prouver que le défaut existait déjà lors de la délivrance/i.test(occ(11).faits.map(f => f.texte).join(' ')));
+  vrai("occasion 11 mois : ce qui reste à la charge de l'acheteur est dit",
+       /établir l'achat et sa date|preuve d'achat, sa date/i.test(occ(11).faits.map(f => f.texte).join(' ') + occ(11).voies.map(v => v.texte || '').join(' ')));
+  vrai("plus aucune formule « rien à prouver »",
+       !/rien à prouver/i.test(JSON.stringify([occ(11), neu(11), REGLES['conformite-presomption']])));
   vrai("neuf 23 mois : présomption encore active", aPresomption(neu(23)));
   vrai("neuf 24 mois : garantie fermée", !aConformite(neu(24)));
   vrai("la durée de deux ans est annoncée identique quel que soit l'état",

@@ -199,12 +199,25 @@ function calculerDiagnostic(e, stats){
         ? 'Plusieurs éléments que vous avez déclarés n’existent plus'
         : 'Un élément que vous avez déclaré n’existe plus',
       figure: libelles.join(' · '),
-      vosReponses: obsoletes.length > 1
-        ? `Vous avez indiqué que ces éléments entrent dans votre évaluation alors qu'ils n’existent plus aujourd'hui : ${obsoletes.join(', ')}.`
-        : `Vous avez indiqué que cet élément entre dans votre évaluation alors qu'il n’existe plus aujourd'hui : ${obsoletes.join(', ')}.`,
-      calcul: obsoletes.length > 1
-        ? 'Vos deux réponses se contredisent : ces éléments sont portés à votre évaluation mais n’existent plus.'
-        : 'Vos deux réponses se contredisent : cet élément est porté à votre évaluation mais n’existe plus.',
+      // PARITÉ : mêmes textes côté Python, conditionnés de la même façon.
+      // Sans la fiche, l'utilisateur n'a PAS vu ce que l'administration retient :
+      // écrire que l'élément « entre dans son évaluation » ou que ses réponses
+      // « se contredisent » affirmerait ce qu'il ne peut pas savoir. On formule
+      // alors une hypothèse à confirmer, et on dit comment la confirmer.
+      vosReponses: e.f
+        ? (obsoletes.length > 1
+            ? `Vous avez indiqué que ces éléments entrent dans votre évaluation alors qu'ils n’existent plus aujourd'hui : ${obsoletes.join(', ')}.`
+            : `Vous avez indiqué que cet élément entre dans votre évaluation alors qu'il n’existe plus aujourd'hui : ${obsoletes.join(', ')}.`)
+        : (obsoletes.length > 1
+            ? `Vous avez indiqué de mémoire, sans consulter votre fiche, que ces éléments entrent dans votre évaluation alors qu'ils n’existent plus aujourd'hui : ${obsoletes.join(', ')}.`
+            : `Vous avez indiqué de mémoire, sans consulter votre fiche, que cet élément entre dans votre évaluation alors qu'il n’existe plus aujourd'hui : ${obsoletes.join(', ')}.`),
+      calcul: e.f
+        ? (obsoletes.length > 1
+            ? 'Vos deux réponses se contredisent : ces éléments sont portés à votre évaluation mais n’existent plus.'
+            : 'Vos deux réponses se contredisent : cet élément est porté à votre évaluation mais n’existe plus.')
+        : (obsoletes.length > 1
+            ? 'Hypothèse à confirmer, et non contradiction établie : SI ces éléments figurent sur votre fiche d’évaluation, ils entrent encore dans le calcul alors qu’ils n’existent plus. Seule la fiche permet de le savoir — demandez-la, c’est gratuit.'
+            : 'Hypothèse à confirmer, et non contradiction établie : SI cet élément figure sur votre fiche d’évaluation, il entre encore dans le calcul alors qu’il n’existe plus. Seule la fiche permet de le savoir — demandez-la, c’est gratuit.'),
       aVerifier: "Aucune mise à jour n'est automatique : ni une démolition, ni le comblement d'une piscine ne sont signalés d'office aux services fiscaux. Reste à confirmer, sur votre fiche, que l'élément y figure bien — et à pouvoir dater sa disparition.",
       confiance: e.f ? CONFIANCE_CONFORT_AVEC_FICHE : CONFIANCE_CONFORT_SANS_FICHE,
       message: obsoletes.length > 1
