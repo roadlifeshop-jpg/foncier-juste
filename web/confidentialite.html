@@ -94,28 +94,57 @@
   script, image, mesure d'audience — n'est chargée depuis un autre domaine.</p>
 
   <h2>Durée de conservation</h2>
-  <p><b>Ce site ne conserve rien par lui-même.</b> Il n'a aucune base de données, aucun compte, aucun
-  fichier de visiteurs. Les seules données qui subsistent quelque part sont celles-ci&nbsp;:</p>
-  <ul>
-    <li><b>Ce que vous saisissez dans l'outil abonnements&nbsp;: dans votre navigateur, sur cet appareil
-    uniquement</b>, aussi longtemps que vous ne l'effacez pas. Le bouton « Tout effacer » de l'outil, ou
-    la suppression des données du site dans votre navigateur, le retire immédiatement. Rien n'est envoyé
-    à un serveur, donc rien n'en est conservé ailleurs.</li>
-    <li><b>Les journaux de notre hébergeur&nbsp;: une heure.</b> Chaque requête reçue laisse une ligne
-    dans les journaux de Vercel, avec l'adresse IP, l'horodatage et le chemin demandé. Sur le plan
-    gratuit (Hobby) que nous utilisons, Vercel conserve ces journaux d'exécution <b>une heure</b>,
-    au-delà de laquelle ils ne sont plus consultables. C'est aussi la durée de vie des quelques lignes de
-    mesure d'étape que nous y écrivons — sans cookie, sans identifiant, sans aucune donnée que vous avez
-    saisie. <span class="meta">Durée relevée dans la documentation de Vercel le 17 septembre 2026&nbsp;;
-    elle passerait à un jour si nous changions de plan, et cette page serait alors corrigée.</span></li>
-    <li><b>Les commandes passées avant le retrait de l'offre payante&nbsp;: chez Stripe.</b> Plus aucun
-    paiement n'est proposé sur ce site. Pour les commandes antérieures, Stripe conserve la transaction et
-    les réponses qui y étaient jointes selon ses propres règles, que nous ne maîtrisons pas. Aucune
-    nouvelle donnée ne lui est transmise.</li>
-  </ul>
-  <p>Nous n'avons donc <b>aucune durée de conservation à fixer nous-mêmes</b>&nbsp;: nous ne détenons
-  rien. Si une obligation comptable naissait d'une vente future, les pièces correspondantes devraient
-  être conservées dix ans (article L123-22 du code de commerce)&nbsp;; ce n'est pas le cas aujourd'hui.</p>
+  <p><b>Nous n'avons aucune base de données et ne stockons rien sur un serveur qui nous appartienne</b>
+  — mais dire que « rien n'est conservé » serait faux. Quatre catégories de données existent malgré
+  tout, et deux d'entre elles ne dépendent pas de nous. Les voici, avec ce que nous savons de leur
+  durée.</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Ce qui existe</th><th>Où</th><th>Combien de temps</th><th>Qui en décide</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Vos saisies de l'outil abonnements</b> — noms, montants, périodicités, dates que vous entrez</td>
+          <td>Le stockage local de votre navigateur, <b>sur votre appareil</b>. Rien n'est envoyé nulle part.</td>
+          <td><b>Sans limite&nbsp;: jusqu'à ce que vous les effaciez.</b> Aucune expiration automatique.</td>
+          <td><b>Vous.</b> Le bouton « Tout effacer » de l'outil les supprime, comme la suppression des données du site dans votre navigateur. Nous n'y avons aucun accès.</td>
+        </tr>
+        <tr>
+          <td><b>Les journaux d'exécution de l'hébergeur</b> — adresse IP, horodatage, chemin demandé, et les lignes de mesure d'étape que nous écrivons</td>
+          <td>Les serveurs de <b>Vercel Inc.</b> (États-Unis)</td>
+          <td><b>Une heure</b> sur le plan gratuit que nous utilisons. <span class="meta">Durée relevée dans la documentation de Vercel le 17 septembre 2026&nbsp;; elle passerait à un jour sur un plan payant, et cette page serait alors corrigée.</span></td>
+          <td><b>Vercel.</b> Nous ne pouvons ni la prolonger ni la raccourcir.</td>
+        </tr>
+        <tr>
+          <td><b>Les autres traces éventuelles de l'hébergeur</b> — comptage de requêtes pour la facturation, protection contre les abus, statistiques internes</td>
+          <td>Vercel Inc.</td>
+          <td><b>Durée que nous ne pouvons pas confirmer.</b> Nous n'avons pas trouvé, pour ce plan, de document qui la fixe&nbsp;: nous préférons l'écrire plutôt que d'avancer un chiffre. La <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">politique de confidentialité de Vercel</a> fait foi.</td>
+          <td><b>Vercel.</b></td>
+        </tr>
+        <tr>
+          <td><b>Les données de paiement</b></td>
+          <td>Stripe</td>
+          <td><b>Aucune commande réelle n'existe.</b> La clé de paiement déployée est une clé de <b>test</b> — vérifié le 18 septembre 2026&nbsp;: aucun encaissement réel n'a jamais été possible. Seules subsistent des sessions d'essai, sans client réel, et plus aucun paiement n'est proposé sur le site.</td>
+          <td><b>Stripe</b>, pour ces sessions d'essai.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><b>Ce que nous envoyons nous-mêmes, et c'est tout&nbsp;:</b> à trois moments du parcours — page vue,
+  résultat affiché, outil utilisé — une ligne part vers notre propre fonction de mesure. Elle contient le
+  nom de l'étape et, au plus, trois informations non identifiantes&nbsp;: si un élément a été relevé, leur
+  nombre, et le nom d'un document téléchargé. <b>Ni cookie, ni identifiant, ni adresse IP conservée par
+  nous, ni aucune valeur que vous avez saisie</b> — ni commune, ni surface, ni montant. Cette ligne
+  rejoint les journaux de l'hébergeur, et disparaît avec eux.</p>
+
+  <p><b>L'adresse IP, elle, est inévitablement vue par l'hébergeur</b> à chaque requête, y compris pour
+  une simple page. C'est le fonctionnement de tout site web&nbsp;; ce que nous pouvons garantir, c'est
+  que nous ne la lisons pas, ne la stockons pas et ne la croisons avec rien.</p>
+
+  <p><b>Responsable du traitement&nbsp;:</b> l'éditeur du site, identifié sur la page
+  <a href="mentions-legales.html">Mentions légales</a>. Cette identification doit être complétée avant
+  toute mise à disposition publique du site&nbsp;: en l'état, ce document n'est pas opposable.</p>
 
   <h2>Destinataires</h2>
   <ul>

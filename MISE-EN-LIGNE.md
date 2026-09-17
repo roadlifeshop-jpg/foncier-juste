@@ -52,13 +52,67 @@ onglet **Deployments** → la ligne la plus récente dont la branche est
 `trois-outils` — son commit doit être celui qu'imprime
 `sh scripts/etat-mise-en-ligne.sh` → bouton **Visit**, ou menu ⋯ → **Copy URL**.
 
-## 2. Avant le feu vert — ce qui ne dépend pas de moi
+## 2. Avant le feu vert — trois états à ne pas confondre
+
+Un site peut être dans trois états distincts, et `noindex` n'en gouverne qu'un
+seul.
+
+| État | Ce que cela signifie | Ce qui le gouverne aujourd'hui |
+|---|---|---|
+| **Accessible publiquement** | n'importe qui disposant de l'URL ouvre le site, sans mot de passe | **la fusion sur `main`.** Rien ne protège l'accès : `foncier-juste.vercel.app` est ouvert |
+| **Indexé** | les moteurs le référencent et amènent du trafic | `noindex` sur 12 pages et `Disallow: /` |
+| **Commercialisé** | le site vend quelque chose | rien : plus aucun parcours de paiement |
+
+**La correction importante par rapport à la version précédente de ce
+document&nbsp;:** j'y présentais le maintien de `noindex` comme ce qui rendait
+l'absence de mentions légales acceptable. C'était faux. `noindex` et
+`Disallow: /` empêchent le référencement, **ils ne rendent pas le site privé**.
+Une fusion sur `main` met la refonte en ligne, accessible par son adresse, et
+les obligations d'identification d'un éditeur s'appliquent à ce moment-là — pas
+au moment de l'ouverture aux moteurs.
+
+### À compléter AVANT la fusion
+
+Ce sont les informations que l'article 1-1, I de la LCEN demande à un éditeur
+professionnel de mettre à disposition du public, et le contact que l'article 13
+du RGPD exige dès lors que des données sont traitées — ici les journaux de
+l'hébergeur, qui contiennent des adresses IP.
+
+| À fournir | Emplacement | Pourquoi avant la fusion |
+|---|---|---|
+| **Nom et prénoms** | `mentions-legales.html:40` | LCEN art. 1-1, I, 1° |
+| **Adresse** (domicile ou domiciliation) | `mentions-legales.html:42` | LCEN art. 1-1, I, 1° |
+| **Téléphone** | `mentions-legales.html:43` | LCEN art. 1-1, I, 1° — explicitement exigé depuis la loi du 21 mai 2024 |
+| **Directeur de la publication** | `mentions-legales.html:45` | LCEN art. 1-1, I, 3° |
+| **Email de contact** | `mentions-legales.html:44`, `confidentialite.html` | exercice des droits RGPD (art. 13) ; c'est aussi le contact de l'éditeur |
+
+Le bandeau « brouillon non finalisé » de la page mentions légales dit
+honnêtement que le document n'est pas valable. **Il ne remplace pas les
+informations manquantes** : un avertissement n'est pas une identification.
+
+### À compléter dès l'immatriculation, pas avant la fusion
+
+| À fournir | Emplacement | Quand |
+|---|---|---|
+| **Statut juridique** | `mentions-legales.html:40` | dès qu'il existe |
+| **SIRET** | `mentions-legales.html:41` | dès l'immatriculation — l'article 1-1 demande le numéro d'inscription « le cas échéant » |
+
+### Seulement s'il y a de nouveau une vente
+
+| À fournir | Emplacement |
+|---|---|
+| **Régime de TVA** | `cgv.html:49` |
+| **Médiateur de la consommation** | `cgv.html:78` |
+| **Email de réclamation** | `cgv.html:74` |
+
+Ces trois-là ne bloquent pas la mise en ligne d'un site gratuit. Les CGV
+décrivent une offre retirée&nbsp;; leur bandeau le dit.
+
+### Et le reste
 
 1. **Le test Prolific de l'ancien site doit être terminé.** La fusion change le
-   parcours testé ; tant que l'étude tourne, les réponses porteraient sur deux
-   versions différentes.
+   parcours testé.
 2. **La prévisualisation doit avoir été examinée.**
-3. **Les mentions légales** restent incomplètes : voir la section 6.
 
 ## 3. La fusion
 
@@ -141,18 +195,18 @@ la fusion. **Git et Vercel sont alors de nouveau d'accord**, et c'est le seul
   l'interface ; `api/create-checkout-session.js` et `verify-session.js` restent
   en place mais ne sont appelés par aucune page.
 - **Elle n'ouvre pas le site aux moteurs de recherche.** Voir la section 7.
-- **Elle ne complète pas les mentions légales.** Onze emplacements attendent
-  encore neuf informations distinctes : nom, statut juridique, SIRET, adresse,
-  téléphone, email (à trois endroits), directeur de la publication, régime de
-  TVA, médiateur de la consommation.
+- **Mais elle rend le site accessible à quiconque connaît l'adresse.** C'est
+  pourquoi les cinq informations de la section 2 doivent être en place avant, et
+  non avant l'ouverture aux moteurs.
 
 ## 7. Ouvrir le site aux moteurs — préparé, pas activé
 
 L'état actuel (`noindex` sur **12 pages** et `Disallow: /` dans `robots.txt`)
-empêche tout trafic organique. C'est délibéré : un site indexé dont les mentions
-légales sont incomplètes s'expose plus qu'un site fermé, et une indexation sous
-le nom provisoire « Dépense·Juste » sur le domaine `foncier-juste.vercel.app`
-créerait des adresses qu'il faudrait ensuite faire oublier aux moteurs.
+empêche tout trafic organique. Ce n'est pas une mesure de confidentialité — le
+site reste accessible par son adresse — mais un choix de calendrier : une
+indexation sous le nom provisoire « Dépense·Juste » et sur le domaine
+`foncier-juste.vercel.app` créerait des adresses qu'il faudrait ensuite faire
+oublier aux moteurs, ce qui prend des mois.
 
 **Quatre conditions à réunir avant d'ouvrir**, dans cet ordre :
 
@@ -189,11 +243,12 @@ Console du domaine.
 commande 1 ci-dessus les décocherait aussi, il faut donc les exclure ou les
 remettre ensuite.
 
-## 8. Ce qui empêche aujourd'hui une publication publique complète
+## 8. Ce qui bloque, et à quel moment
 
-| Blocage | Qui peut le lever |
-|---|---|
-| Mentions légales incomplètes — neuf informations manquantes | toi, dont quatre après immatriculation |
-| Aucun médiateur de la consommation désigné (art. L616-1 c. conso., amende jusqu'à 3 000 €) | toi, après immatriculation ; adhésion payante |
-| Nom et domaine non arrêtés | toi |
-| Test Prolific en cours sur l'ancienne version | le calendrier de l'étude |
+| Blocage | Empêche quoi | Qui peut le lever |
+|---|---|---|
+| Cinq informations d'éditeur manquantes — nom, adresse, téléphone, directeur de la publication, email | **la fusion**, puisqu'elle rend le site accessible au public | toi, aucune ne dépend de l'immatriculation |
+| Statut juridique et SIRET | rien tant que l'activité n'est pas immatriculée ; à ajouter dès qu'elle l'est | le guichet unique INPI, puis toi |
+| Aucun médiateur de la consommation (art. L616-1 c. conso.) | une reprise des ventes, pas la mise en ligne gratuite | toi, après immatriculation ; adhésion payante |
+| Nom et domaine non arrêtés | l'ouverture aux moteurs | toi |
+| Test Prolific en cours | le changement de production | le calendrier de l'étude |
