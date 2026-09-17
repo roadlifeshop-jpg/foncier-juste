@@ -219,10 +219,12 @@ function pistes(ligne, aujourdhui) {
     if (ligne.categorie === 'telecom' && eng.dureeMois > 12) {
       out.push({
         type: 'verification', regle: 'engagement-telecom',
-        titre: eng.apresDouziemeMois ? "Vous avez dépassé le douzième mois" : `Repère du douzième mois : ${eng.finDouziemeMois.toLocaleDateString('fr-FR')}`,
+        titre: eng.apresDouziemeMois
+          ? `Douzième mois dépassé depuis le ${eng.finDouziemeMois.toLocaleDateString('fr-FR')}`
+          : `Repère du douzième mois : ${eng.finDouziemeMois.toLocaleDateString('fr-FR')}`,
         texte: eng.apresDouziemeMois
-          ? "Pour un contrat de communications électroniques engagé plus de douze mois, la loi encadre ce qui reste dû après le douzième mois. Vérifiez le décompte que vous propose l'opérateur : il se contrôle."
-          : "Avant ce repère, la totalité des mensualités restantes peut vous être réclamée. Après, la loi encadre ce qui reste dû.",
+          ? "Pour un engagement de 24 mois rompu sans motif légitime, la règle est la suivante : toutes les mensualités restant dues jusqu'à la fin des douze premiers mois, puis 25 % des mensualités restant dues au-delà. Vous êtes dans la seconde période. Nous ne chiffrons pas la somme : elle dépend de votre motif de résiliation, du détail de vos mensualités et des frais propres à votre opérateur. Demandez le décompte par écrit et confrontez-le à cette règle."
+          : "Avant la fin du douzième mois, la totalité des mensualités restant dues sur cette première période peut vous être réclamée ; seule la fraction postérieure au douzième mois bénéficie de la réduction à 25 %. Plusieurs situations suppriment tout frais : motif légitime, modification du contrat par l'opérateur, dysfonctionnement durable du service.",
       });
     }
   } else if (eng && eng.termine) {

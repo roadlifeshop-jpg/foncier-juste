@@ -127,7 +127,8 @@
             <label for="commune">Commune</label>
             <input type="text" id="commune" list="communes-list" placeholder="Tapez les premières lettres…" autocomplete="off" spellcheck="false">
             <datalist id="communes-list"></datalist>
-            <div class="aide" id="commune-hint">Chargement des communes couvertes…</div>
+            <div class="aide" id="commune-hint">Tapez les premières lettres de votre commune.</div>
+            <div class="encart" id="avis-couverture" hidden></div>
           </div>
           <div class="champ">
             <label for="type_local">Type de bien</label>
@@ -357,19 +358,35 @@
       le local de référence retenu pour votre commune. Ce sont deux sources d'erreur réelles que nous ne
       savons pas contrôler automatiquement&nbsp;; le résultat vous invite à les vérifier vous-même.</p>
 
-      <h3 id="couverture">Couverture&nbsp;: 20 départements, et ce qui en dépend exactement</h3>
-      <p>Le questionnaire ne propose que les communes de 20 départements — 06, 13, 21, 30, 31, 33, 34, 35,
-      38, 42, 44, 49, 51, 59, 63, 69, 72, 75, 76 et 83, soit 7&nbsp;134 communes. Hors de ces
-      départements, la première étape ne peut pas être validée.</p>
-      <p><b>Pourquoi cette limite.</b> La liste des communes est construite à partir de nos données de
-      marché (DVF 2024). Or ces données ne servent qu'à <b>une seule chose</b>&nbsp;: le repère de prix
-      affiché en marge du résultat, qui n'est jamais un motif de réclamation. <b>Les deux contrôles qui
-      comptent — l'écart de surface et les éléments de confort disparus — n'en dépendent pas&nbsp;:</b>
-      ils se calculent uniquement à partir de vos réponses et de votre fiche.</p>
-      <p>La limite est donc celle du référentiel de communes, pas celle du diagnostic. L'étendre suppose
-      d'embarquer la liste nationale des communes. Les règles appliquées, elles, valent partout en France
-      métropolitaine sauf dans le Bas-Rhin, le Haut-Rhin et la Moselle, où le régime du Livre foncier
-      diffère.</p>
+      <h3 id="couverture">Couverture&nbsp;: toute la France, avec un repère de prix limité</h3>
+      <p>Le questionnaire accepte <b>34 917 communes</b>&nbsp;: la France métropolitaine, la Corse et les
+      cinq départements et régions d'outre-mer. Les collectivités à fiscalité propre — Saint-Pierre-et-
+      Miquelon, Saint-Barthélemy, Saint-Martin, la Polynésie française, la Nouvelle-Calédonie,
+      Wallis-et-Futuna et les Terres australes — n'y figurent pas&nbsp;: la taxe foncière de l'État n'y
+      est pas applicable, ce n'est donc pas un manque de couverture mais un hors-champ.</p>
+      <p><b>Trois niveaux, dits en clair avant l'étape des surfaces&nbsp;:</b></p>
+      <ul>
+        <li><b>Diagnostic complet avec repère de prix</b> — 7 120 communes de 20 départements (06, 13, 21,
+        30, 31, 33, 34, 35, 38, 42, 44, 49, 51, 59, 63, 69, 72, 75, 76, 83), celles où des ventes ont été
+        enregistrées dans le fichier DVF 2024.</li>
+        <li><b>Diagnostic complet sans repère de prix</b> — toutes les autres communes de métropole et de
+        Corse. C'est le cas le plus fréquent, et il ne retire rien d'essentiel&nbsp;: les deux contrôles
+        qui comptent ne dépendent pas de DVF.</li>
+        <li><b>Diagnostic complet, particularités locales non vérifiées</b> — Bas-Rhin, Haut-Rhin,
+        Moselle (droit local d'Alsace-Moselle) et les cinq départements d'outre-mer. Nous appliquons les
+        règles du régime général sans avoir contrôlé les dispositions propres à ces territoires&nbsp;;
+        l'outil le signale à l'écran, et le résultat y est à confirmer localement.</li>
+      </ul>
+      <p><b>Ce qui dépend vraiment des données de marché.</b> Une seule chose&nbsp;: le repère de prix au
+      m² affiché en marge du résultat, qui n'est jamais un motif de réclamation — la taxe foncière repose
+      sur une valeur locative de 1970 revalorisée, pas sur les prix actuels. L'écart entre la surface de
+      votre fiche et votre surface mesurée, ainsi que les éléments de confort qui n'existent plus, se
+      calculent sans aucune donnée extérieure.</p>
+      <p>Les règles appliquées (articles 324 L à 324 V de l'annexe III au code général des impôts) sont
+      nationales. Le référentiel de communes provient de l'<a href="https://geo.api.gouv.fr" target="_blank" rel="noopener">API
+      Découpage administratif de l'État</a>, fondée sur le Code officiel géographique 2026 de l'Insee, et
+      les codes postaux de la base officielle de La Poste diffusée par la même API — le COG seul n'en
+      contient aucun. Relevé le 17 septembre 2026.</p>
     </div>
   </section>
 
@@ -420,11 +437,10 @@
         </ul>
       </div>
     </div>
-    <p class="fine"><b>Couverture de l'outil taxe foncière&nbsp;:</b> 20 départements — Paris, Lyon,
-    Marseille, Nice, Toulouse, Nantes, Bordeaux, Lille, Rennes, Montpellier, Rouen et Le Havre, Reims,
-    Saint-Étienne, Toulon, Grenoble, Dijon, Angers, Nîmes, Clermont-Ferrand, Le Mans. Données de
-    marché&nbsp;: DVF 2024 (data.gouv.fr). Les départements du Bas-Rhin, du Haut-Rhin et de la Moselle
-    relèvent d'un régime distinct et ne sont pas couverts.</p>
+    <p class="fine"><b>Couverture de l'outil taxe foncière&nbsp;:</b> 34 917 communes — France
+    métropolitaine, Corse et départements d'outre-mer. Le repère de prix au m² n'est disponible que dans
+    20 départements (données DVF 2024, data.gouv.fr)&nbsp;; son absence ne limite pas le diagnostic.
+    <a href="#couverture">Détail des trois niveaux de couverture</a>.</p>
     <p class="fine">Service d'information gratuit. Ne constitue ni un conseil juridique ou fiscal
     personnalisé, ni une garantie de résultat.</p>
   </div>
@@ -450,26 +466,112 @@ function track(evenement, meta = {}) {
 }
 track('page_vue');
 
-fetch('communes.json').then(r => r.json()).then(communes => {
-  const list = document.getElementById('communes-list');
-  const frag = document.createDocumentFragment();
-  // Une entrée par code postal : une commune en a souvent plusieurs
-  // (Grenoble = 38000 ET 38100, Nantes en a quatre).
-  communes.forEach(c => {
-    (c.codes_postaux || []).forEach(cp => {
-      const label = `${c.commune} (${cp})`;
-      communesIndex.set(label, { ...c, code_postal_choisi: cp });
-      const opt = document.createElement('option');
-      opt.value = label;
-      frag.appendChild(opt);
+/* =========================================================================
+   Référentiel des communes — TOUTE LA FRANCE.
+   -------------------------------------------------------------------------
+   Sources : API Découpage administratif de l'État (geo.api.gouv.fr), fondée
+   sur le Code officiel géographique 2026 de l'Insee, et base officielle des
+   codes postaux de La Poste diffusée par la même API. Relevé le 17/09/2026.
+   Le COG seul ne contient aucun code postal : c'est pourquoi la
+   correspondance commune / code postal vient de la base La Poste.
+
+   Deux choix de mise en œuvre, qui expliquent la forme du fichier :
+
+   1. CHARGEMENT DIFFÉRÉ. Le fichier pèse 1,5 Mo (≈ 440 Ko compressés). Il
+      n'est demandé qu'au clic sur « Commencer », pas au chargement de la
+      page : personne ne paie ce téléchargement pour lire l'accueil.
+
+   2. LISTE FILTRÉE À LA SAISIE. 34 917 communes donnent près de 50 000
+      libellés « Commune (code postal) ». Les injecter tous dans un
+      <datalist> fige le navigateur ; on n'y met donc que les correspondances
+      de ce que l'utilisateur tape, au plus 60. L'index complet, lui, reste
+      en mémoire : c'est lui qui résout la saisie, y compris tapée à la main.
+   ========================================================================= */
+let communesChargees = null;   // promesse, pour ne charger qu'une fois
+const sansAccent = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+let rechercheIndex = [];       // [{cle, label}] pour le filtrage
+
+function chargerCommunes(){
+  if (communesChargees) return communesChargees;
+  const hint = document.getElementById('commune-hint');
+  hint.textContent = 'Chargement de la liste des communes…';
+  communesChargees = fetch('communes.json').then(r => {
+    if (!r.ok) throw new Error('indisponible');
+    return r.json();
+  }).then(data => {
+    const depts = data.d || {};
+    data.c.forEach(([nom, code, cps, dept, drap]) => {
+      cps.forEach(cp => {
+        const label = `${nom} (${cp})`;
+        communesIndex.set(label, {
+          commune: nom, code_commune: code, codes_postaux: cps, code_dept: dept,
+          dept_nom: depts[dept] || '', code_postal_choisi: cp,
+          marche: (drap & 1) === 1, aVerifier: (drap & 2) === 2,
+        });
+        rechercheIndex.push({ cle: sansAccent(label), label });
+      });
     });
+    hint.style.color = '';
+    hint.textContent = `${data.c.length.toLocaleString('fr-FR')} communes, toute la France métropolitaine, la Corse et les départements d'outre-mer.`;
+    return true;
+  }).catch(() => {
+    communesChargees = null;   // on pourra réessayer
+    hint.style.color = 'var(--alert)';
+    hint.textContent = "Impossible de charger la liste des communes. Vérifiez votre connexion et réessayez dans un instant.";
+    throw new Error('communes indisponibles');
   });
-  list.appendChild(frag);
-  document.getElementById('commune-hint').textContent =
-    `${communes.length} communes couvertes, réparties sur 20 départements.`;
-}).catch(() => {
-  document.getElementById('commune-hint').textContent =
-    "Impossible de charger la liste des communes. Rechargez la page dans un instant.";
+  return communesChargees;
+}
+
+/* Ce que la commune choisie change, et ce qu'elle ne change pas. Affiché
+   avant l'étape des surfaces, pour qu'une absence de repère de marché ne soit
+   pas découverte au moment du résultat. */
+function majAvisCouverture(){
+  const boite = document.getElementById('avis-couverture');
+  if (!communeChoisie){ boite.hidden = true; return; }
+  const messages = [];
+  if (!communeChoisie.marche){
+    messages.push(`<p><b>Pas de repère de prix pour ${communeChoisie.commune}.</b> Nos données de ventes
+      (DVF 2024) ne couvrent que 20 départements, et seulement les communes où des ventes ont été
+      enregistrées. <b>Cela ne limite en rien le diagnostic&nbsp;:</b> l'écart de surface et les éléments
+      de confort disparus se calculent uniquement à partir de vos réponses et de votre fiche. Vous
+      n'aurez simplement pas l'indication de prix au m² affichée en marge du résultat.</p>`);
+  }
+  if (communeChoisie.aVerifier){
+    messages.push(`<p><b>Particularités locales non vérifiées.</b> ${communeChoisie.dept_nom} relève de
+      dispositions propres — droit local d'Alsace-Moselle, ou régime des départements d'outre-mer — que
+      nous n'avons pas contrôlées. Les règles que nous appliquons sont celles du régime général du Code
+      général des impôts. Traitez le résultat comme une piste à confirmer auprès de votre service des
+      impôts fonciers.</p>`);
+  }
+  boite.className = communeChoisie.aVerifier ? 'encart prudence' : 'encart';
+  boite.innerHTML = messages.join('');
+  boite.hidden = !messages.length;
+}
+
+/* Filtrage : les correspondances par début de nom d'abord, puis celles qui
+   contiennent la saisie. Au plus 60 propositions. */
+let minuteurFiltre = null;
+function filtrerCommunes(){
+  const champ = document.getElementById('commune');
+  const list = document.getElementById('communes-list');
+  const q = sansAccent(champ.value.trim());
+  if (q.length < 2){ list.replaceChildren(); return; }
+  const debut = [], dedans = [];
+  for (const e of rechercheIndex){
+    if (e.cle.startsWith(q)) { if (debut.length < 60) debut.push(e.label); }
+    else if (dedans.length < 60 && e.cle.includes(q)) dedans.push(e.label);
+    if (debut.length >= 60) break;
+  }
+  const frag = document.createDocumentFragment();
+  [...debut, ...dedans].slice(0, 60).forEach(label => {
+    const o = document.createElement('option'); o.value = label; frag.appendChild(o);
+  });
+  list.replaceChildren(frag);
+}
+document.getElementById('commune').addEventListener('input', () => {
+  clearTimeout(minuteurFiltre);
+  minuteurFiltre = setTimeout(filtrerCommunes, 90);
 });
 
 /* =========================================================================
@@ -491,6 +593,7 @@ function showStep(i){
   renderProgress();
 }
 function demarrer(){
+  chargerCommunes().catch(() => {});   // le message d'erreur s'affiche dans l'aide du champ
   $('diagnostic').hidden = false;
   $('resultats').hidden = true;
   current = 0; showStep(current);
@@ -597,13 +700,16 @@ $('next-btn').addEventListener('click', async () => {
       $('commune').focus();
       return;
     }
-    // Confirme ce qui a été compris : 87 communes de la base portent un nom
-    // partagé avec une commune d'un autre département.
+    // Confirme ce qui a été compris : plusieurs centaines de communes
+    // partagent leur nom avec une commune d'un autre département.
     hint.style.color = 'var(--ok)';
     hint.textContent = communeChoisie.dept_nom
-      ? `${communeChoisie.commune} — ${communeChoisie.dept_nom}`
+      ? `${communeChoisie.commune} — ${communeChoisie.dept_nom} (${communeChoisie.code_dept})`
       : communeChoisie.commune;
-    statsPourDepartement(communeChoisie.code_dept).catch(() => {});
+    // Le repère de marché n'est demandé que là où les données DVF existent
+    // pour CETTE commune : le moteur ne retombe pas sur le département.
+    if (communeChoisie.marche) statsPourDepartement(communeChoisie.code_dept).catch(() => {});
+    majAvisCouverture();
   }
   if (current === 1 && !controlerEtape2()) return;
 
@@ -636,8 +742,14 @@ function lireEntree(){
 async function runDiagnostic(){
   const entree = lireEntree();
   let stats = null;
-  try { stats = await statsPourDepartement(entree.cd); }
-  catch (e) { /* département sans données : on continue sans repère de marché */ }
+  // Le repère de marché est un CONFORT, jamais un motif fiscal. Son absence
+  // ne change rien aux deux contrôles qui comptent — écart de surface et
+  // éléments de confort disparus — qui ne dépendent que de vos réponses.
+  // `moteur.js` accepte `stats = null` : rien n'y est modifié.
+  if (communeChoisie && communeChoisie.marche){
+    try { stats = await statsPourDepartement(entree.cd); }
+    catch (e) { /* données indisponibles : on continue sans repère */ }
+  }
   dernierDiagnostic = calculerDiagnostic(entree, stats);
   renderResults(dernierDiagnostic);
 }
@@ -786,11 +898,25 @@ function renderResults(d){
   ];
   $('faits-donnees').innerHTML = faits.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
 
-  // 9 — Contexte de marché : dans la colonne latérale, car ce n'est pas un motif
-  $('contexte-carte').hidden = !contexte.length;
-  $('contexte-marche').innerHTML = contexte.map(a =>
-    `<p class="recap-vide"><b>${echappe(a.titre)}</b><br>${echappe(a.figure)}<br>
-     <span style="font-size:.85rem">${echappe(a.aVerifier)}</span></p>`).join('');
+  // 9 — Contexte de marché : dans la colonne latérale, car ce n'est pas un
+  //     motif. Quand il manque, on l'explique plutôt que de masquer la carte :
+  //     une absence silencieuse se lit comme un oubli.
+  $('contexte-carte').hidden = false;
+  $('contexte-marche').innerHTML = contexte.length
+    ? contexte.map(a =>
+        `<p class="recap-vide"><b>${echappe(a.titre)}</b><br>${echappe(a.figure)}<br>
+         <span style="font-size:.85rem">${echappe(a.aVerifier)}</span></p>`).join('')
+    : (communeChoisie && communeChoisie.marche
+        // Commune couverte par DVF, mais aucune vente comparable : ce n'est pas
+        // un défaut de couverture, et le dire ainsi serait faux.
+        ? `<p class="recap-vide"><b>Aucune vente comparable.</b> Votre commune figure bien dans nos
+           données, mais aucune vente de ce type de bien, dans cette gamme de surface, n'y a été
+           enregistrée en 2024 — c'est fréquent pour une maison en centre-ville dense, ou pour une
+           surface atypique. <b>Aucun élément du résultat ci-contre n'en dépend.</b></p>`
+        : `<p class="recap-vide"><b>Indisponible pour cette commune.</b> Nos données de ventes (DVF 2024)
+           couvrent 20 départements, et seulement les communes où des ventes ont été enregistrées.
+           <b>Aucun élément du résultat ci-contre n'en dépend</b>&nbsp;: ce repère sert uniquement à
+           situer votre bien dans son marché, et n'a jamais valeur de motif de réclamation.</p>`);
 
   // 10 — Statut de chaque élément, visible en permanence.
   //      Deux participants du sondage avaient compris l'inverse l'un de

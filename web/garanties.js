@@ -109,10 +109,10 @@ function orienter(r, aujourdhui) {
         ? `Dans le délai de deux ans de la garantie légale de conformité`
         : `Au-delà des deux ans de la garantie légale de conformité`,
       texte: dansDeuxAns
-        ? `Il reste environ ${24 - mois} mois. ${dansPresomption
-            ? `Vous êtes aussi dans la fenêtre de présomption (${presomptionMois} mois pour un bien ${neuf ? 'neuf' : "d'occasion"}) : c'est au vendeur de prouver que le défaut ne venait pas de la délivrance.`
-            : `La fenêtre de présomption (${presomptionMois} mois) est en revanche dépassée : il vous faudra établir que le défaut existait déjà à la délivrance.`}`
-        : `Cette voie paraît fermée d'après la date saisie. Deux autres restent à regarder : une garantie commerciale éventuelle, et le vice caché, dont le délai se compte à partir de la découverte et non de l'achat.`,
+        ? `Il reste environ ${24 - mois} mois sur les deux ans, durée identique que le bien soit neuf, reconditionné ou d'occasion. ${dansPresomption
+            ? `Vous êtes aussi dans la fenêtre de présomption d'antériorité, qui dure ${presomptionMois} mois pour un bien ${neuf ? 'neuf' : "d'occasion"} : vous n'avez rien à prouver, c'est au vendeur de démontrer que le défaut n'existait pas à la délivrance.`
+            : `La présomption d'antériorité, elle, est terminée : elle ne durait que ${presomptionMois} mois pour un bien ${neuf ? 'neuf' : "d'occasion"}, et vous êtes à ${mois} mois. La garantie reste ouverte, mais la preuve a changé de camp : c'est désormais à vous d'établir que le défaut existait déjà lors de la vente.`}`
+        : `Cette voie paraît fermée d'après la date saisie : les deux ans sont écoulés. Deux autres restent à regarder : une garantie commerciale éventuelle, et le vice caché, dont le délai se compte à partir de la découverte et non de l'achat.`,
     });
   }
 
@@ -149,10 +149,12 @@ function orienter(r, aujourdhui) {
     const dansPresomption = mois < presomptionMois;
     voies.push({
       priorite: 2, regle: 'conformite-duree',
-      titre: "Garantie légale de conformité — à faire jouer auprès du vendeur",
+      titre: dansPresomption
+        ? "Garantie légale de conformité — c'est au vendeur de prouver"
+        : "Garantie légale de conformité — ouverte, mais la preuve vous incombe",
       texte: `Elle s'exerce auprès du VENDEUR, pas du fabricant, et elle est gratuite. Vous choisissez entre la réparation et le remplacement ; le vendeur peut imposer l'autre solution si votre choix lui coûte manifestement plus cher. ${dansPresomption
-        ? "Dans la fenêtre de présomption, vous n'avez pas à démontrer que le défaut est antérieur."
-        : "Hors fenêtre de présomption, préparez de quoi montrer que le défaut existait déjà à la délivrance : photos datées, constat d'un réparateur, nature de la panne."}`,
+        ? `Vous êtes dans les ${presomptionMois} mois de présomption : vous n'avez pas à démontrer que le défaut est antérieur à la vente. Un vendeur qui vous le réclame vous demande une preuve que la loi ne met pas à votre charge.`
+        : `Les ${presomptionMois} mois de présomption sont passés. Préparez de quoi montrer que le défaut existait déjà à la délivrance : constat d'un réparateur décrivant l'origine de la panne, photos datées, nature du défaut. C'est la pièce qui fait basculer un dossier à ce stade.`}`,
     });
     if (dansPresomption) voies.push({ priorite: 3, regle: 'conformite-presomption', titre: null, texte: null });
     voies.push({ priorite: 6, regle: 'conformite-extension-reparation',
@@ -197,7 +199,9 @@ function orienter(r, aujourdhui) {
   limites.push("Ce site n'a accès à aucun dossier : tout ce qui précède découle uniquement de ce que vous venez de saisir.");
   limites.push("Nous ne pouvons pas dire si votre demande aboutira. La cause réelle d'une panne, le contenu exact de votre contrat et l'état du bien ne sont pas connus de nous.");
   if (r.etat === 'occasion' && pro) {
-    limites.push("Pour un bien d'occasion vendu par un professionnel, la présomption ne dure que douze mois. Le délai de deux ans, lui, reste ouvert.");
+    limites.push(mois < 12
+      ? "Pour un bien d'occasion, la présomption d'antériorité ne dure que douze mois — contre vingt-quatre pour un bien neuf. Passé ce délai, la garantie de deux ans reste ouverte mais c'est à vous de prouver l'antériorité du défaut."
+      : "Pour un bien d'occasion, la présomption d'antériorité s'est arrêtée au douzième mois. La garantie de deux ans reste ouverte : ce n'est pas la voie qui se ferme, c'est la charge de la preuve qui se déplace vers vous.");
   }
 
   voies.sort((a, b) => a.priorite - b.priorite);

@@ -29,6 +29,12 @@ SCRIPT_TESTS = r"""
   });
   const vrai = (nom, v) => T.push({ nom, ok: v === true, obtenu: v, attendu: true });
   const AUJ = new Date(2026, 8, 17);           // 17 septembre 2026, heure locale
+  const reculeMois = (d, n) => {
+    const x = new Date(d.getFullYear(), d.getMonth() - n, 1);
+    const dernier = new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate();
+    x.setDate(Math.min(d.getDate(), dernier));
+    return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
+  };
   const iso = d => d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` : null;
 
   /* ---------------- Montants ---------------- */
@@ -146,7 +152,8 @@ SCRIPT_TESTS = r"""
   eq("occasion, pro, 18 mois", rocc.mois, 18);
   vrai("occasion 18 mois : garantie ouverte mais présomption dépassée",
        rocc.voies.some(v => v.regle === 'conformite-duree') && !rocc.voies.some(v => v.regle === 'conformite-presomption'));
-  vrai("occasion : limite sur les 12 mois signalée", rocc.limites.some(l => /douze mois/.test(l)));
+  vrai("occasion : limite sur les 12 mois signalée",
+       rocc.limites.some(l => /douze mois|douzième mois/.test(l)));
 
   const rpart = orienter({ ...base, etat:'occasion', vendeur:'particulier', dateAchat:'2024-01-10' }, AUJ);
   vrai("entre particuliers : pas de garantie de conformité",
@@ -179,6 +186,67 @@ SCRIPT_TESTS = r"""
   eq("statut de la directive dans le registre", REGLES['droit-reparation-ue'].statut, 'non-transpose');
   vrai("toute règle du registre porte une source et une date de vérification",
        Object.values(REGLES).every(r => r.source && r.source.url && /^\d{4}-\d{2}-\d{2}$/.test(r.verifiee)));
+
+
+  /* ---- Frontière du 12e au 13e mois : occasion chez un professionnel ----
+     C'est le point que le brief demande de fiabiliser : la garantie dure deux
+     ans dans les deux cas, seule la présomption change de durée. */
+  const occ = m => orienter({ categorie:'electro_grand', canal:'magasin', probleme:'panne_apres',
+                              etat:'occasion', vendeur:'pro', dateAchat: reculeMois(AUJ, m) }, AUJ);
+  const neu = m => orienter({ categorie:'electro_grand', canal:'magasin', probleme:'panne_apres',
+                              etat:'neuf', vendeur:'pro', dateAchat: reculeMois(AUJ, m) }, AUJ);
+  const aConformite = r => r.voies.some(v => v.regle === 'conformite-duree');
+  const aPresomption = r => r.voies.some(v => v.regle === 'conformite-presomption');
+
+  eq("occasion 11 mois : mois calculés", occ(11).mois, 11);
+  vrai("occasion 11 mois : garantie ouverte ET présomption active", aConformite(occ(11)) && aPresomption(occ(11)));
+  vrai("occasion 12 mois : garantie ouverte, présomption TERMINÉE", aConformite(occ(12)) && !aPresomption(occ(12)));
+  vrai("occasion 13 mois : garantie ouverte, présomption terminée", aConformite(occ(13)) && !aPresomption(occ(13)));
+  vrai("occasion 23 mois : garantie encore ouverte", aConformite(occ(23)));
+  vrai("occasion 24 mois : garantie fermée, vice caché proposé",
+       !aConformite(occ(24)) && occ(24).voies.some(v => v.regle === 'vices-caches'));
+  vrai("occasion 13 mois : le texte dit que la preuve change de camp",
+       /preuve a changé de camp|à vous d'établir/i.test(occ(13).faits.map(f => f.texte).join(' ')));
+  vrai("occasion 13 mois : la limite dit que la voie ne se ferme pas",
+       occ(13).limites.some(l => /charge de la preuve qui se déplace/i.test(l)));
+  vrai("occasion 11 mois : le texte dit que rien n'est à prouver",
+       /rien à prouver|au vendeur de démontrer/i.test(occ(11).faits.map(f => f.texte).join(' ')));
+  vrai("neuf 23 mois : présomption encore active", aPresomption(neu(23)));
+  vrai("neuf 24 mois : garantie fermée", !aConformite(neu(24)));
+  vrai("la durée de deux ans est annoncée identique quel que soit l'état",
+       /neuf, reconditionné ou d'occasion/i.test(occ(11).faits.map(f => f.texte).join(' ')));
+
+  /* ---- Règle télécom : deux périodes, aucun montant affiché -------------- */
+  const tel = (debut, duree) => pistes({ periodicite:'mensuelle', montant: 2499, categorie:'telecom',
+                                          engagementDebut: debut, engagementMois: duree }, AUJ);
+  const t24 = tel(reculeMois(AUJ, 18), 24);   // engagement de 24 mois, 18e mois
+  const t24tot = t24.map(p => p.titre + ' ' + p.texte).join(' ');
+  vrai("télécom 24 mois, après le 12e : règle des deux périodes citée",
+       /douze premiers mois/.test(t24tot) && /25 %/.test(t24tot));
+  vrai("télécom : aucun montant en euros n'est affiché", !/\d\s*€/.test(t24tot));
+  vrai("télécom : les motifs légitimes sont mentionnés quelque part",
+       /motif légitime/i.test(t24tot) || REGLES['engagement-telecom'].exceptions.some(e => /motif légitime/i.test(e)));
+  const t24avant = tel(reculeMois(AUJ, 5), 24);
+  vrai("télécom 24 mois, avant le 12e : la réduction n'est pas annoncée comme acquise",
+       /seule la fraction postérieure/.test(t24avant.map(p => p.texte).join(' ')));
+  const telDouze = tel(reculeMois(AUJ, 6), 12);
+  vrai("télécom 12 mois : pas de repère du 12e mois (l'article ne s'applique pas)",
+       !telDouze.some(p => p.regle === 'engagement-telecom'));
+  vrai("engagement non télécom : pas de règle télécom",
+       !pistes({ periodicite:'mensuelle', montant: 3500, categorie:'sport',
+                 engagementDebut: reculeMois(AUJ, 18), engagementMois: 24 }, AUJ)
+          .some(p => p.regle === 'engagement-telecom'));
+
+  /* ---- Registre : les trois règles fiabilisées --------------------------- */
+  vrai("règle télécom : source Service-Public et source secondaire Légifrance",
+       /service-public/.test(REGLES['engagement-telecom'].source.url) &&
+       /legifrance/.test(REGLES['engagement-telecom'].source_secondaire.url));
+  vrai("règle télécom : dit explicitement qu'aucun montant n'est chiffré",
+       REGLES['engagement-telecom'].exceptions.some(e => /ne chiffre pas/i.test(e)));
+  vrai("règle présomption : annonce la bascule de la preuve",
+       /c'est à vous d'établir/i.test(REGLES['conformite-presomption'].titre));
+  vrai("règle durée : annonce les deux ans quel que soit l'état",
+       /neuf, reconditionné ou d'occasion/i.test(REGLES['conformite-duree'].titre));
 
   return T;
 }

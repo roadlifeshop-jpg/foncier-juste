@@ -28,31 +28,37 @@ const REGLES = {
   /* ------------------------------------------------------------------ */
 
   'conformite-duree': {
-    titre: "Le vendeur professionnel répond des défauts de conformité qui apparaissent dans les deux ans suivant la délivrance du bien.",
+    titre: "Le vendeur professionnel répond des défauts de conformité qui apparaissent dans les deux ans suivant la délivrance du bien. Ce délai de deux ans est le même que le bien soit neuf, reconditionné ou d'occasion.",
     texte: "Article L217-3 du code de la consommation",
-    source: { nom: 'Légifrance — code de la consommation, section « Garantie légale de conformité »',
-              url: 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069565/LEGISCTA000032221271/' },
+    source: { nom: 'Service-Public — Achat d\'un produit : garantie légale de conformité (fiche F11094)',
+              url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F11094' },
+    source_secondaire: { nom: 'Légifrance — code de la consommation, section « Garantie légale de conformité »',
+                         url: 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069565/LEGISCTA000032221271/' },
     statut: 'en vigueur',
     applicable: '2022-01-01',
     verifiee: '2026-09-17',
     concerne: "L'acheteur consommateur, auprès d'un vendeur professionnel. Elle ne s'applique pas entre deux particuliers.",
     exceptions: [
       "Le délai court à compter de la délivrance, pas de la commande.",
+      "Ne confondez pas cette durée de deux ans avec la présomption d'antériorité, plus courte pour un bien d'occasion : la garantie reste ouverte après la fin de la présomption, mais la preuve change de camp.",
       "La garantie couvre un défaut de conformité, pas une casse, une usure normale ou une mauvaise utilisation.",
     ],
   },
 
   'conformite-presomption': {
-    titre: "Pendant 24 mois pour un bien neuf et 12 mois pour un bien d'occasion, le défaut est présumé exister depuis la délivrance : c'est au vendeur de prouver le contraire.",
+    titre: "Pendant 24 mois pour un bien neuf et 12 mois pour un bien d'occasion, le défaut est présumé exister depuis la délivrance : vous n'avez rien à prouver, c'est au vendeur de démontrer le contraire. Passé ce délai, la garantie reste ouverte jusqu'à deux ans, mais c'est à vous d'établir que le défaut existait déjà lors de la vente.",
     texte: "Article L217-7 du code de la consommation",
-    source: { nom: 'Légifrance — code de la consommation, article L217-7',
-              url: 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069565/LEGISCTA000032221271/' },
+    source: { nom: 'Service-Public — Achat d\'un produit : garantie légale de conformité (fiche F11094)',
+              url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F11094' },
+    source_secondaire: { nom: 'Légifrance — code de la consommation, article L217-7',
+                         url: 'https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069565/LEGISCTA000032221271/' },
     statut: 'en vigueur',
     applicable: '2022-01-01',
     verifiee: '2026-09-17',
-    concerne: "L'acheteur consommateur, pendant la fenêtre de présomption.",
+    concerne: "L'acheteur consommateur, auprès d'un vendeur professionnel. Bien neuf : 24 mois. Bien d'occasion ou reconditionné : 12 mois.",
     exceptions: [
-      "Passé cette fenêtre, la garantie reste ouverte jusqu'à deux ans, mais c'est à l'acheteur d'établir que le défaut existait déjà à la délivrance.",
+      "Pour un bien d'occasion, le 13e mois change tout : la garantie de deux ans court toujours, mais la charge de la preuve passe du vendeur à vous.",
+      "Établir l'antériorité passe en pratique par un constat de réparateur décrivant l'origine de la panne, plus que par un courrier argumenté.",
       "La présomption tombe si le vendeur démontre que le défaut vient de l'usage.",
     ],
   },
@@ -151,18 +157,22 @@ const REGLES = {
   },
 
   'engagement-telecom': {
-    titre: "Pour un contrat de communications électroniques imposant plus de douze mois d'engagement, le consommateur peut résilier dès la fin du douzième mois ; il ne reste dû qu'une part des mensualités restantes — le quart dans le cas courant d'un engagement de 24 mois.",
+    titre: "Pour un engagement de 24 mois rompu sans motif légitime, l'abonné doit la totalité des mensualités restant dues jusqu'à la fin des douze premiers mois, puis 25 % des mensualités restant dues au-delà.",
     texte: "Article L224-28 du code de la consommation",
-    source: { nom: 'Légifrance — code de la consommation, article L224-28',
-              url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043545704' },
+    source: { nom: 'Service-Public — Résiliation d\'un abonnement de téléphonie ou d\'internet (fiche F22486)',
+              url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F22486' },
+    source_secondaire: { nom: 'Légifrance — code de la consommation, article L224-28',
+                         url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000043545704' },
     statut: 'en vigueur',
     applicable: null,
     verifiee: '2026-09-17',
-    concerne: "Le consommateur abonné à un service de communications électroniques — mobile, internet fixe — avec un engagement supérieur à douze mois.",
+    concerne: "L'abonné consommateur à un service de communications électroniques — mobile, internet fixe — engagé pour plus de douze mois. Les 25 % ne concernent que la fraction d'engagement postérieure au douzième mois.",
     exceptions: [
-      "Avant le treizième mois, la totalité des mensualités restantes peut être exigée.",
-      "Les frais de résiliation propres à l'opérateur s'ajoutent et se contestent séparément.",
-      "L'Arcep publie les modalités détaillées par opérateur.",
+      "Aucun frais n'est dû en cas de motif légitime : licenciement, hospitalisation prolongée, déménagement dans une zone non couverte, handicap ou maladie. Un justificatif est exigé, et la demande se fait de préférence par lettre recommandée.",
+      "Aucun frais n'est dû non plus si l'opérateur modifie le contrat — hausse tarifaire, suppression d'un service : vous disposez alors de quatre mois pour résilier.",
+      "Ni en cas de dysfonctionnement durable du service (coupures répétées, absence de réseau), après démarches restées infructueuses.",
+      "Les frais de résiliation propres à l'opérateur sont distincts de ce calcul et se contestent séparément.",
+      "Ce site ne chiffre pas la somme due : il faudrait connaître votre motif de résiliation, le détail de vos mensualités restantes et les frais de votre opérateur.",
     ],
   },
 
@@ -255,7 +265,9 @@ function citer(cle){
     <p style="margin-top:6px"><b>Qui est concerné :</b> ${echapper(r.concerne)}</p>
     ${r.exceptions && r.exceptions.length ? `<p style="margin-top:6px"><b>À savoir :</b></p>
       <ul style="margin-top:4px; font-size:.84rem">${r.exceptions.map(e => `<li>${echapper(e)}</li>`).join('')}</ul>` : ''}
-    <p class="maj" style="margin-top:8px"><a href="${echapper(r.source.url)}" target="_blank" rel="noopener">${echapper(r.source.nom)}</a> · vérifié le ${dateFr(r.verifiee)}</p>
+    <p class="maj" style="margin-top:8px"><a href="${echapper(r.source.url)}" target="_blank" rel="noopener">${echapper(r.source.nom)}</a>${
+      r.source_secondaire ? ` · <a href="${echapper(r.source_secondaire.url)}" target="_blank" rel="noopener">${echapper(r.source_secondaire.nom)}</a>` : ''
+    } · vérifié le ${dateFr(r.verifiee)}</p>
   </div>`;
 }
 
