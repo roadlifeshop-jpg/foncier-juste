@@ -165,23 +165,23 @@ function nouveauDocument(titre, sujet) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4', putOnlyUsedFonts: true });
   installerPolices(doc);
   doc.setProperties({
-    title: titre || 'Foncier·Juste',
+    title: titre || MARQUE,
     subject: sujet || 'Pré-diagnostic de taxe foncière',
-    author: 'Foncier·Juste',
-    creator: 'Foncier·Juste',
+    author: MARQUE,
+    creator: MARQUE,
   });
   return doc;
 }
 
 // Nom de fichier lisible par le destinataire : ni code INSEE, ni identifiant
-// technique. « Foncier-Juste_Dossier-de-verification_Nantes_2026-09-17.pdf ».
+// technique. « Depense-Juste_Dossier-de-verification_Nantes_2026-09-18.pdf ».
 function nomDeFichier(prefixe, d) {
   const sansAccent = (t) => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const maintenant = new Date();
   const jour = [maintenant.getFullYear(), String(maintenant.getMonth() + 1).padStart(2, '0'),
     String(maintenant.getDate()).padStart(2, '0')].join('-');
-  return `Foncier-Juste_${prefixe}_${sansAccent(d.commune.commune)}_${jour}.pdf`;
+  return `${MARQUE_FICHIER}_${prefixe}_${sansAccent(d.commune.commune)}_${jour}.pdf`;
 }
 
 // Remplace doc.save() : contrôle le document, puis déclenche le téléchargement.
@@ -206,9 +206,21 @@ function dessinerPiedDePage(doc, texte) {
   doc.text(doc.splitTextToSize(texte, 170), 20, 280);
 }
 
+// --------------------------------------------------------------------------
+// Nom affiché dans les documents.
+// --------------------------------------------------------------------------
+// PROVISOIRE. « Dépense·Juste » est le positionnement de travail, le temps de
+// vérifier la disponibilité d'un nom et d'un domaine. Il est défini ICI, une
+// seule fois : un renommage futur ne touche que ces deux lignes pour tout ce
+// qui est téléchargé — titres, en-têtes, pieds de page, propriétés du fichier
+// et nom du fichier lui-même. Les pages HTML sont listées dans
+// MISE-EN-LIGNE.md, section « Renommer le site ».
+const MARQUE = 'Dépense·Juste';
+const MARQUE_FICHIER = 'Depense-Juste';   // sans accent ni point médian
+
 const PIED_ANALYSE =
   "Document d'information établi à partir des seules réponses fournies par son destinataire et de données publiques " +
-  "(DVF, data.gouv.fr). Foncier·Juste n'a pas accès au dossier fiscal de l'usager, ne recalcule pas de valeur locative " +
+  `(DVF, data.gouv.fr). ${MARQUE} n'a pas accès au dossier fiscal de l'usager, ne recalcule pas de valeur locative ` +
   "cadastrale et ne garantit aucun résultat. Ce document ne constitue ni un conseil fiscal personnalisé, ni une " +
   "consultation juridique, ni une pièce officielle.";
 
@@ -266,7 +278,7 @@ function hauteurBloc(doc, lignes, margeGauche, largeur) {
 // --------------------------------------------------------------------------
 
 function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
-  const titre = exemple ? 'Foncier·Juste — Pré-diagnostic' : 'Foncier·Juste — Analyse détaillée';
+  const titre = exemple ? `${MARQUE} — Pré-diagnostic` : `${MARQUE} — Analyse détaillée`;
   const w = creerEcrivain(doc, 20, 170, { pied: PIED_ANALYSE, titreSuite: 'Analyse détaillée' });
   w.y = dessinerEnTete(doc, titre, { exemple });
 
@@ -398,7 +410,7 @@ function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
 
 function genererRapportPDF(d, opts = {}) {
   const exemple = opts.exemple !== false;
-  const doc = nouveauDocument(exemple ? 'Foncier·Juste — Pré-diagnostic' : 'Foncier·Juste — Analyse détaillée',
+  const doc = nouveauDocument(exemple ? `${MARQUE} — Pré-diagnostic` : `${MARQUE} — Analyse détaillée`,
     'Éléments de votre évaluation foncière qui méritent une vérification');
   dessinerPageAnalyse(doc, d, { exemple });
   enregistrerPDF(doc, nomDeFichier(exemple ? 'Exemple' : 'Analyse-detaillee', d));
@@ -410,11 +422,11 @@ function genererRapportPDF(d, opts = {}) {
 // --------------------------------------------------------------------------
 
 function genererApercuPDF(d) {
-  const doc = nouveauDocument('Foncier·Juste — Aperçu du dossier', 'Démonstration de format');
+  const doc = nouveauDocument(`${MARQUE} — Aperçu du dossier`, 'Démonstration de format');
   const w = creerEcrivain(doc, 20, 170, {
     pied: "Aperçu de format, sans valeur juridique. Les analyses et le projet de courrier ne figurent que dans le document complet.",
   });
-  w.y = dessinerEnTete(doc, 'Foncier·Juste — Aperçu du dossier', {
+  w.y = dessinerEnTete(doc, `${MARQUE} — Aperçu du dossier`, {
     sousTitre: 'Document de démonstration : le contenu est volontairement masqué.',
   });
 
@@ -523,7 +535,7 @@ function conseilsPieces(motifs) {
 function dessinerPageCourrier(doc, d) {
   doc.addPage();
   const w = creerEcrivain(doc, 20, 170, {
-    pied: "Projet de courrier à relire, compléter et signer. Foncier·Juste n'est pas un cabinet d'avocats ; ce texte ne constitue pas une consultation juridique et n'engage pas son destinataire sur l'issue de la démarche.",
+    pied: `Projet de courrier à relire, compléter et signer. ${MARQUE} n'est pas un cabinet d'avocats ; ce texte ne constitue pas une consultation juridique et n'engage pas son destinataire sur l'issue de la démarche.`,
     titreSuite: 'Projet de courrier',
   });
   w.y = dessinerEnTete(doc, 'Projet de courrier', {
@@ -732,7 +744,7 @@ function dessinerPageDemarche(doc, d) {
   w.ligne('6. Ce que cette démarche ne garantit pas', { taille: 12, style: 'bold', espace: 4 });
   w.ligne(
     "Aucune réclamation ne garantit un dégrèvement. L'administration peut confirmer son évaluation, la corriger " +
-    "partiellement, ou constater une insuffisance d'imposition. Foncier·Juste ne peut pas anticiper sa décision et " +
+    `partiellement, ou constater une insuffisance d'imposition. ${MARQUE} ne peut pas anticiper sa décision et ` +
     "ne vous promet aucun montant. Ce que ce dossier vous apporte, c'est une demande correctement formée, appuyée " +
     "sur les bonnes pièces et déposée dans les délais — ce qui est la seule chose sur laquelle vous ayez prise.",
     { taille: 10, espace: 6 }
@@ -743,7 +755,7 @@ function dessinerPageDemarche(doc, d) {
 
 function genererDossierPDF(d, opts = {}) {
   const exemple = opts.exemple !== false;
-  const doc = nouveauDocument(exemple ? 'Foncier·Juste — Pré-diagnostic' : 'Foncier·Juste — Dossier de vérification',
+  const doc = nouveauDocument(exemple ? `${MARQUE} — Pré-diagnostic` : `${MARQUE} — Dossier de vérification`,
     'Analyse, projet de courrier et marche à suivre');
   dessinerPageAnalyse(doc, d, { exemple, avecCourrier: true });
   dessinerPageCourrier(doc, d);

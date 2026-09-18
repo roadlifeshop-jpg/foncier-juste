@@ -118,8 +118,8 @@ décrivent une offre retirée&nbsp;; leur bandeau le dit.
 
 ### Et le reste
 
-1. **Le test Prolific de l'ancien site doit être terminé.** La fusion change le
-   parcours testé.
+1. ~~Le test Prolific de l'ancien site doit être terminé.~~ **Levé le
+   18/09/2026** : l'étude a été arrêtée.
 2. **La prévisualisation doit avoir été examinée.**
 
 ## 3. La fusion
@@ -251,7 +251,42 @@ disputées, et un site neuf sans historique part loin. Ce n'est pas un levier de
 lancement, c'est un investissement dont les premiers effets, s'il y en a, se
 mesurent en mois.
 
-## 8. Ce qui bloque, et à quel moment
+## 8. Renommer le site — inventaire exact
+
+« Dépense·Juste » est un **positionnement de travail**. Le jour où un nom
+définitif sera arrêté, voici tout ce qu'il faudra changer, et rien d'autre.
+
+**Les documents téléchargés : deux lignes.** `web/rapport.js` définit la marque
+une seule fois, en tête de fichier :
+
+```js
+const MARQUE = 'Dépense·Juste';
+const MARQUE_FICHIER = 'Depense-Juste';   // sans accent ni point médian
+```
+
+Elles gouvernent les titres des trois documents, l'en-tête de page, les deux
+pieds de page, les propriétés du fichier (title, author, creator) et le nom du
+fichier proposé au téléchargement.
+
+**Les pages : la marque est écrite en clair dans le balisage.** Elle apparaît
+dans l'en-tête de chaque page (`<a class="brand">`), dans les `<title>` et
+quelques `<meta>`. Un renommage se fait par recherche-remplacement sur
+`web/*.html`, puis relecture.
+
+**Ce qui doit rester tel quel :**
+
+| Occurrence | Pourquoi la garder |
+|---|---|
+| `index.html` et `mentions-legales.html`, paragraphe « Nom provisoire » | ils racontent précisément que le site s'appelait Foncier·Juste ; les réécrire supprimerait l'explication |
+| `cgv.html` — titre, description et corps | document décrivant l'offre retirée, telle qu'elle était vendue sous ce nom. Page liée de nulle part, conservée pour mémoire |
+| `succes.html` — titre | page de retour d'un paiement qui n'a jamais eu lieu (clé Stripe de test). Liée de nulle part |
+| `moteur.js`, commentaire d'en-tête | commentaire de code, invisible des utilisateurs |
+
+**À faire au même moment que le renommage**, et pas séparément : les URL
+canoniques, le sitemap et `robots.txt` — voir le script de la section 7, qui
+prend le domaine en argument.
+
+## 9. Ce qui bloque, et à quel moment
 
 | Blocage | Empêche quoi | Qui peut le lever |
 |---|---|---|
@@ -259,4 +294,4 @@ mesurent en mois.
 | Statut juridique et SIRET | rien tant que l'activité n'est pas immatriculée ; à ajouter dès qu'elle l'est | le guichet unique INPI, puis toi |
 | Aucun médiateur de la consommation (art. L616-1 c. conso.) | une reprise des ventes, pas la mise en ligne gratuite | toi, après immatriculation ; adhésion payante |
 | Nom et domaine non arrêtés | l'ouverture aux moteurs | toi |
-| Test Prolific en cours | le changement de production | le calendrier de l'étude |
+| ~~Test Prolific en cours~~ | — | **levé le 18/09/2026** : l'étude a été arrêtée, les soumissions en attente sont traitées séparément |
