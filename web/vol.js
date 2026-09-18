@@ -47,16 +47,21 @@ const VOL_RETARDS = {
   inconnu: "Je ne sais pas encore",
 };
 
-/* Les tranches sont celles de l'article 7. On les fait CHOISIR, avec des
-   repères concrets, plutôt que de calculer une distance : il faudrait un
-   référentiel d'aéroports que nous ne pourrions ni maintenir ni justifier, et
-   une distance approchée produirait un montant faux. « Je ne sais pas » est
-   une réponse prévue, qui n'affiche aucun montant. */
+/* Les tranches de l'article 7. Le visiteur ne les choisit plus et n'a plus à
+   connaître de distance : il nomme deux aéroports, et aeroports.js calcule la
+   route orthodromique — la méthode que le paragraphe 4 impose. Ces libellés ne
+   servent donc plus qu'à expliquer un résultat déjà obtenu.
+
+   Ce qui a changé, et pourquoi. La version précédente demandait « 1 500 km ou
+   moins / entre 1 500 et 3 500 / plus de 3 500 ». Personne ne connaît la
+   distance orthodromique de son vol : la question déplaçait sur le passager une
+   difficulté qui nous revient. Deux garde-fous remplacent l'aveu d'ignorance
+   qu'elle provoquait : un aéroport non reconnu ne produit aucun montant, et une
+   distance trop proche d'un seuil non plus. */
 const VOL_TRANCHES = {
   courte:   "1 500 km ou moins",
   moyenne:  "Entre 1 500 et 3 500 km",
   longue:   "Plus de 3 500 km",
-  inconnue: "Je ne sais pas",
 };
 
 const VOL_MONTANTS = { courte: 250, moyenne: 400, longue_intra: 400, longue_3a4: 300, longue_4plus: 600 };
@@ -130,7 +135,7 @@ function orientationRapide(r) {
   return {
     etat: 'ouvert',
     titre: "Ce vol peut ouvrir droit à une indemnisation forfaitaire",
-    texte: "Départ et retard remplissent les deux conditions principales du règlement. Le montant dépend maintenant de la distance, et une seule inconnue peut le ramener à zéro : le motif du retard.",
+    texte: "Départ et retard remplissent les deux conditions principales du règlement. Le montant dépend de la distance, et une seule inconnue peut le ramener à zéro : le motif du retard.",
     suite: null,
   };
 }
@@ -142,6 +147,15 @@ function orientationRapide(r) {
 function orienterVol(r, aujourdhui) {
   const auj = aujourdhui || new Date();
   const rapide = orientationRapide(r);
+
+  /* Le trajet peut arriver déjà résolu (deux aéroports nommés, distance
+     calculée) ou sous forme de tranche, ce que les tests utilisent. Les deux
+     chemins aboutissent aux mêmes variables. */
+  const trajet = r.trajet || null;
+  const tranche = trajet ? trajet.tranche : r.tranche;
+  const intraUE = trajet ? trajet.intraUE : r.intraUE;
+  const aLaLimite = trajet ? trajet.limite : null;
+  const trajetIncomplet = trajet ? !trajet.reconnu : false;
 
   const dateVol = versDateV(r.dateVol);
   if (r.dateVol && !dateVol) {
@@ -200,10 +214,10 @@ function orienterVol(r, aujourdhui) {
   }
 
   const montant = r.arrive === false ? null : montantForfaitaire({
-    tranche: r.tranche, intraUE: r.intraUE === true, retard: r.retard,
+    tranche, intraUE: intraUE === true, retard: r.retard,
   });
 
-  const intraConnu = r.tranche !== 'longue' || typeof r.intraUE === 'boolean';
+  const intraConnu = tranche !== 'longue' || typeof intraUE === 'boolean';
 
   /* L'ordre du constat suit ce qui compte le plus pour le lecteur. Quand le
      délai est passé, c'est cette information qui doit venir en premier :
@@ -212,16 +226,37 @@ function orienterVol(r, aujourdhui) {
   if (prescrit) constat.push({ titre: rapide.titre, texte: rapide.texte });
   else          constat.unshift({ titre: rapide.titre, texte: rapide.texte });
 
+  if (trajet && trajet.reconnu) {
+    constat.push({
+      titre: `${trajet.km.toLocaleString('fr-FR')} km entre ${trajet.depart.ville} et ${trajet.arrivee.ville}`,
+      texte: `Route orthodromique entre ${trajet.depart.nom} et ${trajet.arrivee.nom}, la méthode que l'article 7, paragraphe 4 impose. ${
+        intraUE ? "Ce vol reste intracommunautaire : le barème plafonne alors l'indemnisation à 400 €, même au-delà de 3 500 km." :
+        "Ce vol n'est pas intracommunautaire." } Ce chiffre se compte du départ du premier vol à votre destination finale, pas du seul segment retardé.`,
+    });
+  }
+
   /* ---- La somme et son degré de certitude ---- */
   let somme;
   if (r.arrive === false) {
     somme = { montant: null, texte: 'Aucun montant forfaitaire à ce titre', certitude: 'exclu',
               pourquoi: "Le forfait suppose que vous soyez arrivé à destination avec au moins trois heures de retard." };
+  } else if (aLaLimite) {
+    /* La distance calculée tombe à moins de 100 km d'un seuil du barème. Nos
+       coordonnées d'aéroport sont arrondies au centième de degré : trancher ici
+       ferait dépendre un montant d'une imprécision qui nous appartient. */
+    const deux = aLaLimite === 1500
+      ? '250 € ou 400 €'
+      : (intraUE ? '400 €' : '300 € ou 600 €');
+    somme = { montant: null, texte: deux, certitude: 'indeterminee',
+              pourquoi: `La distance calculée est de ${trajet.km} km, soit à moins de 100 km du seuil de ${aLaLimite} km qui sépare deux paliers du barème. Nos coordonnées d'aéroport étant arrondies, nous ne trancherons pas un montant sur une imprécision qui nous appartient. Demandez à la compagnie le palier qu'elle retient, et confrontez-le à l'article 7.` };
+  } else if (trajetIncomplet) {
+    somme = { montant: null, texte: 'Entre 250 € et 600 €', certitude: 'indeterminee',
+              pourquoi: "Vous n'avez pas précisé les deux aéroports, ou l'un des deux ne figure pas dans notre liste. Le barème dépend de la distance orthodromique entre le départ du premier vol et votre destination finale : nous ne la devinons pas. Le reste du résultat vaut quand même — la démarche est la même, et c'est à la compagnie d'appliquer le barème." };
   } else if (montant === null) {
     somme = { montant: null, texte: 'Entre 250 € et 600 €', certitude: 'indeterminee',
               pourquoi: !intraConnu
-                ? "Pour un vol de plus de 3 500 km, le montant dépend de sa nature : 400 € s'il reste intracommunautaire — un vol entre la métropole et un département d'outre-mer, par exemple — et 300 ou 600 € sinon. Répondez à cette question pour obtenir un montant."
-                : "Le barème dépend de la distance entre le départ du premier vol et votre destination finale. Sans cette tranche, afficher un montant serait deviner." };
+                ? "Pour un vol de plus de 3 500 km, le montant dépend de sa nature : 400 € s'il reste intracommunautaire — un vol entre la métropole et un département d'outre-mer, par exemple — et 300 ou 600 € sinon."
+                : "Le barème dépend de la distance entre le départ du premier vol et votre destination finale. Sans elle, afficher un montant serait deviner." };
   } else if (prescrit) {
     /* Le barème donne bien un montant, mais le délai de recours est passé :
        afficher « 250 € » avec l'étiquette « montant fixé par un texte »
@@ -245,7 +280,7 @@ function orienterVol(r, aujourdhui) {
     texte: "Conservez la carte d'embarquement, la réservation avec l'horaire prévu, et toute trace de l'heure d'arrivée effective. Pour un voyage à correspondances réservé en une seule fois, c'est le dernier vol du contrat qui fait la destination finale.",
     regle: 'vol-montants',
   });
-  if (r.tranche === 'longue' && r.intraUE === false && r.retard === 'de3a4') {
+  if (tranche === 'longue' && intraUE === false && r.retard === 'de3a4') {
     verification.push({
       titre: "Entre trois et quatre heures, la compagnie peut réduire de moitié",
       texte: "L'article 7, paragraphe 2 lui ouvre cette faculté pour un vol de plus de 3 500 km réacheminé avec moins de quatre heures de retard : le montant passe alors de 600 à 300 €. Si votre retard atteint quatre heures, c'est 600 € qui sont dus.",

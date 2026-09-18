@@ -307,36 +307,27 @@ function pistes(ligne, aujourdhui) {
        reconduction tacite, le contrat peut être résilié gratuitement à tout
        moment à compter de la reconduction, et que les sommes versées d'avance
        pour la période non courue sont remboursées dans les trente jours.
-       Cette somme-là est déjà payée : la récupérer n'est pas une économie
-       future, c'est un remboursement. Les confondre serait compter deux fois.
 
-   Sur le calcul du remboursable : la loi dit « la période non courue », sans
-   donner de formule. Nous faisons un prorata en jours entre aujourd'hui et
-   l'échéance, et nous l'affichons comme une hypothèse en indiquant la méthode.
+   AUCUN MONTANT REMBOURSABLE N'EST PLUS AFFICHÉ, et c'est un retrait délibéré.
+   Une version précédente calculait un prorata en jours entre aujourd'hui et
+   l'échéance — 17,09 € sur un abonnement de 99 €, par exemple. Ce chiffre
+   supposait cinq faits établis, dont aucun ne l'était :
+     1. que le contrat relève bien de l'article L215-1 ;
+     2. que la reconduction tacite a effectivement eu lieu ;
+     3. que l'information écrite n'a PAS été reçue — nous ne pouvons pas le
+        savoir, et c'est la condition qui ouvre tout ;
+     4. quelle avance a réellement été payée, et pour quelle période ;
+     5. à quelle date la résiliation prend effet, puisque le remboursement
+        porte sur la période postérieure à cette date, pas à aujourd'hui.
+   Un prorata calculé sur la date du jour répondait donc à une question que
+   personne n'avait posée. La case « somme » ne montre plus qu'un fait — le
+   coût actuel — et la vérification à mener est donnée en clair.
+
+   De même, le coût annuel n'est plus présenté comme une économie. Sans
+   scénario de résiliation (peut-on résilier, à quelle date, à quel coût) ni
+   offre de remplacement (que paierait-on à la place), « 99 € » n'est pas
+   99 € d'économie : c'est le coût actuel de ce contrat.
    ========================================================================== */
-
-/* Part déjà payée correspondant à la période non courue, pour un contrat payé
-   d'avance. Retourne null quand la question ne se pose pas (paiement mensuel
-   ou plus fréquent : il n'y a rien d'avancé) ou quand l'échéance est inconnue. */
-function rembourseableCentimes(ligne, aujourdhui) {
-  const p = PERIODICITES[ligne.periodicite];
-  if (!p || !ligne.echeance) return null;
-  // Seuls les paiements couvrant plus d'un mois laissent une période non courue.
-  const moisCouverts = 12 / (annuelCentimes(100, ligne.periodicite) / 100);
-  if (!(moisCouverts > 1)) return null;
-  const ech = prochaineEcheance(ligne.echeance, ligne.periodicite, aujourdhui);
-  if (!ech) return null;
-  const debutPeriode = ajouterMois(ech, -Math.round(moisCouverts));
-  const total = joursEntre(debutPeriode, ech);
-  const restants = joursEntre(aujourdhui, ech);
-  if (!(total > 0) || !(restants > 0)) return null;
-  return {
-    centimes: Math.round(ligne.montant * (restants / total)),
-    joursRestants: restants,
-    joursPeriode: total,
-    echeance: ech,
-  };
-}
 
 /* Le résultat en quatre parties, dans la forme attendue par resultat4.js. */
 function resultat4Abonnement(ligne, aujourdhui) {
@@ -346,7 +337,6 @@ function resultat4Abonnement(ligne, aujourdhui) {
   const p = PERIODICITES[ligne.periodicite];
   const eng = engagement(ligne.engagementDebut, ligne.engagementMois, auj);
   const fen = fenetreNonReconduction(ligne.echeance, ligne.periodicite, auj);
-  const remb = rembourseableCentimes(ligne, auj);
   const ps = pistes(ligne, auj);
 
   /* ---- 1. Le constat : des faits, tirés de la saisie ---- */
@@ -363,32 +353,20 @@ function resultat4Abonnement(ligne, aujourdhui) {
   ps.filter(x => x.type === 'fait').forEach(x => constat.push({ titre: x.titre, texte: x.texte }));
 
   /* ---- 2. Les deux sommes, séparées ---- */
-  const economie = {
+  const coutActuel = {
     montant: annuel,
-    texte: euros(annuel),
-    certitude: eng && !eng.termine ? 'hypothese' : 'hypothese',
-    pourquoi: eng && !eng.termine
-      ? `C'est ce que ce contrat coûte sur douze mois. Ce n'est pas une économie acquise : votre engagement court jusqu'au ${eng.fin.toLocaleDateString('fr-FR')}, et un arrêt avant ce terme peut laisser des sommes dues que nous ne pouvons pas chiffrer.`
-      : "C'est ce que ce contrat coûte sur douze mois, donc ce que son arrêt représenterait sur une année pleine. Ce n'est pas une économie acquise : un préavis ou des frais propres au contrat peuvent la réduire.",
+    texte: `${euros(annuel)} par an`,
+    certitude: 'fait',
+    pourquoi: `C'est le coût actuel de ce contrat, obtenu en additionnant ce que vous venez de saisir : ${euros(ligne.montant)} ${p.nom}. Ce n'est pas une économie${eng && !eng.termine ? ', et ce ne peut pas l\'être tant que votre engagement court' : ''} : pour parler d'économie, il faudrait savoir si vous pouvez résilier, à quelle date, à quel coût, et ce que vous paieriez à la place. Nous ne connaissons aucun de ces quatre éléments.`,
   };
-
-  let remboursement = null;
-  if (fen && fen.dedans && remb) {
-    remboursement = {
-      montant: remb.centimes,
-      texte: euros(remb.centimes),
-      certitude: 'hypothese',
-      pourquoi: `Si l'information écrite avant reconduction ne vous est pas parvenue dans les formes prévues, le contrat peut être résilié gratuitement à compter de la reconduction et les sommes versées d'avance pour la période non courue vous sont remboursées sous trente jours. Estimation au prorata : ${remb.joursRestants} jours restants sur les ${remb.joursPeriode} de la période en cours. La loi ne fixe pas de formule ; ce prorata est notre méthode, à confronter au décompte du professionnel.`,
-    };
-  }
 
   /* ---- 3. Ce qu'il reste à vérifier ---- */
   const verification = ps.filter(x => x.type === 'verification')
                          .map(x => ({ titre: x.titre, texte: x.texte, regle: x.regle }));
   if (fen && fen.dedans) {
     verification.unshift({
-      titre: "Avez-vous reçu l'information écrite avant reconduction ?",
-      texte: "Cherchez dans vos courriels et votre courrier une lettre dédiée ou un message consacré à la reconduction. Son absence est ce qui ouvre la résiliation gratuite et le remboursement — et c'est la seule chose que nous ne pouvons pas vérifier pour vous.",
+      titre: "Cinq choses à établir avant de parler de remboursement",
+      texte: "L'article L215-1 prévoit qu'à défaut d'information écrite avant la reconduction, le contrat peut être résilié gratuitement et les sommes versées d'avance pour la période non courue sont remboursées sous trente jours. Nous n'affichons aucun montant, parce qu'il dépend de cinq faits que nous ne connaissons pas : que ce contrat relève bien de cet article ; que la reconduction a eu lieu ; que l'information écrite ne vous est pas parvenue dans les formes — cherchez une lettre dédiée ou un courriel consacré à la reconduction, c'est la condition qui ouvre tout ; quelle avance vous avez réellement payée, et pour quelle période ; et à quelle date votre résiliation prendrait effet, puisque le remboursement porte sur la période postérieure à cette date. Le décompte, c'est au professionnel de le produire.",
       regle: 'tacite-reconduction',
     });
   }
@@ -431,10 +409,11 @@ function resultat4Abonnement(ligne, aujourdhui) {
   const limites = [
     "Nous ne lisons pas votre contrat : ni préavis, ni frais de résiliation, ni clause particulière ne nous sont connus.",
     "Aucune des règles citées ne rend un contrat résiliable à elle seule. Elles pèsent sur le professionnel.",
-    "Les deux sommes ci-dessus ne s'additionnent pas et ne sont pas acquises : la première est un coût annuel qu'un arrêt supprimerait, la seconde une part déjà payée qu'un cas précis rend remboursable.",
+    "Le montant affiché est un coût, pas un gain. Nous n'affichons aucune économie : elle supposerait de connaître votre faculté de résilier, sa date, son coût, et ce que vous paieriez à la place.",
+    "Nous n'affichons aucun montant remboursable au titre de l'article L215-1 : il dépend de cinq faits que seul votre contrat et vos courriers peuvent établir. La vérification à mener est détaillée ci-dessus.",
   ];
 
-  return { constat, somme: economie, remboursement, verification, action, limites, annuel, mensuel };
+  return { constat, somme: coutActuel, verification, action, limites, annuel, mensuel };
 }
 
 
@@ -442,5 +421,5 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = { PERIODICITES, CATEGORIES, enCentimes, euros, annuelCentimes, mensuelCentimes,
                      totaux, ajouterMois, ajouterJours, versDate, joursEntre, prochaineEcheance,
                      fenetreNonReconduction, engagement, pistes,
-                     rembourseableCentimes, resultat4Abonnement };
+                     resultat4Abonnement };
 }

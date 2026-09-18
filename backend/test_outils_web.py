@@ -295,6 +295,64 @@ SCRIPT_TESTS = r"""
        vol({}).action.some(a => a.gratuit === true) &&
        vol({}).limites.some(l => /commission|intermédiaire/i.test(l)));
 
+  /* ---- Saisie par aéroports : plus personne n'a à connaître une distance -- */
+  const tj = (a, b) => resoudreTrajet(a, b);
+  eq("Paris–Berlin : tranche courte",       tj('CDG','BER').tranche, 'courte');
+  eq("Paris–Athènes : tranche moyenne",     tj('CDG','ATH').tranche, 'moyenne');
+  eq("Paris–New York : tranche longue",     tj('CDG','JFK').tranche, 'longue');
+  vrai("Paris–La Réunion : long ET intracommunautaire (400 €, pas 600 €)",
+       tj('CDG','RUN').tranche === 'longue' && tj('CDG','RUN').intraUE === true &&
+       montantForfaitaire({tranche:'longue', intraUE:true, retard:'plus4'}) === 400);
+  vrai("Paris–Papeete : hors Union, donc palier à 600 €",
+       tj('CDG','PPT').intraUE === false &&
+       montantForfaitaire({tranche:'longue', intraUE:false, retard:'plus4'}) === 600);
+  vrai("Paris–Londres : dans le champ mais pas intracommunautaire",
+       tj('CDG','LHR').reconnu === true && tj('CDG','LHR').intraUE === false);
+  vrai("distance à moins de 100 km d'un seuil : aucune tranche retenue",
+       tj('CDG','TUN').reconnu === true && tj('CDG','TUN').tranche === null &&
+       tj('CDG','TUN').limite === 1500);
+  vrai("aéroport inconnu : rien de reconnu, aucune tranche",
+       tj('CDG','ZZZ').reconnu === false && tj('CDG','ZZZ').tranche === null);
+  vrai("saisie par ville acceptée", tj('Paris','Marseille').reconnu === true);
+  vrai("saisie « Nom (CODE) » acceptée",
+       tj('Paris Charles-de-Gaulle (CDG)','Nice Côte d’Azur (NCE)').reconnu === true);
+  vrai("distances cohérentes avec les valeurs publiées (± 1 %)",
+       Math.abs(tj('CDG','JFK').km - 5837) / 5837 < 0.01 &&
+       Math.abs(tj('CDG','RUN').km - 9346) / 9346 < 0.01);
+
+  /* Un trajet non reconnu ne doit JAMAIS produire de montant. */
+  const volAero = (t) => orienterVol({ depart:'ue', retard:'plus4', arrive:true, trajet:t }, AUJ);
+  vrai("trajet non reconnu : aucun montant, fourchette annoncée",
+       volAero(tj('CDG','ZZZ')).somme.montant === null &&
+       volAero(tj('CDG','ZZZ')).somme.certitude === 'indeterminee');
+  vrai("trajet à la limite d'un seuil : aucun montant tranché",
+       volAero(tj('CDG','TUN')).somme.montant === null &&
+       /moins de 100 km du seuil/.test(volAero(tj('CDG','TUN')).somme.pourquoi));
+  vrai("trajet reconnu : montant du barème et distance rappelée dans le constat",
+       volAero(tj('CDG','JFK')).somme.montant === 600 &&
+       volAero(tj('CDG','JFK')).constat.some(c => /5.8\d\d km/.test(c.titre)));
+
+  /* ---- Abonnements : ni économie annoncée, ni montant remboursable ------- */
+  const abo = (o) => resultat4Abonnement(Object.assign({
+    id:'x', nom:'Test', montant: 9900, periodicite:'annuelle', categorie:'',
+    echeance:null, engagementDebut:null, engagementMois:null,
+    souscritEnLigne:false, recent:false }, o), AUJ);
+
+  vrai("la case somme porte le COÛT ACTUEL, étiqueté comme un fait",
+       abo({}).somme.certitude === 'fait' && /par an/.test(abo({}).somme.texte));
+  vrai("le mot « économie » n'est jamais affirmé sur le montant",
+       !/\bd.économie\b/i.test(abo({}).somme.texte) &&
+       /pas une économie/.test(abo({}).somme.pourquoi));
+  vrai("aucun second montant n'est renvoyé",
+       abo({ echeance: iso(new Date(AUJ.getFullYear(), AUJ.getMonth() + 2, 20)) }).remboursement === undefined);
+  vrai("dans la fenêtre de reconduction : une vérification, pas un montant",
+       abo({ echeance: iso(new Date(AUJ.getFullYear(), AUJ.getMonth() + 2, 20)) })
+         .verification.some(v => /cinq faits|Cinq choses/i.test(v.titre + ' ' + v.texte)));
+  vrai("les limites disent qu'aucun montant remboursable n'est affiché",
+       abo({}).limites.some(l => /aucun montant remboursable/i.test(l)));
+  vrai("la fonction de prorata a bien été retirée",
+       typeof rembourseableCentimes === 'undefined');
+
   /* ---- Registre : les règles aériennes sont datées et sourcées ---------- */
   vrai("règle des montants : source DGAC et source secondaire EUR-Lex",
        /aviation-civile\.gouv\.fr/.test(REGLES['vol-montants'].source.url) &&
@@ -382,7 +440,7 @@ async def executer():
         nav = await p.chromium.launch()
         page = await (await nav.new_context()).new_page()
         await page.goto("about:blank")
-        for f in ("regles.js", "abonnements.js", "garanties.js", "vol.js"):
+        for f in ("regles.js", "aeroports.js", "abonnements.js", "garanties.js", "vol.js"):
             await page.add_script_tag(content=(WEB / f).read_text(encoding="utf-8"))
         resultats = await page.evaluate(SCRIPT_TESTS)
         await nav.close()

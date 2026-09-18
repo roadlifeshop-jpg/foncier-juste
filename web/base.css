@@ -559,17 +559,9 @@ main.doc > .fine{margin-top:26px; font-size:.86rem; color:var(--ink-faint);}
 .emplacement h3{font-family:'Archivo',sans-serif; font-size:.95rem;}
 .emplacement p{font-size:.89rem; color:var(--ink-muted); margin-top:7px;}
 
-/* Deux sommes dans la même case, séparées franchement : l'une est un coût
-   annuel qu'un arrêt supprimerait, l'autre une part déjà payée qu'un cas
-   précis rend remboursable. Elles ne s'additionnent pas. */
-.sous-titre-somme{
-  font-family:'Archivo',sans-serif; font-size:.68rem; font-weight:700;
-  letter-spacing:.13em; text-transform:uppercase; color:var(--accent); margin-top:14px;
-}
-.r4-somme .seconde-somme{
-  margin-top:18px; padding-top:16px; border-top:1px solid var(--accent-line);
-}
-.r4-somme .seconde-somme .chiffre{color:var(--warn);}
+/* La case « somme » ne porte qu'un chiffre. Les styles du second montant
+   (.sous-titre-somme, .seconde-somme) ont été retirés avec lui : voir
+   l'explication en tête de resultat4.js. */
 
 /* Le type de somme, annoncé dès le choix de la situation. La promesse du site
    parle d'une somme à récupérer ou à économiser : elle n'est tenable que sur

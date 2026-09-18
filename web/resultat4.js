@@ -11,7 +11,6 @@
    Forme attendue :
      { constat:      [{ titre, texte }],
        somme:        { montant, texte, certitude, pourquoi },
-       remboursement:{ … } | null,   // second montant, affiché séparément
        verification: [{ titre, texte, regle? }],
        action:       [{ titre, texte, gratuit?, regle? }],
        limites:      [ "…" ] }
@@ -54,20 +53,18 @@ function rendreResultat4(r){
   return [
     bloc4('1', 'Le constat', items4(r.constat), 'plein'),
 
-    bloc4('2', r.remboursement ? 'Deux sommes, à ne pas confondre' : 'Somme éventuelle', `
-      ${r.remboursement ? '<div class="sous-titre-somme">Économiser à l\'avenir</div>' : ''}
+    /* Une seule somme par résultat, volontairement.
+       La version précédente en affichait deux dans cette case pour les
+       abonnements : « économiser à l'avenir » et « réclamer un remboursement ».
+       Les deux ont été retirées — la première parce qu'un coût annuel n'est pas
+       une économie sans scénario de résiliation ni offre de remplacement, la
+       seconde parce qu'un remboursement au titre de l'article L215-1 dépend de
+       cinq faits qu'un formulaire de trois champs n'établit pas. Cette case ne
+       porte plus qu'un chiffre, et son étiquette dit ce qu'il vaut. */
+    bloc4('2', r.somme && r.somme.certitude === 'fait' ? 'Coût actuel' : 'Somme éventuelle', `
       <div class="chiffre${chiffre ? '' : ' sans'}">${ech4(r.somme ? r.somme.texte : 'Non chiffrable')}</div>
       <span class="certitude ${c.classe}">${ech4(c.libelle)}</span>
-      <p>${ech4(r.somme ? r.somme.pourquoi : '')}</p>
-      ${r.remboursement ? (() => {
-        const c2 = CERTITUDES[r.remboursement.certitude] || CERTITUDES['hypothese'];
-        return `<div class="seconde-somme">
-          <div class="sous-titre-somme">Réclamer un remboursement</div>
-          <div class="chiffre">${ech4(r.remboursement.texte)}</div>
-          <span class="certitude ${c2.classe}">${ech4(c2.libelle)}</span>
-          <p>${ech4(r.remboursement.pourquoi)}</p>
-        </div>`;
-      })() : ''}`, 'r4-somme'),
+      <p>${ech4(r.somme ? r.somme.pourquoi : '')}</p>`, 'r4-somme'),
 
     bloc4('3', 'Ce qu\'il reste à vérifier', items4(r.verification)),
 

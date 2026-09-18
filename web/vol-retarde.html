@@ -20,7 +20,14 @@
 .orientation p{font-size:.94rem; color:var(--ink-muted); margin-top:8px;}
 .orientation .suite{margin-top:12px; padding-top:12px; border-top:1px solid var(--accent-line);}
 .orientation.ferme{border-color:var(--line-strong); background:var(--surface-2);}
-.repere{font-size:.84rem; color:var(--ink-faint); margin-top:5px;}
+.trajet-lu{margin-bottom:12px; padding:12px 14px; border-radius:var(--r); background:var(--accent-soft); border:1px solid var(--accent-line); font-size:.9rem; line-height:1.5;}
+.trajet-lu b{color:var(--accent);}
+.trajet-lu.incertain{background:var(--warn-soft); border-color:var(--warn-line);}
+.trajet-lu.incertain b{color:var(--warn);}
+.trajet-lu .km{font-variant-numeric:tabular-nums; font-weight:700;}
+.case-aero{display:flex; gap:10px; align-items:flex-start; font-size:.9rem; cursor:pointer;}
+.case-aero input{margin-top:3px; width:18px; height:18px; accent-color:var(--accent); flex-shrink:0;}
+.case-aero .d{display:block; color:var(--ink-muted); font-size:.85rem;}
 </style>
 </head>
 <body>
@@ -99,22 +106,29 @@
 
       <div class="etage" id="v-etage-2" hidden>
         <div class="etage-num">Étape 2 — les informations qui déterminent le montant</div>
+        <!-- Deux aéroports, pas une distance. Le barème se joue sur la route
+             orthodromique, que personne ne connaît pour son propre vol : la
+             demander revenait à déplacer sur le passager une difficulté qui
+             nous revient. Nous la calculons, et nous affichons le résultat. -->
         <div class="champ">
-          <label for="v-tranche">Quelle distance, du départ du premier vol à votre destination finale&nbsp;?</label>
-          <select id="v-tranche"></select>
-          <div class="repere" id="v-repere-tranche"></div>
-          <div class="aide">Le règlement retient la distance orthodromique. Si vous ne savez pas, choisissez
-          « je ne sais pas »&nbsp;: nous afficherons la fourchette plutôt qu'un montant deviné.</div>
+          <label for="v-depart-aero">Aéroport de départ du premier vol</label>
+          <input type="text" id="v-depart-aero" list="liste-aeroports" autocomplete="off"
+                 spellcheck="false" placeholder="ex : Paris, CDG, Lyon…">
+          <div class="aide">Tapez une ville, un nom d'aéroport ou son code à trois lettres.</div>
         </div>
-        <div class="champ" id="v-zone-intra" hidden>
-          <label for="v-intra">Ce vol restait-il à l'intérieur de l'Union européenne&nbsp;?</label>
-          <select id="v-intra">
-            <option value="">— à préciser</option>
-            <option value="oui">Oui — par exemple entre la métropole et un département d'outre-mer</option>
-            <option value="non">Non — le vol sortait de l'Union</option>
-          </select>
-          <div class="aide">Au-delà de 3 500 km, cette réponse change le montant&nbsp;: 400 € pour un vol
-          intracommunautaire, 300 ou 600 € sinon.</div>
+        <div class="champ">
+          <label for="v-arrivee-aero">Aéroport de votre destination finale</label>
+          <input type="text" id="v-arrivee-aero" list="liste-aeroports" autocomplete="off"
+                 spellcheck="false" placeholder="ex : Fort-de-France, New York…">
+          <div class="aide">La destination du dernier vol de votre contrat, pas celle de l'escale.</div>
+        </div>
+        <datalist id="liste-aeroports"></datalist>
+        <div class="champ">
+          <div class="trajet-lu" id="v-trajet-lu" hidden></div>
+          <label class="case-aero"><input type="checkbox" id="v-aero-inconnu">
+            <span>Mon aéroport n'est pas dans la liste, ou je préfère ne pas le préciser
+            <span class="d">Le résultat reste complet, mais sans montant : nous ne devinons pas une
+            distance.</span></span></label>
         </div>
         <div class="champ">
           <label for="v-arrive">Avez-vous effectué le voyage&nbsp;?</label>
@@ -200,21 +214,12 @@
 </footer>
 
 <script src="regles.js"></script>
+<script src="aeroports.js"></script>
 <script src="vol.js"></script>
 <script src="resultat4.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const AUJ = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-
-/* Repères concrets sous la tranche choisie. Ce sont des ordres de grandeur
-   destinés à aider quelqu'un à se situer, pas des distances officielles :
-   le texte le dit, et aucun montant n'en dépend directement. */
-const REPERES = {
-  courte:   "Ordre de grandeur : Paris–Barcelone, Paris–Berlin, Lyon–Rome.",
-  moyenne:  "Ordre de grandeur : Paris–Athènes, Paris–Marrakech, Paris–Moscou.",
-  longue:   "Ordre de grandeur : Paris–New York, Paris–Dakar, Paris–Fort-de-France.",
-  inconnue: "Aucun montant ne sera affiché : nous donnerons la fourchette et la question à trancher.",
-};
 
 function remplirV(id, table){
   const sel = $(id);
@@ -224,7 +229,19 @@ function remplirV(id, table){
 }
 remplirV('v-depart', VOL_DEPARTS);
 remplirV('v-retard', VOL_RETARDS);
-remplirV('v-tranche', VOL_TRANCHES);
+
+/* La liste propose « Nom d'aéroport (CODE) » ; trouverAeroport accepte aussi
+   la ville seule ou le code seul, pour qui tape sans utiliser la liste. */
+{
+  const dl = document.getElementById('liste-aeroports');
+  Object.keys(AEROPORTS).sort((a, b) => AEROPORTS[a].nom.localeCompare(AEROPORTS[b].nom, 'fr'))
+    .forEach(code => {
+      const o = document.createElement('option');
+      o.value = etiquetteAeroport(code);
+      o.label = `${AEROPORTS[code].ville} — ${AEROPORTS[code].nom}`;
+      dl.appendChild(o);
+    });
+}
 $('v-regles').innerHTML = ['vol-champ','vol-montants','vol-exoneration','vol-demarche','vol-reforme-2026'].map(citer).join('');
 
 function majDepart(){
@@ -232,12 +249,51 @@ function majDepart(){
 }
 $('v-depart').addEventListener('change', majDepart); majDepart();
 
-function majTranche(){
-  const t = $('v-tranche').value;
-  $('v-repere-tranche').textContent = REPERES[t] || '';
-  $('v-zone-intra').hidden = t !== 'longue';
+/* Écho du trajet : la distance calculée, dite avant tout montant, pour que la
+   personne puisse contester le calcul plutôt que le subir. */
+function trajetSaisi(){
+  /* Case cochée : on renvoie un trajet explicitement NON reconnu, plutôt que
+     null. Le moteur affiche alors « nous ne devinons pas » au lieu de retomber
+     sur un message générique sur la distance. */
+  if ($('v-aero-inconnu').checked){
+    return { reconnu: false, depart: null, arrivee: null, km: null, tranche: null, intraUE: null, limite: null };
+  }
+  return resoudreTrajet($('v-depart-aero').value, $('v-arrivee-aero').value);
 }
-$('v-tranche').addEventListener('change', majTranche); majTranche();
+
+function majTrajet(){
+  const z = $('v-trajet-lu');
+  const inconnu = $('v-aero-inconnu').checked;
+  $('v-depart-aero').disabled = inconnu;
+  $('v-arrivee-aero').disabled = inconnu;
+  if (inconnu){
+    z.className = 'trajet-lu incertain';
+    z.innerHTML = "<b>Aucun montant ne sera affiché.</b> Le barème dépend de la distance ; sans les deux aéroports, nous ne la connaissons pas et nous ne la devinons pas. Le reste du résultat vaut quand même : la démarche est la même, et c'est à la compagnie d'appliquer le barème.";
+    z.hidden = false;
+    return;
+  }
+  const t = resoudreTrajet($('v-depart-aero').value, $('v-arrivee-aero').value);
+  if (!t.depart && !t.arrivee){ z.hidden = true; return; }
+  if (!t.reconnu){
+    const manque = !t.depart ? 'de départ' : "d'arrivée";
+    z.className = 'trajet-lu incertain';
+    z.innerHTML = `<b>Aéroport ${manque} non reconnu.</b> Choisissez-le dans la liste proposée, ou cochez la case ci-dessous : nous n'afficherons alors aucun montant plutôt qu'un montant deviné.`;
+    z.hidden = false;
+    return;
+  }
+  z.className = 'trajet-lu';
+  z.innerHTML = `<b>${t.depart.nom}</b> → <b>${t.arrivee.nom}</b><br>
+    Distance orthodromique calculée&nbsp;: <span class="km">${t.km.toLocaleString('fr-FR')} km</span>${
+      t.intraUE ? ' · vol intracommunautaire' : ''}.${
+      t.limite ? ` <b>À moins de 100 km du seuil de ${t.limite.toLocaleString('fr-FR')} km</b> : nous ne trancherons pas entre deux paliers du barème.` : ''}`;
+  z.hidden = false;
+}
+['input','change'].forEach(e => {
+  $('v-depart-aero').addEventListener(e, majTrajet);
+  $('v-arrivee-aero').addEventListener(e, majTrajet);
+});
+$('v-aero-inconnu').addEventListener('change', majTrajet);
+majTrajet();
 
 function relireDateV(){
   const d = versDateV($('v-date').value), p = $('v-date-lue');
@@ -253,10 +309,7 @@ function lireForme(){
     depart,
     compagnieEuropeenne: depart === 'tiers' ? ($('v-compagnie').value === 'oui') : null,
     retard: $('v-retard').value,
-    tranche: $('v-tranche').value,
-    intraUE: $('v-tranche').value === 'longue'
-      ? ($('v-intra').value === 'oui' ? true : $('v-intra').value === 'non' ? false : null)
-      : null,
+    trajet: trajetSaisi(),
     arrive: $('v-arrive').value === 'oui',
     dateVol: $('v-date').value || null,
   };
@@ -305,7 +358,7 @@ $('forme-vol').addEventListener('submit', ev => { ev.preventDefault(); afficher(
 
 $('v-reset').addEventListener('click', () => {
   $('forme-vol').reset();
-  majDepart(); majTranche(); relireDateV();
+  majDepart(); majTrajet(); relireDateV();
   $('v-orientation').hidden = true; $('v-etage-2').hidden = true; $('v-resultat').hidden = true;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
