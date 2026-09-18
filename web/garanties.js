@@ -26,7 +26,14 @@ const CANAUX = {
   domicile:  "À domicile, démarchage",
 };
 
-const ETATS = { neuf: "Neuf", occasion: "D'occasion" };
+/* « Reconditionné » n'est pas une catégorie de l'article L217-7 : le texte dit
+   vingt-quatre mois, et douze « pour les biens vendus d'occasion ». La fiche
+   service-public F11094 (vérifiée le 17/08/2026) range le reconditionné dans
+   l'onglet « Bien d'occasion ou bien reconditionné », donc à douze mois. Le
+   libellé le dit explicitement : le calcul est inchangé, mais l'acheteur d'un
+   téléphone reconditionné n'a plus à deviner laquelle des deux cases le
+   concerne. */
+const ETATS = { neuf: "Neuf", occasion: "D'occasion ou reconditionné" };
 
 const PROBLEMES = {
   panne_apres:   "Il est tombé en panne",
@@ -134,8 +141,8 @@ function orienter(r, aujourdhui) {
         : `Au-delà des deux ans de la garantie légale de conformité`,
       texte: dansDeuxAns
         ? `Il reste environ ${24 - mois} mois sur les deux ans${approximatif ? ' (décompte approximatif, faute de date de livraison)' : ''}, durée identique que le bien soit neuf, reconditionné ou d'occasion. ${dansPresomption
-            ? `Vous êtes aussi dans la fenêtre de présomption d'antériorité, qui dure ${presomptionMois} mois pour un bien ${neuf ? 'neuf' : "d'occasion"} : vous n'avez pas à prouver que le défaut existait déjà lors de la délivrance, c'est au vendeur de démontrer le contraire. Vous devez en revanche établir l'achat et sa date, et décrire le défaut.`
-            : `La présomption d'antériorité, elle, est terminée : elle ne durait que ${presomptionMois} mois pour un bien ${neuf ? 'neuf' : "d'occasion"}, et vous êtes à ${mois} mois. La garantie reste ouverte, mais la preuve a changé de camp : c'est désormais à vous d'établir que le défaut existait déjà lors de la vente.`}`
+            ? `Vous êtes aussi dans la fenêtre de présomption d'antériorité, qui dure ${presomptionMois} mois pour un bien ${neuf ? 'neuf' : "d'occasion ou reconditionné"} : vous n'avez pas à prouver que le défaut existait déjà lors de la délivrance, c'est au vendeur de démontrer le contraire. Vous devez en revanche établir l'achat et sa date, et décrire le défaut.`
+            : `La présomption d'antériorité, elle, est terminée : elle ne durait que ${presomptionMois} mois pour un bien ${neuf ? 'neuf' : "d'occasion ou reconditionné"}, et vous êtes à ${mois} mois. La garantie reste ouverte, mais la preuve a changé de camp : c'est désormais à vous d'établir que le défaut existait déjà lors de la vente.`}`
         : `Cette voie paraît fermée d'après la date saisie : les deux ans sont écoulés. Deux autres restent à regarder : une garantie commerciale éventuelle, et le vice caché, dont le délai se compte à partir de la découverte et non de l'achat.`,
     });
   }
@@ -229,8 +236,8 @@ function orienter(r, aujourdhui) {
   limites.push("Nous ne pouvons pas dire si votre demande aboutira. La cause réelle d'une panne, le contenu exact de votre contrat et l'état du bien ne sont pas connus de nous.");
   if (r.etat === 'occasion' && pro) {
     limites.push(mois < 12
-      ? "Pour un bien d'occasion, la présomption d'antériorité ne dure que douze mois — contre vingt-quatre pour un bien neuf. Passé ce délai, la garantie de deux ans reste ouverte mais c'est à vous de prouver l'antériorité du défaut."
-      : "Pour un bien d'occasion, la présomption d'antériorité s'est arrêtée au douzième mois. La garantie de deux ans reste ouverte : ce n'est pas la voie qui se ferme, c'est la charge de la preuve qui se déplace vers vous.");
+      ? "Pour un bien d'occasion ou reconditionné, la présomption d'antériorité ne dure que douze mois — contre vingt-quatre pour un bien neuf. Passé ce délai, la garantie de deux ans reste ouverte mais c'est à vous de prouver l'antériorité du défaut."
+      : "Pour un bien d'occasion ou reconditionné, la présomption d'antériorité s'est arrêtée au douzième mois. La garantie de deux ans reste ouverte : ce n'est pas la voie qui se ferme, c'est la charge de la preuve qui se déplace vers vous.");
   }
 
   voies.sort((a, b) => a.priorite - b.priorite);

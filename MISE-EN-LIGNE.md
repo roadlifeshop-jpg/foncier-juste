@@ -273,6 +273,18 @@ dans l'en-tête de chaque page (`<a class="brand">`), dans les `<title>` et
 quelques `<meta>`. Un renommage se fait par recherche-remplacement sur
 `web/*.html`, puis relecture.
 
+**La marque graphique : une seule ligne, répétée douze fois.** Le favicon est un
+SVG en ligne, identique dans les douze pages (`<link rel="icon">`) : trois
+lignes d'un relevé dont la dernière est mise en évidence. Il ne contient ni
+lettre ni initiale, donc **un changement de nom ne l'oblige pas à changer**. Si
+l'on veut malgré tout le remplacer, c'est un remplacement littéral sur
+`web/*.html`, la chaîne étant rigoureusement la même partout. Ses deux couleurs
+reprennent `--accent` et un or éclairci de `base.css`.
+
+**L'en-tête des PDF suit la même couleur** : `rapport.js`, `setFillColor(16, 86,
+108)`, valeur de `--accent`. À changer en même temps que la palette, sinon le
+document téléchargé porte l'ancienne identité.
+
 **Ce qui doit rester tel quel :**
 
 | Occurrence | Pourquoi la garder |

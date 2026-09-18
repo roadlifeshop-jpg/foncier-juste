@@ -107,7 +107,7 @@ function creerEcrivain(doc, margeGauche, largeur, opts = {}) {
 }
 
 function dessinerEnTete(doc, titre, { exemple, sousTitre } = {}) {
-  doc.setFillColor(33, 65, 79);
+  doc.setFillColor(16, 86, 108)   /* --accent de base.css : l'en-tête du PDF suit la couleur du site */;
   doc.rect(0, 0, 210, 16, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFont(POLICE_NOM, 'bold'); doc.setFontSize(13);

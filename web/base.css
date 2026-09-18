@@ -33,47 +33,53 @@
 }
 
 :root{
-  /* Palette conservée. Les neutres sont légèrement réchauffés et le contraste
-     du texte courant relevé : l'ancien gris de corps passait juste les seuils,
-     ce qui était visible sur grand écran. */
-  --bg:#F5F6F4; --surface:#FFFFFF; --surface-2:#EBEDEA; --surface-3:#DFE3E0;
-  --ink:#0B1620; --ink-muted:#4B5864; --ink-faint:#626C76;
-  --line:#D8DDD9; --line-strong:#B9C2BC;
-  --accent:#0F3D56; --accent-ink:#FFFFFF; --accent-soft:#E2EDF3; --accent-line:#A9C7D8;
-  --gold:#8A6520; --gold-soft:#F4EEE1;
+  /* Direction : claire et rassurante.
+     Le fond passe d'un gris-vert froid (#F5F6F4) à un blanc cassé chaud. Ce seul
+     changement retire au site son air de formulaire administratif, sans toucher
+     à la sobriété : le papier est chaud, l'encre reste froide.
+     L'accent se déplace de #0F3D56 (bleu ardoise, proche d'un bleu par défaut)
+     vers un bleu-canard plus saturé : il se lit comme un choix, pas comme le
+     bleu de tout le monde, et il n'est ni le vert ni le bleu vif des sites
+     comparables. Tous les couples texte/fond de cette palette ont été mesurés :
+     minimum constaté 4,67:1, la majorité au-dessus de 7:1. */
+  --bg:#FBFAF7; --surface:#FFFFFF; --surface-2:#F1EFEA; --surface-3:#E6E2DA;
+  --ink:#17212B; --ink-muted:#4C5762; --ink-faint:#626C76;
+  --line:#E3DFD6; --line-strong:#C4BDB0;
+  --accent:#10566C; --accent-ink:#FFFFFF; --accent-soft:#E4F0F3; --accent-line:#9CC4D0;
+  --gold:#8A6520; --gold-soft:#F6F0E3;
   --ok:#1B6045; --ok-soft:#E2EFE8;
   --warn:#7D5210; --warn-soft:#F6EDDA; --warn-line:#DCC28A;
   --alert:#932D20; --alert-soft:#F8E5E1; --alert-line:#E2B7AE;
-  --ring:0 0 0 3px rgba(15,61,86,.28);
-  --lift:0 1px 0 rgba(11,22,32,.04), 0 12px 32px -22px rgba(11,22,32,.45);
+  --ring:0 0 0 3px rgba(16,86,108,.32);
+  --lift:0 1px 0 rgba(23,33,43,.03), 0 14px 34px -24px rgba(23,33,43,.38);
   --r:5px;            /* angles nettement plus francs : moins de « carte » générique */
   --r-lg:8px;
   --mesure:66ch;      /* largeur de lecture du texte courant */
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0B1117; --surface:#121A21; --surface-2:#18212A; --surface-3:#202B34;
+    --bg:#0D1418; --surface:#141D23; --surface-2:#1B252C; --surface-3:#233038;
     --ink:#E9EEF2; --ink-muted:#A0AEB8; --ink-faint:#7B8992;
     --line:#233038; --line-strong:#35444E;
-    --accent:#8FC2DD; --accent-ink:#06111A; --accent-soft:#132734; --accent-line:#27485D;
+    --accent:#86C6DC; --accent-ink:#06131A; --accent-soft:#122A34; --accent-line:#27505F;
     --gold:#CFA867; --gold-soft:#241D10;
     --ok:#74C79E; --ok-soft:#0F2620;
     --warn:#E0B064; --warn-soft:#2A2113; --warn-line:#4C3B1C;
     --alert:#EC9686; --alert-soft:#2D1A17; --alert-line:#4E2C25;
-    --ring:0 0 0 3px rgba(143,194,221,.35);
+    --ring:0 0 0 3px rgba(134,198,220,.38);
     --lift:0 1px 0 rgba(0,0,0,.3), 0 12px 32px -22px rgba(0,0,0,.85);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0B1117; --surface:#121A21; --surface-2:#18212A; --surface-3:#202B34;
+  --bg:#0D1418; --surface:#141D23; --surface-2:#1B252C; --surface-3:#233038;
   --ink:#E9EEF2; --ink-muted:#A0AEB8; --ink-faint:#7B8992;
   --line:#233038; --line-strong:#35444E;
-  --accent:#8FC2DD; --accent-ink:#06111A; --accent-soft:#132734; --accent-line:#27485D;
+  --accent:#86C6DC; --accent-ink:#06131A; --accent-soft:#122A34; --accent-line:#27505F;
   --gold:#CFA867; --gold-soft:#241D10;
   --ok:#74C79E; --ok-soft:#0F2620;
   --warn:#E0B064; --warn-soft:#2A2113; --warn-line:#4C3B1C;
   --alert:#EC9686; --alert-soft:#2D1A17; --alert-line:#4E2C25;
-  --ring:0 0 0 3px rgba(143,194,221,.35);
+  --ring:0 0 0 3px rgba(134,198,220,.38);
   --lift:0 1px 0 rgba(0,0,0,.3), 0 12px 32px -22px rgba(0,0,0,.85);
 }
 
@@ -105,8 +111,8 @@ a:hover{text-decoration-thickness:2px;}
 
 /* ---------- Titres ---------- */
 h1,h2,h3,h4{font-family:'Spectral',Georgia,serif; font-weight:600; line-height:1.18; text-wrap:balance; margin:0;}
-h1{font-size:clamp(1.85rem,3.6vw,2.55rem); letter-spacing:-.021em;}
-h2{font-size:clamp(1.3rem,2.1vw,1.6rem); letter-spacing:-.016em;}
+h1{font-size:clamp(1.92rem,4.4vw,3.05rem); letter-spacing:-.026em;}
+h2{font-size:clamp(1.42rem,2.4vw,1.8rem); letter-spacing:-.018em;}
 h3{font-family:'Archivo',sans-serif; font-size:1.06rem; font-weight:600; letter-spacing:-.01em;}
 h4{font-family:'Archivo',sans-serif; font-size:.98rem; font-weight:600;}
 p{margin:15px 0 0; max-width:var(--mesure);}
@@ -134,6 +140,13 @@ strong,b{font-weight:600;}
   letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint); margin-top:3px;
 }
 .nav{display:flex; gap:4px 18px; flex-wrap:wrap; margin-left:auto; font-size:.88rem;}
+/* Sur téléphone les quatre entrées débordaient sur une troisième ligne, ce qui
+   repoussait d'autant le premier choix de l'accueil. Réduites, elles tiennent
+   sur une seule. */
+@media(max-width:560px){
+  .site-head .shell{gap:10px; padding-block:12px 11px;}
+  .nav{font-size:.82rem; gap:2px 14px; margin-left:0; width:100%;}
+}
 .nav a{color:var(--ink-muted); text-decoration:none; font-weight:500; padding-block:4px;}
 .nav a:hover{color:var(--ink); text-decoration:underline;}
 .nav a[aria-current="page"]{color:var(--ink); box-shadow:inset 0 -2px 0 var(--gold);}
@@ -197,7 +210,8 @@ strong,b{font-weight:600;}
 .band > .shell > p, .band > .shell-lire > p{color:var(--ink-muted);}
 .hero{padding-block:56px 40px;}
 @media(max-width:560px){ .hero{padding-block:30px 22px;} .band{padding-block:36px;} }
-.hero .lede{margin-top:18px; font-size:1.14rem; max-width:44ch; color:var(--ink);}
+.hero .lede{margin-top:18px; font-size:1.18rem; line-height:1.55; max-width:46ch; color:var(--ink-muted);}
+.hero .lede b{color:var(--ink);}
 
 /* ---------- Formulaires ---------- */
 fieldset{border:none; margin:0; padding:0;}
@@ -321,7 +335,19 @@ td.nombre,th.nombre{text-align:right; font-variant-numeric:tabular-nums; white-s
 .source .maj{color:var(--ink-faint);}
 
 /* ---------- Pages de contenu ---------- */
-.doc{padding-block:46px 30px;}
+/* Colonne de lecture centrée. Avec la seule largeur de .shell (1120 px), le
+   texte — plafonné à 66 caractères — se collait au bord gauche et laissait la
+   moitié droite vide sur un écran large. */
+.doc{max-width:860px; padding-block:46px 30px;}
+/* Exception : le tableau de la page confidentialité a QUATRE colonnes. Réduit
+   à la mesure du texte, il tasse chaque cellule sur cinq lignes. Quand l'écran
+   le permet, il ressort de la colonne de lecture ; en dessous il reprend sa
+   largeur, et sous 700 px il passe en blocs (voir .tableau-adaptatif). */
+/* width:calc(...) et pas seulement des marges négatives : sur une table en
+   width:100%, une marge négative déplace la boîte sans l'élargir. */
+@media(min-width:1180px){
+  .doc .tableau-adaptatif{width:calc(100% + 240px); max-width:none; margin-inline:-120px;}
+}
 .doc h2{margin-top:38px;}
 .doc h3{margin-top:26px;}
 .doc .maj{margin-top:10px; font-size:.86rem; color:var(--ink-faint);}
@@ -376,3 +402,84 @@ main.doc > .fine{margin-top:26px; font-size:.86rem; color:var(--ink-faint);}
 .sources dd{margin:6px 0 0; font-size:.94rem; color:var(--ink-muted);}
 .sources dd b{color:var(--ink); font-weight:600;}
 [data-fill]{background:var(--warn-soft); border-bottom:1px dashed var(--warn-line); padding:1px 3px;}
+
+
+/* ==========================================================================
+   Point de départ — la première question, pas un bouton abstrait
+   --------------------------------------------------------------------------
+   Constat fait en observant deux sites du domaine : celui qui convertit le
+   mieux ne demande pas « commencer », il pose tout de suite un choix concret
+   et facile (« votre bien est une maison ou un appartement ? »), et il annonce
+   ce que l'étape coûte en temps. L'autre fait entrer par la situation du
+   visiteur, nommée dans ses mots, et non par le nom de sa fonctionnalité.
+   Nous reprenons ces deux principes — entrer par la situation, annoncer le
+   coût — sans reprendre leur mise en page : ici chaque départ porte en plus ce
+   qu'il faut avoir sous la main, parce que nos trois outils échouent surtout
+   quand le visiteur n'a pas le bon document devant lui.
+   ========================================================================== */
+.departs{display:grid; gap:14px; margin-top:30px; grid-template-columns:repeat(auto-fit,minmax(278px,1fr));}
+.depart{
+  position:relative; display:flex; flex-direction:column;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+  padding:22px 20px 20px; transition:border-color .15s ease, box-shadow .15s ease;
+}
+.depart:hover{border-color:var(--accent-line); box-shadow:var(--lift);}
+.depart:focus-within{border-color:var(--accent); box-shadow:var(--ring);}
+.depart .situation{
+  font-size:.99rem; font-weight:600; line-height:1.4; color:var(--ink);
+  font-family:'Archivo',sans-serif; letter-spacing:-.008em;
+}
+.depart .quoi{
+  font-family:'Spectral',Georgia,serif; font-size:.82rem; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin-bottom:10px;
+}
+.depart .rend{margin-top:9px; font-size:.93rem; line-height:1.55; color:var(--ink-muted); max-width:none;}
+.depart .cout{
+  display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:14px; padding-top:12px;
+  border-top:1px solid var(--line); font-size:.85rem; color:var(--ink-muted);
+}
+.depart .cout span{display:inline-flex; align-items:baseline; gap:6px;}
+.depart .cout b{color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums;}
+.depart .besoin{
+  margin-top:9px; font-size:.85rem; line-height:1.5; color:var(--ink-muted);
+  padding-left:11px; border-left:2px solid var(--line-strong); max-width:none;
+}
+.depart .besoin b{color:var(--ink); font-weight:600;}
+/* margin-top:auto — les trois boutons s'alignent quel que soit le nombre de
+   lignes du texte au-dessus. Sans cela, la carte la plus courte plaçait son
+   bouton plus haut que ses voisines. */
+.depart .aller{margin-top:auto; padding-top:16px;}
+/* Le lien couvre la carte entière : la cible tactile est la carte, pas le seul
+   bouton. Le bouton reste un vrai lien, donc atteignable au clavier et annoncé
+   comme tel ; ::after n'ajoute aucun élément à l'ordre de tabulation. */
+.depart .aller a::after{content:""; position:absolute; inset:0; border-radius:var(--r-lg);}
+.depart .aller a{width:100%;}
+@media(max-width:560px){ .depart{padding:18px 16px 16px;} }
+
+/* ---------- Ce qu'il vous faut, avant de commencer ---------- */
+.prerequis{
+  margin-top:24px; padding:18px 20px; background:var(--surface);
+  border:1px solid var(--line); border-radius:var(--r-lg);
+}
+.prerequis h2{
+  font-family:'Archivo',sans-serif; font-size:.72rem; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+}
+.prerequis ul{list-style:none; padding:0; margin:12px 0 0; max-width:none;
+  display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(245px,1fr));}
+.prerequis li{margin:0; font-size:.93rem; line-height:1.5; color:var(--ink-muted);}
+.prerequis li b{color:var(--ink); font-weight:600;}
+/* Chaque ligne répond à une question différente — combien de temps, quoi
+   apporter, quoi ne pas chercher. Une étiquette qui la nomme vaut mieux qu'une
+   pastille décorative : au premier coup d'œil, on sait ce qu'on lit. */
+.prerequis li .cle{
+  display:block; margin-bottom:3px;
+  font-family:'Archivo',sans-serif; font-size:.66rem; font-weight:700;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--accent);
+}
+.prerequis li.rien .cle{color:var(--ink-faint);}
+.prerequis .sans{
+  margin-top:14px; padding-top:12px; border-top:1px solid var(--line);
+  font-size:.88rem; color:var(--ink-muted); max-width:none;
+}
+.prerequis .sans b{color:var(--ink);}

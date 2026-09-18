@@ -4,10 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Vérifier sa taxe foncière — outil gratuit</title>
-<meta name="description" content="Repérez gratuitement les informations de votre logement qui méritent d'être vérifiées sur votre fiche d'évaluation, et les démarches possibles. Aucun accès à votre dossier fiscal, aucune promesse de remboursement.">
+<meta name="description" content="Repérez gratuitement ce qui mérite d'être vérifié sur votre fiche d'évaluation, et les démarches possibles. Trois étapes, sans compte. Aucun gain promis.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/taxe-fonciere.html">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230F3D56'/><path d='M8 22V10h4l4 6 4-6h4v12' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 25.5h16' stroke='%238A6520' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
 <link rel="stylesheet" href="base.css">
 <style>
 /* Composants propres à cet outil. Le système de design, les jetons de palette
@@ -103,19 +103,28 @@
       Vous décrivez votre logement. À partir de vos seules réponses, nous signalons ce qui mérite
       d'être vérifié sur votre fiche d'évaluation — et nous le disons aussi quand il n'y a rien.
     </p>
-    <p class="limite-courte">
-      <b>Aucune correction ni aucun remboursement n'est garanti</b>, et nous n'avons aucun accès à votre
-      dossier fiscal. <a href="#limites-outil">Ce que cela signifie exactement</a>.
-    </p>
+    <!-- Ce bloc était auparavant SOUS les boutons : on découvrait qu'il fallait
+         un document après avoir cliqué sur « Commencer ». Il passe avant, avec
+         les trois informations qui décident vraiment de l'entrée : le temps,
+         la pièce à avoir, et ce que l'outil ne fera pas. -->
+    <div class="prerequis">
+      <h2>Avant de commencer</h2>
+      <ul>
+        <li><span class="cle">Combien de temps</span><b>Trois étapes</b>, environ deux minutes avec la
+        fiche sous les yeux.</li>
+        <li><span class="cle">À avoir sous la main</span><b>Votre fiche d'évaluation</b> (formulaire
+        6675-M), si vous l'avez — elle s'obtient gratuitement sur impots.gouv.fr. Sans elle le parcours
+        reste possible, mais aucune surface n'est comparée.</li>
+        <li class="rien"><span class="cle">Inutile de chercher</span>Ni compte, ni pièce jointe, ni
+        paiement. <b>Vos réponses ne quittent pas ce navigateur.</b></li>
+      </ul>
+      <p class="sans"><b>Aucune correction ni aucun remboursement n'est garanti</b>, et nous n'avons
+      aucun accès à votre dossier fiscal. <a href="#limites-outil">Ce que cela signifie exactement</a>.</p>
+    </div>
     <div class="cta-row">
       <button class="btn-primary" id="start-btn">Commencer — 3 étapes</button>
       <a class="btn btn-secondary" href="guide-erreurs-taxe-fonciere.html">Lire le guide d'abord</a>
     </div>
-    <p class="aide" style="max-width:56ch; margin-top:16px">
-      Prévoyez votre <b>fiche d'évaluation (formulaire 6675-M)</b>&nbsp;: environ 2 minutes avec elle sous
-      les yeux. Sans elle, le parcours reste possible mais aucune surface n'est comparée. Elle s'obtient
-      gratuitement sur impots.gouv.fr.
-    </p>
   </section>
 
 <!-- ====================== QUESTIONNAIRE ====================== -->

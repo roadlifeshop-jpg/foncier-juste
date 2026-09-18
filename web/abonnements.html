@@ -4,10 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Suivi des abonnements — coût réel et démarches</title>
-<meta name="description" content="Saisissez vos abonnements et voyez ce qu'ils coûtent par mois et par an, paiements annuels compris. L'outil indique les vérifications utiles avant de résilier, sans affirmer qu'un contrat est résiliable.">
+<meta name="description" content="Ce que vos abonnements coûtent vraiment par mois et par an, paiements annuels compris, et les vérifications utiles avant de résilier. Sans lien bancaire.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/abonnements.html">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230F3D56'/><path d='M8 22V10h4l4 6 4-6h4v12' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 25.5h16' stroke='%238A6520' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
 <link rel="stylesheet" href="base.css">
 <style>
 /* Composants propres à cet outil. */
@@ -80,11 +80,20 @@
       Vous les saisissez à la main&nbsp;; l'outil calcule le coût par mois et par an, paiements annuels
       compris, et indique les vérifications utiles avant de résilier.
     </p>
-    <p class="limite-courte">
-      <b>Aucune connexion bancaire</b>, et nous ne pouvons pas dire qu'un contrat donné est résiliable —
-      cela dépend de ses conditions, que nous ne lisons pas.
-      <a href="#limites-outil">Ce que cela signifie exactement</a>.
-    </p>
+    <div class="prerequis">
+      <h2>Avant de commencer</h2>
+      <ul>
+        <li><span class="cle">Combien de temps</span><b>Trois champs</b> par abonnement — nom, montant,
+        périodicité. Une minute pour le premier.</li>
+        <li><span class="cle">À avoir sous la main</span><b>Échéance et engagement</b>, si vous les
+        connaissez&nbsp;: facultatifs, mais ce sont eux qui ouvrent les vérifications utiles.</li>
+        <li class="rien"><span class="cle">Inutile de chercher</span>Aucun relevé bancaire, aucune connexion
+        à votre banque. <b>La liste reste sur cet appareil.</b></li>
+      </ul>
+      <p class="sans"><b>Nous ne pouvons pas dire qu'un contrat donné est résiliable</b> — cela dépend
+      de ses conditions, que nous ne lisons pas.
+      <a href="#limites-outil">Ce que cela signifie exactement</a>.</p>
+    </div>
   </section>
 
   <section class="shell">
@@ -112,8 +121,10 @@
                 <p class="aide" id="aide-periodicite"></p>
               </div>
               <div class="champ">
-                <label for="f-categorie">Catégorie</label>
+                <label for="f-categorie">Catégorie <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
                 <select id="f-categorie"></select>
+                <div class="aide">Utile surtout pour la téléphonie et l'internet&nbsp;: une règle
+                particulière s'y applique aux engagements de plus de douze mois.</div>
               </div>
               <div class="champ">
                 <label for="f-echeance">Prochaine échéance <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
@@ -273,11 +284,26 @@ Object.entries(PERIODICITES).forEach(([k, p]) => {
   $('f-periodicite').appendChild(o);
 });
 $('f-periodicite').value = 'mensuelle';
+/* Première option neutre, et AUCUNE présélection.
+   Auparavant le formulaire imposait « Streaming, musique, presse » à toute
+   ligne dont l'utilisateur n'avait pas touché ce champ. Deux conséquences,
+   l'une visible, l'autre pas :
+     — la fiche affichait une catégorie que personne n'avait choisie ;
+     — la règle des engagements de plus de douze mois en téléphonie est
+       conditionnée à `categorie === 'telecom'` (voir abonnements.js) : un
+       forfait mobile laissé sur la valeur par défaut perdait donc en silence
+       la seule piste qui le concernait vraiment.
+   Le champ reste facultatif ; c'est l'invention d'une réponse qui ne l'était pas. */
+{
+  const neutre = document.createElement('option');
+  neutre.value = ''; neutre.textContent = '— à préciser';
+  $('f-categorie').appendChild(neutre);
+}
 Object.entries(CATEGORIES).forEach(([k, nom]) => {
   const o = document.createElement('option'); o.value = k; o.textContent = nom;
   $('f-categorie').appendChild(o);
 });
-$('f-categorie').value = 'streaming';
+$('f-categorie').value = '';
 
 function majAidePeriodicite(){
   const k = $('f-periodicite').value;
@@ -329,7 +355,7 @@ function viderForme(){
   ['f-nom','f-montant','f-echeance','f-eng-debut','f-eng-mois'].forEach(i => { $(i).value = ''; });
   ['f-echeance-lue','f-eng-debut-lue'].forEach(i => { $(i).hidden = true; });
   $('f-en-ligne').checked = false; $('f-recent').checked = false;
-  $('f-periodicite').value = 'mensuelle'; $('f-categorie').value = 'streaming';
+  $('f-periodicite').value = 'mensuelle'; $('f-categorie').value = '';
   majAidePeriodicite();
   enEdition = null;
   $('forme-titre').textContent = 'Ajouter un abonnement';
@@ -426,7 +452,7 @@ function rendre(){
       <div class="abo-tete">
         <div>
           <span class="abo-nom">${ech(l.nom)}</span>
-          <span class="abo-cat">${ech(CATEGORIES[l.categorie] || '')} · ${ech(euros(l.montant))} ${ech(p.nom)}</span>
+          <span class="abo-cat">${l.categorie && CATEGORIES[l.categorie] ? ech(CATEGORIES[l.categorie]) + ' · ' : ''}${ech(euros(l.montant))} ${ech(p.nom)}</span>
         </div>
         <div class="abo-cout">
           <span class="m">${euros(mensuelCentimes(l.montant, l.periodicite))}</span>

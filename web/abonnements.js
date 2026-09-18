@@ -227,6 +227,18 @@ function pistes(ligne, aujourdhui) {
           : "Avant la fin du douzième mois, la totalité des mensualités restant dues sur cette première période peut vous être réclamée ; seule la fraction postérieure au douzième mois bénéficie de la réduction à 25 %. Plusieurs situations suppriment tout frais : motif légitime, modification du contrat par l'opérateur, dysfonctionnement durable du service.",
       });
     }
+    // La règle ci-dessus est conditionnée à la catégorie « télécom ». Tant que
+    // la catégorie n'est pas renseignée, nous ne pouvons ni l'appliquer ni la
+    // taire : l'appliquer serait affirmer une qualification que l'utilisateur
+    // n'a pas donnée, la taire ferait disparaître sans bruit la seule règle
+    // vraiment utile à ce stade. On le dit donc, sans rien conclure.
+    else if (!ligne.categorie && eng.dureeMois > 12) {
+      out.push({
+        type: 'verification', regle: null,
+        titre: "Une règle particulière existe pour la téléphonie et l'internet",
+        texte: "Vous n'avez pas indiqué la catégorie de cet abonnement. S'il s'agit d'un contrat de téléphonie ou d'accès à internet, un engagement de plus de douze mois obéit à une règle de calcul spécifique en cas de rupture anticipée. Précisez la catégorie pour l'afficher : nous ne l'appliquons pas d'office, parce que rien ne nous dit que ce contrat en relève.",
+      });
+    }
   } else if (eng && eng.termine) {
     out.push({
       type: 'fait', regle: null,
