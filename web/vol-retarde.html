@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vol retardé : quelle indemnisation possible</title>
+<meta name="description" content="Deux questions pour savoir si le règlement européen couvre votre vol retardé, puis le montant forfaitaire prévu. Gratuit, sans compte, sans commission.">
+<link rel="canonical" href="https://foncier-juste.vercel.app/vol-retarde.html">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="base.css">
+<style>
+.forme-vol{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px 20px;}
+@media(max-width:560px){ .forme-vol{padding:18px 16px;} }
+.etage{border-top:1px solid var(--line); margin-top:22px; padding-top:20px;}
+.etage:first-of-type{border-top:none; margin-top:0; padding-top:0;}
+.etage-num{font-family:'Archivo',sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--gold);}
+.orientation{margin-top:20px; padding:18px 20px; border-radius:var(--r-lg); border:1px solid var(--accent-line); background:var(--accent-soft);}
+.orientation h2{font-size:1.15rem;}
+.orientation p{font-size:.94rem; color:var(--ink-muted); margin-top:8px;}
+.orientation .suite{margin-top:12px; padding-top:12px; border-top:1px solid var(--accent-line);}
+.orientation.ferme{border-color:var(--line-strong); background:var(--surface-2);}
+.repere{font-size:.84rem; color:var(--ink-faint); margin-top:5px;}
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="shell">
+    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Vérifier ce que vous payez</small></a>
+    <nav class="nav" aria-label="Outils">
+      <a href="vol-retarde.html" aria-current="page">Vol retardé</a>
+      <a href="abonnements.html">Dépense mensuelle</a>
+      <a href="taxe-fonciere.html">Taxe foncière</a>
+      <a href="sources.html">Sources</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero shell">
+    <div class="eyebrow">Gratuit, sans inscription, sans commission</div>
+    <h1>Votre vol est arrivé en retard&nbsp;: que pouvez-vous réclamer&nbsp;?</h1>
+    <p class="lede">
+      Deux questions suffisent pour savoir si le règlement européen couvre votre vol. Le montant,
+      lui, dépend de la distance&nbsp;: nous le demandons ensuite, plutôt que de le deviner.
+    </p>
+    <div class="prerequis">
+      <h2>Avant de commencer</h2>
+      <ul>
+        <li><span class="cle">Combien de temps</span><b>Deux questions</b>, puis trois de plus si le
+        règlement s'applique. Moins de deux minutes.</li>
+        <li><span class="cle">À avoir sous la main</span><b>L'heure d'arrivée prévue</b> sur votre
+        réservation et l'heure d'arrivée réelle. C'est le retard <b>à l'arrivée</b> qui compte, pas
+        celui au départ.</li>
+        <li class="rien"><span class="cle">Inutile de chercher</span>Ni compte, ni numéro de dossier, ni
+        billet à téléverser. <b>Vos réponses ne quittent pas ce navigateur.</b></li>
+      </ul>
+      <p class="sans"><b>Le montant que nous affichons est celui du barème, pas une somme promise&nbsp;:</b>
+      la compagnie peut s'en exonérer si elle prouve une circonstance extraordinaire, et nous ne pouvons
+      pas savoir pourquoi votre vol a été retardé. <a href="#limites-outil">Ce que cela signifie
+      exactement</a>.</p>
+    </div>
+  </section>
+
+  <section class="shell-lire">
+    <form class="forme-vol" id="forme-vol" novalidate>
+
+      <div class="etage">
+        <div class="etage-num">Étape 1 — première orientation</div>
+        <div class="champ">
+          <label for="v-depart">D'où partait le vol&nbsp;?</label>
+          <select id="v-depart"></select>
+          <div class="aide">Le règlement s'applique au départ de ces pays quelle que soit la compagnie.</div>
+        </div>
+        <div class="champ" id="v-zone-compagnie" hidden>
+          <label for="v-compagnie">La compagnie qui a opéré le vol était-elle européenne&nbsp;?</label>
+          <select id="v-compagnie">
+            <option value="oui">Oui — compagnie de l'UE, de Norvège, d'Islande ou de Suisse</option>
+            <option value="non">Non</option>
+            <option value="inconnu">Je ne sais pas</option>
+          </select>
+          <div class="aide">Au départ d'un pays tiers, le règlement ne joue que si la compagnie qui
+          exploite réellement le vol est européenne — et le vol doit arriver dans l'un de ces pays.</div>
+        </div>
+        <div class="champ">
+          <label for="v-retard">Quel retard à l'arrivée à votre destination finale&nbsp;?</label>
+          <select id="v-retard"></select>
+          <div class="aide">L'écart entre l'heure d'arrivée prévue sur la réservation et l'heure
+          d'arrivée réelle. Pour un voyage à correspondances réservé en une seule fois, c'est l'arrivée
+          du dernier vol qui compte.</div>
+        </div>
+        <div class="cta-row">
+          <button type="button" class="btn-primary" id="v-orienter">Voir la première orientation</button>
+        </div>
+      </div>
+
+      <div id="v-orientation" hidden></div>
+
+      <div class="etage" id="v-etage-2" hidden>
+        <div class="etage-num">Étape 2 — les informations qui déterminent le montant</div>
+        <div class="champ">
+          <label for="v-tranche">Quelle distance, du départ du premier vol à votre destination finale&nbsp;?</label>
+          <select id="v-tranche"></select>
+          <div class="repere" id="v-repere-tranche"></div>
+          <div class="aide">Le règlement retient la distance orthodromique. Si vous ne savez pas, choisissez
+          « je ne sais pas »&nbsp;: nous afficherons la fourchette plutôt qu'un montant deviné.</div>
+        </div>
+        <div class="champ" id="v-zone-intra" hidden>
+          <label for="v-intra">Ce vol restait-il à l'intérieur de l'Union européenne&nbsp;?</label>
+          <select id="v-intra">
+            <option value="">— à préciser</option>
+            <option value="oui">Oui — par exemple entre la métropole et un département d'outre-mer</option>
+            <option value="non">Non — le vol sortait de l'Union</option>
+          </select>
+          <div class="aide">Au-delà de 3 500 km, cette réponse change le montant&nbsp;: 400 € pour un vol
+          intracommunautaire, 300 ou 600 € sinon.</div>
+        </div>
+        <div class="champ">
+          <label for="v-arrive">Avez-vous effectué le voyage&nbsp;?</label>
+          <select id="v-arrive">
+            <option value="oui">Oui, je suis arrivé à destination</option>
+            <option value="non">Non, j'ai renoncé au voyage</option>
+          </select>
+          <div class="aide">Aucune indemnisation forfaitaire n'est due si vous avez renoncé sans atteindre
+          la destination avec au moins trois heures de retard.</div>
+        </div>
+        <div class="champ">
+          <label for="v-date">Date du vol <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
+          <input type="date" id="v-date">
+          <p class="aide date-lue" id="v-date-lue" hidden></p>
+          <p class="aide">Sert uniquement à situer le délai de recours, qui est de cinq ans en France.</p>
+          <p class="erreur-champ" id="v-e-date" hidden></p>
+        </div>
+        <div class="cta-row">
+          <button type="submit" class="btn-primary">Voir le montant possible</button>
+          <button type="button" class="btn-secondary" id="v-reset">Tout recommencer</button>
+        </div>
+      </div>
+
+    </form>
+  </section>
+
+  <section class="shell" id="v-resultat" hidden aria-live="polite">
+    <div class="r4" id="v-r4"></div>
+  </section>
+
+  <section class="band pale" id="limites-outil" style="margin-top:44px">
+    <div class="shell-lire">
+      <div class="eyebrow">Les limites, en entier</div>
+      <h2>Ce que cet outil ne fait pas</h2>
+      <p><b>Il ne dit pas que vous serez payé.</b> Le règlement fixe un barème&nbsp;; il laisse à la
+      compagnie la possibilité de s'en exonérer si elle prouve une circonstance extraordinaire qui
+      n'aurait pas pu être évitée. Le motif réel du retard ne nous est pas accessible&nbsp;: c'est la
+      seule inconnue qui peut ramener le montant à zéro.</p>
+      <p><b>Il ne calcule aucune distance.</b> Il faudrait un référentiel d'aéroports que nous ne
+      pourrions ni maintenir ni justifier, et une distance approchée donnerait un montant faux. Vous
+      choisissez la tranche&nbsp;; si vous ne la connaissez pas, nous affichons la fourchette.</p>
+      <p><b>Il n'engage aucune démarche à votre place</b> et ne prélève aucune commission. Des sociétés
+      privées proposent de réclamer pour vous en retenant une part de l'indemnisation&nbsp;: la démarche
+      auprès de la compagnie est gratuite et n'exige aucun intermédiaire.</p>
+      <p><b>Il ne traite que l'indemnisation forfaitaire.</b> Les frais de restauration et d'hébergement
+      dus pendant l'attente, le remboursement du billet en cas de renoncement au-delà de cinq heures, et
+      la réparation d'un préjudice prouvé au titre de la convention de Montréal suivent d'autres règles,
+      signalées mais non calculées ici.</p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="shell-lire">
+      <div class="eyebrow">Les règles applicables</div>
+      <h2>Ce que disent les textes, et à quelle date nous l'avons vérifié</h2>
+      <p>Relevé le 18 septembre 2026 auprès de la DGAC — l'organisme chargé en France de faire respecter
+      ce règlement — et recoupé avec le texte publié sur EUR-Lex.</p>
+      <div id="v-regles"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="shell">
+    <div class="cols">
+      <div><h4>Les outils</h4><ul>
+        <li><a href="vol-retarde.html">Vol retardé</a></li>
+        <li><a href="abonnements.html">Dépense mensuelle</a></li>
+        <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
+        <li><a href="garanties.html">Garanties après achat</a></li></ul></div>
+      <div><h4>Comprendre</h4><ul>
+        <li><a href="guide-erreurs-taxe-fonciere.html">Erreurs fréquentes de taxe foncière</a></li>
+        <li><a href="resilier-un-abonnement.html">Résilier un abonnement</a></li>
+        <li><a href="produit-defectueux-que-faire.html">Un produit tombe en panne</a></li>
+        <li><a href="sources.html">Toutes les sources</a></li></ul></div>
+      <div><h4>Le site</h4><ul>
+        <li><a href="mentions-legales.html">Mentions légales</a></li>
+        <li><a href="confidentialite.html">Confidentialité</a></li></ul></div>
+    </div>
+    <p class="fine">Service d'information gratuit. Ne constitue ni un conseil juridique personnalisé, ni
+    une garantie de résultat.</p>
+  </div>
+</footer>
+
+<script src="regles.js"></script>
+<script src="vol.js"></script>
+<script src="resultat4.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const AUJ = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+
+/* Repères concrets sous la tranche choisie. Ce sont des ordres de grandeur
+   destinés à aider quelqu'un à se situer, pas des distances officielles :
+   le texte le dit, et aucun montant n'en dépend directement. */
+const REPERES = {
+  courte:   "Ordre de grandeur : Paris–Barcelone, Paris–Berlin, Lyon–Rome.",
+  moyenne:  "Ordre de grandeur : Paris–Athènes, Paris–Marrakech, Paris–Moscou.",
+  longue:   "Ordre de grandeur : Paris–New York, Paris–Dakar, Paris–Fort-de-France.",
+  inconnue: "Aucun montant ne sera affiché : nous donnerons la fourchette et la question à trancher.",
+};
+
+function remplirV(id, table){
+  const sel = $(id);
+  Object.entries(table).forEach(([k, v]) => {
+    const o = document.createElement('option'); o.value = k; o.textContent = v; sel.appendChild(o);
+  });
+}
+remplirV('v-depart', VOL_DEPARTS);
+remplirV('v-retard', VOL_RETARDS);
+remplirV('v-tranche', VOL_TRANCHES);
+$('v-regles').innerHTML = ['vol-champ','vol-montants','vol-exoneration','vol-demarche','vol-reforme-2026'].map(citer).join('');
+
+function majDepart(){
+  $('v-zone-compagnie').hidden = $('v-depart').value !== 'tiers';
+}
+$('v-depart').addEventListener('change', majDepart); majDepart();
+
+function majTranche(){
+  const t = $('v-tranche').value;
+  $('v-repere-tranche').textContent = REPERES[t] || '';
+  $('v-zone-intra').hidden = t !== 'longue';
+}
+$('v-tranche').addEventListener('change', majTranche); majTranche();
+
+function relireDateV(){
+  const d = versDateV($('v-date').value), p = $('v-date-lue');
+  if (!d){ p.hidden = true; return; }
+  p.textContent = 'Date comprise : ' + d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) + '.';
+  p.hidden = false;
+}
+['change','input'].forEach(e => $('v-date').addEventListener(e, relireDateV));
+
+function lireForme(){
+  const depart = $('v-depart').value;
+  return {
+    depart,
+    compagnieEuropeenne: depart === 'tiers' ? ($('v-compagnie').value === 'oui') : null,
+    retard: $('v-retard').value,
+    tranche: $('v-tranche').value,
+    intraUE: $('v-tranche').value === 'longue'
+      ? ($('v-intra').value === 'oui' ? true : $('v-intra').value === 'non' ? false : null)
+      : null,
+    arrive: $('v-arrive').value === 'oui',
+    dateVol: $('v-date').value || null,
+  };
+}
+
+/* ---- Étape 1 : l'orientation, sans aucun montant ---- */
+$('v-orienter').addEventListener('click', () => {
+  const r = lireForme();
+  const o = orientationRapide(r);
+  const zone = $('v-orientation');
+  if (o.etat === 'incomplet'){
+    zone.innerHTML = `<div class="orientation ferme"><h2>Il manque une réponse</h2>
+      <p>Indiquez si la compagnie qui a opéré le vol était européenne : au départ d'un pays tiers,
+      c'est cette réponse qui détermine si le règlement s'applique.</p></div>`;
+    zone.hidden = false; $('v-etage-2').hidden = true;
+    zone.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  const ouvre = o.etat === 'ouvert' || o.etat === 'a-mesurer';
+  zone.innerHTML = `<div class="orientation${ouvre ? '' : ' ferme'}">
+    <h2>${o.titre}</h2>
+    <p>${o.texte}</p>
+    ${o.suite ? `<div class="suite"><p style="margin:0">${o.suite}</p></div>` : ''}
+    ${ouvre ? '' : `<p style="margin-top:12px"><b>Vous pouvez tout de même voir le détail</b> :
+      le résultat ci-dessous indique ce qui reste possible et la démarche gratuite correspondante.</p>`}
+  </div>`;
+  zone.hidden = false;
+  $('v-etage-2').hidden = false;
+  if (!ouvre) afficher();
+  zone.scrollIntoView({ behavior:'smooth', block:'center' });
+});
+
+/* ---- Étape 2 : le résultat complet ---- */
+function afficher(){
+  const res = orienterVol(lireForme(), AUJ);
+  const err = $('v-e-date');
+  if (res.invalide){ err.textContent = res.invalide; err.hidden = false; return; }
+  err.hidden = true;
+  $('v-r4').innerHTML = rendreResultat4(res);
+  $('v-resultat').hidden = false;
+  try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'resultat_affiche' })], { type: 'application/json' })); } catch (_) {}
+}
+
+$('forme-vol').addEventListener('submit', ev => { ev.preventDefault(); afficher();
+  $('v-resultat').scrollIntoView({ behavior:'smooth', block:'start' }); });
+
+$('v-reset').addEventListener('click', () => {
+  $('forme-vol').reset();
+  majDepart(); majTranche(); relireDateV();
+  $('v-orientation').hidden = true; $('v-etage-2').hidden = true; $('v-resultat').hidden = true;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dépense·Juste — vérifier ce que vous payez</title>
-<meta name="description" content="Trois outils gratuits pour vérifier ce que vous payez : taxe foncière, abonnements, garanties après achat. Sans compte, sans paiement, sans accès bancaire.">
+<meta name="description" content="Vérifiez une somme que vous pourriez récupérer ou économiser, puis sachez quoi faire : vol retardé, dépense mensuelle, taxe foncière. Gratuit, sans compte.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
@@ -21,7 +21,7 @@
    supprimés : ils descendent dans leur propre bande, après le choix, où ils
    font leur vrai travail — montrer la forme d'un résultat. */
 .hero-accueil{padding-block:52px 30px;}
-.hero-accueil h1{max-width:19ch;}
+.hero-accueil h1{max-width:30ch;}
 @media(max-width:560px){ .hero-accueil{padding-block:22px 16px;} }
 
 .exemples{display:grid; gap:16px; margin-top:26px; grid-template-columns:repeat(auto-fit,minmax(285px,1fr));}
@@ -53,9 +53,9 @@
   <div class="shell">
     <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Vérifier ce que vous payez</small></a>
     <nav class="nav" aria-label="Outils">
+      <a href="vol-retarde.html">Vol retardé</a>
+      <a href="abonnements.html">Dépense mensuelle</a>
       <a href="taxe-fonciere.html">Taxe foncière</a>
-      <a href="abonnements.html">Abonnements</a>
-      <a href="garanties.html">Garanties</a>
       <a href="sources.html">Sources</a>
     </nav>
   </div>
@@ -64,104 +64,112 @@
 <main>
   <section class="hero-accueil shell">
     <div class="eyebrow">Trois outils gratuits</div>
-    <h1>Vérifier ce que vous payez, avant de payer plus</h1>
+    <h1>Vérifiez une somme que vous pourriez récupérer ou économiser, puis sachez quoi faire</h1>
     <p class="lede">
-      Une dépense se reconduit sans qu'on la revoie, un droit s'éteint sans qu'on l'exerce. Ces
-      outils calculent à partir de ce que vous saisissez et indiquent la démarche qui existe.
-      <b>Sans compte, sans paiement, sans accès à vos comptes bancaires.</b>
+      Chaque outil part de ce que vous saisissez, dit ce que le chiffre obtenu vaut — un montant fixé
+      par un texte, un coût constaté, ou une hypothèse — et donne la démarche gratuite qui suit.
+      <b>Sans compte, sans paiement, sans commission.</b>
     </p>
 
     <h2 class="sr">Choisissez votre situation</h2>
     <div class="departs">
 
       <article class="depart">
+        <div class="quoi">Vol retardé</div>
+        <p class="situation">«&nbsp;Mon vol est arrivé avec plus de trois heures de retard.&nbsp;»</p>
+        <p class="rend">Deux questions pour savoir si le règlement européen s'applique, puis le montant
+        forfaitaire qu'il prévoit — et la seule inconnue qui peut le ramener à zéro.</p>
+        <p class="somme-type"><b>Somme possible&nbsp;:</b> de 250 à 600 €, montant fixé par le règlement
+        (CE) n° 261/2004.</p>
+        <div class="cout">
+          <span><b>2</b> questions, puis 3</span>
+          <span><b>2</b> minutes environ</span>
+        </div>
+        <p class="besoin"><b>Sous la main&nbsp;:</b> l'heure d'arrivée prévue et l'heure réelle. C'est le
+        retard à l'arrivée qui compte, pas celui au départ.</p>
+        <div class="aller"><a class="btn btn-primary" href="vol-retarde.html">Vérifier mon vol</a></div>
+      </article>
+
+      <article class="depart">
+        <div class="quoi">Dépense mensuelle</div>
+        <p class="situation">«&nbsp;Je paie un contrat dont je ne connais pas le coût réel.&nbsp;»</p>
+        <p class="rend">Un contrat à la fois&nbsp;: ce qu'il coûte sur douze mois, ce que son arrêt
+        représenterait, et le cas précis où une part déjà payée peut être réclamée.</p>
+        <p class="somme-type"><b>Deux sommes, séparées&nbsp;:</b> le coût annuel, qui est un fait&nbsp;;
+        le remboursement possible, qui dépend d'une condition à vérifier.</p>
+        <div class="cout">
+          <span><b>3</b> champs</span>
+          <span><b>1</b> minute</span>
+        </div>
+        <p class="besoin"><b>Sous la main&nbsp;:</b> le montant et la périodicité. L'échéance, si vous la
+        connaissez, ouvre la question du remboursement.</p>
+        <div class="aller"><a class="btn btn-primary" href="abonnements.html">Calculer ce que je paie</a></div>
+      </article>
+
+      <article class="depart">
         <div class="quoi">Taxe foncière</div>
-        <p class="situation">«&nbsp;Mon avis de taxe foncière vient d'arriver, et je le trouve élevé.&nbsp;»</p>
+        <p class="situation">«&nbsp;Ma taxe foncière me paraît élevée.&nbsp;»</p>
         <p class="rend">Signale ce qui mérite d'être vérifié sur votre fiche d'évaluation, avec la
         démarche et son délai — et répond aussi qu'il n'y a rien à signaler, quand c'est le cas.</p>
+        <p class="somme-type sans"><b>Aucune somme&nbsp;: non chiffrable.</b> Seule l'administration peut
+        recalculer une valeur locative. L'outil dit quoi vérifier, pas combien vous récupérerez.</p>
         <div class="cout">
           <span><b>3</b> étapes</span>
           <span><b>2</b> minutes environ</span>
         </div>
         <p class="besoin"><b>Sous la main&nbsp;:</b> votre fiche d'évaluation 6675-M, si vous l'avez.
-        Sans elle le diagnostic reste possible, mais limité — et l'outil vous le dit.</p>
+        Sans elle le diagnostic reste possible, mais limité.</p>
         <div class="aller"><a class="btn btn-primary" href="taxe-fonciere.html">Vérifier ma taxe foncière</a></div>
       </article>
 
-      <article class="depart">
-        <div class="quoi">Abonnements et contrats</div>
-        <p class="situation">«&nbsp;Je ne sais plus vraiment ce que je paie chaque mois.&nbsp;»</p>
-        <p class="rend">Calcule ce que vos abonnements coûtent par mois et par an, paiements annuels
-        compris, et indique pour chaque ligne les vérifications qui comptent avant de résilier.</p>
-        <div class="cout">
-          <span><b>3</b> champs par ligne</span>
-          <span><b>1</b> minute pour la première</span>
-        </div>
-        <p class="besoin"><b>Sous la main&nbsp;:</b> le montant de chaque abonnement. Échéance et
-        durée d'engagement ouvrent des vérifications de plus, sans être obligatoires.</p>
-        <div class="aller"><a class="btn btn-primary" href="abonnements.html">Faire le point</a></div>
-      </article>
-
-      <article class="depart">
-        <div class="quoi">Garanties et réparation</div>
-        <p class="situation">«&nbsp;Ce que j'ai acheté est tombé en panne, et je ne sais pas ce que je peux
-        demander.&nbsp;»</p>
-        <p class="rend">Situe votre achat dans les délais légaux et liste les voies encore ouvertes —
-        rétractation, garantie légale, vice caché — avec les pièces à réunir.</p>
-        <div class="cout">
-          <span><b>6</b> questions</span>
-          <span><b>2</b> minutes environ</span>
-        </div>
-        <p class="besoin"><b>Sous la main&nbsp;:</b> la date d'achat, et celle de livraison si elle
-        diffère — c'est la livraison qui fait courir les délais, pas le paiement.</p>
-        <div class="aller"><a class="btn btn-primary" href="garanties.html">Voir mes recours</a></div>
-      </article>
-
     </div>
+
+    <p class="limite-courte" style="margin-top:26px">
+      <b>Aucun de ces montants n'est une somme promise.</b> Nous n'avons accès à aucun dossier&nbsp;:
+      ni votre réservation, ni votre contrat, ni votre avis d'imposition. Chaque chiffre affiché porte
+      son degré de certitude, et aucun outil ne dit qu'une démarche aboutira.
+    </p>
   </section>
 
   <section class="band">
     <div class="shell">
       <div class="eyebrow">À quoi ressemble un résultat</div>
-      <h2>Trois exemples, et ce qu'ils ne disent pas</h2>
-      <p>Ces trois situations sont inventées pour montrer la forme d'un résultat. Aucune ne provient
-      d'un cas réel, et le site n'affiche ni avis, ni témoignage, ni statistique de réussite.</p>
+      <h2>Les trois résultats ont la même charpente</h2>
+      <p>Quatre cases, toujours dans le même ordre&nbsp;: le constat, la somme éventuelle avec son degré
+      de certitude, ce qu'il reste à vérifier, et la prochaine action gratuite. Les situations ci-dessous
+      sont inventées pour montrer la forme d'un résultat. Aucune ne provient d'un cas réel, et le site
+      n'affiche ni avis, ni témoignage, ni statistique de réussite.</p>
       <div class="exemples">
 
         <article class="exemple">
           <span class="marque">Exemple fictif</span>
+          <h3>Paris–New York, arrivé cinq heures en retard</h3>
+          <p><span class="dit">Somme éventuelle&nbsp;:</span> 600 €, <b>montant fixé par un texte</b> —
+          c'est ce que le règlement prévoit pour cette distance et ce retard.</p>
+          <p><span class="pas">Ce que l'outil ne dit pas&nbsp;:</span> si la compagnie paiera. Elle peut
+          s'en exonérer en prouvant une circonstance extraordinaire, et le motif réel du retard ne nous
+          est pas accessible.</p>
+        </article>
+
+        <article class="exemple">
+          <span class="marque">Exemple fictif</span>
+          <h3>Un abonnement presse à 99 € par an</h3>
+          <p><span class="dit">Deux sommes, séparées&nbsp;:</span> 99 € par an que son arrêt
+          supprimerait — <b>une hypothèse</b> — et 17 € déjà payés pour la période non courue, dont le
+          remboursement est prévu <b>si</b> l'information avant reconduction n'a pas été donnée.</p>
+          <p><span class="pas">Ce que l'outil ne dit pas&nbsp;:</span> si cette information vous a été
+          envoyée. C'est la seule chose qui ouvre ce remboursement, et nous ne pouvons pas la
+          vérifier.</p>
+        </article>
+
+        <article class="exemple">
+          <span class="marque">Exemple fictif</span>
           <h3>Une piscine comblée qui compte toujours</h3>
-          <p>Déclarée à la construction, comblée depuis, elle figure encore sur la fiche d'évaluation.
-          Elle n'apparaît sur aucune ligne de l'avis&nbsp;: elle entre dans le calcul de la valeur
-          locative sous forme d'équivalence de surface.</p>
-          <p><span class="dit">Ce que l'outil dit&nbsp;:</span> l'élément est à vérifier sur la fiche,
-          voici les pièces qui datent une disparition et le délai de réclamation.</p>
-          <p><span class="pas">Ce qu'il ne dit pas&nbsp;:</span> combien vous récupérerez. Cela dépend
-          d'un recalcul que seule l'administration peut faire.</p>
-        </article>
-
-        <article class="exemple">
-          <span class="marque">Exemple fictif</span>
-          <h3>Un paiement annuel qui fausse le total</h3>
-          <p>Quatre abonnements saisis, dont un payé 99&nbsp;€ une fois par an — invisible onze mois sur
-          douze sur un relevé.</p>
-          <p><span class="dit">Ce que l'outil dit&nbsp;:</span> le total réel est de 47,25&nbsp;€ par mois
-          et 567&nbsp;€ par an&nbsp;; l'un des contrats arrive à échéance dans deux mois, période pendant
-          laquelle l'information sur la non-reconduction doit vous parvenir.</p>
-          <p><span class="pas">Ce qu'il ne dit pas&nbsp;:</span> qu'un contrat donné est résiliable. Cela
-          dépend de ses conditions, que nous ne lisons pas.</p>
-        </article>
-
-        <article class="exemple">
-          <span class="marque">Exemple fictif</span>
-          <h3>Une panne au quatorzième mois</h3>
-          <p>Un lave-linge acheté neuf en magasin s'arrête de fonctionner quatorze mois après la
-          livraison.</p>
-          <p><span class="dit">Ce que l'outil dit&nbsp;:</span> on est dans les deux ans de la garantie
-          légale de conformité et dans la présomption de vingt-quatre mois&nbsp;; c'est donc au vendeur
-          de démontrer que le défaut n'existait pas à la livraison. Voici les pièces à réunir.</p>
-          <p><span class="pas">Ce qu'il ne dit pas&nbsp;:</span> si la demande aboutira. La cause réelle
-          de la panne nous est inconnue.</p>
+          <p><span class="dit">Somme éventuelle&nbsp;:</span> <b>non chiffrable</b>. L'élément figure
+          peut-être encore sur la fiche d'évaluation, sous forme d'équivalence de surface&nbsp;; le
+          recalcul n'appartient qu'à l'administration.</p>
+          <p><span class="pas">Ce que l'outil ne dit pas&nbsp;:</span> combien vous récupérerez. Il dit
+          quelles pièces datent une disparition, et dans quel délai réclamer.</p>
         </article>
 
       </div>
@@ -246,14 +254,11 @@
 <footer class="site-foot">
   <div class="shell">
     <div class="cols">
-      <div>
-        <h4>Les trois outils</h4>
-        <ul>
-          <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
-          <li><a href="abonnements.html">Abonnements et contrats</a></li>
-          <li><a href="garanties.html">Garanties et réparation</a></li>
-        </ul>
-      </div>
+      <div><h4>Les outils</h4><ul>
+        <li><a href="vol-retarde.html">Vol retardé</a></li>
+        <li><a href="abonnements.html">Dépense mensuelle</a></li>
+        <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
+        <li><a href="garanties.html">Garanties après achat</a></li></ul></div>
       <div>
         <h4>Comprendre</h4>
         <ul>

@@ -241,6 +241,73 @@ SCRIPT_TESTS = r"""
                  engagementDebut: reculeMois(AUJ, 18), engagementMois: 24 }, AUJ)
           .some(p => p.regle === 'engagement-telecom'));
 
+  /* ================= VOL RETARDÉ =================
+     Le barème du règlement (CE) n° 261/2004, tel que la DGAC le présente au
+     18/09/2026. C'est le seul endroit du site qui affiche un montant : il est
+     testé palier par palier, y compris le cas intracommunautaire de plus de
+     3 500 km, qui vaut 400 € et non 600 €. */
+  const vol = (o) => orienterVol(Object.assign({
+    depart:'ue', compagnieEuropeenne:null, retard:'plus4', tranche:'courte',
+    intraUE:null, arrive:true, dateVol:null }, o), AUJ);
+
+  eq("vol ≤1500 km, retard 3-4 h -> 250 €",  montantForfaitaire({tranche:'courte', intraUE:false, retard:'de3a4'}), 250);
+  eq("vol ≤1500 km, retard >4 h -> 250 €",   montantForfaitaire({tranche:'courte', intraUE:false, retard:'plus4'}), 250);
+  eq("vol 1500-3500 km -> 400 €",            montantForfaitaire({tranche:'moyenne', intraUE:false, retard:'de3a4'}), 400);
+  eq("vol >3500 km hors UE, 3-4 h -> 300 €", montantForfaitaire({tranche:'longue', intraUE:false, retard:'de3a4'}), 300);
+  eq("vol >3500 km hors UE, >4 h -> 600 €",  montantForfaitaire({tranche:'longue', intraUE:false, retard:'plus4'}), 600);
+  eq("vol >3500 km INTRA-UE -> 400 €",       montantForfaitaire({tranche:'longue', intraUE:true,  retard:'plus4'}), 400);
+  eq("tranche inconnue -> aucun montant",    montantForfaitaire({tranche:'inconnue', intraUE:false, retard:'plus4'}), null);
+  eq(">3500 km sans savoir si intra-UE -> aucun montant",
+     montantForfaitaire({tranche:'longue', intraUE:null, retard:'plus4'}), null);
+
+  vrai("retard sous 3 h : aucun montant et étiquette « exclu »",
+       vol({retard:'moins3'}).somme.montant === null && vol({retard:'moins3'}).somme.certitude === 'exclu');
+  vrai("départ hors UE sur compagnie non européenne : hors champ",
+       vol({depart:'tiers', compagnieEuropeenne:false}).rapide.etat === 'hors-champ');
+  vrai("départ hors UE sur compagnie européenne : dans le champ",
+       vol({depart:'tiers', compagnieEuropeenne:true}).rapide.etat === 'ouvert');
+  vrai("voyage non effectué : aucun montant",
+       vol({arrive:false}).somme.montant === null);
+  vrai("tranche connue et retard ≥3 h : le montant porte l'étiquette « barème »",
+       vol({}).somme.certitude === 'barème' && vol({}).somme.montant === 250);
+  vrai("tranche inconnue : fourchette annoncée, jamais un montant",
+       vol({tranche:'inconnue'}).somme.montant === null &&
+       /250/.test(vol({tranche:'inconnue'}).somme.texte) && /600/.test(vol({tranche:'inconnue'}).somme.texte));
+
+  /* Prescription : cinq ans à compter de l'incident (DGAC). Un vol trop ancien
+     ne doit PAS afficher un montant présenté comme fixé par un texte. */
+  const volVieux = vol({dateVol:'2019-03-01'});
+  vrai("vol de plus de cinq ans : marqué prescrit", volVieux.prescrit === true);
+  vrai("vol prescrit : le montant n'est plus présenté comme dû",
+       volVieux.somme.montant === null && volVieux.somme.certitude === 'exclu' && /hors délai/.test(volVieux.somme.texte));
+  vrai("vol prescrit : le constat commence par le délai dépassé",
+       /Délai de recours dépassé/.test(volVieux.constat[0].titre));
+  const volRecent = vol({dateVol:'2026-06-10'});
+  vrai("vol récent : non prescrit, délai restant positif",
+       volRecent.prescrit === false && volRecent.joursRestants > 0);
+  vrai("date de vol future refusée", typeof vol({dateVol:'2027-01-01'}).invalide === 'string');
+
+  vrai("aucune piste n'affirme que la compagnie paiera",
+       [...vol({}).verification, ...vol({}).action].every(x => !/vous serez indemnisé|la compagnie paiera|vous obtiendrez/i.test(x.texte)));
+  vrai("le motif du retard est toujours signalé comme l'inconnue décisive",
+       vol({}).verification.some(v => v.regle === 'vol-exoneration'));
+  vrai("la démarche citée est gratuite et sans intermédiaire",
+       vol({}).action.some(a => a.gratuit === true) &&
+       vol({}).limites.some(l => /commission|intermédiaire/i.test(l)));
+
+  /* ---- Registre : les règles aériennes sont datées et sourcées ---------- */
+  vrai("règle des montants : source DGAC et source secondaire EUR-Lex",
+       /aviation-civile\.gouv\.fr/.test(REGLES['vol-montants'].source.url) &&
+       /eur-lex/.test(REGLES['vol-montants'].source_secondaire.url));
+  vrai("règle des montants : la divergence entre sources officielles est signalée",
+       REGLES['vol-montants'].exceptions.some(e => /Commission européenne/.test(e)));
+  vrai("réforme 2026 : signalée comme non applicable",
+       REGLES['vol-reforme-2026'].statut === 'reforme-attendue' &&
+       REGLES['vol-reforme-2026'].applicable === null);
+  vrai("exonération : la preuve incombe à la compagnie",
+       /compagnie/i.test(REGLES['vol-exoneration'].concerne) &&
+       /preuve|prouver/i.test(REGLES['vol-exoneration'].concerne));
+
   /* ---- Registre : les trois règles fiabilisées --------------------------- */
   vrai("règle télécom : source Service-Public et source secondaire Légifrance",
        /service-public/.test(REGLES['engagement-telecom'].source.url) &&
@@ -315,7 +382,7 @@ async def executer():
         nav = await p.chromium.launch()
         page = await (await nav.new_context()).new_page()
         await page.goto("about:blank")
-        for f in ("regles.js", "abonnements.js", "garanties.js"):
+        for f in ("regles.js", "abonnements.js", "garanties.js", "vol.js"):
             await page.add_script_tag(content=(WEB / f).read_text(encoding="utf-8"))
         resultats = await page.evaluate(SCRIPT_TESTS)
         await nav.close()

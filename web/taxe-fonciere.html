@@ -79,6 +79,7 @@
 <script src="vendor/polices.js"></script>
 <script src="moteur.js"></script>
 <script src="rapport.js"></script>
+<script src="resultat4.js"></script>
 <script src="regles.js"></script>
 </head>
 <body>
@@ -87,9 +88,9 @@
   <div class="shell">
     <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Vérifier ce que vous payez</small></a>
     <nav class="nav" aria-label="Outils">
+      <a href="vol-retarde.html">Vol retardé</a>
+      <a href="abonnements.html">Dépense mensuelle</a>
       <a href="taxe-fonciere.html" aria-current="page">Taxe foncière</a>
-      <a href="abonnements.html">Abonnements</a>
-      <a href="garanties.html">Garanties</a>
       <a href="sources.html">Sources</a>
     </nav>
   </div>
@@ -297,7 +298,14 @@
   </section>
 
   <!-- ====================== RÉSULTAT ====================== -->
+  <!-- Les quatre mêmes cases que les deux autres outils, en tête : constat,
+       somme éventuelle et son degré de certitude, vérification, prochaine
+       action. Le détail complet du diagnostic suit, inchangé. Le moteur n'est
+       pas touché : ce récapitulatif est construit à partir de ce qu'il a déjà
+       calculé. La case « somme » y vaut toujours « non chiffrable », et c'est
+       le seul des trois outils où c'est le cas. -->
   <section class="shell" id="resultats" hidden aria-live="polite">
+    <div class="r4" id="tf-r4" style="margin-bottom:26px"></div>
     <div class="resultat-grille">
       <div>
         <div class="panneau">
@@ -471,14 +479,11 @@
 <footer class="site-foot">
   <div class="shell">
     <div class="cols">
-      <div>
-        <h4>Les trois outils</h4>
-        <ul>
-          <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
-          <li><a href="abonnements.html">Abonnements et contrats</a></li>
-          <li><a href="garanties.html">Garanties et réparation</a></li>
-        </ul>
-      </div>
+      <div><h4>Les outils</h4><ul>
+        <li><a href="vol-retarde.html">Vol retardé</a></li>
+        <li><a href="abonnements.html">Dépense mensuelle</a></li>
+        <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
+        <li><a href="garanties.html">Garanties après achat</a></li></ul></div>
       <div>
         <h4>Comprendre</h4>
         <ul>
@@ -856,8 +861,106 @@ function blocSignal(a, opts = {}){
   </article>`;
 }
 
+/* ==========================================================================
+   Le récapitulatif en quatre cases, commun aux trois outils.
+   --------------------------------------------------------------------------
+   Construit UNIQUEMENT à partir de ce que le moteur a déjà produit : aucun
+   score, aucune classification, aucune règle de vente n'est recalculée ici.
+   La case « somme » ne peut afficher qu'une seule chose — « non chiffrable » —
+   parce que seule l'administration recalcule une valeur locative. C'est
+   volontaire, et c'est ce qui distingue cet outil des deux autres.
+   ========================================================================== */
+function remplirRecapQuatreCases(d){
+  const { anomalies, classif, avecFiche } = d;
+  const reels = anomalies.filter(a => a.gravite !== 'info');
+  const retenus = reels.filter(a => !CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code));
+  const observations = reels.filter(a => CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code));
+  const n = retenus.length;
+
+  const constat = [{
+    titre: reels.length === 0
+      ? "Rien ne ressort de vos réponses"
+      : n === 0
+        ? "Aucun motif retenu à ce stade"
+        : avecFiche
+          ? `${n} piste${n > 1 ? 's' : ''} à vérifier sur votre fiche d'évaluation`
+          : `${n} point${n > 1 ? 's' : ''} à confirmer sur votre fiche d'évaluation`,
+    texte: reels.length === 0
+      ? (avecFiche
+          ? "Avec les chiffres lus sur votre fiche, nous n'identifions aucun élément appelant une vérification. C'est une information utile : votre base semble conforme à ce que vous avez décrit."
+          : "Avec les informations fournies, nous n'identifions aucun élément appelant une vérification approfondie.")
+      : n === 0
+        ? "Le seul écart relevé porte sur les surfaces. Il vous indique où regarder, mais nous ne le traitons pas comme un motif tant que la comparaison des deux périmètres n'a pas été validée sur de vraies fiches."
+        : (avecFiche
+            ? "Ces éléments reposent sur des chiffres que vous avez lus sur votre fiche d'évaluation. Le détail de chacun figure plus bas."
+            : "Vous avez répondu de mémoire, sans consulter votre fiche : ce sont des hypothèses qui indiquent où regarder, pas des constats."),
+  }];
+  if (observations.length){
+    constat.push({
+      titre: "Une observation qui ne compte pas comme motif",
+      texte: "L'écart entre vos deux surfaces est présenté à part, et n'ouvre aucune démarche : la surface cadastrale pondérée dépasse normalement la surface mesurée de 20 à 40 %, parce qu'elle ajoute des mètres carrés fictifs pour les équipements.",
+    });
+  }
+
+  const somme = {
+    montant: null,
+    texte: 'Aucun montant à ce stade',
+    certitude: 'non-chiffrable',
+    pourquoi: "Contrairement à un vol retardé, aucun texte ne fixe de montant ici, et contrairement à un abonnement, rien de ce que vous avez saisi ne constitue une somme déjà payée à tort. Une valeur locative ne peut être recalculée que par l'administration, à partir de la fiche d'évaluation. Tout chiffre que nous avancerions serait inventé.",
+  };
+
+  const verification = [];
+  if (!avecFiche){
+    verification.push({
+      titre: "Votre fiche d'évaluation, avant toute démarche",
+      texte: "C'est le document qui fait foi, et le seul qui dise ce que l'administration retient réellement pour votre logement. Sans lui, rien de ce qui précède ne peut être établi. Il s'obtient gratuitement.",
+      regle: 'tf-forme-reclamation',
+    });
+  } else if (n > 0){
+    verification.push({
+      titre: "Chaque élément, ligne par ligne sur la fiche",
+      texte: "Confirmez que l'élément y figure bien, et réunissez de quoi dater sa disparition ou sa modification. Le détail des pièces utiles figure plus bas, élément par élément.",
+      regle: 'tf-delai-reclamation',
+    });
+  }
+  if (observations.length){
+    verification.push({
+      titre: "Ne réclamez pas sur le seul écart de surface",
+      texte: "Comparer la surface pondérée de la fiche à un relevé au mètre ruban n'est pas un motif valable : ce sont deux grandeurs de nature différente. Seule la surface réelle inscrite sur la fiche se compare à votre mesure.",
+      regle: 'tf-surface-ponderee',
+    });
+  }
+  if (!verification.length){
+    verification.push({
+      titre: "Rien de particulier à vérifier",
+      texte: "Vous pouvez tout de même demander votre fiche d'évaluation pour contrôler vous-même chaque ligne : la demande est gratuite et sans conséquence.",
+    });
+  }
+
+  const action = [{
+    titre: avecFiche && n > 0
+      ? "Déposez une réclamation depuis votre espace particulier"
+      : "Demandez votre fiche d'évaluation (formulaire 6675-M)",
+    texte: avecFiche && n > 0
+      ? "Depuis votre espace sur impots.gouv.fr, par la messagerie sécurisée. La démarche est gratuite et n'exige aucun intermédiaire. Attention : une réclamation ne dispense pas de payer l'avis en cours ; un sursis de paiement peut être demandé séparément."
+      : "Depuis la messagerie sécurisée de votre espace particulier sur impots.gouv.fr, en demandant « la fiche d'évaluation de mon local ». C'est gratuit, sans conséquence, et c'est l'étape qui débloque tout le reste.",
+    gratuit: true,
+    regle: avecFiche && n > 0 ? 'tf-forme-reclamation' : null,
+  }];
+
+  const limites = [
+    "Nous n'avons aucun accès à votre dossier fiscal : tout ce qui précède découle de ce que vous venez de saisir.",
+    "Aucune correction ni aucun remboursement n'est garanti. Seule l'administration peut recalculer une valeur locative.",
+    "Cet outil ne détecte ni une hausse du taux voté par votre commune, ni la fin d'une exonération temporaire — deux causes fréquentes d'augmentation, qui ne se contestent pas par une réclamation.",
+  ];
+
+  document.getElementById('tf-r4').innerHTML =
+    rendreResultat4({ constat, somme, verification, action, limites });
+}
+
 function renderResults(d){
   const { anomalies, classif, avecFiche } = d;
+  remplirRecapQuatreCases(d);
   $('diagnostic').hidden = true;
   $('resultats').hidden = false;
 

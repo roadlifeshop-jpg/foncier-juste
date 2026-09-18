@@ -3,32 +3,40 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Suivi des abonnements — coût réel et démarches</title>
-<meta name="description" content="Ce que vos abonnements coûtent vraiment par mois et par an, paiements annuels compris, et les vérifications utiles avant de résilier. Sans lien bancaire.">
+<title>Dépense mensuelle : ce qu'un contrat vous coûte</title>
+<meta name="description" content="Le coût annuel d'un contrat, puis une action concrète : ce qu'un arrêt économiserait, et le cas précis où un remboursement peut être réclamé.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/abonnements.html">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
 <link rel="stylesheet" href="base.css">
 <style>
-/* Composants propres à cet outil. */
-.deux-colonnes{display:grid; gap:24px; align-items:start; margin-top:24px;}
-@media(max-width:560px){ .deux-colonnes{margin-top:14px; gap:18px;} }
-@media(min-width:980px){ .deux-colonnes{grid-template-columns:minmax(0,1fr) 340px;} .colonne-cote{position:sticky; top:22px;} }
+/* Composants propres à cet outil.
+   Les règles de l'ancienne mise en page à deux colonnes (.deux-colonnes,
+   .colonne-cote, .totaux, .hypothese, .piste, .vide) ont été retirées avec
+   elle : le parcours traite maintenant un contrat à la fois, et le résultat
+   est rendu par la charpente commune aux trois outils (.r4 dans base.css).
+   Vérifié : aucune de ces classes n'apparaît plus dans cette page. */
 
-.totaux{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px;}
-.totaux h2{font-size:1.1rem; font-family:'Archivo',sans-serif; font-weight:600;}
-.chiffre{display:flex; align-items:baseline; gap:10px; margin-top:14px;}
-.chiffre .val{font-size:2rem; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.028em; line-height:1;}
-.chiffre .unite-txt{font-size:.9rem; color:var(--ink-muted);}
-.totaux .second{margin-top:6px; font-size:.95rem; color:var(--ink-muted); font-variant-numeric:tabular-nums;}
-.totaux .sep{margin-top:20px; padding-top:18px; border-top:1px solid var(--line);}
-.hypothese{background:var(--warn-soft); border:1px solid var(--warn-line); border-radius:var(--r); padding:14px 16px; margin-top:16px;}
-.hypothese .t{font-size:.7rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--warn);}
-.hypothese .val{font-size:1.4rem; font-weight:700; font-variant-numeric:tabular-nums; margin-top:5px;}
-.hypothese p{margin-top:7px; font-size:.86rem; color:var(--ink-muted);}
+.forme{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px 24px;}
+.forme-grille{display:grid; gap:0 18px; grid-template-columns:1fr;}
+@media(min-width:640px){ .forme-grille{grid-template-columns:1fr 1fr;} .forme-grille .plein{grid-column:1 / -1;} }
+@media(max-width:560px){ .forme{padding:18px;} }
+.cases-fines{display:grid; gap:10px; margin-top:8px;}
+.cases-fines label{display:flex; gap:10px; align-items:flex-start; font-size:.92rem; cursor:pointer;}
+.cases-fines input{margin-top:3px; width:18px; height:18px; accent-color:var(--accent); flex-shrink:0;}
+.cases-fines .d{display:block; color:var(--ink-muted); font-size:.85rem;}
+
+/* Rappel du total, sous le résultat du contrat en cours. Volontairement
+   secondaire : c'est une addition, pas une économie. */
+.totaux-bande{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+  padding:18px 20px; margin-top:14px;
+}
+.totaux-bande .val{font-size:1.7rem; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.026em;}
+.totaux-bande .unite-txt{font-size:.9rem; color:var(--ink-muted); margin-left:9px;}
+.totaux-bande .second{margin-top:5px; font-size:.93rem; color:var(--ink-muted); font-variant-numeric:tabular-nums;}
 
 .ligne-abo{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:18px 20px; margin-top:14px;}
-.ligne-abo.arreter{border-color:var(--warn-line); background:var(--warn-soft);}
 .abo-tete{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap;}
 .abo-nom{font-size:1.06rem; font-weight:600; letter-spacing:-.01em;}
 .abo-cat{display:block; font-size:.78rem; color:var(--ink-faint); margin-top:2px; letter-spacing:.04em; text-transform:uppercase;}
@@ -36,27 +44,10 @@
 .abo-cout .m{font-size:1.16rem; font-weight:700;}
 .abo-cout .a{display:block; font-size:.85rem; color:var(--ink-muted);}
 .abo-actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; padding-top:13px; border-top:1px solid var(--line);}
-.piste{margin-top:14px; padding:13px 15px; border-radius:var(--r); background:var(--surface-2); border-left:3px solid var(--line-strong);}
-.piste.fait{border-left-color:var(--accent);}
-.piste.verification{border-left-color:var(--gold);}
-.piste .genre{font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint);}
-.piste h4{margin-top:4px; font-size:.97rem;}
-.piste p{margin-top:5px; font-size:.9rem; color:var(--ink-muted);}
-.piste details{margin-top:9px;}
-.piste summary{font-size:.86rem; font-weight:600; color:var(--accent); cursor:pointer;}
-.vide{background:var(--surface); border:1px dashed var(--line-strong); border-radius:var(--r-lg); padding:30px 24px; text-align:center; margin-top:14px;}
-.vide p{margin:8px auto 0; color:var(--ink-muted); max-width:46ch;}
-.forme{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px 24px;}
-.forme-grille{display:grid; gap:0 18px; grid-template-columns:1fr;}
-@media(min-width:640px){ .forme-grille{grid-template-columns:1fr 1fr;} .forme-grille .plein{grid-column:1 / -1;} }
-.cases-fines{display:grid; gap:10px; margin-top:8px;}
-.cases-fines label{display:flex; gap:10px; align-items:flex-start; font-size:.92rem; cursor:pointer;}
-.cases-fines input{margin-top:3px; width:18px; height:18px; accent-color:var(--accent); flex-shrink:0;}
-.cases-fines .d{display:block; color:var(--ink-muted); font-size:.85rem;}
-@media(max-width:560px){ .forme{padding:18px;} }
 </style>
 <script src="regles.js"></script>
 <script src="abonnements.js"></script>
+<script src="resultat4.js"></script>
 </head>
 <body>
 
@@ -64,9 +55,9 @@
   <div class="shell">
     <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Vérifier ce que vous payez</small></a>
     <nav class="nav" aria-label="Outils">
+      <a href="vol-retarde.html">Vol retardé</a>
+      <a href="abonnements.html" aria-current="page">Dépense mensuelle</a>
       <a href="taxe-fonciere.html">Taxe foncière</a>
-      <a href="abonnements.html" aria-current="page">Abonnements</a>
-      <a href="garanties.html">Garanties</a>
       <a href="sources.html">Sources</a>
     </nav>
   </div>
@@ -96,105 +87,98 @@
     </div>
   </section>
 
-  <section class="shell">
-    <div class="deux-colonnes">
-      <div>
-        <div class="forme">
-          <h2 id="forme-titre" style="font-size:1.12rem; font-family:'Archivo',sans-serif; font-weight:600">Ajouter un abonnement</h2>
-          <p class="aide">Seuls le nom, le montant et la périodicité sont nécessaires. Les autres champs
-          servent à orienter les démarches&nbsp;: sans eux, l'outil se contente de calculer.</p>
-          <form id="forme-abo" novalidate>
-            <div class="forme-grille">
-              <div class="champ">
-                <label for="f-nom">Nom de l'abonnement</label>
-                <input type="text" id="f-nom" maxlength="60" autocomplete="off" placeholder="ex : salle de sport">
-                <p class="erreur-champ" id="e-nom" hidden></p>
-              </div>
-              <div class="champ">
-                <label for="f-montant">Montant payé à chaque échéance</label>
-                <div class="unite" data-unite="€"><input type="text" id="f-montant" inputmode="decimal" autocomplete="off" placeholder="ex : 29,99"></div>
-                <p class="erreur-champ" id="e-montant" hidden></p>
-              </div>
-              <div class="champ">
-                <label for="f-periodicite">Périodicité</label>
-                <select id="f-periodicite"></select>
-                <p class="aide" id="aide-periodicite"></p>
-              </div>
-              <div class="champ">
-                <label for="f-categorie">Catégorie <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
-                <select id="f-categorie"></select>
-                <div class="aide">Utile surtout pour la téléphonie et l'internet&nbsp;: une règle
-                particulière s'y applique aux engagements de plus de douze mois.</div>
-              </div>
-              <div class="champ">
-                <label for="f-echeance">Prochaine échéance <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
-                <input type="date" id="f-echeance">
-                <p class="aide date-lue" id="f-echeance-lue" hidden></p>
-                <p class="aide">Le format affiché entre les barres obliques suit la langue de votre navigateur&nbsp;; la date retenue est confirmée en clair dès que vous la saisissez.</p>
-                <p class="aide">Date de fin de la période en cours. Sert à situer la fenêtre pendant
-                laquelle l'information sur la reconduction doit vous parvenir.</p>
-                <p class="erreur-champ" id="e-echeance" hidden></p>
-              </div>
-              <div class="champ">
-                <label for="f-eng-debut">Début de l'engagement <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
-                <input type="date" id="f-eng-debut">
-                <p class="aide date-lue" id="f-eng-debut-lue" hidden></p>
-                <div style="margin-top:9px">
-                  <label for="f-eng-mois" style="font-size:.9rem">Durée de l'engagement, en mois</label>
-                  <input type="number" id="f-eng-mois" min="1" max="120" step="1" inputmode="numeric" placeholder="ex : 24">
-                </div>
-                <p class="erreur-champ" id="e-eng" hidden></p>
-              </div>
-              <div class="champ plein">
-                <div class="cases-fines">
-                  <label><input type="checkbox" id="f-en-ligne"><span>J'ai souscrit cet abonnement <b>en ligne</b><span class="d">Le professionnel doit alors proposer une résiliation en ligne, gratuite.</span></span></label>
-                  <label><input type="checkbox" id="f-recent"><span>J'ai souscrit <b>il y a moins de quatorze jours</b><span class="d">Le droit de rétractation peut encore être ouvert.</span></span></label>
-                </div>
-              </div>
-            </div>
-            <div class="cta-row">
-              <button type="submit" class="btn-primary" id="f-valider">Ajouter</button>
-              <button type="button" class="btn-secondary" id="f-annuler" hidden>Annuler la modification</button>
-            </div>
-          </form>
-        </div>
-
-        <h2 style="margin-top:34px">Vos abonnements <span class="surtitre" id="compte-lignes"></span></h2>
-        <div id="liste"></div>
-      </div>
-
-      <aside class="colonne-cote" aria-label="Totaux">
-        <div class="totaux" aria-live="polite">
-          <h2>Dépense actuelle</h2>
-          <p class="aide" style="margin-top:4px">Un fait&nbsp;: la somme de ce que vous avez saisi.</p>
-          <div class="chiffre"><span class="val num" id="t-mensuel">0,00 €</span><span class="unite-txt">par mois, en moyenne</span></div>
-          <p class="second" id="t-annuel">soit 0,00 € par an</p>
-          <p class="aide" id="t-note"></p>
-
-          <div class="sep">
-            <div class="hypothese" id="zone-hypothese" hidden>
-              <div class="t">Hypothèse, pas un acquis</div>
-              <div class="val num" id="t-arret">0,00 €</div>
-              <p>par an, <b>si</b> les abonnements que vous avez marqués « à arrêter » sont effectivement
-              arrêtés. Un engagement en cours, un préavis ou des frais de résiliation peuvent réduire ce
-              montant, voire l'annuler pour l'année en cours. Ce n'est donc pas une économie constatée.</p>
-            </div>
-            <p class="aide" id="note-hypothese">Marquez un abonnement « à arrêter » pour voir ce que son
-            arrêt représenterait sur une année.</p>
+  <section class="shell-lire" id="saisie">
+    <div class="forme">
+      <h2 id="forme-titre" style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Un contrat à la fois</h2>
+      <p class="aide">Seuls le nom, le montant et la périodicité sont nécessaires. Les autres champs
+      ouvrent des vérifications supplémentaires&nbsp;: sans eux, l'outil se contente de calculer le coût.</p>
+      <form id="forme-abo" novalidate>
+        <div class="forme-grille">
+          <div class="champ">
+            <label for="f-nom">Nom du contrat</label>
+            <input type="text" id="f-nom" placeholder="ex : forfait mobile, salle de sport" autocomplete="off">
+            <p class="erreur-champ" id="e-nom" hidden></p>
           </div>
-
-          <div class="sep">
-            <h2 style="font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint)">Vos données</h2>
-            <p class="aide">Cette liste est conservée <b>dans ce navigateur, sur cet appareil</b>,
-            jusqu'à son effacement&nbsp;: elle vous attendra à votre prochaine visite. Elle
-            <b>n'est pas sauvegardée sur nos serveurs</b> — nous n'en avons aucune copie. Vider les
-            données du site, changer d'appareil ou de navigateur la fait donc disparaître.</p>
-            <button class="btn-secondary btn-petit" id="tout-effacer" style="margin-top:10px">Tout effacer</button>
-            <p class="erreur-champ" id="stockage-erreur" hidden></p>
+          <div class="champ">
+            <label for="f-montant">Montant payé</label>
+            <div class="unite"><input type="text" id="f-montant" inputmode="decimal" placeholder="ex : 29,90"></div>
+            <p class="erreur-champ" id="e-montant" hidden></p>
+          </div>
+          <div class="champ">
+            <label for="f-periodicite">Payé</label>
+            <select id="f-periodicite"></select>
+            <div class="aide" id="aide-periodicite"></div>
+          </div>
+          <div class="champ">
+            <label for="f-categorie">Catégorie <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
+            <select id="f-categorie"></select>
+            <div class="aide">Utile surtout pour la téléphonie et l'internet&nbsp;: une règle
+            particulière s'y applique aux engagements de plus de douze mois.</div>
+          </div>
+          <div class="champ">
+            <label for="f-echeance">Prochaine échéance <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
+            <input type="date" id="f-echeance">
+            <p class="aide date-lue" id="f-echeance-lue" hidden></p>
+            <p class="aide">Fin de la période en cours. C'est elle qui situe la fenêtre pendant laquelle
+            l'information sur la reconduction doit vous parvenir — et donc le remboursement possible.</p>
+            <p class="erreur-champ" id="e-echeance" hidden></p>
+          </div>
+          <div class="champ">
+            <label for="f-eng-debut">Début de l'engagement <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
+            <input type="date" id="f-eng-debut">
+            <p class="aide date-lue" id="f-eng-debut-lue" hidden></p>
+            <div style="margin-top:9px">
+              <label for="f-eng-mois" style="font-size:.9rem">Durée de l'engagement, en mois</label>
+              <input type="number" id="f-eng-mois" min="1" max="120" step="1" inputmode="numeric" placeholder="ex : 24">
+            </div>
+            <p class="erreur-champ" id="e-eng" hidden></p>
+          </div>
+          <div class="champ plein">
+            <div class="cases-fines">
+              <label><input type="checkbox" id="f-en-ligne"><span>J'ai souscrit ce contrat <b>en ligne</b><span class="d">Le professionnel doit alors proposer une résiliation en ligne, gratuite.</span></span></label>
+              <label><input type="checkbox" id="f-recent"><span>J'ai souscrit <b>il y a moins de quatorze jours</b><span class="d">Le droit de rétractation peut encore être ouvert.</span></span></label>
+            </div>
           </div>
         </div>
-      </aside>
+        <div class="cta-row">
+          <button type="submit" class="btn-primary" id="f-valider">Voir ce que ce contrat coûte</button>
+          <button type="button" class="btn-secondary" id="f-annuler" hidden>Annuler la modification</button>
+        </div>
+      </form>
     </div>
+  </section>
+
+  <section class="shell" id="zone-resultat" hidden aria-live="polite">
+    <div class="r4" id="abo-r4"></div>
+
+    <!-- Emplacement réservé. Aucune offre n'y est affichée, et ce n'est pas un
+         oubli : comparer suppose des prix à jour, une méthode publiable et une
+         indication des liens commerciaux. Nous n'avons ni l'un ni l'autre. -->
+    <div class="shell-lire" style="padding-inline:0">
+      <div class="emplacement">
+        <h3>Comparer des fournisseurs&nbsp;: emplacement réservé</h3>
+        <p><b>Aucune offre n'est affichée ici, et ce n'est pas un oubli.</b> Un comparateur suppose des
+        prix vérifiés à une date connue, une méthode de classement publiable, et la mention de tout lien
+        commercial avec les fournisseurs cités. Nous n'avons aujourd'hui aucun des trois.</p>
+        <p>Afficher un prix concurrent que nous ne pourrions ni tenir à jour ni justifier reviendrait à
+        vous faire changer de contrat sur une information périmée. Cet espace attend une source de prix
+        officielle ou contractuelle&nbsp;; d'ici là, il reste vide.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell-lire" id="zone-liste" hidden>
+    <h2 style="font-size:1.1rem; font-family:'Archivo',sans-serif; font-weight:600">Contrats déjà examinés
+    <span class="surtitre" id="compte-lignes"></span></h2>
+    <p class="aide">Conservés <b>dans ce navigateur, sur cet appareil</b>, jusqu'à leur effacement&nbsp;:
+    ils vous attendront à votre prochaine visite. <b>Rien n'est sauvegardé sur nos serveurs</b> — nous
+    n'en avons aucune copie.</p>
+    <div class="totaux-ligne" id="totaux-ligne"></div>
+    <div id="liste"></div>
+    <div class="cta-row">
+      <button class="btn-secondary btn-petit" id="tout-effacer">Tout effacer</button>
+    </div>
+    <p class="erreur-champ" id="stockage-erreur" hidden></p>
   </section>
 
   <section class="band pale" id="limites-outil" style="margin-top:44px">
@@ -232,10 +216,11 @@
 <footer class="site-foot">
   <div class="shell">
     <div class="cols">
-      <div><h4>Les trois outils</h4><ul>
+      <div><h4>Les outils</h4><ul>
+        <li><a href="vol-retarde.html">Vol retardé</a></li>
+        <li><a href="abonnements.html">Dépense mensuelle</a></li>
         <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
-        <li><a href="abonnements.html">Abonnements et contrats</a></li>
-        <li><a href="garanties.html">Garanties et réparation</a></li></ul></div>
+        <li><a href="garanties.html">Garanties après achat</a></li></ul></div>
       <div><h4>Comprendre</h4><ul>
         <li><a href="guide-erreurs-taxe-fonciere.html">Erreurs fréquentes de taxe foncière</a></li>
         <li><a href="resilier-un-abonnement.html">Résilier un abonnement</a></li>
@@ -257,8 +242,8 @@ const AUJ = new Date(new Date().getFullYear(), new Date().getMonth(), new Date()
 let lignes = [];
 let enEdition = null;
 
-/* ---------- Stockage : le navigateur peut le refuser (navigation privée,
-   données de site bloquées). Aucun chemin ne doit casser pour autant. ------ */
+/* ---------- Stockage : le navigateur peut le refuser. Aucun chemin ne doit
+   casser pour autant. ---------------------------------------------------- */
 function charger(){
   try {
     const brut = localStorage.getItem(CLE);
@@ -266,34 +251,30 @@ function charger(){
     if (!Array.isArray(lignes)) lignes = [];
   } catch (_) {
     lignes = [];
-    $('stockage-erreur').textContent = "Votre navigateur refuse l'enregistrement local : la liste fonctionnera, mais sera perdue en fermant l'onglet.";
+    $('stockage-erreur').textContent = "Votre navigateur refuse l'enregistrement local : le calcul fonctionne, mais la liste sera perdue en fermant l'onglet.";
     $('stockage-erreur').hidden = false;
   }
 }
 function sauver(){
   try { localStorage.setItem(CLE, JSON.stringify(lignes)); }
   catch (_) {
-    $('stockage-erreur').textContent = "Enregistrement impossible sur cet appareil. La liste reste utilisable jusqu'à la fermeture de l'onglet.";
+    $('stockage-erreur').textContent = "Enregistrement impossible sur cet appareil. Le calcul reste utilisable jusqu'à la fermeture de l'onglet.";
     $('stockage-erreur').hidden = false;
   }
 }
 
-/* ---------- Remplissage des listes déroulantes ---------- */
+/* ---------- Listes déroulantes ---------- */
 Object.entries(PERIODICITES).forEach(([k, p]) => {
-  const o = document.createElement('option'); o.value = k; o.textContent = p.nom.replace(/^par /, 'Par ').replace(/^tous/, 'Tous');
+  const o = document.createElement('option'); o.value = k;
+  o.textContent = p.nom.replace(/^par /, 'Par ').replace(/^tous/, 'Tous');
   $('f-periodicite').appendChild(o);
 });
 $('f-periodicite').value = 'mensuelle';
-/* Première option neutre, et AUCUNE présélection.
-   Auparavant le formulaire imposait « Streaming, musique, presse » à toute
-   ligne dont l'utilisateur n'avait pas touché ce champ. Deux conséquences,
-   l'une visible, l'autre pas :
-     — la fiche affichait une catégorie que personne n'avait choisie ;
-     — la règle des engagements de plus de douze mois en téléphonie est
-       conditionnée à `categorie === 'telecom'` (voir abonnements.js) : un
-       forfait mobile laissé sur la valeur par défaut perdait donc en silence
-       la seule piste qui le concernait vraiment.
-   Le champ reste facultatif ; c'est l'invention d'une réponse qui ne l'était pas. */
+
+/* Option neutre, et AUCUNE présélection : la catégorie conditionne la règle
+   des engagements de plus de douze mois en téléphonie (voir abonnements.js).
+   Imposer « streaming » par défaut faisait disparaître cette règle en silence
+   pour un forfait mobile. */
 {
   const neutre = document.createElement('option');
   neutre.value = ''; neutre.textContent = '— à préciser';
@@ -327,10 +308,10 @@ function erreur(champ, message){
 }
 
 function lireForme(){
-  erreur('nom'); erreur('montant'); erreur('echeance'); erreur('eng');
+  ['nom','montant','echeance','eng'].forEach(c => erreur(c));
   let ok = true;
   const nom = $('f-nom').value.trim();
-  if (!nom){ erreur('nom', "Donnez un nom, même approximatif : c'est ce qui vous permettra de retrouver la ligne."); ok = false; }
+  if (!nom){ erreur('nom', "Donnez un nom, même approximatif : c'est ce qui vous permettra de retrouver ce contrat."); ok = false; }
   const montant = enCentimes($('f-montant').value);
   if (montant === null){ erreur('montant', "Indiquez un montant, en euros. Exemples acceptés : 12, 12,99, 12.99."); ok = false; }
   else if (montant === 0){ erreur('montant', "Un montant de zéro n'a rien à calculer."); ok = false; }
@@ -347,7 +328,6 @@ function lireForme(){
     nom, montant, periodicite: $('f-periodicite').value, categorie: $('f-categorie').value,
     echeance, engagementDebut: engDebut, engagementMois: engMois,
     souscritEnLigne: $('f-en-ligne').checked, recent: $('f-recent').checked,
-    aArreter: enEdition ? (lignes.find(l => l.id === enEdition) || {}).aArreter === true : false,
   };
 }
 
@@ -358,8 +338,8 @@ function viderForme(){
   $('f-periodicite').value = 'mensuelle'; $('f-categorie').value = '';
   majAidePeriodicite();
   enEdition = null;
-  $('forme-titre').textContent = 'Ajouter un abonnement';
-  $('f-valider').textContent = 'Ajouter';
+  $('forme-titre').textContent = 'Un contrat à la fois';
+  $('f-valider').textContent = 'Voir ce que ce contrat coûte';
   $('f-annuler').hidden = true;
   ['nom','montant','echeance','eng'].forEach(c => erreur(c));
 }
@@ -370,10 +350,59 @@ $('forme-abo').addEventListener('submit', ev => {
   if (!ligne) return;
   const i = lignes.findIndex(l => l.id === ligne.id);
   if (i >= 0) lignes[i] = ligne; else lignes.push(ligne);
-  sauver(); viderForme(); rendre();
+  sauver();
+  afficherResultat(ligne);
+  viderForme();
+  rendreListe();
   try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'outil_utilise' })], { type: 'application/json' })); } catch (_) {}
 });
 $('f-annuler').addEventListener('click', () => { viderForme(); });
+
+/* ---------- Le résultat, dans les quatre cases communes aux trois outils --- */
+function afficherResultat(ligne){
+  $('abo-r4').innerHTML = rendreResultat4(resultat4Abonnement(ligne, AUJ));
+  $('zone-resultat').hidden = false;
+  $('zone-resultat').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ---------- La liste : un rappel, plus le point d'entrée --------------- */
+const ech = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+function rendreListe(){
+  const t = totaux(lignes);
+  $('compte-lignes').textContent = t.nombre ? `— ${t.nombre} contrat${t.nombre > 1 ? 's' : ''}` : '';
+  $('zone-liste').hidden = !lignes.length;
+  if (!lignes.length){ $('liste').innerHTML = ''; $('totaux-ligne').innerHTML = ''; return; }
+
+  const annuels = lignes.filter(l => l.periodicite === 'annuelle' || l.periodicite === 'semestrielle').length;
+  $('totaux-ligne').innerHTML = `<div class="totaux-bande">
+    <div><span class="val num">${euros(t.annuel)}</span><span class="unite-txt">par an, tous contrats confondus</span></div>
+    <div class="second">${euros(t.mensuel)} par mois en moyenne${annuels ? ` · ${annuels} contrat${annuels > 1 ? 's' : ''} non prélevé${annuels > 1 ? 's' : ''} chaque mois` : ''}</div>
+    <p class="aide" style="margin-top:8px">Une addition de ce que vous avez saisi. Ce n'est pas une
+    économie : rien n'est arrêté du seul fait d'être listé ici.</p>
+  </div>`;
+
+  $('liste').innerHTML = lignes.map(l => {
+    const p = PERIODICITES[l.periodicite];
+    return `<article class="ligne-abo">
+      <div class="abo-tete">
+        <div>
+          <span class="abo-nom">${ech(l.nom)}</span>
+          <span class="abo-cat">${l.categorie && CATEGORIES[l.categorie] ? ech(CATEGORIES[l.categorie]) + ' · ' : ''}${ech(euros(l.montant))} ${ech(p.nom)}</span>
+        </div>
+        <div class="abo-cout">
+          <span class="m">${euros(annuelCentimes(l.montant, l.periodicite))}</span>
+          <span class="a">par an</span>
+        </div>
+      </div>
+      <div class="abo-actions">
+        <button class="btn-secondary btn-petit" data-action="revoir" data-id="${l.id}">Revoir le résultat</button>
+        <button class="btn-secondary btn-petit" data-action="editer" data-id="${l.id}">Modifier</button>
+        <button class="btn-secondary btn-petit" data-action="supprimer" data-id="${l.id}">Supprimer</button>
+      </div>
+    </article>`;
+  }).join('');
+}
 
 function editer(id){
   const l = lignes.find(x => x.id === id);
@@ -382,7 +411,7 @@ function editer(id){
   $('f-nom').value = l.nom;
   $('f-montant').value = (l.montant / 100).toFixed(2).replace('.', ',');
   $('f-periodicite').value = l.periodicite;
-  $('f-categorie').value = l.categorie;
+  $('f-categorie').value = l.categorie || '';
   $('f-echeance').value = l.echeance || '';
   $('f-eng-debut').value = l.engagementDebut || '';
   $('f-eng-mois').value = l.engagementMois || '';
@@ -392,101 +421,36 @@ function editer(id){
   relireDate('f-echeance', 'f-echeance-lue');
   relireDate('f-eng-debut', 'f-eng-debut-lue');
   $('forme-titre').textContent = 'Modifier « ' + l.nom + ' »';
-  $('f-valider').textContent = 'Enregistrer';
+  $('f-valider').textContent = 'Revoir le résultat';
   $('f-annuler').hidden = false;
-  $('forme-abo').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  $('saisie').scrollIntoView({ behavior: 'smooth', block: 'start' });
   $('f-nom').focus();
-}
-
-function supprimer(id){
-  const l = lignes.find(x => x.id === id);
-  if (!l) return;
-  if (!window.confirm(`Supprimer « ${l.nom} » de la liste ?`)) return;
-  lignes = lignes.filter(x => x.id !== id);
-  if (enEdition === id) viderForme();
-  sauver(); rendre();
-}
-
-function basculerArret(id){
-  const l = lignes.find(x => x.id === id);
-  if (!l) return;
-  l.aArreter = !l.aArreter;
-  sauver(); rendre();
-}
-
-$('tout-effacer').addEventListener('click', () => {
-  if (!lignes.length) return;
-  if (!window.confirm('Effacer toute la liste ? Cette action est définitive.')) return;
-  lignes = []; viderForme(); sauver(); rendre();
-});
-
-/* ---------- Rendu ---------- */
-const ech = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
-
-function rendre(){
-  const t = totaux(lignes);
-  $('t-mensuel').textContent = euros(t.mensuel);
-  $('t-annuel').textContent = `soit ${euros(t.annuel)} par an`;
-  $('compte-lignes').textContent = t.nombre ? `— ${t.nombre} ligne${t.nombre > 1 ? 's' : ''}` : '';
-  const annuels = lignes.filter(l => l.periodicite === 'annuelle' || l.periodicite === 'semestrielle').length;
-  $('t-note').textContent = annuels
-    ? `Le mensuel est une moyenne lissée : ${annuels} de vos abonnements ${annuels > 1 ? 'ne sont pas prélevés' : "n'est pas prélevé"} chaque mois.`
-    : '';
-
-  $('zone-hypothese').hidden = !t.nombreAArreter;
-  $('note-hypothese').hidden = !!t.nombreAArreter;
-  if (t.nombreAArreter) $('t-arret').textContent = euros(t.annuelAArreter);
-
-  if (!lignes.length){
-    $('liste').innerHTML = `<div class="vide">
-      <h3>Aucun abonnement saisi</h3>
-      <p>Ajoutez-en un ci-dessus. Commencez par ceux que vous payez sans y penser&nbsp;: c'est là que se
-      trouvent les surprises.</p></div>`;
-    return;
-  }
-
-  $('liste').innerHTML = lignes.map(l => {
-    const p = PERIODICITES[l.periodicite];
-    const ps = pistes(l, AUJ);
-    return `<article class="ligne-abo${l.aArreter ? ' arreter' : ''}">
-      <div class="abo-tete">
-        <div>
-          <span class="abo-nom">${ech(l.nom)}</span>
-          <span class="abo-cat">${l.categorie && CATEGORIES[l.categorie] ? ech(CATEGORIES[l.categorie]) + ' · ' : ''}${ech(euros(l.montant))} ${ech(p.nom)}</span>
-        </div>
-        <div class="abo-cout">
-          <span class="m">${euros(mensuelCentimes(l.montant, l.periodicite))}</span>
-          <span class="a">par mois · ${euros(annuelCentimes(l.montant, l.periodicite))} par an</span>
-        </div>
-      </div>
-      ${l.aArreter ? `<p class="aide" style="margin-top:10px"><b>Marqué « à arrêter ».</b> Son coût annuel est repris dans l'hypothèse d'arrêt, à droite — qui reste une hypothèse.</p>` : ''}
-      ${ps.map(x => `<div class="piste ${x.type}">
-          <div class="genre">${x.type === 'fait' ? 'Calculé à partir de vos dates' : 'À vérifier vous-même'}</div>
-          <h4>${ech(x.titre)}</h4>
-          <p>${ech(x.texte)}</p>
-          ${x.regle ? `<details><summary>Voir la règle et sa source</summary>${citer(x.regle)}</details>` : ''}
-        </div>`).join('')}
-      <div class="abo-actions">
-        <button class="btn-secondary btn-petit" data-action="editer" data-id="${l.id}">Modifier</button>
-        <button class="btn-secondary btn-petit" data-action="arret" data-id="${l.id}">${l.aArreter ? 'Ne plus marquer « à arrêter »' : 'Marquer « à arrêter »'}</button>
-        <button class="btn-secondary btn-petit" data-action="supprimer" data-id="${l.id}">Supprimer</button>
-      </div>
-    </article>`;
-  }).join('');
 }
 
 $('liste').addEventListener('click', ev => {
   const b = ev.target.closest('button[data-action]');
   if (!b) return;
   const id = b.dataset.id;
+  const l = lignes.find(x => x.id === id);
   if (b.dataset.action === 'editer') editer(id);
-  else if (b.dataset.action === 'supprimer') supprimer(id);
-  else if (b.dataset.action === 'arret') basculerArret(id);
+  else if (b.dataset.action === 'revoir' && l) afficherResultat(l);
+  else if (b.dataset.action === 'supprimer' && l){
+    if (!window.confirm(`Supprimer « ${l.nom} » de la liste ?`)) return;
+    lignes = lignes.filter(x => x.id !== id);
+    if (enEdition === id) viderForme();
+    sauver(); rendreListe();
+    if (!lignes.length) $('zone-resultat').hidden = true;
+  }
 });
 
-/* Écho des dates, indépendant de la locale du navigateur : voir .date-lue
-   dans base.css. La valeur d'un champ type=date est toujours en aaaa-mm-jj,
-   mais son affichage suit la langue du navigateur. */
+$('tout-effacer').addEventListener('click', () => {
+  if (!lignes.length) return;
+  if (!window.confirm('Effacer toute la liste ? Cette action est définitive.')) return;
+  lignes = []; viderForme(); sauver(); rendreListe();
+  $('zone-resultat').hidden = true;
+});
+
+/* Écho des dates, indépendant de la locale du navigateur. */
 function relireDate(champ, cible){
   const d = versDate($(champ).value);
   const p = $(cible);
@@ -500,7 +464,7 @@ function relireDate(champ, cible){
 });
 
 charger();
-rendre();
+rendreListe();
 try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
 </script>
 </body>

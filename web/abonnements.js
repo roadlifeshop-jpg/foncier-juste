@@ -289,8 +289,158 @@ function pistes(ligne, aujourdhui) {
   return out;
 }
 
+/* ==========================================================================
+   AJOUTS POUR LE PARCOURS « UN CONTRAT À LA FOIS »
+   --------------------------------------------------------------------------
+   Rien de ce qui précède n'est modifié : `pistes`, `totaux`, `engagement` et
+   `fenetreNonReconduction` gardent exactement le même comportement, et les
+   assertions qui les couvrent restent valables. Les deux fonctions ci-dessous
+   s'ajoutent, pour une raison précise : le parcours doit désormais SÉPARER
+   deux sommes que l'ancien écran mélangeait.
+
+     — « économiser à l'avenir » : le coût annuel d'un contrat qu'on arrête.
+       C'est une HYPOTHÈSE. Un engagement en cours, un préavis ou des frais
+       peuvent la réduire, voire l'annuler pour l'année en cours.
+
+     — « réclamer un remboursement » : l'article L215-1 du code de la
+       consommation prévoit qu'à défaut d'information écrite avant la
+       reconduction tacite, le contrat peut être résilié gratuitement à tout
+       moment à compter de la reconduction, et que les sommes versées d'avance
+       pour la période non courue sont remboursées dans les trente jours.
+       Cette somme-là est déjà payée : la récupérer n'est pas une économie
+       future, c'est un remboursement. Les confondre serait compter deux fois.
+
+   Sur le calcul du remboursable : la loi dit « la période non courue », sans
+   donner de formule. Nous faisons un prorata en jours entre aujourd'hui et
+   l'échéance, et nous l'affichons comme une hypothèse en indiquant la méthode.
+   ========================================================================== */
+
+/* Part déjà payée correspondant à la période non courue, pour un contrat payé
+   d'avance. Retourne null quand la question ne se pose pas (paiement mensuel
+   ou plus fréquent : il n'y a rien d'avancé) ou quand l'échéance est inconnue. */
+function rembourseableCentimes(ligne, aujourdhui) {
+  const p = PERIODICITES[ligne.periodicite];
+  if (!p || !ligne.echeance) return null;
+  // Seuls les paiements couvrant plus d'un mois laissent une période non courue.
+  const moisCouverts = 12 / (annuelCentimes(100, ligne.periodicite) / 100);
+  if (!(moisCouverts > 1)) return null;
+  const ech = prochaineEcheance(ligne.echeance, ligne.periodicite, aujourdhui);
+  if (!ech) return null;
+  const debutPeriode = ajouterMois(ech, -Math.round(moisCouverts));
+  const total = joursEntre(debutPeriode, ech);
+  const restants = joursEntre(aujourdhui, ech);
+  if (!(total > 0) || !(restants > 0)) return null;
+  return {
+    centimes: Math.round(ligne.montant * (restants / total)),
+    joursRestants: restants,
+    joursPeriode: total,
+    echeance: ech,
+  };
+}
+
+/* Le résultat en quatre parties, dans la forme attendue par resultat4.js. */
+function resultat4Abonnement(ligne, aujourdhui) {
+  const auj = aujourdhui || new Date();
+  const annuel = annuelCentimes(ligne.montant, ligne.periodicite);
+  const mensuel = mensuelCentimes(ligne.montant, ligne.periodicite);
+  const p = PERIODICITES[ligne.periodicite];
+  const eng = engagement(ligne.engagementDebut, ligne.engagementMois, auj);
+  const fen = fenetreNonReconduction(ligne.echeance, ligne.periodicite, auj);
+  const remb = rembourseableCentimes(ligne, auj);
+  const ps = pistes(ligne, auj);
+
+  /* ---- 1. Le constat : des faits, tirés de la saisie ---- */
+  const constat = [{
+    titre: `${euros(annuel)} par an`,
+    texte: `Vous payez ${euros(ligne.montant)} ${p.nom}, soit ${euros(annuel)} sur douze mois et ${euros(mensuel)} par mois en moyenne. C'est une addition de ce que vous venez de saisir, rien de plus.`,
+  }];
+  if (ligne.periodicite === 'annuelle' || ligne.periodicite === 'semestrielle') {
+    constat.push({
+      titre: "Un paiement peu fréquent, donc peu visible",
+      texte: "Ce contrat ne figure pas sur vos relevés la plupart des mois. Le mensuel affiché est une moyenne lissée, utile pour comparer, pas pour prévoir un prélèvement.",
+    });
+  }
+  ps.filter(x => x.type === 'fait').forEach(x => constat.push({ titre: x.titre, texte: x.texte }));
+
+  /* ---- 2. Les deux sommes, séparées ---- */
+  const economie = {
+    montant: annuel,
+    texte: euros(annuel),
+    certitude: eng && !eng.termine ? 'hypothese' : 'hypothese',
+    pourquoi: eng && !eng.termine
+      ? `C'est ce que ce contrat coûte sur douze mois. Ce n'est pas une économie acquise : votre engagement court jusqu'au ${eng.fin.toLocaleDateString('fr-FR')}, et un arrêt avant ce terme peut laisser des sommes dues que nous ne pouvons pas chiffrer.`
+      : "C'est ce que ce contrat coûte sur douze mois, donc ce que son arrêt représenterait sur une année pleine. Ce n'est pas une économie acquise : un préavis ou des frais propres au contrat peuvent la réduire.",
+  };
+
+  let remboursement = null;
+  if (fen && fen.dedans && remb) {
+    remboursement = {
+      montant: remb.centimes,
+      texte: euros(remb.centimes),
+      certitude: 'hypothese',
+      pourquoi: `Si l'information écrite avant reconduction ne vous est pas parvenue dans les formes prévues, le contrat peut être résilié gratuitement à compter de la reconduction et les sommes versées d'avance pour la période non courue vous sont remboursées sous trente jours. Estimation au prorata : ${remb.joursRestants} jours restants sur les ${remb.joursPeriode} de la période en cours. La loi ne fixe pas de formule ; ce prorata est notre méthode, à confronter au décompte du professionnel.`,
+    };
+  }
+
+  /* ---- 3. Ce qu'il reste à vérifier ---- */
+  const verification = ps.filter(x => x.type === 'verification')
+                         .map(x => ({ titre: x.titre, texte: x.texte, regle: x.regle }));
+  if (fen && fen.dedans) {
+    verification.unshift({
+      titre: "Avez-vous reçu l'information écrite avant reconduction ?",
+      texte: "Cherchez dans vos courriels et votre courrier une lettre dédiée ou un message consacré à la reconduction. Son absence est ce qui ouvre la résiliation gratuite et le remboursement — et c'est la seule chose que nous ne pouvons pas vérifier pour vous.",
+      regle: 'tacite-reconduction',
+    });
+  }
+  if (!verification.length) {
+    verification.push({
+      titre: "Trois informations à retrouver dans votre contrat",
+      texte: "La date de prochaine échéance, la durée d'engagement s'il en existe une, et le mode de souscription. Sans elles, aucune démarche ne peut être évaluée — ni par vous, ni par nous.",
+    });
+  }
+
+  /* ---- 4. Une seule prochaine action, gratuite ---- */
+  const action = [];
+  if (ligne.recent) {
+    action.push({
+      titre: "Exercez votre rétractation, c'est le chemin le plus court",
+      texte: "Vous avez indiqué une souscription de moins de quatorze jours à distance ou hors établissement. Ce délai se prend sans motif à donner et sans frais. Envoyez la demande par écrit et gardez la preuve de sa date.",
+      gratuit: true, regle: 'retractation-14-jours',
+    });
+  } else if (fen && fen.dedans) {
+    action.push({
+      titre: "Demandez par écrit la résiliation et le remboursement",
+      texte: "Nous sommes dans la fenêtre pendant laquelle l'information sur la reconduction doit vous parvenir. Écrivez au professionnel en lui demandant de produire la preuve de cette information, et à défaut de résilier gratuitement et de rembourser la période non courue. Un courriel suffit à établir la date ; conservez-le.",
+      gratuit: true, regle: 'tacite-reconduction',
+    });
+  } else if (ligne.souscritEnLigne) {
+    action.push({
+      titre: "Cherchez la résiliation en ligne dans votre espace client",
+      texte: "Vous avez souscrit en ligne : le professionnel doit mettre à disposition une fonctionnalité de résiliation en ligne, gratuite et accessible en quelques clics. Son existence est une obligation ; elle ne dit pas que votre contrat peut être rompu aujourd'hui sans frais. Faites une capture d'écran de la confirmation.",
+      gratuit: true, regle: 'resiliation-trois-clics',
+    });
+  } else {
+    action.push({
+      titre: "Retrouvez l'échéance, puis revenez",
+      texte: "La date de prochaine échéance est l'information qui débloque le reste : elle situe la fenêtre pendant laquelle l'information sur la reconduction doit vous parvenir. Elle figure sur votre contrat, une facture, ou le courriel de souscription.",
+      gratuit: true,
+    });
+  }
+
+  /* ---- Les limites ---- */
+  const limites = [
+    "Nous ne lisons pas votre contrat : ni préavis, ni frais de résiliation, ni clause particulière ne nous sont connus.",
+    "Aucune des règles citées ne rend un contrat résiliable à elle seule. Elles pèsent sur le professionnel.",
+    "Les deux sommes ci-dessus ne s'additionnent pas et ne sont pas acquises : la première est un coût annuel qu'un arrêt supprimerait, la seconde une part déjà payée qu'un cas précis rend remboursable.",
+  ];
+
+  return { constat, somme: economie, remboursement, verification, action, limites, annuel, mensuel };
+}
+
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { PERIODICITES, CATEGORIES, enCentimes, euros, annuelCentimes, mensuelCentimes,
                      totaux, ajouterMois, ajouterJours, versDate, joursEntre, prochaineEcheance,
-                     fenetreNonReconduction, engagement, pistes };
+                     fenetreNonReconduction, engagement, pistes,
+                     rembourseableCentimes, resultat4Abonnement };
 }

@@ -483,3 +483,102 @@ main.doc > .fine{margin-top:26px; font-size:.86rem; color:var(--ink-faint);}
   font-size:.88rem; color:var(--ink-muted); max-width:none;
 }
 .prerequis .sans b{color:var(--ink);}
+
+/* ==========================================================================
+   Résultat en quatre parties — structure commune aux trois outils
+   --------------------------------------------------------------------------
+   Les trois outils répondaient auparavant avec trois mises en forme
+   différentes. Ici la même charpente partout, dans le même ordre :
+     1. le CONSTAT — ce qui découle de ce qui a été saisi ;
+     2. la SOMME éventuelle, avec son degré de certitude affiché à côté ;
+     3. la VÉRIFICATION encore nécessaire ;
+     4. la PROCHAINE ACTION, gratuite.
+   Le degré de certitude n'est pas décoratif : c'est lui qui distingue un
+   montant fixé par un texte d'une hypothèse, et « non chiffrable » d'un
+   « zéro ». La taxe foncière n'affichera jamais autre chose que
+   « non chiffrable » dans la case 2, et c'est voulu.
+   ========================================================================== */
+.r4{display:grid; gap:14px; margin-top:26px;}
+@media(min-width:900px){ .r4{grid-template-columns:1fr 1fr;} .r4 .r4-bloc.plein{grid-column:1 / -1;} }
+
+.r4-bloc{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px;
+}
+.r4-bloc > h2{
+  font-family:'Archivo',sans-serif; font-size:.7rem; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint);
+  display:flex; align-items:baseline; gap:8px;
+}
+.r4-bloc > h2 .rang{
+  font-variant-numeric:tabular-nums; color:var(--accent); font-size:.78rem;
+}
+.r4-bloc h3{font-family:'Spectral',Georgia,serif; font-size:1.06rem; margin-top:12px;}
+.r4-bloc p{font-size:.93rem; color:var(--ink-muted); margin-top:7px;}
+.r4-bloc p b{color:var(--ink);}
+.r4-item + .r4-item{margin-top:16px; padding-top:16px; border-top:1px solid var(--line);}
+
+/* ---- Case 2 : la somme, et surtout son degré de certitude ---- */
+.r4-somme{background:var(--accent-soft); border-color:var(--accent-line);}
+.r4-somme .chiffre{
+  font-family:'Spectral',Georgia,serif; font-weight:600; letter-spacing:-.02em;
+  font-size:clamp(1.9rem,6vw,2.5rem); line-height:1.1; color:var(--accent);
+  font-variant-numeric:tabular-nums; margin-top:10px;
+}
+.r4-somme .chiffre.sans{font-size:clamp(1.15rem,3.6vw,1.4rem); color:var(--ink);}
+.r4-somme p{color:var(--ink-muted);}
+
+.certitude{
+  display:inline-flex; align-items:center; gap:7px; margin-top:12px;
+  font-family:'Archivo',sans-serif; font-size:.74rem; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase;
+  padding:5px 11px; border-radius:999px; border:1px solid transparent;
+}
+.certitude::before{content:""; width:7px; height:7px; border-radius:50%; background:currentColor;}
+.certitude.bareme{color:var(--ok); background:var(--ok-soft); border-color:var(--ok);}
+.certitude.fait{color:var(--accent); background:var(--surface); border-color:var(--accent-line);}
+.certitude.hypothese{color:var(--warn); background:var(--warn-soft); border-color:var(--warn-line);}
+.certitude.non-chiffrable{color:var(--gold); background:var(--gold-soft); border-color:var(--gold);}
+.certitude.exclu{color:var(--ink-faint); background:var(--surface-2); border-color:var(--line-strong);}
+
+/* ---- Case 4 : l'action, mise en avant parce que c'est la sortie ---- */
+.r4-action{border-left:3px solid var(--accent);}
+.r4-action .gratuit{
+  display:inline-block; margin-left:8px; font-family:'Archivo',sans-serif;
+  font-size:.66rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ok); background:var(--ok-soft); border:1px solid var(--ok);
+  border-radius:3px; padding:2px 7px; vertical-align:2px;
+}
+.r4-bloc details{margin-top:10px;}
+.r4-bloc summary{font-size:.86rem; color:var(--accent); cursor:pointer;}
+
+/* ---- Emplacement réservé, sans aucune offre affichée ---- */
+.emplacement{
+  margin-top:16px; padding:16px 18px; border:1px dashed var(--line-strong);
+  border-radius:var(--r-lg); background:var(--surface-2);
+}
+.emplacement h3{font-family:'Archivo',sans-serif; font-size:.95rem;}
+.emplacement p{font-size:.89rem; color:var(--ink-muted); margin-top:7px;}
+
+/* Deux sommes dans la même case, séparées franchement : l'une est un coût
+   annuel qu'un arrêt supprimerait, l'autre une part déjà payée qu'un cas
+   précis rend remboursable. Elles ne s'additionnent pas. */
+.sous-titre-somme{
+  font-family:'Archivo',sans-serif; font-size:.68rem; font-weight:700;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--accent); margin-top:14px;
+}
+.r4-somme .seconde-somme{
+  margin-top:18px; padding-top:16px; border-top:1px solid var(--accent-line);
+}
+.r4-somme .seconde-somme .chiffre{color:var(--warn);}
+
+/* Le type de somme, annoncé dès le choix de la situation. La promesse du site
+   parle d'une somme à récupérer ou à économiser : elle n'est tenable que sur
+   deux des trois sujets, et le dire ici évite de la démentir au résultat. */
+.depart .somme-type{
+  margin-top:11px; padding:10px 12px; border-radius:var(--r);
+  background:var(--accent-soft); border:1px solid var(--accent-line);
+  font-size:.87rem; line-height:1.5; color:var(--ink-muted); max-width:none;
+}
+.depart .somme-type b{color:var(--accent);}
+.depart .somme-type.sans{background:var(--gold-soft); border-color:var(--gold);}
+.depart .somme-type.sans b{color:var(--gold);}
