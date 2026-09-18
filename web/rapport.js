@@ -303,7 +303,11 @@ function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
         ? "Un écart a été relevé entre vos deux surfaces. Il mérite votre attention, mais il n'est pas retenu comme motif : il est présenté plus bas, à part."
         : "Des écarts ont été relevés entre vos surfaces. Ils méritent votre attention, mais ne sont pas retenus comme motifs : ils sont présentés plus bas, à part.";
     }
-    const base = `${nb(retenus.length, 'piste est retenue', 'pistes sont retenues')} pour vérification.`;
+    // Sans la fiche, rien n'est « retenu » : l'utilisateur n'a pas vu ce que
+    // l'administration prend en compte. Même conditionnement qu'à l'écran.
+    const base = d.avecFiche
+      ? `${nb(retenus.length, 'piste est retenue', 'pistes sont retenues')} pour vérification.`
+      : `${nb(retenus.length, 'point est à confirmer', 'points sont à confirmer')} sur votre fiche d'évaluation, que vous n'aviez pas sous les yeux.`;
     return observations.length
       ? `${base} S'y ajoute ${nb(observations.length, 'observation qui ne compte pas comme motif', 'observations qui ne comptent pas comme motifs')}, présentée séparément.`
       : `${base} Le détail figure ci-dessous.`;
@@ -328,7 +332,9 @@ function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
 
   // 3 — Chaque élément détecté
   if (reels.length) {
-    w.ligne(retenus.length ? 'Pistes à vérifier' : 'Ce que nous avons relevé', { taille: 12, style: 'bold', espace: 4 });
+    w.ligne(retenus.length
+      ? (d.avecFiche ? 'Pistes à vérifier' : 'Points à confirmer sur votre fiche')
+      : 'Ce que nous avons relevé', { taille: 12, style: 'bold', espace: 4 });
     let intertitrePose = false;
     ordonnes.forEach((a, i) => {
       const nonValide = CODES_NE_DECLENCHANT_PAS_LA_VENTE.includes(a.code);

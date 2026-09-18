@@ -220,36 +220,36 @@ oublier aux moteurs, ce qui prend des mois.
 
 1. le **nom** définitif est arrêté (disponibilité et recherche INPI faites) ;
 2. le **domaine** définitif est acheté et branché sur le projet Vercel ;
-3. les **mentions légales** sont complètes — les onze emplacements ;
+3. les **mentions légales** sont complètes — voir la section 2, et `sh scripts/etat-mise-en-ligne.sh` pour le décompte à jour ;
 4. la **version publiée** a été examinée sur le domaine réel.
 
-**Les quatre changements à faire alors, tous préparés :**
+**Le changement est préparé dans un script**, à lancer avec le domaine
+définitif — et pas avant :
 
 ```bash
-# 1. retirer le noindex des 12 pages
-grep -rl 'name="robots" content="noindex, nofollow"' web/*.html \
-  | xargs sed -i '' '/name="robots" content="noindex, nofollow"/d'
-
-# 2. réécrire les 11 URL canoniques et le sitemap vers le domaine définitif
-grep -rl 'foncier-juste.vercel.app' web/*.html web/sitemap.xml \
-  | xargs sed -i '' 's|https://foncier-juste\.vercel\.app|https://LE-DOMAINE-DEFINITIF|g'
-
-# 3. remplacer robots.txt
-printf 'User-agent: *\nAllow: /\n\nSitemap: https://LE-DOMAINE-DEFINITIF/sitemap.xml\n' > web/robots.txt
-
-# 4. contrôler qu'il ne reste rien
-grep -rn 'noindex\|foncier-juste.vercel.app' web/ || echo "rien à corriger"
+sh scripts/ouvrir-indexation.sh https://le-domaine-definitif.fr
 ```
 
-Puis, après déploiement : vérifier `robots.txt` en ligne, l'absence de balise
-`robots` dans le source d'une page, et déposer le sitemap dans la Search
-Console du domaine.
+Il retire la balise `noindex` de toutes les pages **sauf** `succes.html` et
+`cgv.html`, réécrit les URL canoniques et le sitemap, retire ces deux pages du
+sitemap, et remplace `robots.txt`. Il ne pousse rien&nbsp;: il modifie les
+fichiers, à relire avec `git diff` avant de committer.
 
-**Deux pages ne doivent pas être indexées même après ouverture** :
-`succes.html` (page de retour d'un paiement, sans intérêt public) et `cgv.html`
-(document décrivant une offre retirée). Leur `noindex` doit être conservé — la
-commande 1 ci-dessus les décocherait aussi, il faut donc les exclure ou les
-remettre ensuite.
+**Le piège qu'il évite, et qui mérite d'être compris.** `Disallow` et `noindex`
+ne se cumulent pas&nbsp;: ils se contredisent. Un robot à qui `robots.txt`
+interdit d'explorer une page **ne la télécharge pas**, donc ne lit jamais la
+balise `noindex` qu'elle contient — l'adresse peut rester référencée, sans titre
+ni description, sur la seule foi des liens qui pointent vers elle. Pour qu'une
+page soit **désindexée**, il faut au contraire **autoriser** son exploration et
+la laisser répondre « noindex ». Le nouveau `robots.txt` autorise donc tout, et
+ce sont les deux balises conservées qui tiennent les deux pages hors index.
+
+**Ce que l'ouverture ne produit pas.** Aucun trafic immédiat. L'indexation rend
+les pages *éligibles* à figurer dans les résultats&nbsp;: la découverte prend
+des semaines, le classement dépend de la concurrence sur des requêtes déjà très
+disputées, et un site neuf sans historique part loin. Ce n'est pas un levier de
+lancement, c'est un investissement dont les premiers effets, s'il y en a, se
+mesurent en mois.
 
 ## 8. Ce qui bloque, et à quel moment
 

@@ -908,7 +908,9 @@ function renderResults(d){
     detail.textContent = "Tant que nous n'avons pas vérifié, sur de vraies fiches, que les deux surfaces comparées recouvrent bien le même périmètre, cet écart vous indique où regarder sans rien établir. Le détail figure ci-dessous.";
     detail.hidden = false;
   } else {
-    sum.textContent = `Nous retenons ${pluriel(retenus.length, 'piste à vérifier', 'pistes à vérifier')}.`;
+    sum.textContent = avecFiche
+      ? `Nous retenons ${pluriel(retenus.length, 'piste à vérifier', 'pistes à vérifier')}.`
+      : `Nous relevons ${pluriel(retenus.length, 'point à confirmer', 'points à confirmer')} sur votre fiche d'évaluation.`;
     detail.textContent = observations.length
       ? `S'y ajoute ${pluriel(observations.length, 'observation qui ne compte pas comme motif', 'observations qui ne comptent pas comme motifs')}, présentée plus bas, à part.`
       : '';
@@ -925,8 +927,10 @@ function renderResults(d){
      </section>`;
   const html =
     (retenus.length
-      ? groupe('Pistes à vérifier',
-               pluriel(retenus.length, 'élément retenu', 'éléments retenus'),
+      ? groupe(avecFiche ? 'Pistes à vérifier' : 'Points à confirmer sur votre fiche',
+               avecFiche
+                 ? pluriel(retenus.length, 'élément retenu', 'éléments retenus')
+                 : pluriel(retenus.length, 'élément à vérifier', 'éléments à vérifier'),
                retenus.map(a => blocSignal(a)).join(''), 'groupe')
       : '') +
     (observations.length
@@ -996,13 +1000,26 @@ function renderResults(d){
   //      Deux participants du sondage avaient compris l'inverse l'un de
   //      l'autre sur l'écart de surface : le statut est désormais répété ici,
   //      avec sa raison, et non seulement au fil du texte.
-  const ligneStatut = (a, retenu) => `<li>
+  // Trois états, et non deux. Sans la fiche, un élément relevé n'est PAS un
+  // motif retenu : l'utilisateur n'a pas vu ce que l'administration retient, et
+  // la phrase « repose sur une donnée lue sur votre fiche » était fausse dans
+  // ce cas — elle était écrite en dur. Le moteur n'est pas en cause : il
+  // classait déjà la confiance en « faible » et refusait le projet de courrier.
+  const ligneStatut = (a, retenu) => {
+    const etiquette = !retenu ? ['et-info', 'Non retenu']
+      : avecFiche ? ['et-warn', 'Retenu comme motif']
+                  : ['et-info', 'À confirmer sur la fiche'];
+    const pourquoi = !retenu
+      ? "La comparaison des deux surfaces n'est pas encore validée sur de vraies fiches : cet écart peut venir de la question posée, pas de votre situation. Il n'ouvre donc aucune démarche."
+      : avecFiche
+        ? "Repose sur une donnée que vous avez lue sur votre fiche d'évaluation, et entre dans le périmètre que nous savons contrôler."
+        : "Vous avez répondu de mémoire, sans consulter votre fiche : nous ne savons pas si cet élément y figure réellement. C'est le point à vérifier en premier, et il ne deviendra un motif qu'une fois lu sur le document.";
+    return `<li>
       <span class="quoi">${echappe(a.titre)}</span>
-      <span class="etiquette ${retenu ? 'et-warn' : 'et-info'}">${retenu ? 'Retenu comme motif' : 'Non retenu'}</span>
-      <span class="pourquoi">${retenu
-        ? 'Repose sur une donnée lue sur votre fiche et entre dans le périmètre que nous savons contrôler.'
-        : "La comparaison des deux surfaces n'est pas encore validée sur de vraies fiches : cet écart peut venir de la question posée, pas de votre situation. Il n'ouvre donc aucune démarche."}</span>
+      <span class="etiquette ${etiquette[0]}">${etiquette[1]}</span>
+      <span class="pourquoi">${pourquoi}</span>
     </li>`;
+  };
   const statuts = retenus.map(a => ligneStatut(a, true)).concat(observations.map(a => ligneStatut(a, false)));
   $('recap-statut').innerHTML = statuts.length ? statuts.join('')
     : `<li><span class="quoi">Aucun élément relevé</span><span class="pourquoi">Sur les points que nous savons contrôler, vos réponses ne font apparaître aucun écart.</span></li>`;
