@@ -674,7 +674,7 @@ function majModeFiche(){
   $('notice-sans-fiche').hidden = avec;
   $('lab-factures').textContent = avec
     ? 'Éléments listés sur votre fiche d’évaluation'
-    : 'Éléments pris en compte dans votre évaluation';
+    : 'Éléments que vous pensez pris en compte dans votre évaluation';
   $('hint-factures').textContent = avec
     ? 'Reprenez exactement les éléments mentionnés dans le cadre « éléments de confort » de la fiche.'
     : 'À votre connaissance : ce qui a été déclaré à la construction, lors de travaux, ou repris dans l’acte d’achat.';
@@ -971,7 +971,11 @@ function renderResults(d){
       ? `Vous l'aviez sous les yeux. Surface réelle qui y figure : ${Number(d.surfFiche).toFixed(0)} m².`
       : "Non consultée. Aucune comparaison de surface n'a donc été faite."],
     ['Surface habitable aujourd\'hui', `${Number(d.surfReelle).toFixed(0)} m², ${source}.`],
-    ['Éléments portés à l\'évaluation', echappe(listeOuAucun(d.entree && d.entree.ef))],
+    // Sans la fiche, l'utilisateur n'a pas vu ce que l'administration retient :
+    // le libellé doit lui attribuer l'information, pas la présenter comme un
+    // fait relevé sur le document.
+    [avecFiche ? 'Éléments lus sur votre fiche' : 'Éléments que vous pensez portés à l\'évaluation',
+     echappe(listeOuAucun(d.entree && d.entree.ef))],
     ['Éléments existant aujourd\'hui', echappe(listeOuAucun(d.entree && d.entree.ee))],
   ];
   $('faits-donnees').innerHTML = faits.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');

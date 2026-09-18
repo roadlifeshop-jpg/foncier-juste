@@ -328,7 +328,9 @@ function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
     : 'estimée de mémoire'}.`, { taille: 10, espace: 3 });
   const ef = (d.entree && d.entree.ef) || [];
   const ee = (d.entree && d.entree.ee) || [];
-  w.ligne(`Éléments portés à l'évaluation selon vos réponses : ${ef.length ? ef.join(', ') : 'aucun'}. Existant aujourd'hui : ${ee.length ? ee.join(', ') : 'aucun'}.`, { taille: 10, espace: 8 });
+  w.ligne(`${d.avecFiche ? 'Éléments lus sur votre fiche' : 'Éléments que vous pensez portés à l\'évaluation'} : ${
+    ef.length ? ef.join(', ') : 'aucun'}. Existant aujourd'hui : ${ee.length ? ee.join(', ') : 'aucun'}.`,
+    { taille: 10, espace: 8 });
 
   // 3 — Chaque élément détecté
   if (reels.length) {
@@ -376,6 +378,14 @@ function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
   w.espace(4);
 
   // 6 — Sources
+  // Le titre ne doit pas rester seul en bas de page : on réserve sa hauteur et
+  // celle de la première source avant de l'écrire, pour que le saut de page,
+  // s'il a lieu, se produise AVANT le titre et non après.
+  const premiereSource = "Méthode d'évaluation des locaux d'habitation : articles 324 L à 324 V de l'annexe III au Code général des impôts ; commentaires BOFiP BOI-IF-TFB-20-10-20-50.";
+  w.reserver(hauteurBloc(doc, [
+    { texte: 'Sources', taille: 12, style: 'bold', espace: 3 },
+    { texte: `— ${premiereSource}`, taille: 9, espace: 3, x: 20 },
+  ], 20, 170));
   w.ligne('Sources', { taille: 12, style: 'bold', espace: 3 });
   [
     "Méthode d'évaluation des locaux d'habitation : articles 324 L à 324 V de l'annexe III au Code général des impôts ; commentaires BOFiP BOI-IF-TFB-20-10-20-50.",
