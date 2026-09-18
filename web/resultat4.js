@@ -29,8 +29,8 @@ function ech4(s){
   return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 }
 
-function bloc4(rang, intitule, corps, classes){
-  return `<div class="r4-bloc ${classes || ''}">
+function bloc4(rang, intitule, corps, classes, id){
+  return `<div class="r4-bloc ${classes || ''}"${id ? ` id="${id}"` : ''}>
     <h2><span class="rang">${rang}</span>${ech4(intitule)}</h2>
     ${corps}
   </div>`;
@@ -64,11 +64,19 @@ function rendreResultat4(r){
     bloc4('2', r.somme && r.somme.certitude === 'fait' ? 'Coût actuel' : 'Somme éventuelle', `
       <div class="chiffre${chiffre ? '' : ' sans'}">${ech4(r.somme ? r.somme.texte : 'Non chiffrable')}</div>
       <span class="certitude ${c.classe}">${ech4(c.libelle)}</span>
-      <p>${ech4(r.somme ? r.somme.pourquoi : '')}</p>`, 'r4-somme'),
+      <p>${ech4(r.somme ? r.somme.pourquoi : '')}</p>
+      ${r.action && r.action.length
+        ? `<p class="vers-action"><a href="#r4-action">Voir la démarche gratuite&nbsp;→</a></p>` : ''}`, 'r4-somme'),
 
-    bloc4('3', 'Ce qu\'il reste à vérifier', items4(r.verification)),
+    /* L'action vient AVANT la vérification, et ce n'est pas un détail d'ordre.
+       Entre le montant et la démarche gratuite, la version précédente
+       intercalait les développements juridiques : preuves à réunir, exceptions,
+       textes cités. Quelqu'un qui vient de lire « 600 € » veut savoir quoi
+       faire, pas lire un article du règlement. Les textes ne disparaissent
+       pas — ils restent en dessous, et chacun garde son dépliant de source. */
+    bloc4('3', 'Prochaine action, gratuite', items4(r.action), 'r4-action', 'r4-action'),
 
-    bloc4('4', 'Prochaine action', items4(r.action), 'r4-action'),
+    bloc4('4', 'Ce qu\'il reste à vérifier', items4(r.verification)),
 
     r.limites && r.limites.length
       ? bloc4('—', 'Ce que nous ne garantissons pas',

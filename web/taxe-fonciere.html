@@ -212,7 +212,7 @@
                     <tr><td data-label="Rubrique de la fiche"><b>Surface réelle</b>, partie par partie</td><td data-label="Ce qu'on y lit">Des mètres carrés bruts, sans correction. C'est la seule rubrique en mètres carrés réels.</td><td class="nombre" data-label="À saisir ici ?"><b>oui</b></td></tr>
                     <tr><td data-label="Rubrique de la fiche">Correctifs</td><td data-label="Ce qu'on y lit">Coefficients d'importance, d'entretien, de situation — des multiplicateurs, pas des surfaces</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
                     <tr><td data-label="Rubrique de la fiche">Équivalences superficielles</td><td data-label="Ce qu'on y lit">Des mètres carrés fictifs ajoutés pour les éléments de confort</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
-                    <tr><td data-label="Rubrique de la fiche">Surface pondérée</td><td data-label="Ce qu'on y lit">Le résultat du calcul&nbsp;: surface réelle corrigée, plus les équivalences. Normalement 20 à 40&nbsp;% au-dessus de la surface mesurée.</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
+                    <tr><td data-label="Rubrique de la fiche">Surface pondérée</td><td data-label="Ce qu'on y lit">Le résultat du calcul&nbsp;: surface réelle corrigée par les coefficients, plus les équivalences. Elle ne se compare pas à un relevé au mètre ruban.</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
                     <tr><td data-label="Rubrique de la fiche">Valeur locative</td><td data-label="Ce qu'on y lit">Un montant en euros, base de l'imposition</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
                   </tbody>
                 </table>
@@ -229,7 +229,7 @@
               <p class="attention"><b>Ce n'est pas la surface pondérée</b>
                 Celle-ci figure plus bas sur la même fiche, après correctifs et équivalences
                 (environ 5&nbsp;m² pour une baignoire, 3&nbsp;m² pour un WC, 2&nbsp;m² par pièce
-                chauffée). Elle dépasse normalement la surface mesurée de 20 à 40&nbsp;%&nbsp;: si le
+                chauffée). Elle ne se compare donc pas à une mesure au mètre ruban&nbsp;: si le
                 chiffre lu est nettement plus grand que ce que vous mesurez chez vous, ce n'est pas
                 celui-là.</p>
               <p class="encours"><b>Point que nous vérifions actuellement</b>
@@ -898,7 +898,7 @@ function remplirRecapQuatreCases(d){
   if (observations.length){
     constat.push({
       titre: "Une observation qui ne compte pas comme motif",
-      texte: "L'écart entre vos deux surfaces est présenté à part, et n'ouvre aucune démarche : la surface cadastrale pondérée dépasse normalement la surface mesurée de 20 à 40 %, parce qu'elle ajoute des mètres carrés fictifs pour les équipements.",
+      texte: "L'écart entre vos deux surfaces est présenté à part, et n'ouvre aucune démarche : la surface cadastrale pondérée n'est pas de même nature que votre mesure : elle applique des coefficients, qui peuvent la relever comme l'abaisser, puis ajoute des mètres carrés fictifs pour les équipements. L'écart n'a donc ni sens ni ampleur prévisibles.",
     });
   }
 
@@ -1068,7 +1068,7 @@ function renderResults(d){
        </ol>`
     : `<ol>
          <li><b>Demandez votre fiche d'évaluation (formulaire 6675-M)</b> depuis votre espace particulier sur impots.gouv.fr, par la messagerie sécurisée. C'est gratuit, et c'est le seul document qui indique la surface et les éléments réellement retenus.</li>
-         <li><b>Lisez-y la ligne « surface réelle »</b>, et non la surface pondérée : cette dernière intègre des équivalences (baignoire, WC, chauffage central) et dépasse normalement la surface mesurée de 20 à 40 %.</li>
+         <li><b>Lisez-y la ligne « surface réelle »</b>, et non la surface pondérée : cette dernière applique des coefficients, qui peuvent la relever comme l'abaisser, puis ajoute des équivalences fixées par l'article 324 T (5 m² par baignoire, 3 m² par WC particulier, 2 m² de chauffage central par pièce et annexe d'hygiène). Elle ne se compare donc pas à une mesure au mètre ruban.</li>
          <li><b>Vérifiez la catégorie de confort</b> attribuée à votre logement, sur l'échelle de 1 à 8.</li>
          <li><b>Revenez ici avec ces chiffres</b> : le pré-diagnostic deviendra alors réellement exploitable.</li>
        </ol>`;

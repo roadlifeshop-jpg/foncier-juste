@@ -417,7 +417,7 @@ main.doc > .fine{margin-top:26px; font-size:.86rem; color:var(--ink-faint);}
    qu'il faut avoir sous la main, parce que nos trois outils échouent surtout
    quand le visiteur n'a pas le bon document devant lui.
    ========================================================================== */
-.departs{display:grid; gap:14px; margin-top:30px; grid-template-columns:repeat(auto-fit,minmax(278px,1fr));}
+.departs{display:grid; gap:14px; margin-top:22px; grid-template-columns:repeat(auto-fit,minmax(278px,1fr));}
 .depart{
   position:relative; display:flex; flex-direction:column;
   background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
@@ -574,3 +574,7 @@ main.doc > .fine{margin-top:26px; font-size:.86rem; color:var(--ink-faint);}
 .depart .somme-type b{color:var(--accent);}
 .depart .somme-type.sans{background:var(--gold-soft); border-color:var(--gold);}
 .depart .somme-type.sans b{color:var(--gold);}
+
+/* Accès direct du montant à la démarche, sans traverser les textes. */
+.r4-somme .vers-action{margin-top:14px;}
+.r4-somme .vers-action a{font-weight:600; font-size:.95rem;}

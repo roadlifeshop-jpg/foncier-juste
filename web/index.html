@@ -21,7 +21,7 @@
    supprimés : ils descendent dans leur propre bande, après le choix, où ils
    font leur vrai travail — montrer la forme d'un résultat. */
 .hero-accueil{padding-block:52px 30px;}
-.hero-accueil h1{max-width:30ch;}
+.hero-accueil h1{max-width:26ch;}
 @media(max-width:560px){ .hero-accueil{padding-block:22px 16px;} }
 
 .exemples{display:grid; gap:16px; margin-top:26px; grid-template-columns:repeat(auto-fit,minmax(285px,1fr));}
@@ -64,11 +64,13 @@
 <main>
   <section class="hero-accueil shell">
     <div class="eyebrow">Trois outils gratuits</div>
-    <h1>Vérifiez une somme que vous pourriez récupérer ou économiser, puis sachez quoi faire</h1>
+    <!-- La promesse tient en une phrase, coupée entre le titre et le chapô : aucun
+         mot n'est perdu, et le premier choix remonte de deux lignes sur téléphone. -->
+    <h1>Vérifiez une somme que vous pourriez récupérer ou économiser</h1>
     <p class="lede">
-      Chaque outil part de ce que vous saisissez, dit ce que le chiffre obtenu vaut — un montant fixé
-      par un texte, un coût constaté, ou une hypothèse — et donne la démarche gratuite qui suit.
-      <b>Sans compte, sans paiement, sans commission.</b>
+      <b>Puis sachez quoi faire.</b> Chaque outil dit ce que son chiffre vaut — montant fixé par un
+      texte, coût constaté, hypothèse — et la démarche gratuite qui suit. Sans compte, sans paiement,
+      sans commission.
     </p>
 
     <h2 class="sr">Choisissez votre situation</h2>
@@ -78,53 +80,51 @@
         <div class="quoi">Vol retardé</div>
         <p class="situation">«&nbsp;Mon vol est arrivé avec plus de trois heures de retard.&nbsp;»</p>
         <p class="rend">Deux questions pour savoir si le règlement européen s'applique, puis le montant
-        forfaitaire qu'il prévoit — et la seule inconnue qui peut le ramener à zéro.</p>
-        <p class="somme-type"><b>Somme possible&nbsp;:</b> de 250 à 600 €, montant fixé par le règlement
-        (CE) n° 261/2004.</p>
+        qu'il prévoit.</p>
+        <p class="somme-type"><b>De 250 à 600 €</b>, montant fixé par le règlement (CE) n° 261/2004.</p>
         <div class="cout">
           <span><b>2</b> questions, puis 3</span>
           <span><b>2</b> minutes environ</span>
         </div>
-        <p class="besoin"><b>Sous la main&nbsp;:</b> l'heure d'arrivée prévue et l'heure réelle. C'est le
-        retard à l'arrivée qui compte, pas celui au départ.</p>
         <div class="aller"><a class="btn btn-primary" href="vol-retarde.html">Vérifier mon vol</a></div>
       </article>
 
       <article class="depart">
         <div class="quoi">Dépense mensuelle</div>
         <p class="situation">«&nbsp;Je paie un contrat dont je ne connais pas le coût réel.&nbsp;»</p>
-        <p class="rend">Un contrat à la fois&nbsp;: ce qu'il coûte sur douze mois, ce que son arrêt
-        représenterait, et le cas précis où une part déjà payée peut être réclamée.</p>
-        <p class="somme-type"><b>Somme affichée&nbsp;: le coût actuel</b>, pas une économie. Ce qu'un
-        arrêt ou un remboursement vous rendraient dépend de vérifications que l'outil vous indique.</p>
+        <p class="rend">Un contrat à la fois&nbsp;: ce qu'il coûte réellement sur douze mois, puis quoi
+        faire.</p>
+        <p class="somme-type"><b>Le coût actuel</b>, pas une économie&nbsp;: celle-ci dépend de
+        vérifications que l'outil indique.</p>
         <div class="cout">
           <span><b>3</b> champs</span>
           <span><b>1</b> minute</span>
         </div>
-        <p class="besoin"><b>Sous la main&nbsp;:</b> le montant et la périodicité. L'échéance, si vous la
-        connaissez, ouvre la question du remboursement.</p>
         <div class="aller"><a class="btn btn-primary" href="abonnements.html">Calculer ce que je paie</a></div>
       </article>
 
       <article class="depart">
         <div class="quoi">Taxe foncière</div>
         <p class="situation">«&nbsp;Ma taxe foncière me paraît élevée.&nbsp;»</p>
-        <p class="rend">Signale ce qui mérite d'être vérifié sur votre fiche d'évaluation, avec la
-        démarche et son délai — et répond aussi qu'il n'y a rien à signaler, quand c'est le cas.</p>
-        <p class="somme-type sans"><b>Aucune somme&nbsp;: non chiffrable.</b> Seule l'administration peut
-        recalculer une valeur locative. L'outil dit quoi vérifier, pas combien vous récupérerez.</p>
+        <p class="rend">Ce qui mérite d'être vérifié sur votre fiche d'évaluation, avec la démarche et
+        son délai.</p>
+        <p class="somme-type sans"><b>Aucune somme&nbsp;: non chiffrable.</b> Seule l'administration
+        recalcule une valeur locative.</p>
         <div class="cout">
           <span><b>3</b> étapes</span>
           <span><b>2</b> minutes environ</span>
         </div>
-        <p class="besoin"><b>Sous la main&nbsp;:</b> votre fiche d'évaluation 6675-M, si vous l'avez.
-        Sans elle le diagnostic reste possible, mais limité.</p>
         <div class="aller"><a class="btn btn-primary" href="taxe-fonciere.html">Vérifier ma taxe foncière</a></div>
       </article>
 
     </div>
 
-    <p class="limite-courte" style="margin-top:26px">
+    <p class="aide" style="margin-top:16px; max-width:52ch">
+      Chaque outil indique, avant de commencer, le temps qu'il demande et le document à avoir sous la
+      main.
+    </p>
+
+    <p class="limite-courte" style="margin-top:18px">
       <b>Aucun de ces montants n'est une somme promise.</b> Nous n'avons accès à aucun dossier&nbsp;:
       ni votre réservation, ni votre contrat, ni votre avis d'imposition. Chaque chiffre affiché porte
       son degré de certitude, et aucun outil ne dit qu'une démarche aboutira.
