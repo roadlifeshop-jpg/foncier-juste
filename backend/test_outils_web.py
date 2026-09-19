@@ -374,8 +374,53 @@ SCRIPT_TESTS = r"""
   eq("catégorie inconnue : effacée", normaliserLignes([{ nom:'X', montant:100, categorie:'crypto' }])[0].categorie, '');
   eq("date impossible : écartée", normaliserLignes([{ nom:'X', montant:100, echeance:'2026-02-31' }])[0].echeance, null);
   eq("nom absent : nom de repli", normaliserLignes([{ montant:100 }])[0].nom, 'Contrat sans nom');
+  /* Un engagement à moitié saisi est CONSERVÉ, et non plus effacé : c'est ce
+     qui permet à `etatLigne` de nommer ce qui manque au lieu de faire
+     disparaître la saisie en silence. Aucune règle ne s'applique pour autant,
+     `engagement()` exigeant les deux valeurs. */
   const engBoiteux = normaliserLignes([{ nom:'X', montant:100, engagementDebut:'2026-01-01' }])[0];
-  eq("début d'engagement sans durée : les deux tombent", [engBoiteux.engagementDebut, engBoiteux.engagementMois], [null, null]);
+  eq("début d'engagement sans durée : la date est conservée",
+     [engBoiteux.engagementDebut, engBoiteux.engagementMois], ['2026-01-01', null]);
+  eq("durée sans date de début : la durée est conservée",
+     normaliserLignes([{ nom:'X', montant:100, engagementMois:24 }])[0].engagementMois, 24);
+  vrai("engagement à moitié saisi : aucune règle d'engagement n'est produite",
+       !pistes(engBoiteux, AUJ).some(p => /[Ee]ngagement (en cours|terminé)/.test(p.titre)));
+
+  /* ---- L'état d'une ligne : ce qui manque est nommé --------------------- */
+  const etat = o => etatLigne(Object.assign({ id:'e', nom:'E', montant: 999, periodicite:'mensuelle',
+    categorie:'', echeance:null, engagementDebut:null, engagementMois:null,
+    souscritEnLigne:false, recent:false }, o), AUJ);
+
+  eq("montant seul : aucune pastille", [etat({}).cle, etat({}).libelle], ['sommaire', null]);
+  eq("date de début sans durée : la durée est réclamée",
+     etat({ engagementDebut: reculeMois(AUJ, 6) }).libelle, "À compléter : durée de l'engagement");
+  eq("durée sans date de début : la date est réclamée",
+     etat({ engagementMois: 24 }).libelle, "À compléter : date de début de l'engagement");
+  eq("engagement de plus de douze mois sans catégorie : la catégorie est réclamée",
+     etat({ engagementDebut: reculeMois(AUJ, 6), engagementMois: 24 }).libelle,
+     'À compléter : catégorie du contrat');
+  eq("engagement de douze mois ou moins : la catégorie n'est pas réclamée",
+     etat({ engagementDebut: reculeMois(AUJ, 3), engagementMois: 12 }).cle, 'verifiable');
+  eq("engagement complet et catégorie donnée : vérification possible",
+     etat({ engagementDebut: reculeMois(AUJ, 6), engagementMois: 24, categorie:'telecom' }).libelle,
+     'Vérification possible');
+  eq("échéance seule : vérification possible",
+     etat({ echeance:'2027-01-15' }).cle, 'verifiable');
+  vrai("le manque le plus bloquant est cité en premier",
+       etat({ engagementMois: 24 }).manque[0] === "date de début de l'engagement");
+  vrai("aucun état ne conclut à la place de l'utilisateur",
+       ['sommaire', 'a-completer', 'verifiable'].includes(etat({}).cle) &&
+       !/résiliable|économie/i.test(String(etat({ engagementMois: 24 }).libelle)));
+
+  /* La synthèse nomme elle aussi les saisies inachevées. */
+  const inachevee = [{ id:'i1', nom:'Box', montant: 3999, periodicite:'mensuelle', categorie:'',
+                       engagementDebut: reculeMois(AUJ, 6), engagementMois: 24 }];
+  vrai("synthèse : la ligne inachevée est nommée, avec ce qui lui manque",
+       resultat4Inventaire(inachevee, AUJ).verification
+         .some(v => /^Box — à compléter : catégorie du contrat$/.test(v.titre)));
+  vrai("synthèse : la catégorie n'est jamais attribuée d'office",
+       resultat4Inventaire(inachevee, AUJ).verification
+         .some(v => /n'attribuons aucune catégorie d'office/.test(v.texte)));
   vrai("identifiant impropre : remplacé par un identifiant sûr",
        /^reprise-/.test(normaliserLignes([{ id:'x" onerror=1', nom:'X', montant:100 }])[0].id));
   eq("identifiants dupliqués : rendus uniques",

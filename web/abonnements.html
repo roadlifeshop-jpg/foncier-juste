@@ -83,9 +83,17 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 .abo-cout .m{font-size:1.1rem; font-weight:700;}
 .abo-cout .a{display:block; font-size:.82rem; color:var(--ink-muted);}
 .abo-actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; padding-top:11px; border-top:1px solid var(--line);}
-.marque-verif{display:inline-block; font-size:.7rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
-  color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-line);
-  border-radius:99px; padding:2px 8px; margin-top:6px;}
+/* Pastille d'état. Deux couleurs, deux sens : l'ambre appelle une action de
+   l'utilisateur, le bleu constate que la vérification peut avoir lieu. */
+.marque-verif{display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.04em;
+  border-radius:99px; padding:3px 9px; margin-top:7px; line-height:1.35;
+  color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-line);}
+.marque-verif.a-completer{color:var(--warn); background:var(--warn-soft); border-color:var(--warn-line);}
+.manque-dit{color:var(--warn); font-weight:600; margin-bottom:9px;}
+/* Héros raccourci : la saisie doit être atteignable sans lecture préalable. */
+.hero-court{padding-block:40px 20px;}
+@media(max-width:560px){ .hero-court{padding-block:26px 14px;} }
+.hero-court .lede{margin-top:14px; font-size:1.1rem; max-width:52ch;}
 
 /* --- Le panneau d'un contrat : révélé à la demande, pour lui seul -------- */
 .abo-panneau{margin-top:14px; padding-top:14px; border-top:1px solid var(--line);}
@@ -122,40 +130,21 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 </header>
 
 <main>
-  <section class="hero shell">
+  <section class="hero shell hero-court">
     <div class="eyebrow">Outil secondaire — bêta · gratuit, sans inscription</div>
     <h1>Ce que tous vos contrats vous coûtent</h1>
     <p class="lede">
       Deux champs par contrat&nbsp;: son nom et son montant. Le total par mois et par an s'affiche au fur
-      et à mesure, <b>puis vous n'approfondissez que les contrats que vous voulez vérifier</b>.
+      et à mesure. <b>Aucun relevé bancaire, aucun compte</b>&nbsp;; la liste reste sur cet appareil.
     </p>
-    <div class="prerequis">
-      <h2>Avant de commencer</h2>
-      <ul>
-        <li><span class="cle">Combien de temps</span><b>Deux champs</b> par contrat — le nom et le
-        montant. Une liste de six ou sept contrats se saisit en moins de deux minutes.</li>
-        <li><span class="cle">À avoir sous la main</span><b>Rien pour l'inventaire.</b> Les dates
-        d'échéance et d'engagement ne sont demandées que si vous ouvrez « Vérifier ce contrat »&nbsp;:
-        ce sont elles qui ouvrent les démarches possibles.</li>
-        <li class="rien"><span class="cle">Inutile de chercher</span>Aucun relevé bancaire, aucune connexion
-        à votre banque. <b>La liste reste sur cet appareil.</b></li>
-      </ul>
-      <p class="sans"><b>Cet outil est en bêta&nbsp;:</b> il additionne ce que vous payez et indique les
-      vérifications à mener. Il ne compare aucune offre et ne chiffre aucune économie — cela demanderait
-      des prix à jour et datés, une méthode de classement publique, et la transparence sur tout lien
-      commercial. Rien de cela n'existe encore.<br><br>
-      <b>Nous ne pouvons pas dire qu'un contrat donné est résiliable</b> — cela dépend
-      de ses conditions, que nous ne lisons pas.
-      <a href="#limites-outil">Ce que cela signifie exactement</a>.</p>
-    </div>
   </section>
 
   <!-- ====================== 1. INVENTAIRE RAPIDE ====================== -->
   <section class="shell-lire" id="saisie">
     <div class="forme">
       <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Ajoutez vos contrats</h2>
-      <p class="aide">Le type sert à préremplir le nom et à situer le contrat&nbsp;; il n'est pas
-      obligatoire. Vous pouvez aussi écrire directement dans le champ « Contrat ».</p>
+      <p class="aide">Le type préremplit le nom&nbsp;; il n'est pas obligatoire. Vous pouvez écrire
+      directement dans le champ « Contrat ».</p>
 
       <div class="choix-rapides" id="choix-rapides" role="group" aria-label="Type de contrat"></div>
 
@@ -216,27 +205,30 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
     <div class="r4" id="abo-r4"></div>
   </section>
 
-  <!-- Emplacement réservé. Aucune offre n'y est affichée, et ce n'est pas un
-       oubli : comparer suppose des prix à jour, une méthode publiable et une
-       indication des liens commerciaux. Nous n'avons aucun des trois. -->
-  <section class="shell-lire" style="margin-top:34px">
-    <div class="emplacement">
-      <h3>Comparer des fournisseurs&nbsp;: emplacement réservé</h3>
-      <p><b>Aucune offre n'est affichée ici, et ce n'est pas un oubli.</b> Un comparateur suppose des
-      prix vérifiés à une date connue, une méthode de classement publiable, et la mention de tout lien
-      commercial avec les fournisseurs cités. Nous n'avons aujourd'hui aucun des trois.</p>
-      <p>Les noms proposés à la saisie ne sont pas un comparateur&nbsp;: ils vous évitent de taper, ne
-      portent aucun prix, aucun lien et aucun classement. Afficher un prix concurrent que nous ne
-      pourrions ni tenir à jour ni justifier reviendrait à vous faire changer de contrat sur une
-      information périmée. Cet espace attend une source de prix officielle ou contractuelle&nbsp;; d'ici
-      là, il reste vide.</p>
-    </div>
-  </section>
+  <!-- Les explications longues sont repliées : celui qui saisit sa liste n'a
+       pas à les traverser, celui qui en a besoin les ouvre. Rien n'est
+       supprimé. `#limites-outil` est conservé comme identifiant : plus aucun
+       lien du site n'y pointe, mais une adresse partagée autrefois continue
+       d'atteindre la bonne section. -->
+  <section class="shell-lire" style="margin-top:40px">
+    <details class="detail-diagnostic" id="avant-commencer">
+      <summary>Ce qu'il faut savoir avant de commencer</summary>
+      <div class="prerequis" style="border:none; padding:0; background:none; margin-top:4px">
+        <ul>
+          <li><span class="cle">Combien de temps</span><b>Deux champs</b> par contrat — le nom et le
+          montant. Une liste de six ou sept contrats se saisit en moins de deux minutes.</li>
+          <li><span class="cle">À avoir sous la main</span><b>Rien pour l'inventaire.</b> Les dates
+          d'échéance et d'engagement ne sont demandées que si vous ouvrez « Vérifier ce contrat »&nbsp;:
+          ce sont elles qui ouvrent les démarches possibles.</li>
+          <li class="rien"><span class="cle">Inutile de chercher</span>Aucun relevé bancaire, aucune
+          connexion à votre banque. <b>La liste reste sur cet appareil</b>, dans le stockage local de ce
+          navigateur, et n'est envoyée à aucun serveur.</li>
+        </ul>
+      </div>
+    </details>
 
-  <section class="band pale" id="limites-outil" style="margin-top:44px">
-    <div class="shell-lire">
-      <div class="eyebrow">Les limites, en entier</div>
-      <h2>Ce que cet outil ne fait pas</h2>
+    <details class="detail-diagnostic" id="limites-outil" style="margin-top:12px">
+      <summary>Ce que cet outil ne fait pas</summary>
       <p><b>Aucune connexion bancaire, aucun relevé à fournir.</b> Rien n'est deviné ni détecté&nbsp;:
       l'outil ne connaît que ce que vous tapez. La liste est enregistrée dans le stockage local de cet
       appareil, n'est envoyée à aucun serveur, et disparaîtra si vous videz les données du site.</p>
@@ -248,21 +240,23 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
       par coût décroissant est une addition triée&nbsp;: il ne désigne pas un contrat à arrêter, puisque
       nous ignorons si l'un d'eux peut l'être, à quelle date et à quel coût, et ce que vous paieriez à
       la place.</p>
+      <p><b>Il ne compare aucune offre et ne cite aucun concurrent.</b> Un comparateur suppose des prix
+      vérifiés à une date connue, une méthode de classement publiable et la mention de tout lien
+      commercial. Nous n'avons aucun des trois, et les noms proposés à la saisie ne servent qu'à vous
+      éviter de taper&nbsp;: ils ne portent ni prix, ni lien, ni classement.</p>
       <p><b>Le mensuel affiché est une moyenne lissée.</b> Un contrat payé une fois par an ne coûte
       rien onze mois sur douze&nbsp;; le chiffre sert à comparer, pas à prévoir un prélèvement.</p>
-    </div>
-  </section>
+    </details>
 
-  <section class="band">
-    <div class="shell-lire">
-      <div class="eyebrow">Les règles applicables</div>
-      <h2>Ce que la loi impose, et à qui</h2>
+    <details class="detail-diagnostic" id="regles-applicables" style="margin-top:12px">
+      <summary>Les règles que la loi impose, et à qui</summary>
       <p>Ces trois règles sont celles que l'outil peut citer. Elles pèsent sur le professionnel&nbsp;;
       aucune ne rend un contrat résiliable à elle seule.</p>
       <div id="regles-abo"></div>
       <p style="margin-top:22px"><a href="resilier-un-abonnement.html">Comment se déroule une résiliation, étape par étape</a></p>
-    </div>
+    </details>
   </section>
+
 </main>
 
 <footer class="site-foot">
@@ -440,6 +434,15 @@ function resume(){
    nœud, une suppression en retire un. C'est ce qui permet à un panneau ouvert
    de le rester, et au champ en cours de saisie de garder le curseur. */
 
+/* La pastille d'état. « Vérification en cours » ne disait rien d'actionnable :
+   elle signalait qu'il se passait quelque chose sans dire quoi, ni ce qui
+   bloquait. Elle est remplacée par l'information manquante, nommée. */
+function marqueHTML(l){
+  const e = etatLigne(l, AUJ);
+  if (!e.libelle) return '';
+  return `<span class="marque-verif ${ech(e.cle)}" data-marque>${ech(e.libelle)}</span>`;
+}
+
 function resumeLigne(l){
   const p = PERIODICITES[l.periodicite];
   const cat = l.categorie && CATEGORIES[l.categorie] ? ech(CATEGORIES[l.categorie]) + ' · ' : '';
@@ -452,7 +455,7 @@ function ligneHTML(l){
       <div class="abo-ident">
         <span class="abo-nom" data-champ-nom>${ech(l.nom)}</span>
         <span class="abo-cat" data-champ-resume>${resumeLigne(l)}</span>
-        ${contratApprofondi(l) ? '<span class="marque-verif" data-marque>Vérification en cours</span>' : ''}
+        ${marqueHTML(l)}
       </div>
       <div class="abo-cout">
         <span class="m" data-champ-annuel>${ech(euros(annuelCentimes(l.montant, l.periodicite)))}</span>
@@ -485,11 +488,9 @@ function majLigne(id){
   art.querySelector('[data-champ-resume]').innerHTML = resumeLigne(l);
   art.querySelector('[data-champ-annuel]').textContent = euros(annuelCentimes(l.montant, l.periodicite));
   const marque = art.querySelector('[data-marque]');
-  if (contratApprofondi(l) && !marque){
-    art.querySelector('.abo-ident').insertAdjacentHTML('beforeend', '<span class="marque-verif" data-marque>Vérification en cours</span>');
-  } else if (!contratApprofondi(l) && marque){
-    marque.remove();
-  }
+  const html = marqueHTML(l);
+  if (marque) marque.remove();
+  if (html) art.querySelector('.abo-ident').insertAdjacentHTML('beforeend', html);
 }
 
 function majTotaux(){
@@ -607,8 +608,11 @@ function majPistes(l, panneau){
   const cible = panneau.querySelector('[data-pistes]');
   if (!cible) return;
   const ps = pistes(l, AUJ);
+  const e = etatLigne(l, AUJ);
   const ouvert = contratApprofondi(l);
-  cible.innerHTML = `<b>${ouvert ? 'Ce que vos réponses ouvrent' : 'Rien de renseigné pour l\'instant'}</b>
+  cible.innerHTML = `${e.cle === 'a-completer'
+      ? `<p class="manque-dit">Il manque ${ech(e.manque.join(', '))} pour qu'une règle puisse s'appliquer.</p>` : ''}
+    <b>${ouvert ? 'Ce que vos réponses ouvrent' : 'Rien de renseigné pour l\'instant'}</b>
     <ul>${ps.map(p => `<li>${ech(p.titre)}</li>`).join('')}</ul>
     <p class="aide">Le détail, les textes applicables et la démarche à mener figurent dans la synthèse,
     en bas de page.</p>`;
@@ -698,9 +702,13 @@ function appliquer(l, panneau, cible){
     const d = dInput.value || null;
     const m = mInput.value ? Number(mInput.value) : null;
     if (d && !versDate(d)){ errPan(panneau, 'engagement', "Cette date de début n'existe pas."); return; }
-    if (d && !m){ errPan(panneau, 'engagement', "Précisez la durée de l'engagement, en mois, pour que la date de début serve à quelque chose."); l.engagementDebut = null; l.engagementMois = null; }
-    else if (m && !d){ errPan(panneau, 'engagement', "Précisez la date de début de l'engagement."); l.engagementDebut = null; l.engagementMois = null; }
-    else { errPan(panneau, 'engagement'); l.engagementDebut = d; l.engagementMois = m ? Math.round(m) : null; }
+    errPan(panneau, 'engagement');
+    /* Les deux champs sont conservés séparément. Effacer la moitié saisie
+       parce que l'autre manque faisait disparaître le travail de
+       l'utilisateur sans rien lui dire ; la ligne affiche maintenant ce qui
+       manque, et `engagement()` reste muet tant que les deux ne sont pas là. */
+    l.engagementDebut = d;
+    l.engagementMois = (m && m > 0) ? Math.round(m) : null;
     relireDate('engagementDebut', panneau);
   } else if (cle === 'souscritEnLigne' || cle === 'recent'){
     l[cle] = cible.checked === true;

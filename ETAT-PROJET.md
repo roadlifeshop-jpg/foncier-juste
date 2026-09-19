@@ -14,8 +14,9 @@ Trois situations, par ordre de priorité produit :
 
 1. **Vol retardé ou annulé** — outil principal, le seul qui affiche un montant, parce que
    c'est le seul domaine où un texte fixe un barème.
-2. **Dépense récurrente** — outil secondaire, en bêta. Calcule le coût actuel d'un
-   contrat et la vérification à mener. Ne chiffre aucune économie.
+2. **Dépense récurrente** — outil secondaire, en bêta. Inventaire rapide : deux champs
+   par contrat, total par mois et par an, puis vérification facultative contrat par
+   contrat. Ne chiffre aucune économie.
 3. **Taxe foncière** — outil expert. Signale ce qui mérite vérification sur la fiche
    d'évaluation. **Aucune somme n'y est chiffrable**, et la page le dit avant le clic.
 
@@ -185,10 +186,16 @@ python3 -m pytest backend/ -q
 | `test_diagnostic_engine.py` | 30 tests du moteur Python miroir | vert |
 | `test_parite_moteurs.py` | 2 tests — empreinte SHA-256 des textes de `moteur.js` contre `parite_production.json`, 22 cas | vert |
 | `test_communes.py` | 9 tests du référentiel des 34 917 communes | vert |
-| `test_outils_web.py` | 1 test pytest exécutant **163 assertions** dans Chromium sur les vrais fichiers `regles.js`, `aeroports.js`, `abonnements.js`, `garanties.js`, `vol.js` | vert |
+| `test_outils_web.py` | 1 test pytest exécutant dans Chromium un lot d'assertions sur les vrais fichiers `regles.js`, `aeroports.js`, `abonnements.js`, `garanties.js`, `vol.js` | vert |
 
-**42 tests, 163 assertions.** Le harnais web charge les fichiers réellement servis, jamais
-une copie : c'est ce qui empêche les tests de diverger du code livré.
+Le harnais web charge les fichiers réellement servis, jamais une copie : c'est ce qui
+empêche les tests de diverger du code livré. Le décompte exact des tests et des assertions
+n'est pas écrit ici — il serait faux au commit suivant. Il se lit :
+
+```bash
+python3 -m pytest backend/ -q          # nombre de tests
+python3 backend/test_outils_web.py     # nombre d'assertions du harnais web
+```
 
 Contrôles manuels à rejouer avant toute mise en ligne, non automatisés : 14 pages à 320,
 360, 390, 768, 1180 et 1440 px — aucun débordement horizontal, un seul `h1`, tous les champs
@@ -243,9 +250,11 @@ directeur de la publication, email de contact. Le statut juridique et le SIRET s
 
 - Le délai de **remboursement sous trente jours** de l'article L215-1 n'est mentionné ni
   dans le guide abonnements, ni dans l'outil, ni dans `regles.js`.
-- La comparaison de fournisseurs a **un emplacement réservé et volontairement vide** dans
-  l'outil dépense mensuelle. L'ouvrir demandera des prix datés, une méthode de classement
-  publiable et la transparence sur tout lien commercial.
+- La comparaison de fournisseurs **n'a plus d'emplacement dans l'interface publique** :
+  le bloc « emplacement réservé » a été retiré de l'outil dépense mensuelle, un espace vide
+  n'étant d'aucun secours au visiteur. Le refus de comparer reste énoncé dans la section
+  repliée « Ce que cet outil ne fait pas ». L'ouvrir demandera des prix datés, une méthode
+  de classement publiable et la transparence sur tout lien commercial.
 - L'architecture visuelle permettrait d'ajouter, **après le résultat**, une option
   facultative de type « recevoir mon résultat ». Aucune de ces fonctions ne sera activée
   sans service réel, politique de confidentialité adaptée et consentement explicite.

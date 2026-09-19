@@ -513,10 +513,13 @@ function normaliserLigne(brut, rang) {
     periodicite,
     categorie,
     echeance: dateValide(brut.echeance),
-    // Une date de début sans durée, ou l'inverse, ne dit rien : les deux
-    // tombent ensemble plutôt que d'alimenter `engagement()` à moitié.
-    engagementDebut: dureeOk ? engagementDebut : null,
-    engagementMois: (engagementDebut && dureeOk) ? Math.round(mois) : null,
+    // Une date de début sans durée, ou l'inverse, ne suffit pas à calculer un
+    // engagement — `engagement()` renvoie null tant que les deux ne sont pas
+    // là. Mais les deux champs sont conservés SÉPARÉMENT : effacer la moitié
+    // saisie ferait disparaître le travail de l'utilisateur sans rien lui
+    // dire, alors que `etatLigne()` peut nommer précisément ce qui manque.
+    engagementDebut,
+    engagementMois: dureeOk ? Math.round(mois) : null,
     souscritEnLigne: brut.souscritEnLigne === true,
     recent: brut.recent === true,
     // Deux indicateurs d'anciennes versions qui pèsent sur `totaux()` : les
@@ -548,6 +551,43 @@ function normaliserLignes(brut) {
 function contratApprofondi(ligne) {
   if (!ligne) return false;
   return !!(ligne.echeance || ligne.engagementDebut || ligne.souscritEnLigne === true || ligne.recent === true);
+}
+
+/** L'état d'une ligne dans l'inventaire, en un mot et sans jargon.
+ *
+ *  Remplace l'ancienne pastille « Vérification en cours », qui disait qu'il se
+ *  passait quelque chose sans dire quoi. Quand une information indispensable
+ *  manque, elle est nommée : l'utilisateur sait quoi aller chercher.
+ *
+ *  Trois états, et un seul peut s'appliquer :
+ *    'sommaire'    — seul le montant est connu. Aucune pastille : c'est le cas
+ *                    normal d'un inventaire, pas un défaut à signaler.
+ *    'a-completer' — une saisie a commencé mais reste inexploitable en l'état.
+ *    'verifiable'  — assez d'éléments pour qu'une vérification existe.
+ *
+ *  Les manques sont ordonnés du plus bloquant au moins bloquant, et seul le
+ *  premier est affiché : une pastille qui énumère trois choses ne se lit pas. */
+function etatLigne(ligne, aujourdhui) {
+  const auj = aujourdhui || new Date();
+  const manque = [];
+
+  // Un engagement à moitié saisi ne produit aucune règle : `engagement()`
+  // exige les deux. C'est le manque le plus coûteux, donc le premier cité.
+  if (ligne.engagementDebut && !ligne.engagementMois) manque.push("durée de l'engagement");
+  if (ligne.engagementMois && !ligne.engagementDebut) manque.push("date de début de l'engagement");
+
+  // Un engagement de plus de douze mois sans catégorie : la règle des
+  // communications électroniques ne peut être ni appliquée ni tue. `pistes()`
+  // le signale déjà en toutes lettres ; la pastille dit quoi faire pour lever
+  // le doute, sans rien conclure sur la nature du contrat.
+  const eng = (ligne.engagementDebut && ligne.engagementMois)
+    ? engagement(ligne.engagementDebut, ligne.engagementMois, auj)
+    : null;
+  if (eng && eng.dureeMois > 12 && !ligne.categorie) manque.push('catégorie du contrat');
+
+  if (manque.length) return { cle: 'a-completer', manque, libelle: 'À compléter : ' + manque[0] };
+  if (!contratApprofondi(ligne)) return { cle: 'sommaire', manque: [], libelle: null };
+  return { cle: 'verifiable', manque: [], libelle: 'Vérification possible' };
 }
 
 /** Classement par coût annuel décroissant. Constat arithmétique : à parts
@@ -633,6 +673,19 @@ function resultat4Inventaire(lignes, aujourdhui) {
 
   /* ---- 4. Ce qu'il reste à vérifier ---- */
   const verification = [];
+
+  // Les saisies inachevées passent devant : tant qu'il leur manque une
+  // information, elles ne produisent aucune règle, et l'utilisateur mérite de
+  // savoir laquelle plutôt que de constater qu'il ne se passe rien.
+  actives.forEach(l => {
+    const e = etatLigne(l, auj);
+    if (e.cle !== 'a-completer') return;
+    verification.push({
+      titre: `${l.nom} — à compléter : ${e.manque.join(', ')}`,
+      texte: `Cette ligne est commencée mais reste inexploitable en l'état : ${e.manque.length > 1 ? 'ces informations manquent' : 'cette information manque'} pour qu'une règle puisse s'appliquer. ${e.manque.includes('catégorie du contrat') ? "Nous n'attribuons aucune catégorie d'office : rien ne nous dit de quel type de contrat il s'agit, et la règle des engagements de plus de douze mois ne vaut que pour la téléphonie et l'accès à internet. " : ''}Ouvrez « Vérifier ce contrat » pour ${e.manque.length > 1 ? 'les' : 'la'} renseigner.`,
+    });
+  });
+
   approfondis.forEach(l => {
     resultat4Abonnement(l, auj).verification
       .forEach(v => verification.push({ titre: `${l.nom} — ${v.titre}`, texte: v.texte, regle: v.regle }));
@@ -665,5 +718,5 @@ if (typeof module !== 'undefined' && module.exports) {
                      fenetreNonReconduction, engagement, pistes,
                      resultat4Abonnement,
                      CHOIX_RAPIDES, normaliserLigne, normaliserLignes, contratApprofondi,
-                     repartition, resultat4Inventaire };
+                     etatLigne, repartition, resultat4Inventaire };
 }
