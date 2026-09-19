@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Comparer mon forfait mobile</title>
-<meta name="description" content="Comparez votre forfait mobile à un petit ensemble d'offres vérifiées et datées. Coût sur douze mois, promotions comprises. Aucune offre partenaire, aucun classement sponsorisé.">
+<meta name="description" content="Comparez votre forfait mobile à un petit ensemble d'offres relevées à une date connue sur les pages officielles. Coût sur douze mois, promotions et frais de souscription compris. Aucune offre partenaire, aucun classement sponsorisé.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/comparer-mobile.html">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
@@ -93,8 +93,9 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
     <div class="eyebrow">Premier essai — gratuit, sans inscription</div>
     <h1>Comparer mon forfait mobile</h1>
     <p class="lede" style="margin-top:14px; font-size:1.1rem; max-width:52ch">
-      Un petit ensemble d'offres <b>lues sur les pages officielles et datées</b>. Coût sur douze mois,
-      promotions comprises. Aucun partenaire, aucun classement sponsorisé, aucun lien affilié.
+      Un petit ensemble d'offres <b>lues sur les pages officielles à une date connue</b>. Coût sur
+      douze mois, promotions et frais de souscription compris. Aucun partenaire, aucun classement
+      sponsorisé, aucun lien affilié. <b>Revérifiez le prix chez l'opérateur avant de décider.</b>
     </p>
   </section>
 
@@ -198,16 +199,23 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
         <p><b>Rien sur ce que vous coûterait de partir.</b> Frais de résiliation, engagement en cours,
         matériel à rendre&nbsp;: nous ne lisons pas vos contrats. Une offre moins chère ne devient une
         économie qu'une fois ce coût de sortie connu.</p>
-        <p><b>Les frais de mise en service ne sont pas comptés.</b> Aucune des pages consultées ne les
-        affichait à l'endroit où les prix sont annoncés. Les coûts sur douze mois les excluent donc,
-        et ils peuvent représenter plusieurs dizaines d'euros la première année.</p>
+        <p><b>Trois sortes de frais, à ne pas confondre.</b> Les <i>frais de souscription</i> — carte
+        SIM, activation, mise en service — sont compris dans le coût affiché quand la page de
+        l'opérateur les donne, et signalés « non établis » quand elle ne les donne pas. Les <i>frais
+        de résiliation de la nouvelle offre</i> sont indiqués mais jamais additionnés&nbsp;: on ne les
+        paie qu'en partant. Le <i>coût de sortie de vos contrats actuels</i> nous est inconnu et
+        n'entre dans aucun calcul.</p>
         <p><b>Rien n'est garanti disponible à votre adresse.</b> Pour une box, l'éligibilité se teste
         chez l'opérateur, adresse par adresse. Tant qu'elle n'est pas confirmée, une offre fibre n'est
         pas une offre&nbsp;: c'est une hypothèse.</p>
         <p><b>Ce comparatif est petit et tenu à la main.</b> Il ne couvre pas le marché, ne classe pas
-        les opérateurs et ne reçoit aucune rémunération. Chaque offre porte la date à laquelle elle a
-        été lue sur la page officielle&nbsp;; passé trente jours, elle cesse d'être présentée comme
-        vérifiée.</p>
+        les opérateurs et ne reçoit aucune rémunération.</p>
+        <p><b>Aucune offre n'est présentée comme « vérifiée » aujourd'hui.</b> Chacune porte la date à
+        laquelle son prix a été lu sur la page officielle, et rien de plus&nbsp;: nous ignorons à quelle
+        fréquence ces offres changent, et les mentions des opérateurs portent elles-mêmes des fenêtres
+        datées. Une série spéciale peut disparaître le lendemain du relevé. <b>Revérifiez le prix sur la
+        page de l'opérateur avant toute décision</b> — c'est vrai le jour du relevé comme un mois
+        après, et au-delà de trente jours l'avertissement se renforce.</p>
       </details>
     </div>
   </section>
@@ -359,22 +367,28 @@ function offreHTML(r, situation){
     </div>
     <p class="offre-cle"><b>${ech(periode)}</b> · ${o.donneesFr} Go en France.${etranger}</p>
     <p class="offre-cle">${ech(conditionCle)}</p>
+    <p class="offre-cle">${r.fraisConnus
+      ? `<b>Pour entrer :</b> ${ech(euros(r.frais))} de frais de souscription, compris dans le total ci-dessus (${ech(euros(r.recurrent12))} de mensualités + ${ech(euros(r.frais))}).`
+      : `<b>Frais de souscription non établis</b> sur les pages consultées : le total ci-dessus ne compte que les mensualités et pourrait donc être sous-estimé.`}
+      ${Number.isFinite(o.fraisResiliationNouvelle)
+        ? `<br><b>Pour repartir :</b> ${ech(euros(o.fraisResiliationNouvelle))} de frais de résiliation de cette offre — non comptés, puisqu'on ne les paie qu'en partant.`
+        : `<br><b>Pour repartir :</b> frais de résiliation de cette offre non établis.`}</p>
     ${ecart}
     <details>
       <summary>Le détail, et ce qui n'est pas compté</summary>
       <ul>
         ${o.conditions.map(c => `<li>${ech(c)}</li>`).join('')}
-        <li>Frais de mise en service <b>non relevés</b> : le coût sur douze mois ne les comprend pas.</li>
+        <li>${ech(o.sourceFrais)}</li>
         <li>${o.donneesEurope} Go utilisables hors de France, d'après la page de l'opérateur.</li>
+        <li><b>Le coût de sortie de votre contrat actuel n'est pas compté</b> : nous ne le connaissons pas.</li>
       </ul>
     </details>
     <div class="offre-actions">
       <a class="btn-secondary btn-petit" href="${ech(o.url)}" target="_blank" rel="noopener noreferrer"
          style="text-decoration:none">Voir l'offre chez ${ech(o.operateur)}</a>
       <span class="hors-site">autre site</span>
-      <span class="date-verif${r.perimee ? ' perimee' : ''}">${r.perimee
-        ? 'Vérifiée le ' + ech(dateFrCourt(o.verifiee)) + ' — trop ancienne, à revérifier sur la page'
-        : 'Prix lu sur la page officielle le ' + ech(dateFrCourt(o.verifiee))}</span>
+      <span class="date-verif${r.ancien ? ' perimee' : ''}">Prix relevé le ${ech(dateFrCourt(o.verifiee))}${r.ancien
+        ? ' — relevé ancien, cette offre a pu changer ou disparaître' : ''}. À revérifier sur la page avant de décider.</span>
     </div>
   </article>`;
 }
@@ -391,7 +405,14 @@ function scenarioHTML(s){
     </div>
     <p class="offre-cle"><b>${ech(euros(sc.mobileAvecBox))} par mois pendant ${sc.dureeRemiseMois} mois,
     puis ${ech(euros(sc.mobileApresRemise))}</b> pour le mobile, <b>${ech(euros(sc.prixBox))} par mois</b>
-    pour la box.</p>
+    pour la box. Soit ${ech(euros(s.recurrent12))} de mensualités sur douze mois.</p>
+    <p class="offre-cle"><b>Pour entrer :</b> ${ech(euros(s.fraisEntree))} de frais de souscription —
+    ${ech(euros(sc.fraisSouscriptionMobile))} pour le mobile (carte SIM et activation) et
+    ${ech(euros(sc.fraisMiseEnServiceBox))} de mise en service de la fibre. Ils sont compris dans le
+    total ci-dessus.<br>
+    <b>Pour repartir :</b> ${ech(euros(s.fraisSortieNouvelle))} de frais de résiliation
+    (${ech(euros(sc.fraisResiliationMobile))} pour le mobile, ${ech(euros(sc.fraisResiliationBox))} pour
+    la fibre) — non comptés, puisqu'on ne les paie qu'en partant.</p>
     <p class="offre-cle">${ech(sc.conditionRemise)} <b>Sans la box, le mobile revient à
     ${ech(euros(sc.mobileSeul))} par mois.</b></p>
 
@@ -411,9 +432,8 @@ function scenarioHTML(s){
       <a class="btn-secondary btn-petit" href="${ech(sc.url)}" target="_blank" rel="noopener noreferrer"
          style="text-decoration:none">Tester mon éligibilité chez ${ech(sc.operateur)}</a>
       <span class="hors-site">autre site</span>
-      <span class="date-verif${s.perimee ? ' perimee' : ''}">${s.perimee
-        ? 'Vérifiée le ' + ech(dateFrCourt(sc.verifiee)) + ' — trop ancienne, à revérifier'
-        : 'Prix lus sur la page officielle le ' + ech(dateFrCourt(sc.verifiee))}</span>
+      <span class="date-verif${s.ancien ? ' perimee' : ''}">Prix relevés le ${ech(dateFrCourt(sc.verifiee))}${s.ancien
+        ? ' — relevés anciens, l’offre a pu changer' : ''}. À revérifier sur la page avant de décider.</span>
     </div>
   </article>`;
 }

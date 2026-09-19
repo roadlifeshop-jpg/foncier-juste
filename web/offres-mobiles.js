@@ -23,23 +23,41 @@
       douze mois, croissant. Les liens pointent vers la page officielle, sans
       paramètre de suivi.
 
-   4. LES FRAIS DE MISE EN SERVICE N'ONT PAS ÉTÉ RELEVÉS. Aucune des pages
-      consultées ne les affichait à l'endroit où les prix sont annoncés. Ils
-      sont donc `null` partout, et l'interface dit que les coûts affichés les
-      excluent. C'est une limite, pas un détail : elle peut représenter
-      plusieurs dizaines d'euros la première année.
+   4. TROIS SORTES DE FRAIS, JAMAIS CONFONDUES.
+      — `fraisSouscription` : ce qu'on paie pour ENTRER dans l'offre (carte
+        SIM, activation, mise en service). Il s'ajoute au coût de la première
+        année, parce qu'on le paie vraiment.
+      — `fraisResiliationNouvelle` : ce que coûterait de QUITTER cette offre
+        plus tard. Il n'entre dans aucun total — on ne le paie que si l'on
+        part — mais il est affiché, parce qu'il change la valeur d'un contrat
+        « sans engagement ».
+      — Le coût de sortie des contrats ACTUELS n'est ni ici ni calculable :
+        nous ne lisons pas les contrats de l'utilisateur.
+      Un frais non établi vaut `null` et s'affiche « non établi », jamais
+      zéro. Une première version de ce fichier mettait `null` partout en
+      affirmant que les pages ne les publiaient pas : c'était faux. Les
+      mentions de B&YOU les donnent, et celles de Free donnent le prix de la
+      carte SIM. Ils avaient simplement été cherchés sur les cartes d'offres
+      et non dans les mentions.
 
-   ENTRETIEN. Une offre dont `verifiee` remonte à plus de `PEREMPTION_JOURS`
-   cesse d'être présentée comme vérifiée. Voir `offrePerimee()`.
+   ENTRETIEN. Nous ne savons pas à quelle fréquence ces offres changent, et
+   nous ne prétendons donc pas qu'un relevé reste valable un mois. Une offre
+   n'est JAMAIS présentée comme « vérifiée » au présent : elle porte la date
+   à laquelle son prix a été lu, et l'invitation à le revérifier. Au-delà de
+   `ALERTE_JOURS`, l'avertissement se renforce. Voir `releveAncien()`.
    ========================================================================== */
 
-/* Au-delà de ce délai, une offre n'est plus annoncée comme vérifiée. Trente
-   jours : les séries spéciales des opérateurs changent au mois, parfois plus
-   vite. Ce n'est pas une garantie de fraîcheur, c'est une date de péremption. */
-const PEREMPTION_JOURS = 30;
+/* Seuil d'avertissement renforcé. Trente jours n'est PAS une durée de validité :
+   nous n'avons aucune donnée sur la fréquence de changement de ces offres, et
+   les mentions consultées portent elles-mêmes des fenêtres datées — « offre
+   valable à partir du 26/01/26 », « valable jusqu'au 11/02/2026 ». Une série
+   spéciale peut disparaître le lendemain du relevé. Avant ce seuil comme
+   après, la page invite à revérifier ; au-delà, elle insiste. */
+const ALERTE_JOURS = 30;
 
-/* Toutes les offres ci-dessous ont été lues le 19 septembre 2026 sur les pages
-   officielles citées. Les frais de mise en service ne figuraient sur aucune. */
+/* Prix et frais lus le 19 septembre 2026 sur les pages officielles citées,
+   mentions comprises. `sourceFrais` dit où les frais ont été lus, ou pourquoi
+   ils ne l'ont pas été. */
 const OFFRES_MOBILES = [
   {
     id: 'sosh-1go',
@@ -53,7 +71,9 @@ const OFFRES_MOBILES = [
     donneesFr: 1,              // Go en France
     donneesEurope: 1,
     engagement: false,
-    fraisMiseEnService: null,  // non relevé
+    fraisSouscription: null,
+    fraisResiliationNouvelle: null,
+    sourceFrais: 'Frais non établis : ni la liste des forfaits ni la fiche détaillée consultées ne les affichent.',
     nouveauxClientsSeulement: false,
     remiseBox: null,
     conditions: [
@@ -73,7 +93,9 @@ const OFFRES_MOBILES = [
     donneesFr: 60,
     donneesEurope: 23,
     engagement: false,
-    fraisMiseEnService: null,
+    fraisSouscription: null,
+    fraisResiliationNouvelle: null,
+    sourceFrais: 'Frais non établis : la page d’offre ne les donne pas, et la brochure tarifaire n’a pas été ouverte.',
     nouveauxClientsSeulement: false,
     remiseBox: null,
     conditions: [
@@ -94,7 +116,9 @@ const OFFRES_MOBILES = [
     donneesFr: 20,
     donneesEurope: 20,
     engagement: false,
-    fraisMiseEnService: null,
+    fraisSouscription: null,
+    fraisResiliationNouvelle: null,
+    sourceFrais: 'Frais non établis : ni la liste des forfaits ni la fiche détaillée consultées ne les affichent.',
     nouveauxClientsSeulement: true,
     remiseBox: null,
     conditions: [
@@ -114,7 +138,9 @@ const OFFRES_MOBILES = [
     donneesFr: 110,
     donneesEurope: 30,
     engagement: false,
-    fraisMiseEnService: null,
+    fraisSouscription: 1000,
+    fraisResiliationNouvelle: null,
+    sourceFrais: 'Carte SIM ou eSIM à 10 €, lue dans les mentions de mobile.free.fr. Frais de résiliation non établis sur cette page.',
     nouveauxClientsSeulement: false,
     remiseBox: null,
     conditions: [
@@ -134,7 +160,9 @@ const OFFRES_MOBILES = [
     donneesFr: 100,
     donneesEurope: 40,
     engagement: false,
-    fraisMiseEnService: null,
+    fraisSouscription: null,
+    fraisResiliationNouvelle: null,
+    sourceFrais: 'Frais non établis : ni la liste des forfaits ni la fiche détaillée consultées ne les affichent.',
     nouveauxClientsSeulement: true,
     remiseBox: null,
     conditions: [
@@ -154,7 +182,9 @@ const OFFRES_MOBILES = [
     donneesFr: 200,
     donneesEurope: 40,
     engagement: false,
-    fraisMiseEnService: null,
+    fraisSouscription: 200,
+    fraisResiliationNouvelle: 500,
+    sourceFrais: 'Carte SIM 1 € et frais d’activation 1 € à payer sur la première facture, frais de résiliation 5 € : lus dans les mentions de la page B&YOU sans engagement.',
     nouveauxClientsSeulement: false,
     remiseBox: null,
     conditions: [
@@ -173,7 +203,9 @@ const OFFRES_MOBILES = [
     donneesFr: 200,
     donneesEurope: 40,
     engagement: false,
-    fraisMiseEnService: null,
+    fraisSouscription: null,
+    fraisResiliationNouvelle: null,
+    sourceFrais: 'Frais non établis : ni la liste des forfaits ni la fiche détaillée consultées ne les affichent.',
     nouveauxClientsSeulement: true,
     remiseBox: null,
     conditions: [
@@ -193,7 +225,9 @@ const OFFRES_MOBILES = [
     donneesFr: 350,
     donneesEurope: 35,
     engagement: false,
-    fraisMiseEnService: null,
+    fraisSouscription: 1000,
+    fraisResiliationNouvelle: null,
+    sourceFrais: 'Carte SIM ou eSIM à 10 €, lue dans les mentions de mobile.free.fr — offerte pour une nouvelle souscription réservée aux abonnés Freebox ou Box 5G. Frais de résiliation non établis sur cette page.',
     nouveauxClientsSeulement: false,
     // Une remise existe pour les abonnés Freebox, mais elle dépend du type de
     // box, de l'ordre et de la date de souscription — jusqu'à cinq résultats
@@ -216,7 +250,9 @@ const OFFRES_MOBILES = [
     donneesFr: 300,
     donneesEurope: 50,
     engagement: false,
-    fraisMiseEnService: null,
+    fraisSouscription: null,
+    fraisResiliationNouvelle: null,
+    sourceFrais: 'Frais non établis : ni la liste des forfaits ni la fiche détaillée consultées ne les affichent.',
     nouveauxClientsSeulement: true,
     remiseBox: null,
     conditions: ['Réseau Orange.'],
@@ -240,12 +276,15 @@ const SCENARIOS_BOX_MOBILE = [
     dureeRemiseMois: 12,
     mobileApresRemise: 1599,
     prixBox: 2499,
-    fraisMiseEnServiceBox: null,   // non relevé sur la page consultée
-    conditionRemise: 'Le prix mobile de 12,99 €/mois est annoncé « avec Pure fibre », pendant un an, puis 15,99 €/mois.',
+    /* Lus dans les mentions de la page B&YOU sans engagement, le 19/09/2026. */
+    fraisSouscriptionMobile: 200,      // carte SIM 1 € + activation 1 €
+    fraisMiseEnServiceBox: 4800,       // mise en service fibre 48 €
+    fraisResiliationMobile: 500,       // 5 €
+    fraisResiliationBox: 6900,         // 69 €
+    conditionRemise: 'La remise de 3 €/mois pendant 12 mois suppose une première souscription SIMULTANÉE au forfait et à B&YOU Pure fibre, sous réserve d’activation effective des lignes. Elle est perdue si la box est résiliée.',
     eligibiliteAVerifier: true,
     inconnues: [
-      'les frais de mise en service de la fibre, absents de la page consultée',
-      'l’éligibilité de votre adresse à cette fibre, qui se teste chez l’opérateur',
+      'l’éligibilité de votre adresse à cette fibre, qui se teste chez l’opérateur et conditionne toute l’offre',
       'ce que vous coûterait la sortie de vos contrats actuels',
     ],
   },
@@ -271,9 +310,8 @@ function roleTelecom(nom) {
    Calculs. Tout est en centimes entiers, comme dans `abonnements.js`.
    -------------------------------------------------------------------------- */
 
-/** Coût d'une offre sur douze mois, promotion comprise. Si le prix change
- *  avant le douzième mois, les deux périodes sont additionnées — c'est tout
- *  l'intérêt de raisonner sur l'année plutôt que sur la mensualité affichée. */
+/** Coût RÉCURRENT sur douze mois, promotion comprise. N'inclut aucun frais :
+ *  c'est la part qui revient chaque mois, et elle seule. */
 function coutDouzeMois(offre) {
   if (!offre) return 0;
   const promo = Number(offre.dureePromoMois);
@@ -283,26 +321,43 @@ function coutDouzeMois(offre) {
   return offre.prix * 12;
 }
 
-/** Nombre de jours écoulés depuis la vérification. */
-function ageVerification(offre, aujourdhui) {
+/** Ce qu'on paie réellement la première année : douze mensualités plus les
+ *  frais d'entrée. Les frais de résiliation de la nouvelle offre n'y sont pas
+ *  — on ne les paie qu'en partant, et les compter d'avance supposerait qu'on
+ *  part. Quand les frais ne sont pas établis, le total reste le récurrent et
+ *  `fraisConnus` vaut faux : l'interface le dit au lieu de compter zéro. */
+function coutPremiereAnnee(offre) {
+  const recurrent = coutDouzeMois(offre);
+  /* `Number(null)` vaut 0 : passer par Number() ferait d'un frais inconnu un
+     frais nul, exactement ce que ce fichier interdit. Le type est vérifié
+     avant toute conversion. */
+  const brut = offre ? offre.fraisSouscription : null;
+  const connus = typeof brut === 'number' && Number.isFinite(brut) && brut >= 0;
+  const frais = connus ? brut : null;
+  return { recurrent, frais, fraisConnus: connus,
+           total: recurrent + (connus ? frais : 0) };
+}
+
+/** Nombre de jours écoulés depuis le relevé. */
+function ageReleve(offre, aujourdhui) {
   const d = versDate(offre.verifiee);
   if (!d) return null;
   return Math.max(0, Math.round((aujourdhui - d) / 86400000));
 }
 
-/** Une offre trop ancienne ne doit plus être présentée comme vérifiée. */
-function offrePerimee(offre, aujourdhui) {
-  const age = ageVerification(offre, aujourdhui || new Date());
-  return age === null || age > PEREMPTION_JOURS;
+/** Vrai si le relevé dépasse le seuil d'alerte, ou si sa date est illisible.
+ *  Ce n'est pas une date de péremption : une offre peut avoir changé dès le
+ *  lendemain du relevé, et la page le dit dans tous les cas. */
+function releveAncien(offre, aujourdhui) {
+  const age = ageReleve(offre, aujourdhui || new Date());
+  return age === null || age > ALERTE_JOURS;
 }
 
-/** Les offres retenues pour une situation donnée, triées par coût sur douze
- *  mois croissant.
+/** Les offres retenues, triées par coût de première année croissant.
  *
  *  `situation` : { prixActuel (centimes|null), donneesNecessaires (Go|null),
  *                  besoinEtranger (bool|null) }
- *  Un `null` vaut « je ne sais pas » et ne filtre rien : mieux vaut montrer
- *  trop que d'écarter en silence une offre qui aurait convenu. */
+ *  Un `null` vaut « je ne sais pas » et ne filtre rien. */
 function comparerMobile(situation, aujourdhui, offres) {
   const auj = aujourdhui || new Date();
   const liste = (offres || OFFRES_MOBILES).filter(o => !o.remiseBox);
@@ -312,17 +367,20 @@ function comparerMobile(situation, aujourdhui, offres) {
   const retenues = liste
     .filter(o => !aBesoin || o.donneesFr >= besoin)
     .map(o => {
-      const cout12 = coutDouzeMois(o);
+      const c = coutPremiereAnnee(o);
       const actuel12 = Number.isFinite(situation && situation.prixActuel) && situation.prixActuel > 0
         ? situation.prixActuel * 12 : null;
       return {
         offre: o,
-        cout12,
-        perimee: offrePerimee(o, auj),
-        /* L'écart n'est un écart que si l'on connaît le prix actuel. Sinon il
-           n'existe pas, et l'interface montre un coût, pas un gain. */
-        ecart12: actuel12 === null ? null : actuel12 - cout12,
-        moinsCher: actuel12 === null ? null : actuel12 - cout12 > 0,
+        cout12: c.total,          // frais d'entrée compris
+        recurrent12: c.recurrent,
+        frais: c.frais,
+        fraisConnus: c.fraisConnus,
+        ancien: releveAncien(o, auj),
+        /* L'écart n'existe que si le prix actuel est connu. Il ne tient pas
+           compte du coût de sortie du contrat actuel, que nous ignorons. */
+        ecart12: actuel12 === null ? null : actuel12 - c.total,
+        moinsCher: actuel12 === null ? null : actuel12 - c.total > 0,
       };
     })
     .sort((a, b) => a.cout12 - b.cout12 || a.offre.operateur.localeCompare(b.offre.operateur, 'fr'));
@@ -332,14 +390,12 @@ function comparerMobile(situation, aujourdhui, offres) {
     nombreEcartees: liste.length - retenues.length,
     besoinApplique: aBesoin ? besoin : null,
     prixActuelConnu: Number.isFinite(situation && situation.prixActuel) && situation.prixActuel > 0,
+    fraisIncomplets: retenues.some(r => !r.fraisConnus),
   };
 }
 
-/** Le scénario groupé. Il ne rend JAMAIS une économie chiffrée tant qu'une
- *  inconnue subsiste : il rend la liste des inconnues, en clair.
- *
- *  `foyer` : { prixActuelMobile, prixActuelBox (centimes|null),
- *              aDejaUneBox (bool|null), remiseBoxDejaActive (bool|null) } */
+/** Le scénario groupé. Il ne rend JAMAIS une économie chiffrée : l'éligibilité
+ *  à l'adresse et le coût de sortie des contrats actuels manquent toujours. */
 function scenarioBoxMobile(foyer, scenario, aujourdhui) {
   const auj = aujourdhui || new Date();
   const sc = scenario || SCENARIOS_BOX_MOBILE[0];
@@ -348,7 +404,10 @@ function scenarioBoxMobile(foyer, scenario, aujourdhui) {
   const mobile12 = (Number.isFinite(promo) && promo > 0 && promo < 12)
     ? sc.mobileAvecBox * promo + sc.mobileApresRemise * (12 - promo)
     : sc.mobileAvecBox * 12;
-  const nouveau12 = mobile12 + sc.prixBox * 12;
+  const box12 = sc.prixBox * 12;
+  const fraisEntree = (Number(sc.fraisSouscriptionMobile) || 0) + (Number(sc.fraisMiseEnServiceBox) || 0);
+  const recurrent12 = mobile12 + box12;
+  const nouveau12 = recurrent12 + fraisEntree;
 
   const mobileActuel = Number(foyer && foyer.prixActuelMobile);
   const boxActuelle = Number(foyer && foyer.prixActuelBox);
@@ -362,22 +421,18 @@ function scenarioBoxMobile(foyer, scenario, aujourdhui) {
       ? 'le fait que vous n’ayez pas de box aujourd’hui : la comparaison porterait alors sur une dépense nouvelle, pas sur un remplacement'
       : 'le prix actuel de votre box');
   }
-  if (sc.fraisMiseEnServiceBox === null) manque.push(sc.inconnues[0]);
-  if (sc.eligibiliteAVerifier) manque.push(sc.inconnues[1]);
-  manque.push(sc.inconnues[2]);
+  sc.inconnues.forEach(i => manque.push(i));
 
   const actuel12 = (mobileActuelConnu && boxActuelleConnue)
     ? mobileActuel * 12 + boxActuelle * 12 : null;
 
   return {
     scenario: sc,
-    perimee: offrePerimee(sc, auj),
-    nouveau12,
-    mobile12,
-    box12: sc.prixBox * 12,
+    ancien: releveAncien(sc, auj),
+    mobile12, box12, recurrent12, fraisEntree, nouveau12,
+    /* Ce qu'il en coûterait de repartir : affiché, jamais additionné. */
+    fraisSortieNouvelle: (Number(sc.fraisResiliationMobile) || 0) + (Number(sc.fraisResiliationBox) || 0),
     actuel12,
-    /* `confirmee` reste faux tant qu'une inconnue subsiste. Il n'y a pas de
-       demi-mesure : une économie approximative est une économie fausse. */
     confirmee: false,
     ecartIndicatif: actuel12 === null ? null : actuel12 - nouveau12,
     manque,
@@ -385,7 +440,7 @@ function scenarioBoxMobile(foyer, scenario, aujourdhui) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { PEREMPTION_JOURS, OFFRES_MOBILES, SCENARIOS_BOX_MOBILE, roleTelecom,
-                     coutDouzeMois, ageVerification, offrePerimee,
+  module.exports = { ALERTE_JOURS, OFFRES_MOBILES, SCENARIOS_BOX_MOBILE, roleTelecom,
+                     coutDouzeMois, coutPremiereAnnee, ageReleve, releveAncien,
                      comparerMobile, scenarioBoxMobile };
 }

@@ -711,9 +711,11 @@ SCRIPT_TESTS = r"""
   const serie = cmp.retenues.find(r => r.offre.id === 'free-serie-110go');
   vrai("la Série Free porte bien un prix suivant et une durée",
        serie.offre.prixApres === 1999 && serie.offre.dureePromoMois === 12);
-  vrai("son coût sur douze mois retient le prix promotionnel, et sa condition annonce la bascule",
-       serie.cout12 === 15588 &&
+  vrai("ses mensualités retiennent le prix promotionnel, et sa condition annonce la bascule",
+       serie.recurrent12 === 15588 &&
        serie.offre.conditions.some(c => /puis l[’']offre bascule/.test(c)));
+  vrai("son coût de première année ajoute la carte SIM à 10 €",
+       serie.cout12 === 16588 && serie.frais === 1000 && serie.fraisConnus === true);
 
   /* ---- Prix actuel inconnu : un coût, jamais un écart ---- */
   const sansPrix = comparerMobile(situ({ prixActuel: null }), AUJ);
@@ -751,14 +753,22 @@ SCRIPT_TESTS = r"""
   /* ---- Le scénario box + mobile ---- */
   const scNu = scenarioBoxMobile({ prixActuelMobile: null, prixActuelBox: null, aDejaUneBox: null }, null, AUJ);
   vrai("scénario groupé : jamais confirmé", scNu.confirmee === false);
-  vrai("scénario groupé : le total additionne bien les deux contrats",
-       scNu.nouveau12 === scNu.mobile12 + scNu.box12);
+  vrai("scénario groupé : mensualités des deux contrats plus frais d'entrée",
+       scNu.recurrent12 === scNu.mobile12 + scNu.box12 &&
+       scNu.nouveau12 === scNu.recurrent12 + scNu.fraisEntree);
+  eq("scénario groupé : 2 € de mobile et 48 € de fibre à l'entrée", scNu.fraisEntree, 5000);
+  eq("scénario groupé : 5 € et 69 € pour repartir, affichés et non additionnés",
+     [scNu.fraisSortieNouvelle, scNu.nouveau12], [7400, scNu.recurrent12 + 5000]);
   vrai("scénario groupé : sans prix actuels, aucun écart même indicatif",
        scNu.actuel12 === null && scNu.ecartIndicatif === null);
-  vrai("scénario groupé : les inconnues nomment les frais, l'éligibilité et le coût de sortie",
-       scNu.manque.some(m => /frais de mise en service/.test(m)) &&
+  vrai("scénario groupé : l'éligibilité et le coût de sortie restent inconnus",
        scNu.manque.some(m => /éligibilité/.test(m)) &&
        scNu.manque.some(m => /sortie de vos contrats/.test(m)));
+  vrai("scénario groupé : les frais, désormais établis, ne figurent plus parmi les inconnues",
+       !scNu.manque.some(m => /frais de mise en service/.test(m)));
+  vrai("scénario groupé : la condition de souscription simultanée est dite",
+       /SIMULTANÉE/.test(SCENARIOS_BOX_MOBILE[0].conditionRemise) &&
+       /perdue si la box est résiliée/i.test(SCENARIOS_BOX_MOBILE[0].conditionRemise));
   vrai("scénario groupé : le prix mobile sans la box est conservé, et il est plus élevé",
        SCENARIOS_BOX_MOBILE[0].mobileSeul > SCENARIOS_BOX_MOBILE[0].mobileAvecBox);
 
@@ -770,21 +780,42 @@ SCRIPT_TESTS = r"""
      scFoyer.actuel12, 2499 * 12 + 2999 * 12);
   vrai("foyer équipé : un écart indicatif existe, mais rien n'est confirmé",
        scFoyer.ecartIndicatif === scFoyer.actuel12 - scFoyer.nouveau12 && scFoyer.confirmee === false);
-  vrai("foyer équipé : les frais et l'éligibilité restent listés comme manquants",
-       scFoyer.manque.length >= 3 && scFoyer.manque.some(m => /éligibilité/.test(m)));
+  vrai("foyer équipé : l'éligibilité reste listée comme manquante",
+       scFoyer.manque.length >= 2 && scFoyer.manque.some(m => /éligibilité/.test(m)));
 
   /* Sans box aujourd'hui : la comparaison porterait sur une dépense nouvelle. */
   vrai("foyer sans box : le scénario le dit au lieu de comparer",
        scenarioBoxMobile({ prixActuelMobile: 2499, prixActuelBox: null, aDejaUneBox: false }, null, AUJ)
          .manque.some(m => /dépense nouvelle/.test(m)));
 
-  /* ---- Péremption : une offre trop ancienne n'est plus « vérifiée » ---- */
-  vrai("offre du jour : non périmée", offrePerimee({ verifiee: '2026-09-19' }, AUJ) === false);
-  vrai("offre de plus de trente jours : périmée",
-       offrePerimee({ verifiee: '2026-06-01' }, AUJ) === true);
-  vrai("date de vérification illisible : traitée comme périmée",
-       offrePerimee({ verifiee: 'bientôt' }, AUJ) === true);
-  vrai("chaque offre du registre porte une date de vérification lisible",
+  /* ---- Frais : trois catégories, jamais confondues -------------------- */
+  const byou = OFFRES_MOBILES.find(o => o.id === 'byou-200go');
+  eq("B&YOU : carte SIM 1 € + activation 1 € en frais de souscription", byou.fraisSouscription, 200);
+  eq("B&YOU : 5 € pour quitter la nouvelle offre, jamais additionnés au coût", byou.fraisResiliationNouvelle, 500);
+  eq("Free : carte SIM ou eSIM à 10 €",
+     OFFRES_MOBILES.find(o => o.id === 'free-serie-110go').fraisSouscription, 1000);
+  vrai("un frais non établi vaut null, jamais zéro",
+       OFFRES_MOBILES.filter(o => o.operateur === 'Sosh').every(o => o.fraisSouscription === null));
+  vrai("chaque offre dit où ses frais ont été lus, ou pourquoi ils ne l'ont pas été",
+       OFFRES_MOBILES.every(o => typeof o.sourceFrais === 'string' && o.sourceFrais.length > 20));
+
+  eq("coût récurrent et coût de première année sont distincts",
+     [coutPremiereAnnee(byou).recurrent, coutPremiereAnnee(byou).total], [19188, 19388]);
+  vrai("frais non établis : le total reste le récurrent, et le dit",
+       (c => c.fraisConnus === false && c.frais === null && c.total === c.recurrent)
+         (coutPremiereAnnee(OFFRES_MOBILES.find(o => o.id === 'sosh-100go'))));
+  eq("Série Free : 155,88 € de mensualités + 10 € de carte SIM",
+     coutPremiereAnnee(OFFRES_MOBILES.find(o => o.id === 'free-serie-110go')).total, 16588);
+  vrai("les frais de résiliation de la nouvelle offre n'entrent dans aucun total",
+       coutPremiereAnnee(byou).total === coutDouzeMois(byou) + byou.fraisSouscription);
+
+  /* ---- Ancienneté du relevé : jamais présentée comme une validité ------- */
+  vrai("relevé du jour : pas d'alerte renforcée", releveAncien({ verifiee: '2026-09-19' }, AUJ) === false);
+  vrai("relevé de plus de trente jours : alerte renforcée",
+       releveAncien({ verifiee: '2026-06-01' }, AUJ) === true);
+  vrai("date de relevé illisible : traitée comme ancienne",
+       releveAncien({ verifiee: 'bientôt' }, AUJ) === true);
+  vrai("chaque offre du registre porte une date de relevé lisible",
        OFFRES_MOBILES.every(o => versDate(o.verifiee) !== null));
 
   /* ---- Les liens : officiels, sans paramètre de suivi, sans affiliation --- */
@@ -792,8 +823,8 @@ SCRIPT_TESTS = r"""
        OFFRES_MOBILES.every(o => /^https:\/\/([a-z0-9.-]+\.)?(free\.fr|sosh\.fr|red-by-sfr\.fr|bouyguestelecom\.fr)\//.test(o.url)));
   vrai("aucun lien ne porte de paramètre de suivi ou d'affiliation",
        OFFRES_MOBILES.concat(SCENARIOS_BOX_MOBILE).every(o => !/[?&](utm_|aff|partner|tag=|xtor)/i.test(o.url)));
-  vrai("les frais de mise en service sont déclarés non relevés, jamais à zéro",
-       OFFRES_MOBILES.every(o => o.fraisMiseEnService === null));
+  vrai("aucun frais inconnu n'est compté comme zéro",
+       OFFRES_MOBILES.every(o => o.fraisSouscription === null || o.fraisSouscription > 0));
 
   /* ---- Choix rapides : des noms pour éviter de taper, rien d'autre ------ */
   eq("choix rapides : huit entrées", CHOIX_RAPIDES.length, 8);
