@@ -588,6 +588,54 @@ SCRIPT_TESTS = r"""
        ['', 'telecom', 'assurance', 'streaming', 'sport', 'logiciel', 'energie']
          .every(c => !/\best résiliable\b/i.test(JSON.stringify(fi({ categorie: c, engagementDeclare:'sans' })))));
 
+  /* ---- Les démarches par catégorie -------------------------------------- */
+  const dem = o => demarcheContrat(Object.assign({}, base5, o), AUJ);
+
+  vrai("télécom sans engagement déclaré : engagement à confirmer, puis numéro et couverture",
+       (d => /Faites confirmer votre engagement/.test(d.titre) &&
+             d.liens.some(x => /arcep/.test(x.url)) &&
+             d.liens.some(x => /F22479/.test(x.url)))(dem({ categorie:'telecom', engagementDeclare:'sans' })));
+  vrai("télécom : aucune conclusion de résiliation sans frais",
+       /ne rend pas le contrat résiliable sans condition/.test(dem({ categorie:'telecom', engagementDeclare:'sans' }).texte));
+  vrai("assurance : la règle est citée, et l'hétérogénéité de la catégorie est dite",
+       (d => d.regle === 'assurance-resiliation-annuelle' && /n'obéissent pas aux mêmes règles/.test(d.texte))
+         (dem({ categorie:'assurance' })));
+  vrai("énergie : aucune économie déduite de la mensualité",
+       (d => /acompte estimé/.test(d.texte) && /n'en déduisons aucune économie/.test(d.texte) && !d.liens.length)
+         (dem({ categorie:'energie' })));
+  vrai("streaming : la résiliation en ligne est la démarche, avec sa règle",
+       dem({ categorie:'streaming' }).regle === 'resiliation-trois-clics');
+  vrai("salle de sport : renvoie au contrat, sans inventer de règle de sortie",
+       /pas dans la loi/.test(dem({ categorie:'sport' }).texte));
+  vrai("sans catégorie : la démarche reste utile",
+       dem({}).titre.length > 0 && dem({}).texte.length > 0);
+  vrai("rétractation : elle prime sur toute démarche de catégorie",
+       dem({ categorie:'telecom', recent:true }).regle === 'retractation-14-jours');
+
+  /* ---- Les ressources citées : publiques, sans prix ni classement -------- */
+  vrai("toutes les ressources pointent vers une autorité publique",
+       Object.values(RESSOURCES).every(r => /^https:\/\/([a-z.]+\.)?(service-public\.gouv\.fr|arcep\.fr)\//.test(r.url)));
+  vrai("aucune ressource n'annonce un prix, une offre ou une économie",
+       Object.values(RESSOURCES).every(r => !/prix|offre|\d+ ?€|économ|meilleur/i.test(r.nom + ' ' + r.quoi)));
+  vrai("chaque ressource porte sa date de vérification",
+       Object.values(RESSOURCES).every(r => /^\d{4}-\d{2}-\d{2}$/.test(r.verifiee)));
+  vrai("aucun lien de démarche ne sort de cette liste de ressources",
+       ['', 'telecom', 'assurance', 'streaming', 'sport', 'logiciel', 'energie'].every(c =>
+         ['avec', 'sans', 'inconnu', null].every(e =>
+           dem({ categorie: c, engagementDeclare: e }).liens.every(x =>
+             Object.values(RESSOURCES).some(r => r.url === x.url)))));
+
+  /* ---- La règle assurance ajoutée au registre --------------------------- */
+  vrai("règle assurance : deux fiches officielles et une date de vérification",
+       /service-public/.test(REGLES['assurance-resiliation-annuelle'].source.url) &&
+       /service-public/.test(REGLES['assurance-resiliation-annuelle'].source_secondaire.url) &&
+       REGLES['assurance-resiliation-annuelle'].verifiee === '2026-09-19');
+  vrai("règle assurance : sa portée est bornée à l'habitation et au véhicule",
+       /habitation/.test(REGLES['assurance-resiliation-annuelle'].concerne) &&
+       /complémentaire santé/.test(REGLES['assurance-resiliation-annuelle'].concerne));
+  vrai("règle assurance : elle prévient que la catégorie de l'outil est hétérogène",
+       REGLES['assurance-resiliation-annuelle'].exceptions.some(e => /contrats très différents/.test(e)));
+
   /* ---- Choix rapides : des noms pour éviter de taper, rien d'autre ------ */
   eq("choix rapides : huit entrées", CHOIX_RAPIDES.length, 8);
   vrai("choix rapides : chaque catégorie existe dans CATEGORIES, ou est vide",

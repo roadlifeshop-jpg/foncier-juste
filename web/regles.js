@@ -276,6 +276,26 @@ const REGLES = {
     ],
   },
 
+  'assurance-resiliation-annuelle': {
+    titre: "Pour une assurance habitation ou une assurance de véhicule à moteur, l'assuré peut demander la résiliation à chaque échéance annuelle, et à tout moment après la première année de contrat.",
+    texte: "Code des assurances, articles L113-1 à L113-17",
+    source: { nom: 'Service-Public — Assurance habitation : résiliation du contrat (fiche F19083)',
+              url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F19083' },
+    source_secondaire: { nom: 'Service-Public — Assurance auto : résiliation du contrat (fiche F2659)',
+                         url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F2659' },
+    statut: 'en vigueur',
+    applicable: null,
+    verifiee: '2026-09-19',
+    concerne: "L'assuré particulier d'un contrat d'assurance habitation ou d'assurance de véhicule à moteur, tacitement reconductible. Les autres assurances relèvent de règles distinctes que cette entrée ne couvre pas : complémentaire santé, assurance d'un téléphone ou d'un appareil, assurance emprunteur.",
+    exceptions: [
+      "La catégorie « assurance » de cet outil recouvre des contrats très différents. Tant que vous n'avez pas identifié lequel est le vôtre, cette règle ne vous est pas acquise.",
+      "La date d'effet d'une résiliation demandée après la première année obéit à ses propres délais : la fiche officielle les détaille, ce site ne les calcule pas.",
+      "Pour un véhicule à moteur, l'assurance est obligatoire : ne résiliez pas avant d'avoir souscrit ailleurs.",
+      "Un changement de situation — déménagement, vente du véhicule, mariage — ouvre d'autres cas de résiliation, soumis à des délais propres.",
+      "Ce site ne dit pas si votre contrat est résiliable aujourd'hui : il ne lit ni vos conditions particulières, ni la date de votre échéance.",
+    ],
+  },
+
   /* ------------------------------------------------------------------ */
   /* Taxe foncière — déjà utilisées par l'outil existant                 */
   /* ------------------------------------------------------------------ */

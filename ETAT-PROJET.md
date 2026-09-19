@@ -15,8 +15,10 @@ Trois situations, par ordre de priorité produit :
 1. **Vol retardé ou annulé** — outil principal, le seul qui affiche un montant, parce que
    c'est le seul domaine où un texte fixe un barème.
 2. **Dépense récurrente** — outil secondaire, en bêta. Inventaire rapide : deux champs
-   par contrat, total par mois et par an, puis vérification facultative contrat par
-   contrat. Ne chiffre aucune économie.
+   par contrat, total par mois et par an, puis un parcours court qui vérifie toute la
+   liste — deux ou trois questions par contrat, avec retour et reprise — et rend une
+   fiche par contrat : ce que vous savez, ce qu'il reste à vérifier, une démarche
+   gratuite. Ne chiffre aucune économie et ne compare aucune offre.
 3. **Taxe foncière** — outil expert. Signale ce qui mérite vérification sur la fiche
    d'évaluation. **Aucune somme n'y est chiffrable**, et la page le dit avant le clic.
 
@@ -81,7 +83,7 @@ seules fonctions.
 | `aeroports.js` | 105 aéroports, route orthodromique, garde-fous de seuil | Stable |
 | `abonnements.js` | Périodicités, totaux, engagements, fenêtre de reconduction | Stable |
 | `garanties.js` | Délais et voies après achat défectueux | Stable |
-| `regles.js` | **Registre unique des règles juridiques** — 18 entrées, chacune avec texte, source, date d'application et date de vérification. `sources.html` le parcourt automatiquement | Source de vérité |
+| `regles.js` | **Registre unique des règles juridiques** — chaque entrée porte texte, source officielle, date d'application et date de vérification. `sources.html` le parcourt automatiquement, et en donne donc le décompte à jour | Source de vérité |
 | `resultat4.js` | Rendu commun des quatre cases de résultat et du vocabulaire des certitudes | Partagé par les trois outils |
 | `rapport.js` | Génération des PDF (jsPDF), marque centralisée en deux constantes | Stable |
 

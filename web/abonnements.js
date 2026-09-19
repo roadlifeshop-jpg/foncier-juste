@@ -637,6 +637,32 @@ function repartition(lignes) {
       subsistent, et nous ne les lisons pas.
    ========================================================================== */
 
+/* Ressources officielles citées par les démarches. Ce ne sont pas des règles
+   de droit — elles n'ont donc pas leur place dans `REGLES` — mais des outils
+   ou des modes d'emploi publiés par une autorité publique. Aucune n'est un
+   comparateur commercial, aucune ne classe d'offres, aucune n'annonce de prix.
+   Chacune porte la date à laquelle son adresse a été vérifiée. */
+const RESSOURCES = {
+  'portabilite-numero': {
+    nom: "Service-Public — Changer d'opérateur en gardant son numéro",
+    url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F22479',
+    quoi: "la démarche officielle, étape par étape, et l'identifiant RIO qu'elle réclame",
+    verifiee: '2026-09-19',
+  },
+  'resiliation-telecom': {
+    nom: 'Service-Public — Téléphone, internet ou télévision : résiliation du contrat',
+    url: 'https://www.service-public.gouv.fr/particuliers/vosdroits/F22486',
+    quoi: "ce que la loi permet selon que vous êtes engagé ou non",
+    verifiee: '2026-09-19',
+  },
+  'couverture-arcep': {
+    nom: 'Arcep — Mon réseau mobile',
+    url: 'https://monreseaumobile.arcep.fr/',
+    quoi: "la couverture réelle de chaque opérateur là où vous vivez et travaillez",
+    verifiee: '2026-09-19',
+  },
+};
+
 /* --------------------------------------------------------------------------
    Les questions du parcours court
    -------------------------------------------------------------------------- */
@@ -728,7 +754,57 @@ function demarcheContrat(ligne, aujourdhui) {
       titre: `Demandez le décompte de ce qu'une rupture vous coûterait`,
       texte: `Votre engagement court jusqu'au ${eng.fin.toLocaleDateString('fr-FR')}. Demandez par écrit le décompte des sommes restant dues en cas de rupture anticipée : c'est au professionnel de le produire, et le recevoir ne vous engage à rien. ${cat === 'telecom' ? "Confrontez-le à la règle de l'article L224-28, rappelée ci-dessous." : "Nous ne le chiffrons pas : il dépend de vos mensualités et des frais propres à votre contrat."}`,
       regle: cat === 'telecom' && eng.dureeMois > 12 ? 'engagement-telecom' : null,
-      liens: [],
+      liens: cat === 'telecom' ? [RESSOURCES['resiliation-telecom']] : [],
+    };
+  }
+
+  /* À partir d'ici, aucun fait daté ne commande. La démarche dépend de la
+     catégorie et de ce que l'utilisateur a déclaré. */
+
+  if (cat === 'telecom') {
+    return {
+      titre: decl === 'avec'
+        ? "Demandez votre date de fin d'engagement par écrit"
+        : "Faites confirmer votre engagement, puis préparez votre numéro",
+      texte: decl === 'avec'
+        ? "Vous avez déclaré être engagé sans en connaître les dates. Demandez à votre opérateur, par écrit ou depuis votre espace client, la date de début et la durée de votre engagement. C'est l'information qui décide de tout le reste, et elle vous est due."
+        : `${decl === 'sans' ? "Vous avez déclaré n'être pas engagé, et c'est probablement exact — mais cela ne rend pas le contrat résiliable sans condition : préavis, frais propres à l'opérateur et clauses particulières subsistent." : "Vous ne savez pas si vous êtes engagé, et c'est la première chose à établir."} Demandez la confirmation écrite à votre opérateur. Dans le même mouvement, deux choses se préparent sans rien engager : la couverture réseau réelle là où vous vivez, et l'identifiant qui vous permettra de garder votre numéro.`,
+      regle: null,
+      liens: decl === 'avec'
+        ? [RESSOURCES['resiliation-telecom']]
+        : [RESSOURCES['couverture-arcep'], RESSOURCES['portabilite-numero'], RESSOURCES['resiliation-telecom']],
+    };
+  }
+
+  if (cat === 'assurance') {
+    return {
+      titre: "Identifiez le type exact de cette assurance, puis sa date d'échéance",
+      texte: "La catégorie « assurance » recouvre des contrats qui n'obéissent pas aux mêmes règles : habitation et véhicule à moteur d'un côté, complémentaire santé, assurance d'un appareil ou assurance emprunteur de l'autre. Commencez par nommer le vôtre, puis relevez sa date d'échéance annuelle sur l'avis de cotisation. Ces deux éléments décident de ce que vous pouvez faire, et nous ne les devinons pas.",
+      regle: 'assurance-resiliation-annuelle', liens: [],
+    };
+  }
+
+  if (cat === 'energie') {
+    return {
+      titre: "Relevez votre consommation annuelle, pas votre mensualité",
+      texte: "Le montant que vous payez chaque mois pour l'énergie est un acompte estimé, régularisé une fois par an : ce n'est ni votre coût réel, ni une base de comparaison. Cherchez sur votre dernière facture de régularisation la consommation annuelle en kilowattheures. C'est la seule donnée qui permette de comparer quoi que ce soit — nous ne la connaissons pas et n'en déduisons aucune économie.",
+      regle: null, liens: [],
+    };
+  }
+
+  if (cat === 'streaming' || cat === 'logiciel') {
+    return {
+      titre: "Cherchez la résiliation dans votre espace client, et relevez l'échéance",
+      texte: `Un contrat souscrit en ligne doit pouvoir être résilié en ligne, gratuitement et en quelques clics : c'est une obligation qui pèse sur le professionnel. Faites une capture d'écran de la confirmation. Relevez au passage la date de prochaine échéance — c'est elle qui situe la fenêtre d'information sur la reconduction.${decl === 'sans' ? " Vous avez déclaré n'être pas engagé ; cela ne dispense ni du préavis éventuel ni des conditions propres au service." : ''}`,
+      regle: 'resiliation-trois-clics', liens: [],
+    };
+  }
+
+  if (cat === 'sport') {
+    return {
+      titre: "Relisez la clause de résiliation de votre contrat",
+      texte: `Les contrats de salle de sport comportent fréquemment un engagement de douze mois et des motifs de sortie anticipée limitativement énumérés — déménagement, raison médicale, perte d'emploi — chacun avec son justificatif. Ces conditions sont dans votre contrat, pas dans la loi : nous ne les lisons pas.${decl === 'sans' ? " Vous avez déclaré n'être pas engagé : faites-le confirmer par écrit avant de compter dessus." : ''} Demandez un exemplaire de vos conditions si vous ne l'avez plus.`,
+      regle: 'tacite-reconduction', liens: [],
     };
   }
 
@@ -935,6 +1011,6 @@ if (typeof module !== 'undefined' && module.exports) {
                      resultat4Abonnement,
                      CHOIX_RAPIDES, normaliserLigne, normaliserLignes, contratApprofondi,
                      etatLigne, repartition, resultat4Inventaire,
-                     ENGAGEMENT_DECLARE, etapeSuivante, resteAVerifier,
+                     RESSOURCES, ENGAGEMENT_DECLARE, etapeSuivante, resteAVerifier,
                      avancement, demarcheContrat, ficheContrat };
 }
