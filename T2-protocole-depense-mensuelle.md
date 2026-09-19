@@ -134,17 +134,69 @@ session.
 
 ## Avant la première session
 
-**Trois conditions.** Aucune n'est technique.
+### Une version, et une seule, pour les cinq essais
 
-1. **Un accès qui fonctionne sur un téléphone inconnu**, et un plan B si le lien
-   échoue devant la personne. Voir la note d'accès du rapport de session.
-2. **Un email de contact publié** dans les mentions légales. C'est le seul champ
-   dont l'absence se voit pendant une session : une personne qui veut revenir
-   n'a aujourd'hui aucun moyen de le faire. Le reste — adresse, téléphone,
-   SIRET, statut — conditionne une mise en ligne ouverte, pas cinq sessions
-   accompagnées où l'éditeur est physiquement présent.
-3. **Une réponse préparée à « c'est vous qui avez fait ça ? »**, honnête et
-   courte. Mentir sur ce point contaminerait tout le reste de la session.
+**Les cinq sessions se font sur le même build.** Noter son identifiant de commit
+avant la première et ne rien pousser jusqu'à la cinquième. Deux personnes qui
+n'ont pas vu la même page ne se comparent pas, et cinq cas sont déjà trop peu
+pour se permettre de mélanger deux versions.
+
+**Seule exception : le critère d'arrêt immédiat.** S'il se réalise, la série
+s'interrompt, la correction est faite, et **les sessions repartent de zéro** sur
+le nouveau build. Les sessions déjà menées sont conservées comme observations,
+mais ne comptent plus dans les seuils.
+
+Cette règle a un effet utile de côté : la question de savoir si un lien d'accès
+suit ou non les commits suivants ne se pose plus, puisqu'il n'y a pas de commit
+suivant pendant la série.
+
+### L'accès
+
+**Vérifier le lien réel sur un téléphone déconnecté du compte Vercel**, avant la
+première session et non devant la personne. Ce qui doit être constaté soi-même,
+parce que la documentation ne le dit pas et qu'aucune session de préparation ne
+l'a établi :
+
+- la page s'ouvre bien sans compte, sur un appareil qui n'a jamais visité le
+  site ;
+- c'est bien la version attendue qui s'affiche — comparer un élément daté ou
+  une formulation propre au build retenu ;
+- le lien survit à une fermeture d'onglet et à un partage par message.
+
+Prévoir un plan B si le lien échoue devant la personne, et le préparer avant.
+
+### L'identification de l'éditeur
+
+Deux choses distinctes, qu'il ne faut pas confondre.
+
+**Le contact avec les testeurs** relève du confort de la session : sans adresse
+de contact publiée, une personne qui veut revenir, poser une question ou
+signaler une erreur n'a aucun moyen de le faire. C'est une gêne réelle, ce n'est
+pas une question de droit.
+
+**Les obligations d'identification de l'éditeur** sont une question séparée, et
+elles ne se règlent pas par la présence physique de l'éditeur pendant la
+session. `INFORMATIONS-LEGALES.md` en tient la liste, datée et sourcée sur
+l'article 1-1 de la LCEN : nom et prénoms, adresse, téléphone, directeur de la
+publication et email **n'attendent aucune immatriculation** et peuvent être
+renseignés dès maintenant ; seuls le statut juridique et le SIRET dépendent du
+guichet unique.
+
+**Ce protocole ne tranche pas** si le partage d'un lien à des personnes
+extérieures au projet déclenche ces obligations. Ce n'est ni une question
+d'interface ni une question de méthode d'enquête, et y répondre au jugé
+reviendrait à fabriquer une règle. Le site affiche lui-même, en haut de ses
+mentions légales, que le document n'est pas légalement valable et qu'un
+avertissement ne remplace pas une identification. Deux voies, et le choix
+appartient à l'éditeur : renseigner les cinq champs qui n'attendent rien, ou
+mener les sessions en connaissance de cause après avis qualifié.
+
+### Le reste
+
+**Une réponse préparée à « c'est vous qui avez fait ça ? »**, honnête et courte.
+Mentir sur ce point contaminerait tout le reste de la session. Une personne qui
+ouvre les mentions légales y lira l'avertissement : mieux vaut l'avoir dit avant
+qu'elle le découvre.
 
 ---
 
@@ -154,5 +206,6 @@ session.
 la décision qui découle de chaque seuil, ce qui a cassé et n'était pas prévu,
 et ce que ces cinq sessions **ne permettent pas** de conclure.
 
-Ne pas ajouter de fonctionnalité pendant la série. Une correction entre deux
-sessions ne se fait que pour le critère d'arrêt immédiat, et se note.
+Ne rien pousser pendant la série : les cinq essais se font sur le même build,
+et la seule interruption admise est le critère d'arrêt immédiat, qui fait
+repartir la série de zéro. Noter dans le rapport l'identifiant de commit utilisé.
