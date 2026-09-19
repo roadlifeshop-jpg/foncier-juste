@@ -29,14 +29,20 @@ accompagnement qui n'existe pas.
 
 ## Branche et dernier commit
 
-| | |
-|---|---|
-| Branche de travail | `refonte-trois-outils` |
-| Dernier commit | `1b37805` — « Un diagnostic gratuit avant d'engager quoi que ce soit : agir d'abord » |
-| Date | 19 septembre 2026 |
-| Local = distant | oui, arbre de travail propre |
-| `main` | `52ab6ac`, **21 commits en arrière**, jamais fusionnée |
-| Production | `foncier-juste.vercel.app` sert toujours **l'ancien site Foncier·Juste** |
+Branche de travail : **`refonte-trois-outils`**. `main` alimente la production et n'a jamais
+été fusionnée ; `foncier-juste.vercel.app` sert toujours **l'ancien site Foncier·Juste**.
+
+Aucun identifiant de commit ni compteur d'écart n'est écrit ici : ils seraient faux dès le
+commit suivant. L'état réel se lit à tout moment :
+
+```bash
+git status --short --branch      # branche courante, écart avec le distant, fichiers modifiés
+git rev-parse --short HEAD       # dernier commit de la branche de travail
+git rev-parse --short origin/main # dernier commit servi en production
+git rev-list --count main..HEAD  # nombre de commits d'avance sur main
+```
+
+`git log --oneline -1` donne en prime l'intitulé du dernier commit.
 
 Les prévisualisations Vercel sont protégées par l'authentification du projet : elles
 répondent `302` vers `vercel.com/sso-api` pour qui n'est pas connecté au compte. L'URL d'un
