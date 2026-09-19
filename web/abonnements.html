@@ -110,6 +110,55 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 .pan-pistes ul{margin:7px 0 0; padding-left:19px; color:var(--ink-muted);}
 .pan-pistes li{margin-top:5px;}
 .pan-fin{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;}
+
+/* --- Le parcours de vérification --------------------------------------- */
+#parcours-question{margin-top:16px;}
+.q-choix{display:grid; gap:9px; margin-top:12px;}
+.q-choix label{
+  display:flex; gap:11px; align-items:flex-start; cursor:pointer;
+  border:1px solid var(--line-strong); border-radius:var(--r); padding:13px 14px;
+  background:var(--surface); font-size:.96rem; min-height:48px;
+}
+.q-choix label:hover{border-color:var(--ink-faint);}
+.q-choix label:has(input:checked){border-color:var(--accent); background:var(--accent-soft); box-shadow:inset 0 0 0 1px var(--accent);}
+.q-choix label:has(input:focus-visible){box-shadow:var(--ring);}
+.q-choix input{margin-top:2px; width:18px; height:18px; accent-color:var(--accent); flex-shrink:0;}
+.q-choix .t{font-weight:600;}
+.q-choix .d{display:block; font-weight:400; color:var(--ink-muted); font-size:.87rem; margin-top:3px;}
+.q-aide{font-size:.89rem; color:var(--ink-muted); margin-top:10px; max-width:60ch;}
+
+/* --- Une fiche de contrat ---------------------------------------------- */
+.fiche{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:18px 20px; margin-top:14px;}
+@media(max-width:560px){ .fiche{padding:16px;} }
+.fiche-tete{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap;
+  padding-bottom:12px; border-bottom:1px solid var(--line);}
+.fiche-tete h3{font-family:'Archivo',sans-serif; font-size:1.06rem; font-weight:600; overflow-wrap:anywhere;}
+.fiche-cout{font-variant-numeric:tabular-nums; font-weight:700; font-size:.95rem; flex-shrink:0;}
+.fiche-part{margin-top:15px;}
+.fiche-part h4{font-size:.72rem; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-faint);}
+.fiche-part ul{margin:8px 0 0; padding-left:0; list-style:none;}
+.fiche-part li{font-size:.92rem; line-height:1.55; color:var(--ink-muted); margin-top:7px;}
+.fiche-part li + li{padding-top:7px; border-top:1px dotted var(--line);}
+/* La provenance d'une information n'est pas décorative : un souvenir et une
+   date lue sur un contrat ne se valent pas, et la page doit le montrer. */
+.prov{display:inline-block; font-size:.66rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  border-radius:3px; padding:2px 6px; margin-right:7px; vertical-align:1px; white-space:nowrap;}
+.prov.saisi{color:var(--ok); background:var(--ok-soft); border:1px solid var(--ok);}
+.prov.declare{color:var(--warn); background:var(--warn-soft); border:1px solid var(--warn-line);}
+.prov.calcule{color:var(--ink-faint); background:var(--surface-2); border:1px solid var(--line);}
+.fiche-part.faire{background:var(--accent-soft); border:1px solid var(--accent-line); border-radius:var(--r);
+  padding:14px 15px; margin-top:16px;}
+.fiche-part.faire h4{color:var(--accent);}
+.fiche-action-titre{font-weight:600; font-size:.98rem; margin-top:7px;}
+.fiche-part.faire p{font-size:.92rem; line-height:1.58; color:var(--ink-muted); margin-top:7px;}
+.liens-officiels{margin:12px 0 0; padding-left:0; list-style:none;}
+.liens-officiels li{font-size:.89rem; margin-top:9px; line-height:1.5;}
+.liens-officiels a{font-weight:600;}
+.hors-site{display:inline-block; font-size:.7rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--ink-faint); border:1px solid var(--line-strong); border-radius:3px; padding:1px 6px; margin-left:6px;
+  white-space:nowrap;}
+.fiche-part.faire details{margin-top:12px;}
+.fiche-part.faire summary{font-size:.86rem; color:var(--accent); cursor:pointer;}
 </style>
 <script src="regles.js"></script>
 <script src="abonnements.js"></script>
@@ -198,6 +247,46 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
       <button class="btn-secondary btn-petit" id="tout-effacer">Tout effacer</button>
     </div>
     <p class="erreur-champ" id="stockage-erreur" hidden></p>
+  </section>
+
+  <!-- ============ 3. LE PARCOURS DE VÉRIFICATION ============
+       Deux ou trois questions par contrat, enchaînées. Le panneau « Vérifier
+       ce contrat » de la liste reste en place pour qui veut tout saisir d'un
+       coup : les deux chemins écrivent dans les mêmes champs. -->
+  <section class="shell-lire" id="zone-parcours" hidden style="margin-top:26px">
+    <div class="forme">
+      <div id="parcours-appel">
+        <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600" id="parcours-titre">Vérifier mes contrats</h2>
+        <p class="aide" id="parcours-intro"></p>
+        <div class="cta-row" style="margin-top:16px">
+          <button type="button" class="btn-primary" id="parcours-lancer">Vérifier mes contrats</button>
+        </div>
+      </div>
+
+      <div id="parcours-questionnaire" hidden>
+        <div class="jauge" id="parcours-jauge" aria-hidden="true"></div>
+        <p class="etape-label" id="parcours-position"></p>
+        <h2 style="font-size:1.2rem; font-family:'Archivo',sans-serif; font-weight:600; margin-top:4px" id="parcours-nom"></h2>
+        <div id="parcours-question" aria-live="polite"></div>
+        <div class="cta-row" style="margin-top:20px">
+          <button type="button" class="btn-primary" id="parcours-suivant">Suivant</button>
+          <button type="button" class="btn-secondary btn-petit" id="parcours-retour">Retour</button>
+          <button type="button" class="btn-secondary btn-petit" id="parcours-passer">Passer ce contrat</button>
+          <button type="button" class="btn-ghost btn-petit" id="parcours-plus-tard">Terminer plus tard</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LES FICHES, UN CONTRAT PAR CARTE ============
+       Ce que vous savez · ce qu'il reste à vérifier · ce que vous pouvez faire.
+       La synthèse en quatre cases, plus bas, ne répète aucune de ces phrases :
+       elle ne porte plus que l'agrégat. -->
+  <section class="shell-lire" id="zone-fiches" hidden style="margin-top:30px">
+    <h2 style="font-size:1.1rem; font-family:'Archivo',sans-serif; font-weight:600">Vos contrats, un par un</h2>
+    <p class="aide">Pour chacun : ce que nous savons, d'où nous le savons, ce qui reste à vérifier, et
+    une démarche gratuite à engager maintenant.</p>
+    <div id="fiches"></div>
   </section>
 
   <!-- ====================== 4. LA SYNTHÈSE ====================== -->
@@ -518,7 +607,7 @@ function majSynthese(){
   $('zone-resultat').hidden = false;
 }
 
-function majTout(){ majTotaux(); majSynthese(); }
+function majTout(){ majTotaux(); majParcours(); majFiches(); majSynthese(); }
 
 /* ====================== 3. LE PANNEAU D'UN CONTRAT ======================
    Construit à la première ouverture seulement : dix contrats ne créent pas
@@ -775,6 +864,264 @@ $('tout-effacer').addEventListener('click', () => {
   rendreListe();
   annoncer('Liste effacée.');
 });
+
+/* ====================== 3. LE PARCOURS DE VÉRIFICATION ======================
+   Deux ou trois questions par contrat, enchaînées, avec retour et reprise.
+
+   Aucune position n'est stockée : elle se recalcule depuis les réponses déjà
+   données (`resteAVerifier`). Fermer l'onglet, revenir demain, vider la pile
+   d'historique — le parcours repart là où il s'était arrêté, sans second
+   magasin à tenir synchronisé avec la liste.
+
+   Les réponses ne s'appliquent qu'au clic sur « Suivant ». Cocher un bouton
+   radio n'enregistre rien et ne fait pas avancer : au clavier, les flèches
+   parcourent les options, et une réponse ne doit pas être validée au passage. */
+
+let parcoursCourant = null;      /* { id, etape } */
+const parcoursPile = [];         /* historique pour « Retour » */
+
+function ligneParId(id){ return lignes.find(l => l.id === id) || null; }
+
+function prochaineCase(){
+  const reste = resteAVerifier(lignes);
+  if (!reste.length) return null;
+  return { id: reste[0].id, etape: etapeSuivante(reste[0]) };
+}
+
+/* ---------- Le rendu d'une question ---------- */
+function questionHTML(l, etape){
+  if (etape === 'categorie'){
+    return `<p class="q-aide">De quel type de contrat s'agit-il&nbsp;? La catégorie décide des règles
+      applicables — nous n'en attribuons aucune d'office.</p>
+      <div class="q-choix">
+        ${Object.entries(CATEGORIES).map(([k, nom]) => `<label><input type="radio" name="q-cat" value="${ech(k)}"><span class="t">${ech(nom)}</span></label>`).join('')}
+        <label><input type="radio" name="q-cat" value="" checked><span class="t">Je préfère ne pas préciser<span class="d">Le contrat reste dans votre liste et dans le total. Les règles propres à un type de contrat ne s'appliqueront pas.</span></span></label>
+      </div>`;
+  }
+
+  if (etape === 'engagement'){
+    return `<p class="q-aide">Ce contrat comporte-t-il une durée d'engagement&nbsp;? Répondez de mémoire&nbsp;:
+      nous notons votre réponse <b>comme une déclaration</b>, pas comme une vérification, et nous vous
+      dirons quoi faire confirmer.</p>
+      <div class="q-choix">
+        <label><input type="radio" name="q-eng" value="avec"><span class="t">Avec engagement<span class="d">Vous êtes tenu jusqu'à une date. Nous demanderons ensuite les dates, si vous les avez.</span></span></label>
+        <label><input type="radio" name="q-eng" value="sans"><span class="t">Sans engagement<span class="d">Cela ne rend pas le contrat résiliable sans frais ni condition&nbsp;: préavis et clauses subsistent.</span></span></label>
+        <label><input type="radio" name="q-eng" value="inconnu"><span class="t">Je ne sais pas<span class="d">C'est une réponse valable. Nous ne reposerons pas la question, et nous vous dirons où chercher.</span></span></label>
+      </div>`;
+  }
+
+  if (etape === 'engagement-dates'){
+    return `<p class="q-aide">Vous avez déclaré un engagement. Ces deux dates situent sa fin&nbsp;; elles
+      figurent sur votre contrat ou le courriel de souscription. <b>Si vous ne les avez pas sous la main,
+      passez ce contrat</b>&nbsp;: votre déclaration est conservée.</p>
+      <div class="champ">
+        <label for="q-eng-debut">Début de l'engagement</label>
+        <input type="date" id="q-eng-debut" value="${ech(l.engagementDebut || '')}">
+      </div>
+      <div class="champ">
+        <label for="q-eng-mois">Durée de l'engagement, en mois</label>
+        <input type="number" id="q-eng-mois" min="1" max="120" step="1" inputmode="numeric" placeholder="ex : 24" value="${ech(l.engagementMois || '')}">
+      </div>
+      <p class="erreur-champ" id="q-erreur" hidden></p>`;
+  }
+  return '';
+}
+
+/* ---------- Lire la réponse et l'appliquer. Rien n'est écrit avant ce
+     moment, et une réponse absente n'écrase jamais une valeur existante. ---- */
+function appliquerReponse(l, etape){
+  if (etape === 'categorie'){
+    const c = document.querySelector('input[name="q-cat"]:checked');
+    const v = c ? c.value : '';
+    l.categorie = CATEGORIES[v] ? v : '';
+    l.categorieDemandee = true;            /* posée : on ne la reposera pas */
+    return true;
+  }
+  if (etape === 'engagement'){
+    const c = document.querySelector('input[name="q-eng"]:checked');
+    if (!c){ return false; }
+    l.engagementDeclare = ENGAGEMENT_DECLARE[c.value] ? c.value : null;
+    return true;
+  }
+  if (etape === 'engagement-dates'){
+    const d = $('q-eng-debut').value || null;
+    const m = $('q-eng-mois').value ? Number($('q-eng-mois').value) : null;
+    const err = $('q-erreur');
+    const dire = msg => { err.textContent = msg; err.hidden = false; };
+    err.hidden = true;
+    if (d && !versDate(d)){ dire("Cette date n'existe pas."); return false; }
+    if (!d && !m){ dire("Renseignez les deux, ou passez ce contrat si vous ne les avez pas."); return false; }
+    if (!d || !m){ dire("Il manque " + (d ? "la durée en mois" : "la date de début") + " : les deux sont nécessaires pour situer la fin de l'engagement."); return false; }
+    l.engagementDebut = d;
+    l.engagementMois = Math.round(m);
+    return true;
+  }
+  return true;
+}
+
+/* ---------- Affichage ---------- */
+function afficherCase(etat){
+  parcoursCourant = etat;
+  const l = etat && ligneParId(etat.id);
+  if (!l){ terminerParcours(); return; }
+
+  /* Le rang est la POSITION du contrat dans la liste, pas le nombre de
+     réponses déjà données : en revenant en arrière, on doit lire le numéro du
+     contrat qu'on a sous les yeux, pas celui d'un compteur d'avancement. */
+  const actives = lignes.filter(x => !x.archive);
+  const rang = actives.findIndex(x => x.id === l.id) + 1;
+  $('parcours-jauge').innerHTML = Array.from({ length: actives.length },
+    (_, i) => `<i class="${i < rang - 1 ? 'faite' : ''}"></i>`).join('');
+  $('parcours-position').textContent = `Contrat ${rang} sur ${actives.length}`;
+  $('parcours-nom').textContent = l.nom;
+  $('parcours-question').innerHTML = questionHTML(l, etat.etape);
+
+  /* Pré-cocher la réponse déjà donnée, pour un retour en arrière : on la
+     retrouve telle quelle, et on peut la changer — jamais en silence. */
+  if (etat.etape === 'categorie' && l.categorie){
+    const c = document.querySelector(`input[name="q-cat"][value="${CSS.escape(l.categorie)}"]`);
+    if (c) c.checked = true;
+  }
+  if (etat.etape === 'engagement' && l.engagementDeclare){
+    const c = document.querySelector(`input[name="q-eng"][value="${CSS.escape(l.engagementDeclare)}"]`);
+    if (c) c.checked = true;
+  }
+
+  $('parcours-retour').disabled = parcoursPile.length === 0;
+  $('parcours-appel').hidden = true;
+  $('parcours-questionnaire').hidden = false;
+
+  const premier = $('parcours-question').querySelector('input');
+  if (premier) premier.focus({ preventScroll: true });
+}
+
+function avancerParcours(){
+  const suite = prochaineCase();
+  if (!suite){ terminerParcours(); return; }
+  afficherCase(suite);
+}
+
+function terminerParcours(){
+  parcoursCourant = null;
+  parcoursPile.length = 0;
+  $('parcours-questionnaire').hidden = true;
+  $('parcours-appel').hidden = false;
+  majTout();
+  $('zone-fiches').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  annoncer(`Vérification interrompue ou terminée. ${avancement(lignes).restants} contrat(s) restant(s).`);
+}
+
+/* ---------- Les boutons ---------- */
+$('parcours-lancer').addEventListener('click', () => {
+  const suite = prochaineCase();
+  if (!suite) return;
+  parcoursPile.length = 0;
+  afficherCase(suite);
+  $('zone-parcours').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+$('parcours-suivant').addEventListener('click', () => {
+  if (!parcoursCourant) return;
+  const l = ligneParId(parcoursCourant.id);
+  if (!l) { avancerParcours(); return; }
+  if (!appliquerReponse(l, parcoursCourant.etape)) return;
+  sauver();
+  majLigne(l.id);
+  majTotaux();
+  parcoursPile.push(parcoursCourant);
+  avancerParcours();
+});
+
+$('parcours-retour').addEventListener('click', () => {
+  const precedent = parcoursPile.pop();
+  if (!precedent) return;
+  afficherCase(precedent);
+});
+
+$('parcours-passer').addEventListener('click', () => {
+  if (!parcoursCourant) return;
+  const l = ligneParId(parcoursCourant.id);
+  if (l){
+    /* Passer arrête les questions pour ce contrat, sans effacer ce qui a déjà
+       été répondu : la fiche continuera d'afficher ce qui manque. */
+    l.verifIgnoree = true;
+    sauver();
+    majLigne(l.id);
+  }
+  parcoursPile.push(parcoursCourant);
+  avancerParcours();
+});
+
+$('parcours-plus-tard').addEventListener('click', () => { terminerParcours(); });
+
+function majParcours(){
+  $('zone-parcours').hidden = !lignes.length;
+  if (!lignes.length || parcoursCourant) return;
+  const av = avancement(lignes);
+  if (av.termine){
+    $('parcours-titre').textContent = `Vos ${av.total} contrat${av.total > 1 ? 's' : ''} ${av.total > 1 ? 'sont parcourus' : 'est parcouru'}`;
+    $('parcours-intro').textContent = "Chaque contrat porte sa propre démarche, juste en dessous. Vous pouvez relancer le parcours après avoir ajouté un contrat, ou ouvrir « Vérifier ce contrat » sur une ligne pour corriger une réponse.";
+    $('parcours-lancer').hidden = true;
+  } else {
+    const repris = av.faits > 0;
+    $('parcours-titre').textContent = repris ? 'Reprendre la vérification' : 'Vérifier mes contrats';
+    $('parcours-intro').textContent = repris
+      ? `Il reste ${av.restants} contrat${av.restants > 1 ? 's' : ''} sur ${av.total}. Le parcours reprend là où vous l'aviez laissé.`
+      : `Deux ou trois questions par contrat, ${av.total} contrat${av.total > 1 ? 's' : ''} à passer. Vous pouvez en passer un, revenir en arrière et reprendre plus tard.`;
+    $('parcours-lancer').textContent = repris
+      ? `Reprendre — ${av.restants} restant${av.restants > 1 ? 's' : ''}`
+      : 'Vérifier mes contrats';
+    $('parcours-lancer').hidden = false;
+  }
+}
+
+/* ====================== LES FICHES, UN CONTRAT PAR CARTE ====================== */
+const PROVENANCE = {
+  saisi:   { libelle: 'lu sur le contrat', classe: 'saisi' },
+  declare: { libelle: 'déclaré',           classe: 'declare' },
+  calcule: { libelle: 'calculé',           classe: 'calcule' },
+};
+
+function ficheHTML(fi){
+  const prov = x => {
+    const p = PROVENANCE[x.source] || PROVENANCE.calcule;
+    return `<li><span class="prov ${p.classe}">${ech(p.libelle)}</span>${ech(x.texte)}</li>`;
+  };
+  const f = fi.faire;
+  return `<article class="fiche">
+    <div class="fiche-tete">
+      <h3>${ech(fi.nom)}</h3>
+      <span class="fiche-cout num">${ech(euros(fi.annuel))} / an</span>
+    </div>
+
+    <div class="fiche-part">
+      <h4>Ce que vous savez</h4>
+      <ul>${fi.sais.map(prov).join('')}</ul>
+    </div>
+
+    <div class="fiche-part">
+      <h4>Ce qu'il reste à vérifier</h4>
+      <ul>${fi.verifier.map(v => `<li>${ech(v)}</li>`).join('')}</ul>
+    </div>
+
+    <div class="fiche-part faire">
+      <h4>Ce que vous pouvez faire maintenant — gratuit</h4>
+      <p class="fiche-action-titre">${ech(f.titre)}</p>
+      <p>${ech(f.texte)}</p>
+      ${f.liens && f.liens.length ? `<ul class="liens-officiels">${f.liens.map(x =>
+        `<li><a href="${ech(x.url)}" target="_blank" rel="noopener noreferrer">${ech(x.nom)}</a><span class="hors-site">autre site</span><br>${ech(x.quoi)}.</li>`).join('')}</ul>` : ''}
+      ${f.regle && typeof citer === 'function'
+        ? `<details><summary>Voir le texte applicable et sa source</summary>${citer(f.regle)}</details>` : ''}
+    </div>
+  </article>`;
+}
+
+function majFiches(){
+  if (!lignes.length){ $('zone-fiches').hidden = true; $('fiches').innerHTML = ''; return; }
+  const res = resultat4Inventaire(lignes, AUJ);
+  $('fiches').innerHTML = res.fiches.map(ficheHTML).join('');
+  $('zone-fiches').hidden = false;
+}
 
 charger();
 rendreListe();

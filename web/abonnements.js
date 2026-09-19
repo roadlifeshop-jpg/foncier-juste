@@ -522,6 +522,13 @@ function normaliserLigne(brut, rang) {
     engagementMois: dureeOk ? Math.round(mois) : null,
     souscritEnLigne: brut.souscritEnLigne === true,
     recent: brut.recent === true,
+    // Réponses du parcours de vérification. Ce sont des DÉCLARATIONS : elles
+    // aiguillent les questions et ne déclenchent aucune règle. Une valeur
+    // inconnue retombe sur null, jamais sur « sans engagement » — ce serait
+    // conclure à la place de quelqu'un qui n'a rien dit.
+    engagementDeclare: ['avec', 'sans', 'inconnu'].includes(brut.engagementDeclare) ? brut.engagementDeclare : null,
+    categorieDemandee: brut.categorieDemandee === true,
+    verifIgnoree: brut.verifIgnoree === true,
     // Deux indicateurs d'anciennes versions qui pèsent sur `totaux()` : les
     // laisser tomber changerait un total déjà affiché à l'utilisateur.
     archive: brut.archive === true,
@@ -603,6 +610,235 @@ function repartition(lignes) {
     .sort((a, b) => b.annuel - a.annuel || a.ligne.nom.localeCompare(b.ligne.nom, 'fr'));
 }
 
+/* ==========================================================================
+   PARCOURS DE VÉRIFICATION — toute la liste, sans ouvrir chaque contrat.
+   --------------------------------------------------------------------------
+   Rouvrir un panneau de neuf champs sept fois de suite sur un téléphone, ce
+   n'est pas un parcours, c'est un obstacle. Ces fonctions décrivent un
+   questionnaire court qui enchaîne les contrats et ne demande que ce qui
+   manque vraiment.
+
+   TROIS PRINCIPES.
+
+   1. UNE DÉCLARATION N'EST PAS UNE VÉRIFICATION. « Je crois que c'est sans
+      engagement » est un souvenir ; une date lue sur un contrat est un fait.
+      Les deux sont stockés, mais jamais confondus : `ficheContrat` les rend
+      dans deux registres distincts, et aucune règle ne se déclenche sur une
+      déclaration seule.
+
+   2. « JE NE SAIS PAS » EST UNE RÉPONSE. Elle est enregistrée comme les
+      autres, pour que le parcours ne repose pas la question à la reprise, et
+      elle mène à une démarche : savoir qu'on ne sait pas, c'est savoir quoi
+      aller chercher.
+
+   3. AUCUNE CONCLUSION N'EST TIRÉE DE L'ABSENCE D'ENGAGEMENT. Un contrat sans
+      engagement n'est pas pour autant résiliable sans frais ni condition : le
+      préavis, les clauses particulières et les frais propres au professionnel
+      subsistent, et nous ne les lisons pas.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Les questions du parcours court
+   -------------------------------------------------------------------------- */
+
+const ENGAGEMENT_DECLARE = {
+  avec:    'Avec engagement',
+  sans:    'Sans engagement',
+  inconnu: 'Je ne sais pas',
+};
+
+/** La prochaine question à poser pour ce contrat, ou null s'il n'en reste
+ *  aucune. L'ordre suit l'utilité : la catégorie conditionne les règles, la
+ *  nature de l'engagement conditionne les dates, et les dates ne sont
+ *  demandées que si un engagement a été déclaré. */
+function etapeSuivante(ligne) {
+  if (!ligne || ligne.verifIgnoree === true) return null;
+  if (!ligne.categorie && ligne.categorieDemandee !== true) return 'categorie';
+  // Un engagement déjà daté et chiffré rend la question sans objet.
+  if (ligne.engagementDebut && ligne.engagementMois) {
+    return null;
+  }
+  if (!ENGAGEMENT_DECLARE[ligne.engagementDeclare]) return 'engagement';
+  if (ligne.engagementDeclare === 'avec' && !(ligne.engagementDebut && ligne.engagementMois)) {
+    return 'engagement-dates';
+  }
+  return null;
+}
+
+/** Les contrats restant à parcourir, dans l'ordre de la liste. La reprise est
+ *  gratuite : il n'y a aucun curseur à stocker, la position se recalcule. */
+function resteAVerifier(lignes) {
+  return (lignes || []).filter(l => l && !l.archive && etapeSuivante(l) !== null);
+}
+
+/** Avancement du parcours, compté en CONTRATS et non en questions : une barre
+ *  qui recule parce qu'une réponse ouvre une sous-question ne sert à rien. */
+function avancement(lignes) {
+  const actives = (lignes || []).filter(l => l && !l.archive);
+  const restants = resteAVerifier(actives).length;
+  return {
+    total: actives.length,
+    faits: actives.length - restants,
+    restants,
+    termine: restants === 0,
+  };
+}
+
+/* --------------------------------------------------------------------------
+   La démarche gratuite, adaptée à ce que l'on sait
+   -------------------------------------------------------------------------- */
+
+/** Une seule prochaine action, toujours gratuite, jamais une conclusion.
+ *  Elle reste utile quand aucun remboursement n'est identifié : c'est le cas
+ *  le plus fréquent, et le plus mal servi par un outil qui ne saurait parler
+ *  que d'argent récupérable.
+ *
+ *  `liens` ne contient que des ressources publiques. Aucun partenaire, aucun
+ *  classement d'offres, aucune économie annoncée. */
+function demarcheContrat(ligne, aujourdhui) {
+  const auj = aujourdhui || new Date();
+  const cat = ligne.categorie || '';
+  const decl = ligne.engagementDeclare;
+  const eng = (ligne.engagementDebut && ligne.engagementMois)
+    ? engagement(ligne.engagementDebut, ligne.engagementMois, auj) : null;
+  const fen = ligne.echeance ? fenetreNonReconduction(ligne.echeance, ligne.periodicite, auj) : null;
+
+  /* La rétractation prime sur tout : c'est le chemin le plus court et le seul
+     qui ne demande aucun motif. */
+  if (ligne.recent) {
+    return {
+      titre: "Exercez votre rétractation, c'est le chemin le plus court",
+      texte: "Vous avez indiqué une souscription de moins de quatorze jours à distance ou hors établissement. Ce délai se prend sans motif à donner et sans frais. Envoyez la demande par écrit et gardez la preuve de sa date.",
+      regle: 'retractation-14-jours', liens: [],
+    };
+  }
+
+  /* Une fenêtre de reconduction ouverte est un fait daté, pas une déclaration :
+     elle passe devant les démarches de catégorie. */
+  if (fen && fen.dedans) {
+    return {
+      titre: "Demandez par écrit la preuve de l'information sur la reconduction",
+      texte: "Nous sommes dans la période pendant laquelle le professionnel doit vous avoir informé de la possibilité de ne pas reconduire. Demandez-lui de produire cette preuve, et à défaut de résilier gratuitement et de rembourser la période non courue. Un courriel suffit à établir la date ; conservez-le.",
+      regle: 'tacite-reconduction', liens: [],
+    };
+  }
+
+  if (eng && !eng.termine) {
+    return {
+      titre: `Demandez le décompte de ce qu'une rupture vous coûterait`,
+      texte: `Votre engagement court jusqu'au ${eng.fin.toLocaleDateString('fr-FR')}. Demandez par écrit le décompte des sommes restant dues en cas de rupture anticipée : c'est au professionnel de le produire, et le recevoir ne vous engage à rien. ${cat === 'telecom' ? "Confrontez-le à la règle de l'article L224-28, rappelée ci-dessous." : "Nous ne le chiffrons pas : il dépend de vos mensualités et des frais propres à votre contrat."}`,
+      regle: cat === 'telecom' && eng.dureeMois > 12 ? 'engagement-telecom' : null,
+      liens: [],
+    };
+  }
+
+  /* Sans catégorie, et sans aucune date : la seule action utile est d'aller
+     chercher l'information qui débloque le reste. Nous n'attribuons pas de
+     catégorie d'office — rien ne nous dit de quel contrat il s'agit. */
+  return {
+    titre: "Retrouvez la date de prochaine échéance de ce contrat",
+    texte: "C'est l'information qui débloque le reste : elle situe la fenêtre pendant laquelle l'information sur la reconduction doit vous parvenir. Elle figure sur votre contrat, une facture, ou le courriel de souscription. Préciser la catégorie du contrat permettra en outre d'appliquer les règles qui lui sont propres.",
+    regle: null, liens: [],
+  };
+}
+
+/* --------------------------------------------------------------------------
+   La fiche d'un contrat : trois questions, trois réponses.
+   « Ce que vous savez », « ce qu'il reste à vérifier », « ce que vous pouvez
+   faire maintenant ». C'est la forme que réclame une liste qu'on relit sur un
+   téléphone : une carte par contrat, pas quatre listes par thème.
+   -------------------------------------------------------------------------- */
+
+/** `source` distingue ce qui a été LU sur un document ('saisi') de ce qui a
+ *  été déclaré de mémoire ('declare'), et de ce qui est calculé ('calcule').
+ *  L'interface le montre : un souvenir et une date de contrat ne valent pas
+ *  la même chose, et la page ne doit pas laisser croire l'inverse. */
+function ficheContrat(ligne, aujourdhui) {
+  const auj = aujourdhui || new Date();
+  const p = PERIODICITES[ligne.periodicite] || PERIODICITES.mensuelle;
+  const eng = (ligne.engagementDebut && ligne.engagementMois)
+    ? engagement(ligne.engagementDebut, ligne.engagementMois, auj) : null;
+  const fen = ligne.echeance ? fenetreNonReconduction(ligne.echeance, ligne.periodicite, auj) : null;
+  const etat = etatLigne(ligne, auj);
+
+  /* ---- Ce que vous savez ---- */
+  const sais = [{
+    source: 'calcule',
+    texte: `${euros(ligne.montant)} ${p.nom}, soit ${euros(annuelCentimes(ligne.montant, ligne.periodicite))} par an et ${euros(mensuelCentimes(ligne.montant, ligne.periodicite))} par mois en moyenne.`,
+  }];
+  if (ligne.categorie && CATEGORIES[ligne.categorie]) {
+    sais.push({ source: 'declare', texte: `Catégorie : ${CATEGORIES[ligne.categorie].toLowerCase()}.` });
+  }
+  if (eng) {
+    sais.push({
+      source: 'saisi',
+      texte: eng.termine
+        ? `Engagement de ${eng.dureeMois} mois terminé depuis le ${eng.fin.toLocaleDateString('fr-FR')}.`
+        : `Engagement de ${eng.dureeMois} mois, en cours jusqu'au ${eng.fin.toLocaleDateString('fr-FR')}.`,
+    });
+  } else if (ENGAGEMENT_DECLARE[ligne.engagementDeclare]) {
+    sais.push({
+      source: 'declare',
+      texte: ligne.engagementDeclare === 'avec'
+        ? "Vous avez déclaré un engagement, sans en connaître les dates."
+        : ligne.engagementDeclare === 'sans'
+          ? "Vous avez déclaré n'être pas engagé."
+          : "Vous ne savez pas si ce contrat comporte un engagement.",
+    });
+  }
+  if (fen) {
+    sais.push({ source: 'saisi', texte: `Prochaine échéance le ${fen.echeance.toLocaleDateString('fr-FR')}.` });
+  }
+  if (ligne.souscritEnLigne) sais.push({ source: 'declare', texte: 'Souscrit en ligne.' });
+  if (ligne.recent) sais.push({ source: 'declare', texte: 'Souscrit il y a moins de quatorze jours.' });
+
+  /* ---- Ce qu'il reste à vérifier ---- */
+  const verifier = [];
+  if (etat.cle === 'a-completer') {
+    etat.manque.forEach(m => verifier.push(`Il manque ${m} : sans elle, aucune règle ne s'applique.`));
+  }
+  if (ligne.engagementDeclare === 'sans' && !eng) {
+    verifier.push("Votre absence d'engagement est une déclaration, pas une vérification. Elle ne rend pas le contrat résiliable sans frais ni condition : préavis, clauses particulières et frais propres au professionnel subsistent.");
+  }
+  if (ligne.engagementDeclare === 'inconnu') {
+    verifier.push("L'existence d'un engagement n'est pas établie. C'est la première chose à faire confirmer par écrit.");
+  }
+  if (ligne.engagementDeclare === 'avec' && !eng) {
+    verifier.push("L'engagement est déclaré mais non daté : sa date de fin, et donc ce qu'une rupture coûterait, restent inconnues.");
+  }
+  // Ni date, ni déclaration : la question n'a simplement jamais été posée ou
+  // répondue. Le dire, plutôt que de laisser une fiche silencieuse sur le
+  // point qui commande le plus de démarches.
+  if (!eng && !ENGAGEMENT_DECLARE[ligne.engagementDeclare]) {
+    verifier.push("L'existence d'un engagement n'est pas renseignée : c'est elle qui décide de ce qu'une résiliation coûterait.");
+  }
+  if (ligne.verifIgnoree === true) {
+    verifier.push("Vous avez passé ce contrat dans le parcours de vérification. Ce qui précède reste donc en suspens ; relancez le parcours ou ouvrez « Vérifier ce contrat » quand vous le voudrez.");
+  }
+  if (!ligne.echeance) {
+    verifier.push("La date de prochaine échéance n'est pas connue : sans elle, la fenêtre d'information sur la reconduction ne peut pas être située.");
+  }
+  if (!ligne.categorie) {
+    verifier.push("La catégorie n'est pas précisée : nous n'en attribuons aucune d'office, et les règles propres à un type de contrat restent donc inappliquées.");
+  }
+  if (ligne.categorie === 'energie') {
+    verifier.push("Pour l'énergie, le montant mensuel est un acompte estimé, régularisé une fois par an : ce n'est pas votre coût réel.");
+  }
+  if (!verifier.length) {
+    verifier.push("Rien de bloquant. Restent les conditions de votre contrat — préavis, frais, clauses particulières — que nous ne lisons pas.");
+  }
+
+  return {
+    id: ligne.id,
+    nom: ligne.nom,
+    etat: etat.cle,
+    annuel: annuelCentimes(ligne.montant, ligne.periodicite),
+    sais,
+    verifier,
+    faire: demarcheContrat(ligne, auj),
+  };
+}
+
 /* --------------------------------------------------------------------------
    La synthèse de l'inventaire, dans la forme attendue par resultat4.js.
    `resultat4.js` n'est pas modifié : il est partagé par les trois outils, et
@@ -615,10 +851,9 @@ function resultat4Inventaire(lignes, aujourdhui) {
   const actives = normaliserLignes(lignes);
   const t = totaux(actives);
   const ordre = repartition(actives);
-  const approfondis = ordre.map(o => o.ligne).filter(contratApprofondi);
-  const sommaires = ordre.map(o => o.ligne).filter(l => !contratApprofondi(l));
+  const av = avancement(actives);
 
-  /* ---- 1. Votre situation : des faits, tirés de la saisie ---- */
+  /* ---- 1. Votre situation ---- */
   const constat = [{
     titre: `${t.nombre} contrat${t.nombre > 1 ? 's' : ''} — ${euros(t.annuel)} par an`,
     texte: `Soit ${euros(t.mensuel)} par mois en moyenne. C'est une addition de ce que vous avez saisi, rien de plus : aucun montant n'est deviné, aucun relevé n'est lu.`,
@@ -626,8 +861,8 @@ function resultat4Inventaire(lignes, aujourdhui) {
 
   if (ordre.length > 1) {
     constat.push({
-      titre: "Répartition de vos dépenses récurrentes",
-      texte: "Par coût annuel décroissant : "
+      titre: 'Répartition de vos dépenses récurrentes',
+      texte: 'Par coût annuel décroissant : '
         + ordre.map(o => `${o.ligne.nom}, ${euros(o.annuel)} (${o.part} %)`).join(' · ')
         + ". C'est un constat arithmétique, pas une recommandation : ce classement ne dit pas lequel arrêter, puisque nous ignorons si l'un d'eux peut l'être, à quelle date et à quel coût.",
     });
@@ -641,14 +876,6 @@ function resultat4Inventaire(lignes, aujourdhui) {
     });
   }
 
-  // Les faits ouverts par les contrats approfondis, préfixés du nom du
-  // contrat : sans le préfixe, une échéance ou un engagement flotterait sans
-  // qu'on sache à quel contrat il se rapporte.
-  approfondis.forEach(l => {
-    pistes(l, auj).filter(x => x.type === 'fait')
-      .forEach(x => constat.push({ titre: `${l.nom} — ${x.titre}`, texte: x.texte }));
-  });
-
   /* ---- 2. Le coût total, et rien d'autre ---- */
   const somme = {
     montant: t.annuel,
@@ -657,58 +884,47 @@ function resultat4Inventaire(lignes, aujourdhui) {
     pourquoi: `C'est le coût actuel de ${t.nombre > 1 ? 'ces ' + t.nombre + ' contrats' : 'ce contrat'}, obtenu en additionnant ce que vous avez saisi, soit ${euros(t.mensuel)} par mois en moyenne. Ce n'est pas une économie, et ce n'est pas une somme récupérable : pour parler d'économie, il faudrait savoir quels contrats vous pouvez résilier, à quelle date, à quel coût, et ce que vous paieriez à la place. Nous ne connaissons aucun de ces quatre éléments.`,
   };
 
-  /* ---- 3. Une seule prochaine action par contrat approfondi ---- */
-  const action = [];
-  approfondis.forEach(l => {
-    const a = resultat4Abonnement(l, auj).action[0];
-    if (a) action.push({ titre: `${l.nom} — ${a.titre}`, texte: a.texte, gratuit: a.gratuit, regle: a.regle });
-  });
-  if (!action.length) {
-    action.push({
-      titre: "Ouvrez « Vérifier ce contrat » sur celui qui vous intéresse",
-      texte: "Votre inventaire donne déjà un fait utile : ce que vous payez par mois et par an. Pour aller plus loin, choisissez un contrat et renseignez trois informations — la date de prochaine échéance, la durée d'engagement s'il en existe une, et si vous avez souscrit en ligne. Elles figurent sur votre contrat, une facture, ou le courriel de souscription. Ce sont elles qui déterminent ce que vous pouvez faire.",
-      gratuit: true,
+  /* ---- 3. Une seule action, globale.
+     Le détail par contrat n'est PAS répété ici : il est rendu contrat par
+     contrat par `ficheContrat`, au-dessus. Deux endroits pour la même phrase,
+     c'est une phrase qu'on ne lit ni à l'un ni à l'autre. ---- */
+  const action = [av.termine
+    ? {
+        titre: `Vous avez parcouru vos ${av.total} contrat${av.total > 1 ? 's' : ''}`,
+        texte: "Chaque contrat porte désormais sa propre prochaine démarche, juste au-dessus. Elles sont toutes gratuites et n'engagent à rien : demander un décompte, réclamer une confirmation écrite ou relever une date ne vaut pas résiliation.",
+        gratuit: true,
+      }
+    : {
+        titre: `Vérifiez vos contrats : ${av.restants} sur ${av.total} attendent encore une réponse`,
+        texte: "Le parcours pose deux ou trois questions par contrat, et ne demande que ce qui manque vraiment. Vous pouvez passer un contrat, revenir en arrière, et reprendre plus tard : votre position est retrouvée toute seule.",
+        gratuit: true,
+      }];
+
+  /* ---- 4. Ce que l'outil ne peut pas savoir ---- */
+  const verification = [{
+    titre: "Ce que nous ne lisons pas, et que vous seul pouvez vérifier",
+    texte: "Vos conditions particulières : préavis, frais de résiliation, clauses de sortie anticipée et justificatifs exigés. Aucune règle citée ici ne rend un contrat résiliable à elle seule — toutes pèsent sur le professionnel, et c'est à lui de produire ses décomptes.",
+  }];
+  if (!av.termine) {
+    verification.push({
+      titre: `${av.restants} contrat${av.restants > 1 ? 's' : ''} sans vérification en l'état`,
+      texte: `${resteAVerifier(actives).map(l => l.nom).join(', ')} : nous n'en connaissons que le montant, ou une partie des réponses. Le parcours de vérification les reprend un par un.`,
     });
   }
 
-  /* ---- 4. Ce qu'il reste à vérifier ---- */
-  const verification = [];
-
-  // Les saisies inachevées passent devant : tant qu'il leur manque une
-  // information, elles ne produisent aucune règle, et l'utilisateur mérite de
-  // savoir laquelle plutôt que de constater qu'il ne se passe rien.
-  actives.forEach(l => {
-    const e = etatLigne(l, auj);
-    if (e.cle !== 'a-completer') return;
-    verification.push({
-      titre: `${l.nom} — à compléter : ${e.manque.join(', ')}`,
-      texte: `Cette ligne est commencée mais reste inexploitable en l'état : ${e.manque.length > 1 ? 'ces informations manquent' : 'cette information manque'} pour qu'une règle puisse s'appliquer. ${e.manque.includes('catégorie du contrat') ? "Nous n'attribuons aucune catégorie d'office : rien ne nous dit de quel type de contrat il s'agit, et la règle des engagements de plus de douze mois ne vaut que pour la téléphonie et l'accès à internet. " : ''}Ouvrez « Vérifier ce contrat » pour ${e.manque.length > 1 ? 'les' : 'la'} renseigner.`,
-    });
-  });
-
-  approfondis.forEach(l => {
-    resultat4Abonnement(l, auj).verification
-      .forEach(v => verification.push({ titre: `${l.nom} — ${v.titre}`, texte: v.texte, regle: v.regle }));
-  });
-  if (sommaires.length) {
-    verification.push({
-      titre: `${sommaires.length} contrat${sommaires.length > 1 ? 's' : ''} sans vérification possible en l'état`,
-      texte: `${sommaires.map(l => l.nom).join(', ')} : nous n'en connaissons que le montant. Aucune démarche ne peut être évaluée sans la date de prochaine échéance, la durée d'engagement s'il en existe une, et le mode de souscription. Le bouton « Vérifier ce contrat » ouvre ces champs, contrat par contrat.`,
-    });
-  }
-
-  /* ---- Les limites ---- */
   const limites = [
     "Le total est une addition de vos saisies, pas une économie ni une somme récupérable.",
-    "Nous ne lisons aucun de vos contrats : ni préavis, ni frais de résiliation, ni clause particulière ne nous sont connus.",
-    "Aucune des règles citées ne rend un contrat résiliable à elle seule. Elles pèsent sur le professionnel.",
+    "Une réponse déclarée au parcours — « sans engagement », « je ne sais pas » — est un souvenir, pas une vérification. Aucune règle ne s'applique sur cette seule base.",
+    "Un contrat sans engagement n'est pas pour autant résiliable sans frais ni condition.",
     "Nous n'affichons aucun montant remboursable au titre de l'article L215-1 : il dépend de cinq faits que seuls vos contrats et vos courriers peuvent établir.",
+    "Aucune offre n'est comparée et aucun fournisseur n'est recommandé. Les ressources citées sont publiques et ne classent pas d'offres.",
     "Le mensuel affiché est une moyenne lissée. Un contrat payé une fois par an ne coûte rien onze mois sur douze.",
   ];
 
   return { constat, somme, verification, action, limites,
            annuel: t.annuel, mensuel: t.mensuel, nombre: t.nombre,
-           repartition: ordre, approfondis: approfondis.length };
+           repartition: ordre, avancement: av,
+           fiches: ordre.map(o => ficheContrat(o.ligne, auj)) };
 }
 
 
@@ -718,5 +934,7 @@ if (typeof module !== 'undefined' && module.exports) {
                      fenetreNonReconduction, engagement, pistes,
                      resultat4Abonnement,
                      CHOIX_RAPIDES, normaliserLigne, normaliserLignes, contratApprofondi,
-                     etatLigne, repartition, resultat4Inventaire };
+                     etatLigne, repartition, resultat4Inventaire,
+                     ENGAGEMENT_DECLARE, etapeSuivante, resteAVerifier,
+                     avancement, demarcheContrat, ficheContrat };
 }

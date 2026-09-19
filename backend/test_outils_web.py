@@ -412,15 +412,15 @@ SCRIPT_TESTS = r"""
        ['sommaire', 'a-completer', 'verifiable'].includes(etat({}).cle) &&
        !/résiliable|économie/i.test(String(etat({ engagementMois: 24 }).libelle)));
 
-  /* La synthèse nomme elle aussi les saisies inachevées. */
-  const inachevee = [{ id:'i1', nom:'Box', montant: 3999, periodicite:'mensuelle', categorie:'',
-                       engagementDebut: reculeMois(AUJ, 6), engagementMois: 24 }];
-  vrai("synthèse : la ligne inachevée est nommée, avec ce qui lui manque",
-       resultat4Inventaire(inachevee, AUJ).verification
-         .some(v => /^Box — à compléter : catégorie du contrat$/.test(v.titre)));
-  vrai("synthèse : la catégorie n'est jamais attribuée d'office",
-       resultat4Inventaire(inachevee, AUJ).verification
-         .some(v => /n'attribuons aucune catégorie d'office/.test(v.texte)));
+  /* La fiche du contrat nomme la saisie inachevée. Le détail a quitté la
+     synthèse agrégée pour la carte du contrat : une seule place, pas deux. */
+  const inachevee = { id:'i1', nom:'Box', montant: 3999, periodicite:'mensuelle', categorie:'',
+                      engagementDebut: reculeMois(AUJ, 6), engagementMois: 24,
+                      echeance:null, souscritEnLigne:false, recent:false };
+  vrai("fiche : la saisie inachevée est nommée, avec ce qui lui manque",
+       ficheContrat(inachevee, AUJ).verifier.some(v => /Il manque catégorie du contrat/.test(v)));
+  vrai("fiche : la catégorie n'est jamais attribuée d'office",
+       ficheContrat(inachevee, AUJ).verifier.some(v => /n'en attribuons aucune d'office/.test(v)));
   vrai("identifiant impropre : remplacé par un identifiant sûr",
        /^reprise-/.test(normaliserLignes([{ id:'x" onerror=1', nom:'X', montant:100 }])[0].id));
   eq("identifiants dupliqués : rendus uniques",
@@ -481,9 +481,16 @@ SCRIPT_TESTS = r"""
   vrai("les limites rappellent que le total n'est ni une économie ni une somme récupérable",
        inv(cinq).limites.some(l => /pas une économie ni une somme récupérable/.test(l)));
 
-  /* ---- Inventaire : une seule prochaine action par contrat approfondi --- */
-  vrai("aucun contrat approfondi : une seule action, et elle est générique",
-       inv(cinq).action.length === 1 && /Vérifier ce contrat/.test(inv(cinq).action[0].titre));
+  /* ---- Inventaire : l'action de la synthèse est désormais GLOBALE ---------
+     Une prochaine action par contrat existe toujours, mais dans la fiche du
+     contrat. La synthèse ne la répète pas : deux endroits pour la même phrase,
+     c'est une phrase qu'on ne lit ni à l'un ni à l'autre. */
+  vrai("synthèse : une seule action, et elle porte sur le parcours",
+       inv(cinq).action.length === 1 && /Vérifiez vos contrats/.test(inv(cinq).action[0].titre));
+  vrai("synthèse : elle dit combien de contrats attendent encore",
+       /5 sur 5/.test(inv(cinq).action[0].titre));
+  vrai("synthèse : aucune action ne nomme un contrat en particulier",
+       inv(cinq).action.every(a => !/—/.test(a.titre)));
 
   const approfondi = cinq.concat([
     { id:'c6', nom:'Mobile', montant: 2499, periodicite:'mensuelle', categorie:'telecom',
@@ -491,23 +498,95 @@ SCRIPT_TESTS = r"""
     { id:'c7', nom:'Presse', montant: 9900, periodicite:'annuelle',
       echeance: iso(new Date(AUJ.getFullYear(), AUJ.getMonth() + 2, 20)) },
   ]);
-  eq("une seule prochaine action par contrat approfondi", inv(approfondi).action.length, 2);
-  vrai("chaque action nomme le contrat auquel elle se rapporte",
-       inv(approfondi).action.every(a => /^(Mobile|Presse) — /.test(a.titre)));
-  vrai("vérification télécom avec engagement : la règle est citée",
-       inv(approfondi).verification.some(v => v.regle === 'engagement-telecom'));
-  vrai("les contrats restés sommaires sont regroupés en une seule ligne",
-       inv(approfondi).verification.filter(v => /sans vérification possible/.test(v.titre)).length === 1);
+  eq("une fiche par contrat, dans l'ordre du coût décroissant", inv(approfondi).fiches.length, 7);
+  vrai("chaque fiche porte une démarche gratuite, sans exception",
+       inv(approfondi).fiches.every(fi => fi.faire && fi.faire.titre && fi.faire.texte));
+  vrai("chaque fiche nomme son contrat",
+       inv(approfondi).fiches.every(fi => typeof fi.nom === 'string' && fi.nom.length > 0));
+  vrai("télécom engagé au-delà de douze mois : la règle est citée dans la fiche",
+       ficheContrat(approfondi[5], AUJ).faire.regle === 'engagement-telecom');
+  vrai("la synthèse compte les contrats restant à vérifier",
+       inv(approfondi).verification.some(v => /contrats? sans vérification en l'état/.test(v.titre)));
   vrai("le total ne change pas selon qu'un contrat est approfondi ou non",
        inv(approfondi).annuel === 48887 + 2499 * 12 + 9900);
 
-  /* Contrat sans catégorie : la règle télécom est signalée, jamais appliquée
-     d'office — rien ne dit que ce contrat en relève. */
-  const sansCategorie = [{ id:'s1', nom:'Contrat X', montant: 2499, periodicite:'mensuelle', categorie:'',
-                           engagementDebut: reculeMois(AUJ, 6), engagementMois: 24 }];
+  /* Contrat sans catégorie : la règle télécom est signalée par `pistes`, mais
+     jamais appliquée — rien ne dit que ce contrat en relève. */
+  const sansCategorie = { id:'s1', nom:'Contrat X', montant: 2499, periodicite:'mensuelle', categorie:'',
+                          engagementDebut: reculeMois(AUJ, 6), engagementMois: 24,
+                          echeance:null, souscritEnLigne:false, recent:false };
   vrai("contrat sans catégorie : la règle télécom est signalée, jamais appliquée",
-       inv(sansCategorie).verification.some(v => /règle particulière existe pour la téléphonie/i.test(v.titre)) &&
-       !inv(sansCategorie).verification.some(v => v.regle === 'engagement-telecom'));
+       pistes(sansCategorie, AUJ).some(p => /règle particulière existe pour la téléphonie/i.test(p.titre)) &&
+       ficheContrat(sansCategorie, AUJ).faire.regle !== 'engagement-telecom');
+
+  /* ---- Le parcours de vérification : quelles questions, dans quel ordre ---- */
+  const base5 = { id:'p', nom:'P', montant: 1999, periodicite:'mensuelle', categorie:'',
+                  echeance:null, engagementDebut:null, engagementMois:null,
+                  souscritEnLigne:false, recent:false, engagementDeclare:null,
+                  categorieDemandee:false, verifIgnoree:false };
+  const etp = o => etapeSuivante(Object.assign({}, base5, o));
+
+  eq("sans catégorie et jamais demandée : on demande la catégorie", etp({}), 'categorie');
+  eq("catégorie connue : on passe à l'engagement", etp({ categorie:'telecom' }), 'engagement');
+  eq("catégorie demandée puis refusée : on ne la redemande pas",
+     etp({ categorieDemandee:true }), 'engagement');
+  eq("engagement déclaré « avec » : on demande les dates",
+     etp({ categorie:'telecom', engagementDeclare:'avec' }), 'engagement-dates');
+  eq("engagement déclaré « sans » : aucune date n'est demandée",
+     etp({ categorie:'telecom', engagementDeclare:'sans' }), null);
+  eq("« je ne sais pas » : aucune date n'est demandée, et la question ne revient pas",
+     etp({ categorie:'telecom', engagementDeclare:'inconnu' }), null);
+  eq("engagement déjà daté : la question ne se pose pas",
+     etp({ categorie:'telecom', engagementDebut: reculeMois(AUJ, 6), engagementMois: 24 }), null);
+  eq("contrat passé : plus aucune question", etp({ verifIgnoree:true }), null);
+
+  /* Reprise : la position se recalcule, aucun curseur n'est stocké. */
+  const parcours5 = [
+    Object.assign({}, base5, { id:'x1', nom:'A', categorie:'streaming', engagementDeclare:'sans' }),
+    Object.assign({}, base5, { id:'x2', nom:'B' }),
+    Object.assign({}, base5, { id:'x3', nom:'C', categorie:'telecom', engagementDeclare:'avec' }),
+  ];
+  eq("avancement compté en contrats, pas en questions",
+     [avancement(parcours5).total, avancement(parcours5).faits, avancement(parcours5).restants], [3, 1, 2]);
+  eq("la reprise repart du premier contrat resté sans réponse",
+     resteAVerifier(parcours5).map(l => l.nom), ['B', 'C']);
+  vrai("tout répondu : le parcours est terminé",
+       avancement([Object.assign({}, base5, { categorie:'sport', engagementDeclare:'sans' })]).termine === true);
+
+  /* Une valeur d'engagement inconnue ne devient JAMAIS « sans engagement ». */
+  eq("déclaration inconnue : retombe sur null, jamais sur « sans »",
+     normaliserLignes([{ id:'z1', nom:'Z', montant: 100, engagementDeclare:'peut-être' }])[0].engagementDeclare, null);
+  eq("déclaration valide : conservée",
+     normaliserLignes([{ id:'z2', nom:'Z', montant: 100, engagementDeclare:'inconnu' }])[0].engagementDeclare, 'inconnu');
+  eq("ancienne ligne sans réponse de parcours : champs neutres, rien d'inventé",
+     (l => [l.engagementDeclare, l.categorieDemandee, l.verifIgnoree])(
+       normaliserLignes([{ id:'z3', nom:'Z', montant: 100 }])[0]), [null, false, false]);
+
+  /* ---- Déclaré n'est pas vérifié, et la fiche le montre ------------------ */
+  const fi = o => ficheContrat(Object.assign({}, base5, o), AUJ);
+
+  vrai("une date lue sur le contrat est marquée « saisi »",
+       fi({ echeance:'2027-03-10' }).sais.some(x => x.source === 'saisi' && /échéance/i.test(x.texte)));
+  vrai("une réponse de mémoire est marquée « déclaré »",
+       fi({ engagementDeclare:'sans' }).sais.some(x => x.source === 'declare' && /pas engagé/.test(x.texte)));
+  vrai("le montant est marqué « calculé »",
+       fi({}).sais.some(x => x.source === 'calcule'));
+  vrai("« sans engagement » ne conclut jamais à une résiliation libre",
+       fi({ categorie:'telecom', engagementDeclare:'sans' }).verifier
+         .some(v => /déclaration, pas une vérification/.test(v) && /sans frais ni condition/.test(v)));
+  vrai("« je ne sais pas » mène à une démarche, pas à une impasse",
+       (x => x.faire.titre.length > 0 && x.verifier.some(v => /n'est pas établie/.test(v)))
+         (fi({ categorie:'telecom', engagementDeclare:'inconnu' })));
+  vrai("engagement jamais renseigné : la fiche le dit",
+       fi({ categorie:'sport' }).verifier.some(v => /existence d'un engagement n'est pas renseignée/.test(v)));
+  vrai("contrat passé : la fiche dit qu'il l'a été, et ce qui reste en suspens",
+       fi({ categorie:'sport', verifIgnoree:true }).verifier.some(v => /passé ce contrat dans le parcours/.test(v)));
+  vrai("contrat passé : une démarche lui est tout de même proposée",
+       fi({ categorie:'sport', verifIgnoree:true }).faire.titre.length > 0);
+
+  vrai("aucune fiche ne conclut qu'un contrat est résiliable",
+       ['', 'telecom', 'assurance', 'streaming', 'sport', 'logiciel', 'energie']
+         .every(c => !/\best résiliable\b/i.test(JSON.stringify(fi({ categorie: c, engagementDeclare:'sans' })))));
 
   /* ---- Choix rapides : des noms pour éviter de taper, rien d'autre ------ */
   eq("choix rapides : huit entrées", CHOIX_RAPIDES.length, 8);
