@@ -699,13 +699,14 @@ SCRIPT_TESTS = r"""
   const cmp = comparerMobile(situ(), AUJ);
   vrai("comparatif : au moins trois opérateurs représentés",
        new Set(OFFRES_MOBILES.map(o => o.operateur)).size >= 3);
-  vrai("comparatif : trié par coût sur douze mois croissant",
-       cmp.retenues.every((r, i) => i === 0 || cmp.retenues[i - 1].cout12 <= r.cout12));
-  vrai("à 24,99 €/mois, une offre moins chère est trouvée et l'écart est chiffré",
-       cmp.retenues[0].moinsCher === true && cmp.retenues[0].ecart12 === 2499 * 12 - cmp.retenues[0].cout12);
-  eq("écart calculé sur douze mois, pas sur la mensualité affichée",
+  vrai("comparatif : trié par mensualités croissantes",
+       cmp.retenues.every((r, i) => i === 0 || cmp.retenues[i - 1].recurrent12 <= r.recurrent12));
+  vrai("à 24,99 €/mois, une offre aux frais connus est moins chère, écart chiffré",
+       (x => x.moinsCher === true && x.ecart12 === 2499 * 12 - x.coutTotalConnu)
+         (cmp.retenues.find(r => r.fraisConnus && r.moinsCher)));
+  eq("écart calculé sur douze mois, frais compris, pas sur la mensualité affichée",
      comparerMobile(situ({ prixActuel: 1999 }), AUJ).retenues.find(r => r.offre.id === 'sosh-20go').ecart12,
-     1999 * 12 - 11988);
+     1999 * 12 - (11988 + 1000));
 
   /* ---- Une promotion qui expire ---- */
   const serie = cmp.retenues.find(r => r.offre.id === 'free-serie-110go');
@@ -714,8 +715,8 @@ SCRIPT_TESTS = r"""
   vrai("ses mensualités retiennent le prix promotionnel, et sa condition annonce la bascule",
        serie.recurrent12 === 15588 &&
        serie.offre.conditions.some(c => /puis l[’']offre bascule/.test(c)));
-  vrai("son coût de première année ajoute la carte SIM à 10 €",
-       serie.cout12 === 16588 && serie.frais === 1000 && serie.fraisConnus === true);
+  vrai("son coût total connu ajoute la carte SIM à 10 €",
+       serie.coutTotalConnu === 16588 && serie.frais === 1000 && serie.fraisConnus === true);
 
   /* ---- Prix actuel inconnu : un coût, jamais un écart ---- */
   const sansPrix = comparerMobile(situ({ prixActuel: null }), AUJ);
@@ -794,8 +795,24 @@ SCRIPT_TESTS = r"""
   eq("B&YOU : 5 € pour quitter la nouvelle offre, jamais additionnés au coût", byou.fraisResiliationNouvelle, 500);
   eq("Free : carte SIM ou eSIM à 10 €",
      OFFRES_MOBILES.find(o => o.id === 'free-serie-110go').fraisSouscription, 1000);
+  eq("Sosh : 10 € d'activation là où le récapitulatif contractuel le dit pour une souscription simple",
+     ['sosh-1go','sosh-20go','sosh-100go'].map(i => OFFRES_MOBILES.find(o => o.id === i).fraisSouscription),
+     [1000, 1000, 1000]);
+  eq("Sosh : frais non établis là où le récapitulatif ne parle que de Multi-SIM",
+     ['sosh-voyage-200go','sosh-300go'].map(i => OFFRES_MOBILES.find(o => o.id === i).fraisSouscription),
+     [null, null]);
+  eq("RED : frais non établis malgré la lecture de la brochure tarifaire",
+     OFFRES_MOBILES.find(o => o.id === 'red-60go').fraisSouscription, null);
   vrai("un frais non établi vaut null, jamais zéro",
-       OFFRES_MOBILES.filter(o => o.operateur === 'Sosh').every(o => o.fraisSouscription === null));
+       OFFRES_MOBILES.every(o => o.fraisSouscription === null || o.fraisSouscription > 0));
+
+  /* ---- L'exclusion des clients en changement d'offre ------------------- */
+  vrai("les cinq offres Sosh excluent les clients Orange ou Sosh en changement d'offre",
+       OFFRES_MOBILES.filter(o => o.operateur === 'Sosh').every(o =>
+         o.nouveauxClientsSeulement === true &&
+         /clients mobile Orange ou Sosh en changement d[’']offre/.test(o.exclusionChangementOffre)));
+  vrai("les offres sans exclusion connue portent null, pas une phrase inventée",
+       OFFRES_MOBILES.filter(o => o.operateur !== 'Sosh').every(o => o.exclusionChangementOffre === null));
   vrai("chaque offre dit où ses frais ont été lus, ou pourquoi ils ne l'ont pas été",
        OFFRES_MOBILES.every(o => typeof o.sourceFrais === 'string' && o.sourceFrais.length > 20));
 
@@ -803,11 +820,34 @@ SCRIPT_TESTS = r"""
      [coutPremiereAnnee(byou).recurrent, coutPremiereAnnee(byou).total], [19188, 19388]);
   vrai("frais non établis : le total reste le récurrent, et le dit",
        (c => c.fraisConnus === false && c.frais === null && c.total === c.recurrent)
-         (coutPremiereAnnee(OFFRES_MOBILES.find(o => o.id === 'sosh-100go'))));
-  eq("Série Free : 155,88 € de mensualités + 10 € de carte SIM",
-     coutPremiereAnnee(OFFRES_MOBILES.find(o => o.id === 'free-serie-110go')).total, 16588);
+         (coutPremiereAnnee(OFFRES_MOBILES.find(o => o.id === 'red-60go'))));
+  eq("Sosh 100Go : 167,88 € de mensualités + 10 € d'activation",
+     coutPremiereAnnee(OFFRES_MOBILES.find(o => o.id === 'sosh-100go')).total, 17788);
   vrai("les frais de résiliation de la nouvelle offre n'entrent dans aucun total",
        coutPremiereAnnee(byou).total === coutDouzeMois(byou) + byou.fraisSouscription);
+
+  /* ---- Une offre aux frais inconnus ne peut pas être « la moins chère » --
+     Cas construit exprès : RED 60Go a les mensualités les plus basses des
+     offres d'au moins 60 Go, mais ses frais d'entrée sont inconnus. Elle doit
+     rester visible, en tête du tri par mensualités, et ne jamais porter la
+     mention « moins cher ». */
+  const cas = comparerMobile({ prixActuel: 2499, donneesNecessaires: 60, besoinEtranger: null }, AUJ);
+  const red = cas.retenues.find(r => r.offre.id === 'red-60go');
+  vrai("elle reste visible et arrive en tête du tri par mensualités",
+       cas.retenues[0].offre.id === 'red-60go' && red.recurrent12 === 11988);
+  vrai("aucun coût total n'est donné pour elle",
+       red.coutTotalConnu === null && red.fraisConnus === false);
+  vrai("elle n'est jamais déclarée moins chère, malgré des mensualités plus basses",
+       red.moinsCher === null && red.ecart12 === null && red.ecartIndeterminable === true);
+  vrai("l'écart sur les seules mensualités reste calculé, pour être dit comme tel",
+       red.ecartMensualites === 2499 * 12 - 11988);
+  vrai("une offre aux frais connus, elle, porte bien son écart",
+       (x => x.moinsCher === true && x.coutTotalConnu === 16588)
+         (cas.retenues.find(r => r.offre.id === 'free-serie-110go')));
+  vrai("le tri ne récompense pas l'absence de frais : il porte sur les mensualités",
+       cas.retenues.every((r, i) => i === 0 || cas.retenues[i - 1].recurrent12 <= r.recurrent12));
+  vrai("la synthèse signale que des frais manquent dans la liste",
+       cas.fraisIncomplets === true);
 
   /* ---- Ancienneté du relevé : jamais présentée comme une validité ------- */
   vrai("relevé du jour : pas d'alerte renforcée", releveAncien({ verifiee: '2026-09-19' }, AUJ) === false);

@@ -71,10 +71,11 @@ const OFFRES_MOBILES = [
     donneesFr: 1,              // Go en France
     donneesEurope: 1,
     engagement: false,
-    fraisSouscription: null,
+    fraisSouscription: 1000,
     fraisResiliationNouvelle: null,
-    sourceFrais: 'Frais non établis : ni la liste des forfaits ni la fiche détaillée consultées ne les affichent.',
-    nouveauxClientsSeulement: false,
+    sourceFrais: 'Frais d’activation de la carte SIM ou eSIM : 10 €, payés à la commande, « pour la souscription d’un forfait seul » — récapitulatif contractuel officiel (les-offres-sosh_rc_4098.pdf). Frais de résiliation non établis.',
+    nouveauxClientsSeulement: true,
+    exclusionChangementOffre: 'Offre non valable pour les clients mobile Orange ou Sosh en changement d’offre : si vous êtes déjà chez l’un des deux, ce prix ne vous est pas accessible en changeant simplement de formule.',
     remiseBox: null,
     conditions: [
       'Enveloppe bloquée : 1 Go et 2 h d’appels, pas de hors-forfait.',
@@ -95,8 +96,9 @@ const OFFRES_MOBILES = [
     engagement: false,
     fraisSouscription: null,
     fraisResiliationNouvelle: null,
-    sourceFrais: 'Frais non établis : la page d’offre ne les donne pas, et la brochure tarifaire n’a pas été ouverte.',
+    sourceFrais: 'Frais de souscription non établis : la Brochure Tarifaire et Conditions Générales d’Abonnement (52 pages) a été lue ; elle ne chiffre de frais d’ouverture que pour la fibre (39 €) et la box 5G (29 €), et les 10 € qu’elle cite concernent le remplacement d’une carte SIM, pas une souscription.',
     nouveauxClientsSeulement: false,
+    exclusionChangementOffre: null,
     remiseBox: null,
     conditions: [
       'Relevé sur le configurateur, à sa sélection par défaut : 60 Go, réseau 4G, 23 Go en UE/DOM.',
@@ -116,10 +118,11 @@ const OFFRES_MOBILES = [
     donneesFr: 20,
     donneesEurope: 20,
     engagement: false,
-    fraisSouscription: null,
+    fraisSouscription: 1000,
     fraisResiliationNouvelle: null,
-    sourceFrais: 'Frais non établis : ni la liste des forfaits ni la fiche détaillée consultées ne les affichent.',
+    sourceFrais: 'Frais d’activation de la carte SIM ou eSIM : 10 €, payés à la commande, « pour la souscription d’un forfait seul » — récapitulatif contractuel officiel (les-offres-sosh_rc_4744.pdf). Frais de résiliation non établis.',
     nouveauxClientsSeulement: true,
+    exclusionChangementOffre: 'Offre non valable pour les clients mobile Orange ou Sosh en changement d’offre : si vous êtes déjà chez l’un des deux, ce prix ne vous est pas accessible en changeant simplement de formule.',
     remiseBox: null,
     conditions: [
       'Réseau Orange.',
@@ -142,6 +145,7 @@ const OFFRES_MOBILES = [
     fraisResiliationNouvelle: null,
     sourceFrais: 'Carte SIM ou eSIM à 10 €, lue dans les mentions de mobile.free.fr. Frais de résiliation non établis sur cette page.',
     nouveauxClientsSeulement: false,
+    exclusionChangementOffre: null,
     remiseBox: null,
     conditions: [
       'Le prix de 12,99 €/mois vaut un an, puis l’offre bascule sur le Forfait Free 5G+ à 19,99 €/mois.',
@@ -160,10 +164,11 @@ const OFFRES_MOBILES = [
     donneesFr: 100,
     donneesEurope: 40,
     engagement: false,
-    fraisSouscription: null,
+    fraisSouscription: 1000,
     fraisResiliationNouvelle: null,
-    sourceFrais: 'Frais non établis : ni la liste des forfaits ni la fiche détaillée consultées ne les affichent.',
+    sourceFrais: 'Frais d’activation de la carte SIM ou eSIM : 10 €, payés à la commande, « pour la souscription d’un forfait seul » — récapitulatif contractuel officiel (contractualdocument_009902f025537.pdf). Frais de résiliation non établis.',
     nouveauxClientsSeulement: true,
+    exclusionChangementOffre: 'Offre non valable pour les clients mobile Orange ou Sosh en changement d’offre : si vous êtes déjà chez l’un des deux, ce prix ne vous est pas accessible en changeant simplement de formule.',
     remiseBox: null,
     conditions: [
       'Réseau Orange.',
@@ -186,6 +191,7 @@ const OFFRES_MOBILES = [
     fraisResiliationNouvelle: 500,
     sourceFrais: 'Carte SIM 1 € et frais d’activation 1 € à payer sur la première facture, frais de résiliation 5 € : lus dans les mentions de la page B&YOU sans engagement.',
     nouveauxClientsSeulement: false,
+    exclusionChangementOffre: null,
     remiseBox: null,
     conditions: [
       '40 Go utilisables dans plus de 160 destinations, dont Europe, DOM, Suisse, Maroc et États-Unis.',
@@ -205,8 +211,9 @@ const OFFRES_MOBILES = [
     engagement: false,
     fraisSouscription: null,
     fraisResiliationNouvelle: null,
-    sourceFrais: 'Frais non établis : ni la liste des forfaits ni la fiche détaillée consultées ne les affichent.',
+    sourceFrais: 'Frais de souscription non établis : le récapitulatif contractuel (les-offres-sosh_rc_4983.pdf) ne mentionne 10 € que « pour l’activation d’une option Multi-SIM », ce qui ne dit rien du coût d’une souscription simple.',
     nouveauxClientsSeulement: true,
+    exclusionChangementOffre: 'Offre non valable pour les clients mobile Orange ou Sosh en changement d’offre : si vous êtes déjà chez l’un des deux, ce prix ne vous est pas accessible en changeant simplement de formule.',
     remiseBox: null,
     conditions: [
       '40 Go utilisables depuis 135 destinations.',
@@ -229,6 +236,7 @@ const OFFRES_MOBILES = [
     fraisResiliationNouvelle: null,
     sourceFrais: 'Carte SIM ou eSIM à 10 €, lue dans les mentions de mobile.free.fr — offerte pour une nouvelle souscription réservée aux abonnés Freebox ou Box 5G. Frais de résiliation non établis sur cette page.',
     nouveauxClientsSeulement: false,
+    exclusionChangementOffre: null,
     // Une remise existe pour les abonnés Freebox, mais elle dépend du type de
     // box, de l'ordre et de la date de souscription — jusqu'à cinq résultats
     // différents. Nous ne la chiffrons pas et ne la comparons pas.
@@ -252,8 +260,9 @@ const OFFRES_MOBILES = [
     engagement: false,
     fraisSouscription: null,
     fraisResiliationNouvelle: null,
-    sourceFrais: 'Frais non établis : ni la liste des forfaits ni la fiche détaillée consultées ne les affichent.',
+    sourceFrais: 'Frais de souscription non établis : le récapitulatif contractuel (les-offres-sosh_rc_4792.pdf) ne mentionne 10 € que « pour l’activation d’une option Multi-SIM », ce qui ne dit rien du coût d’une souscription simple.',
     nouveauxClientsSeulement: true,
+    exclusionChangementOffre: 'Offre non valable pour les clients mobile Orange ou Sosh en changement d’offre : si vous êtes déjà chez l’un des deux, ce prix ne vous est pas accessible en changeant simplement de formule.',
     remiseBox: null,
     conditions: ['Réseau Orange.'],
   },
@@ -372,18 +381,30 @@ function comparerMobile(situation, aujourdhui, offres) {
         ? situation.prixActuel * 12 : null;
       return {
         offre: o,
-        cout12: c.total,          // frais d'entrée compris
+        cout12: c.total,
         recurrent12: c.recurrent,
         frais: c.frais,
         fraisConnus: c.fraisConnus,
         ancien: releveAncien(o, auj),
-        /* L'écart n'existe que si le prix actuel est connu. Il ne tient pas
-           compte du coût de sortie du contrat actuel, que nous ignorons. */
-        ecart12: actuel12 === null ? null : actuel12 - c.total,
-        moinsCher: actuel12 === null ? null : actuel12 - c.total > 0,
+        /* Deux chiffres distincts, et c'est volontaire :
+             `recurrent12` — les mensualités sur douze mois, connues pour
+               toutes les offres, donc seules réellement comparables ;
+             `coutTotalConnu` — le total incluant les frais d'entrée, qui
+               n'existe QUE si ces frais ont été établis.
+           Une offre dont les frais manquent ne peut pas être déclarée moins
+           chère : son total est incomplet, et un total incomplet gagne
+           toujours contre un total complet. */
+        coutTotalConnu: c.fraisConnus ? c.total : null,
+        ecart12: (actuel12 === null || !c.fraisConnus) ? null : actuel12 - c.total,
+        ecartMensualites: actuel12 === null ? null : actuel12 - c.recurrent,
+        moinsCher: (actuel12 === null || !c.fraisConnus) ? null : actuel12 - c.total > 0,
+        ecartIndeterminable: actuel12 !== null && !c.fraisConnus,
       };
     })
-    .sort((a, b) => a.cout12 - b.cout12 || a.offre.operateur.localeCompare(b.offre.operateur, 'fr'));
+    /* Le tri porte sur les mensualités : c'est la seule grandeur connue pour
+       toutes les offres. Trier sur un total dont certains membres omettent
+       des frais ferait remonter les moins documentées. */
+    .sort((a, b) => a.recurrent12 - b.recurrent12 || a.offre.operateur.localeCompare(b.offre.operateur, 'fr'));
 
   return {
     retenues,

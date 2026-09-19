@@ -345,8 +345,16 @@ function offreHTML(r, situation){
         ? "Avec engagement."
         : "Sans engagement, d'après la page de l'opérateur.";
 
+  /* Une offre dont les frais d'entrée manquent n'est jamais annoncée « moins
+     chère » : son total est incomplet, et un total incomplet l'emporte
+     toujours sur un total complet. On dit alors l'écart sur les mensualités,
+     en précisant qu'il ne suffit pas à conclure. */
   let ecart = '';
-  if (r.ecart12 === null){
+  if (r.ecartIndeterminable){
+    ecart = `<span class="ecart inconnu">Frais de souscription inconnus — impossible de dire si cette offre est moins chère${
+      r.ecartMensualites !== null && r.ecartMensualites > 0
+        ? `. Sur les seules mensualités, ${euros(r.ecartMensualites)} de moins` : ''}</span>`;
+  } else if (r.ecart12 === null){
     ecart = `<span class="ecart inconnu">Écart inconnu — votre prix actuel n'est pas renseigné</span>`;
   } else if (r.ecart12 > 0){
     ecart = `<span class="ecart moins">${euros(r.ecart12)} de moins sur douze mois, hors frais de sortie</span>`;
@@ -357,19 +365,23 @@ function offreHTML(r, situation){
   const etranger = situation.besoinEtranger === true
     ? `<br><b>À l'étranger :</b> ${o.donneesEurope} Go inclus.` : '';
 
-  return `<article class="offre${r.ecart12 !== null && r.ecart12 > 0 ? ' gagnante' : ''}">
+  return `<article class="offre${r.moinsCher === true ? ' gagnante' : ''}">
     <div class="offre-tete">
       <div class="offre-nom"><span class="op">${ech(o.operateur)}</span>${ech(o.nom)}</div>
       <div class="offre-prix">
-        <span class="m">${ech(euros(r.cout12))}</span>
-        <span class="p">sur douze mois</span>
+        <span class="m">${ech(euros(r.recurrent12))}</span>
+        <span class="p">de mensualités sur 12 mois</span>
+        <span class="p" style="margin-top:4px">${r.coutTotalConnu !== null
+          ? '<b>' + ech(euros(r.coutTotalConnu)) + '</b> coût total connu'
+          : 'coût total <b>non établi</b>'}</span>
       </div>
     </div>
     <p class="offre-cle"><b>${ech(periode)}</b> · ${o.donneesFr} Go en France.${etranger}</p>
     <p class="offre-cle">${ech(conditionCle)}</p>
+    ${o.exclusionChangementOffre ? `<p class="offre-cle"><b>${ech(o.exclusionChangementOffre)}</b></p>` : ''}
     <p class="offre-cle">${r.fraisConnus
-      ? `<b>Pour entrer :</b> ${ech(euros(r.frais))} de frais de souscription, compris dans le total ci-dessus (${ech(euros(r.recurrent12))} de mensualités + ${ech(euros(r.frais))}).`
-      : `<b>Frais de souscription non établis</b> sur les pages consultées : le total ci-dessus ne compte que les mensualités et pourrait donc être sous-estimé.`}
+      ? `<b>Pour entrer :</b> ${ech(euros(r.frais))} de frais de souscription. Coût total connu : ${ech(euros(r.recurrent12))} de mensualités + ${ech(euros(r.frais))} = ${ech(euros(r.coutTotalConnu))}.`
+      : `<b>Frais de souscription non établis</b>, malgré la lecture des documents tarifaires officiels. <b>Aucun coût total ne peut donc être donné</b>, et cette offre n'est pas classée comme moins chère.`}
       ${Number.isFinite(o.fraisResiliationNouvelle)
         ? `<br><b>Pour repartir :</b> ${ech(euros(o.fraisResiliationNouvelle))} de frais de résiliation de cette offre — non comptés, puisqu'on ne les paie qu'en partant.`
         : `<br><b>Pour repartir :</b> frais de résiliation de cette offre non établis.`}</p>
