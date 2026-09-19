@@ -100,9 +100,10 @@ après coup en fonction de ce qui arrange.
 
 **Un critère d'arrêt immédiat, indépendant des seuils :** si une personne repart
 en croyant qu'elle peut résilier un contrat sans frais alors que l'outil ne l'a
-jamais dit, la session est un échec grave. Le noter en toutes lettres et corriger
-avant la session suivante. C'est le risque que toute l'architecture du produit
-cherche à éviter ; s'il se réalise, il prime sur tout le reste.
+jamais dit, la session est un échec grave. Le noter en toutes lettres, interrompre
+la série et corriger — puis la reprendre de zéro, selon la règle de version ci-
+dessous. C'est le risque que toute l'architecture du produit cherche à éviter ;
+s'il se réalise, il prime sur tout le reste.
 
 ---
 
