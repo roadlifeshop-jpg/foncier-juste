@@ -679,6 +679,122 @@ SCRIPT_TESTS = r"""
   vrai("règle assurance : elle prévient que la catégorie de l'outil est hétérogène",
        REGLES['assurance-resiliation-annuelle'].exceptions.some(e => /contrats très différents/.test(e)));
 
+  /* ================= COMPARATIF MOBILE =================
+     Registre daté, tenu à la main. Les cas testés sont ceux qui peuvent
+     tromper : une promotion qui expire, une remise conditionnée à une box,
+     un foyer qui a déjà une box, et des inconnues qui interdisent d'annoncer
+     une économie. */
+
+  /* ---- Le coût sur douze mois, promotion comprise ---- */
+  eq("prix stable : douze mensualités", coutDouzeMois({ prix: 1399, prixApres: null, dureePromoMois: null }), 16788);
+  eq("promotion de six mois : les deux périodes sont additionnées",
+     coutDouzeMois({ prix: 999, prixApres: 1999, dureePromoMois: 6 }), 999 * 6 + 1999 * 6);
+  eq("promotion d'un an pile : le prix suivant ne pèse pas sur les douze premiers mois",
+     coutDouzeMois({ prix: 1299, prixApres: 1999, dureePromoMois: 12 }), 15588);
+  eq("promotion annoncée sans prix suivant : on ne devine pas",
+     coutDouzeMois({ prix: 1299, prixApres: null, dureePromoMois: 6 }), 15588);
+
+  /* ---- Une offre réellement moins chère ---- */
+  const situ = (o) => Object.assign({ prixActuel: 2499, donneesNecessaires: null, besoinEtranger: null }, o);
+  const cmp = comparerMobile(situ(), AUJ);
+  vrai("comparatif : au moins trois opérateurs représentés",
+       new Set(OFFRES_MOBILES.map(o => o.operateur)).size >= 3);
+  vrai("comparatif : trié par coût sur douze mois croissant",
+       cmp.retenues.every((r, i) => i === 0 || cmp.retenues[i - 1].cout12 <= r.cout12));
+  vrai("à 24,99 €/mois, une offre moins chère est trouvée et l'écart est chiffré",
+       cmp.retenues[0].moinsCher === true && cmp.retenues[0].ecart12 === 2499 * 12 - cmp.retenues[0].cout12);
+  eq("écart calculé sur douze mois, pas sur la mensualité affichée",
+     comparerMobile(situ({ prixActuel: 1999 }), AUJ).retenues.find(r => r.offre.id === 'sosh-20go').ecart12,
+     1999 * 12 - 11988);
+
+  /* ---- Une promotion qui expire ---- */
+  const serie = cmp.retenues.find(r => r.offre.id === 'free-serie-110go');
+  vrai("la Série Free porte bien un prix suivant et une durée",
+       serie.offre.prixApres === 1999 && serie.offre.dureePromoMois === 12);
+  vrai("son coût sur douze mois retient le prix promotionnel, et sa condition annonce la bascule",
+       serie.cout12 === 15588 &&
+       serie.offre.conditions.some(c => /puis l[’']offre bascule/.test(c)));
+
+  /* ---- Prix actuel inconnu : un coût, jamais un écart ---- */
+  const sansPrix = comparerMobile(situ({ prixActuel: null }), AUJ);
+  vrai("sans prix actuel : aucun écart n'est inventé",
+       sansPrix.prixActuelConnu === false &&
+       sansPrix.retenues.every(r => r.ecart12 === null && r.moinsCher === null));
+
+  /* ---- « Je ne sais pas » n'écarte rien ---- */
+  eq("besoin en données inconnu : aucune offre écartée",
+     comparerMobile(situ({ donneesNecessaires: null }), AUJ).nombreEcartees, 0);
+  vrai("besoin de 100 Go : seules les offres au moins égales sont retenues",
+       comparerMobile(situ({ donneesNecessaires: 100 }), AUJ).retenues.every(r => r.offre.donneesFr >= 100));
+
+  /* ---- Une remise liée à une box n'entre JAMAIS dans « mobile seul » ---- */
+  const avecRemise = OFFRES_MOBILES.concat([{
+    id: 'piege', operateur: 'Test', nom: 'Forfait remisé', url: 'https://example.invalid/',
+    verifiee: '2026-09-19', prix: 499, prixApres: null, dureePromoMois: null,
+    donneesFr: 500, donneesEurope: 100, engagement: false, fraisMiseEnService: null,
+    nouveauxClientsSeulement: false, conditions: [],
+    remiseBox: { condition: 'exige une box' },
+  }]);
+  vrai("une offre conditionnée à une box est exclue du comparatif mobile seul",
+       !comparerMobile(situ(), AUJ, avecRemise).retenues.some(r => r.offre.id === 'piege'));
+  vrai("aucune offre du registre mobile ne porte de remise liée à une box",
+       OFFRES_MOBILES.every(o => !o.remiseBox));
+
+  /* ---- Distinguer le mobile de la box, par le nom et non par le prix ---- */
+  eq("le nom décide du rôle du contrat télécom",
+     ['Forfait mobile', 'Box internet', 'Freebox Pop', 'Forfait Free 5G+', 'Ligne Sosh', 'Contrat 4712'].map(roleTelecom),
+     ['mobile', 'box', 'box', 'mobile', 'mobile', null]);
+  vrai("une box plus chère qu'un forfait n'est plus prise pour le mobile",
+       roleTelecom('Box internet') === 'box' && roleTelecom('Forfait mobile') === 'mobile');
+  vrai("un nom illisible ne préremplit rien", roleTelecom('Prélèvement 27,90') === null);
+
+  /* ---- Le scénario box + mobile ---- */
+  const scNu = scenarioBoxMobile({ prixActuelMobile: null, prixActuelBox: null, aDejaUneBox: null }, null, AUJ);
+  vrai("scénario groupé : jamais confirmé", scNu.confirmee === false);
+  vrai("scénario groupé : le total additionne bien les deux contrats",
+       scNu.nouveau12 === scNu.mobile12 + scNu.box12);
+  vrai("scénario groupé : sans prix actuels, aucun écart même indicatif",
+       scNu.actuel12 === null && scNu.ecartIndicatif === null);
+  vrai("scénario groupé : les inconnues nomment les frais, l'éligibilité et le coût de sortie",
+       scNu.manque.some(m => /frais de mise en service/.test(m)) &&
+       scNu.manque.some(m => /éligibilité/.test(m)) &&
+       scNu.manque.some(m => /sortie de vos contrats/.test(m)));
+  vrai("scénario groupé : le prix mobile sans la box est conservé, et il est plus élevé",
+       SCENARIOS_BOX_MOBILE[0].mobileSeul > SCENARIOS_BOX_MOBILE[0].mobileAvecBox);
+
+  /* Un foyer qui a déjà une box et une remise : l'écart devient calculable,
+     mais il reste indicatif — les frais et l'éligibilité manquent toujours. */
+  const scFoyer = scenarioBoxMobile({ prixActuelMobile: 2499, prixActuelBox: 2999,
+                                      aDejaUneBox: true, remiseBoxDejaActive: true }, null, AUJ);
+  eq("foyer équipé : la dépense actuelle des deux contrats est additionnée",
+     scFoyer.actuel12, 2499 * 12 + 2999 * 12);
+  vrai("foyer équipé : un écart indicatif existe, mais rien n'est confirmé",
+       scFoyer.ecartIndicatif === scFoyer.actuel12 - scFoyer.nouveau12 && scFoyer.confirmee === false);
+  vrai("foyer équipé : les frais et l'éligibilité restent listés comme manquants",
+       scFoyer.manque.length >= 3 && scFoyer.manque.some(m => /éligibilité/.test(m)));
+
+  /* Sans box aujourd'hui : la comparaison porterait sur une dépense nouvelle. */
+  vrai("foyer sans box : le scénario le dit au lieu de comparer",
+       scenarioBoxMobile({ prixActuelMobile: 2499, prixActuelBox: null, aDejaUneBox: false }, null, AUJ)
+         .manque.some(m => /dépense nouvelle/.test(m)));
+
+  /* ---- Péremption : une offre trop ancienne n'est plus « vérifiée » ---- */
+  vrai("offre du jour : non périmée", offrePerimee({ verifiee: '2026-09-19' }, AUJ) === false);
+  vrai("offre de plus de trente jours : périmée",
+       offrePerimee({ verifiee: '2026-06-01' }, AUJ) === true);
+  vrai("date de vérification illisible : traitée comme périmée",
+       offrePerimee({ verifiee: 'bientôt' }, AUJ) === true);
+  vrai("chaque offre du registre porte une date de vérification lisible",
+       OFFRES_MOBILES.every(o => versDate(o.verifiee) !== null));
+
+  /* ---- Les liens : officiels, sans paramètre de suivi, sans affiliation --- */
+  vrai("chaque offre renvoie à une page officielle de l'opérateur",
+       OFFRES_MOBILES.every(o => /^https:\/\/([a-z0-9.-]+\.)?(free\.fr|sosh\.fr|red-by-sfr\.fr|bouyguestelecom\.fr)\//.test(o.url)));
+  vrai("aucun lien ne porte de paramètre de suivi ou d'affiliation",
+       OFFRES_MOBILES.concat(SCENARIOS_BOX_MOBILE).every(o => !/[?&](utm_|aff|partner|tag=|xtor)/i.test(o.url)));
+  vrai("les frais de mise en service sont déclarés non relevés, jamais à zéro",
+       OFFRES_MOBILES.every(o => o.fraisMiseEnService === null));
+
   /* ---- Choix rapides : des noms pour éviter de taper, rien d'autre ------ */
   eq("choix rapides : huit entrées", CHOIX_RAPIDES.length, 8);
   vrai("choix rapides : chaque catégorie existe dans CATEGORIES, ou est vide",
@@ -779,7 +895,8 @@ async def executer():
         nav = await p.chromium.launch()
         page = await (await nav.new_context()).new_page()
         await page.goto("about:blank")
-        for f in ("regles.js", "aeroports.js", "abonnements.js", "garanties.js", "vol.js"):
+        for f in ("regles.js", "aeroports.js", "abonnements.js", "garanties.js", "vol.js",
+                  "offres-mobiles.js"):
             await page.add_script_tag(content=(WEB / f).read_text(encoding="utf-8"))
         resultats = await page.evaluate(SCRIPT_TESTS)
         await nav.close()

@@ -278,6 +278,23 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
     </div>
   </section>
 
+  <!-- ============ ENTRÉE VERS LE COMPARATIF MOBILE ============
+       N'apparaît que si un contrat de la liste est classé « téléphone,
+       internet, mobile ». Proposer de comparer un forfait à qui n'en a pas
+       déclaré serait du démarchage, pas un service. -->
+  <section class="shell-lire" id="zone-comparer" hidden style="margin-top:26px">
+    <div class="encart info">
+      <h3>Comparer mon forfait mobile</h3>
+      <p id="comparer-intro"></p>
+      <p><b>Un petit ensemble d'offres lues sur les pages officielles et datées.</b> Aucun partenaire,
+      aucun classement sponsorisé, aucun lien affilié. Les remises liées à une box y sont traitées à
+      part&nbsp;: elles ne sont jamais présentées comme une économie sur le mobile seul.</p>
+      <div class="cta-row" style="margin-top:16px">
+        <a class="btn btn-primary" href="comparer-mobile.html" style="text-decoration:none">Comparer mon forfait mobile</a>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ LES FICHES, UN CONTRAT PAR CARTE ============
        Ce que vous savez · ce qu'il reste à vérifier · ce que vous pouvez faire.
        La synthèse en quatre cases, plus bas, ne répète aucune de ces phrases :
@@ -607,7 +624,18 @@ function majSynthese(){
   $('zone-resultat').hidden = false;
 }
 
-function majTout(){ majTotaux(); majParcours(); majFiches(); majSynthese(); }
+/* L'entrée vers le comparatif mobile, réservée aux personnes concernées. */
+function majComparer(){
+  const tel = lignes.filter(l => l.categorie === 'telecom' && !l.archive);
+  $('zone-comparer').hidden = !tel.length;
+  if (!tel.length) return;
+  const noms = tel.map(l => l.nom).join(', ');
+  $('comparer-intro').innerHTML = tel.length > 1
+    ? `Vous avez classé ${tel.length} contrats en téléphone ou internet&nbsp;: <b>${ech(noms)}</b>. Vous pouvez comparer votre forfait mobile à d'autres offres, en tenant compte de votre box si les deux sont liés.`
+    : `Vous avez classé <b>${ech(noms)}</b> en téléphone ou internet. Vous pouvez comparer votre forfait mobile à d'autres offres, en tenant compte de votre box si les deux sont liés.`;
+}
+
+function majTout(){ majTotaux(); majParcours(); majComparer(); majFiches(); majSynthese(); }
 
 /* ====================== 3. LE PANNEAU D'UN CONTRAT ======================
    Construit à la première ouverture seulement : dix contrats ne créent pas

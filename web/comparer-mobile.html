@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Comparer mon forfait mobile</title>
+<meta name="description" content="Comparez votre forfait mobile à un petit ensemble d'offres vérifiées et datées. Coût sur douze mois, promotions comprises. Aucune offre partenaire, aucun classement sponsorisé.">
+<link rel="canonical" href="https://foncier-juste.vercel.app/comparer-mobile.html">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Composants propres à cette page. `base.css` n'est pas modifié : il sert les
+   autres outils, et une règle écrite ici ne peut pas déplacer un pixel
+   ailleurs. */
+.forme{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px 24px;}
+@media(max-width:560px){ .forme{padding:18px;} }
+.forme-grille{display:grid; gap:0 18px; grid-template-columns:1fr;}
+@media(min-width:620px){ .forme-grille{grid-template-columns:1fr 1fr;} .forme-grille .plein{grid-column:1 / -1;} }
+fieldset.sans-cadre{border:0; padding:0; margin:0;}
+
+.bascule{display:flex; flex-wrap:wrap; gap:8px; margin-top:7px;}
+.bascule label{
+  flex:1 1 30%; display:flex; align-items:center; justify-content:center; gap:8px;
+  min-height:46px; padding:8px 10px; cursor:pointer; font-size:.93rem; text-align:center;
+  background:var(--surface); border:1px solid var(--line-strong); border-radius:var(--r);
+}
+.bascule input{width:18px; height:18px; accent-color:var(--accent); flex-shrink:0;}
+.bascule label:has(input:checked){background:var(--accent-soft); border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); font-weight:600;}
+.bascule label:has(input:focus-visible){box-shadow:var(--ring);}
+
+.repris{background:var(--ok-soft); border:1px solid var(--ok); border-radius:var(--r);
+  padding:11px 13px; font-size:.9rem; margin-top:14px;}
+
+/* --- Un résultat : prix et période, puis la condition, puis l'action ----- */
+.groupe{margin-top:34px;}
+.groupe > h2{font-size:1.12rem; font-family:'Archivo',sans-serif; font-weight:600;}
+.groupe > .aide{margin-bottom:4px;}
+
+.offre{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+  padding:16px 18px; margin-top:12px;}
+.offre.gagnante{border-color:var(--ok); box-shadow:inset 0 0 0 1px var(--ok);}
+.offre-tete{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap;}
+.offre-nom{font-weight:600; font-size:1.02rem; overflow-wrap:anywhere;}
+.offre-nom .op{display:block; font-size:.76rem; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:2px;}
+.offre-prix{text-align:right; font-variant-numeric:tabular-nums; flex-shrink:0;}
+.offre-prix .m{font-size:1.16rem; font-weight:700;}
+.offre-prix .p{display:block; font-size:.82rem; color:var(--ink-muted);}
+.offre-cle{margin-top:11px; font-size:.93rem; line-height:1.55;}
+.offre-cle b{color:var(--ink);}
+.ecart{display:inline-block; font-size:.84rem; font-weight:700; border-radius:var(--r);
+  padding:3px 9px; margin-top:9px;}
+.ecart.moins{color:var(--ok); background:var(--ok-soft); border:1px solid var(--ok);}
+.ecart.plus{color:var(--ink-muted); background:var(--surface-2); border:1px solid var(--line);}
+.ecart.inconnu{color:var(--warn); background:var(--warn-soft); border:1px solid var(--warn-line);}
+.offre-actions{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:13px;
+  padding-top:12px; border-top:1px solid var(--line);}
+.date-verif{font-size:.78rem; color:var(--ink-faint);}
+.date-verif.perimee{color:var(--warn); font-weight:600;}
+.hors-site{display:inline-block; font-size:.68rem; font-weight:600; letter-spacing:.04em;
+  text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--line-strong);
+  border-radius:3px; padding:1px 6px; margin-left:6px; white-space:nowrap;}
+.offre details{margin-top:11px;}
+.offre summary{font-size:.86rem; color:var(--accent); cursor:pointer;}
+.offre details ul{margin:9px 0 0; padding-left:19px;}
+.offre details li{font-size:.88rem; color:var(--ink-muted); margin-top:5px;}
+
+.a-confirmer{background:var(--warn-soft); border:1px solid var(--warn-line); border-radius:var(--r-lg);
+  padding:16px 18px; margin-top:12px;}
+.a-confirmer h3{font-family:'Archivo',sans-serif; font-size:1rem; color:var(--warn);}
+.a-confirmer ul{margin:10px 0 0; padding-left:19px;}
+.a-confirmer li{font-size:.9rem; color:var(--ink-muted); margin-top:6px;}
+</style>
+<script src="abonnements.js"></script>
+<script src="offres-mobiles.js"></script>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="shell">
+    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Vérifier ce que vous payez</small></a>
+    <nav class="nav" aria-label="Outils">
+      <a href="vol-retarde.html">Vol retardé</a>
+      <a href="abonnements.html" aria-current="page">Dépense mensuelle</a>
+      <a href="taxe-fonciere.html">Taxe foncière</a>
+      <a href="sources.html">Sources</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero shell" style="padding-block:40px 20px">
+    <div class="eyebrow">Premier essai — gratuit, sans inscription</div>
+    <h1>Comparer mon forfait mobile</h1>
+    <p class="lede" style="margin-top:14px; font-size:1.1rem; max-width:52ch">
+      Un petit ensemble d'offres <b>lues sur les pages officielles et datées</b>. Coût sur douze mois,
+      promotions comprises. Aucun partenaire, aucun classement sponsorisé, aucun lien affilié.
+    </p>
+  </section>
+
+  <section class="shell-lire" id="saisie">
+    <div class="forme">
+      <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Votre situation</h2>
+      <p class="aide">Trois questions, et deux facultatives si vous avez une box. « Je ne sais pas »
+      est une réponse&nbsp;: elle élargit la comparaison au lieu de l'arrêter.</p>
+
+      <div id="repris" class="repris" hidden></div>
+
+      <form id="forme-cm" novalidate style="margin-top:16px">
+        <div class="forme-grille">
+          <div class="champ">
+            <label for="f-prix">Ce que vous payez aujourd'hui, par mois</label>
+            <div class="unite" data-unite="€"><input type="text" id="f-prix" inputmode="decimal" placeholder="ex : 19,99"></div>
+            <p class="aide">Sans ce montant, nous affichons des coûts, pas des écarts.</p>
+            <p class="erreur-champ" id="e-prix" hidden></p>
+          </div>
+          <div class="champ">
+            <label for="f-donnees">Données dont vous avez besoin, par mois</label>
+            <select id="f-donnees">
+              <option value="">Je ne sais pas — montrez tout</option>
+              <option value="1">Environ 1 Go — appels et messages surtout</option>
+              <option value="20">Environ 20 Go</option>
+              <option value="60">Environ 60 Go</option>
+              <option value="100">Environ 100 Go</option>
+              <option value="200">200 Go ou plus</option>
+            </select>
+            <p class="aide">Votre consommation réelle figure dans l'application de votre opérateur.</p>
+          </div>
+        </div>
+
+        <fieldset class="champ sans-cadre">
+          <legend class="lab">Avez-vous besoin de données à l'étranger&nbsp;?</legend>
+          <div class="bascule">
+            <label><input type="radio" name="etranger" value="oui"><span>Oui</span></label>
+            <label><input type="radio" name="etranger" value="non"><span>Non</span></label>
+            <label><input type="radio" name="etranger" value="" checked><span>Je ne sais pas</span></label>
+          </div>
+          <p class="aide">Cette réponse n'écarte aucune offre&nbsp;: elle décide seulement de ce qui est
+          mis en avant dans chaque résultat.</p>
+        </fieldset>
+
+        <fieldset class="champ sans-cadre" style="margin-top:26px; padding-top:20px; border-top:1px solid var(--line)">
+          <legend class="lab">Votre box internet — facultatif</legend>
+          <p class="aide" style="margin-top:0">Ces trois réponses ne servent qu'au second résultat, celui
+          où la remise mobile dépend d'une box. Elles ne changent rien au premier.</p>
+
+          <div class="bascule" style="margin-top:12px">
+            <label><input type="radio" name="box" value="oui"><span>J'ai une box</span></label>
+            <label><input type="radio" name="box" value="non"><span>Je n'en ai pas</span></label>
+            <label><input type="radio" name="box" value="" checked><span>Je ne sais pas</span></label>
+          </div>
+
+          <div class="forme-grille" style="margin-top:6px">
+            <div class="champ">
+              <label for="f-prix-box">Prix de votre box, par mois</label>
+              <div class="unite" data-unite="€"><input type="text" id="f-prix-box" inputmode="decimal" placeholder="ex : 29,99"></div>
+              <p class="erreur-champ" id="e-prix-box" hidden></p>
+            </div>
+            <div class="champ">
+              <label class="lab" style="font-size:.97rem">Votre forfait mobile bénéficie-t-il déjà d'une remise liée à cette box&nbsp;?</label>
+              <div class="bascule">
+                <label><input type="radio" name="remise" value="oui"><span>Oui</span></label>
+                <label><input type="radio" name="remise" value="non"><span>Non</span></label>
+                <label><input type="radio" name="remise" value="" checked><span>Je ne sais pas</span></label>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="cta-row">
+          <button type="submit" class="btn-primary" id="f-comparer">Comparer</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="shell-lire" id="zone-resultat" hidden aria-live="polite">
+    <div class="groupe">
+      <h2>Mobile seul</h2>
+      <p class="aide" id="intro-mobile"></p>
+      <div id="liste-mobile"></div>
+    </div>
+
+    <div class="groupe">
+      <h2>Box + mobile</h2>
+      <p class="aide">Ici, la remise mobile <b>dépend d'une box</b>. Ce n'est donc pas une économie sur
+      le mobile seul&nbsp;: c'est la dépense de deux contrats, à comparer à celle de deux contrats.</p>
+      <div id="liste-box"></div>
+    </div>
+
+    <div class="groupe">
+      <details class="detail-diagnostic">
+        <summary>Ce que cette comparaison ne dit pas</summary>
+        <p><b>Rien sur la couverture réseau.</b> Deux forfaits au même prix ne captent pas pareil chez
+        vous. Vérifiez la couverture de chaque opérateur à votre adresse, à votre travail et sur vos
+        trajets habituels avant de décider — l'Arcep publie une carte pour cela&nbsp;:
+        <a href="https://monreseaumobile.arcep.fr/" target="_blank" rel="noopener noreferrer">Mon réseau mobile</a><span class="hors-site">autre site</span>.</p>
+        <p><b>Rien sur ce que vous coûterait de partir.</b> Frais de résiliation, engagement en cours,
+        matériel à rendre&nbsp;: nous ne lisons pas vos contrats. Une offre moins chère ne devient une
+        économie qu'une fois ce coût de sortie connu.</p>
+        <p><b>Les frais de mise en service ne sont pas comptés.</b> Aucune des pages consultées ne les
+        affichait à l'endroit où les prix sont annoncés. Les coûts sur douze mois les excluent donc,
+        et ils peuvent représenter plusieurs dizaines d'euros la première année.</p>
+        <p><b>Rien n'est garanti disponible à votre adresse.</b> Pour une box, l'éligibilité se teste
+        chez l'opérateur, adresse par adresse. Tant qu'elle n'est pas confirmée, une offre fibre n'est
+        pas une offre&nbsp;: c'est une hypothèse.</p>
+        <p><b>Ce comparatif est petit et tenu à la main.</b> Il ne couvre pas le marché, ne classe pas
+        les opérateurs et ne reçoit aucune rémunération. Chaque offre porte la date à laquelle elle a
+        été lue sur la page officielle&nbsp;; passé trente jours, elle cesse d'être présentée comme
+        vérifiée.</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="shell">
+    <div class="cols">
+      <div><h4>Les outils</h4><ul>
+        <li><a href="vol-retarde.html">Vol retardé</a></li>
+        <li><a href="abonnements.html">Dépense mensuelle</a></li>
+        <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
+        <li><a href="garanties.html">Garanties après achat</a></li></ul></div>
+      <div><h4>Comprendre</h4><ul>
+        <li><a href="resilier-un-abonnement.html">Résilier un abonnement</a></li>
+        <li><a href="sources.html">Toutes les sources</a></li></ul></div>
+      <div><h4>Le site</h4><ul>
+        <li><a href="mentions-legales.html">Mentions légales</a></li>
+        <li><a href="confidentialite.html">Confidentialité</a></li></ul></div>
+    </div>
+    <p class="fine">Service d'information gratuit. Ne constitue ni un conseil juridique personnalisé, ni
+    une garantie de résultat. Aucun lien affilié, aucune rémunération d'aucun opérateur.</p>
+  </div>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const CLE = 'dj_abonnements_v1';
+const AUJ = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+const ech = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const dateFrCourt = iso => { const d = versDate(iso); return d ? d.toLocaleDateString('fr-FR') : iso; };
+
+/* ---------- Reprise des contrats déjà saisis, en LECTURE SEULE.
+   Cette page ne réécrit jamais `dj_abonnements_v1` : elle propose ce qu'elle
+   y trouve, et l'utilisateur reste libre de corriger le champ. ------------ */
+function reprendre(){
+  let lignes = [];
+  try { lignes = normaliserLignes(JSON.parse(localStorage.getItem(CLE) || '[]')); }
+  catch (_) { return; }
+  const telecom = lignes.filter(l => l.categorie === 'telecom');
+  if (!telecom.length) return;
+
+  /* Le nom décide, pas le prix : une box coûte souvent plus cher qu'un
+     forfait, et trier par montant ferait proposer la box comme mobile. Ce
+     qu'on ne sait pas lire n'est pas prérempli. */
+  const mensuel = l => mensuelCentimes(l.montant, l.periodicite);
+  const mobile = telecom.find(l => roleTelecom(l.nom) === 'mobile') || null;
+  const box = telecom.find(l => roleTelecom(l.nom) === 'box') || null;
+  const illisibles = telecom.filter(l => roleTelecom(l.nom) === null);
+
+  if (mobile) $('f-prix').value = (mensuel(mobile) / 100).toFixed(2).replace('.', ',');
+  if (box){
+    $('f-prix-box').value = (mensuel(box) / 100).toFixed(2).replace('.', ',');
+    document.querySelector('input[name="box"][value="oui"]').checked = true;
+  }
+
+  const dits = [];
+  if (mobile) dits.push(`<b>${ech(mobile.nom)}</b> à ${ech(euros(mensuel(mobile)))} par mois comme forfait mobile`);
+  if (box) dits.push(`<b>${ech(box.nom)}</b> à ${ech(euros(mensuel(box)))} par mois comme box`);
+
+  $('repris').innerHTML = dits.length
+    ? `Repris de votre liste « Dépense mensuelle »&nbsp;: ${dits.join(', et ')}.
+       Corrigez si ce n'est pas le bon contrat — <b>rien n'est réécrit dans votre liste</b>.${
+         illisibles.length ? ` ${illisibles.length} autre${illisibles.length > 1 ? 's contrats télécom n\'ont' : ' contrat télécom n\'a'} pas pu être identifié${illisibles.length > 1 ? 's' : ''} : ${ech(illisibles.map(l => l.nom).join(', '))}.` : ''}`
+    : `Votre liste « Dépense mensuelle » contient ${telecom.length} contrat${telecom.length > 1 ? 's' : ''}
+       télécom, mais leur nom ne dit pas lequel est le mobile et lequel est la box
+       — ${ech(telecom.map(l => l.nom).join(', '))}. <b>Rien n'a été prérempli</b> : renseignez vous-même
+       les montants ci-dessous.`;
+  $('repris').hidden = false;
+}
+
+/* ---------- Le formulaire ---------- */
+function erreur(champ, message){
+  const e = $('e-' + champ);
+  if (!e) return;
+  e.textContent = message || '';
+  e.hidden = !message;
+}
+const radio = nom => { const c = document.querySelector(`input[name="${nom}"]:checked`); return c && c.value ? c.value : null; };
+
+function lireForme(){
+  ['prix','prix-box'].forEach(c => erreur(c));
+  let ok = true;
+
+  let prixActuel = null;
+  if ($('f-prix').value.trim()){
+    prixActuel = enCentimes($('f-prix').value);
+    if (prixActuel === null || prixActuel === 0){
+      erreur('prix', "Montant non compris. Exemples acceptés : 12, 12,99, 12.99. Vous pouvez aussi laisser vide."); ok = false;
+    }
+  }
+  let prixBox = null;
+  if ($('f-prix-box').value.trim()){
+    prixBox = enCentimes($('f-prix-box').value);
+    if (prixBox === null || prixBox === 0){
+      erreur('prix-box', "Montant non compris. Vous pouvez laisser vide si vous ne le connaissez pas."); ok = false;
+    }
+  }
+  if (!ok) return null;
+
+  const dn = $('f-donnees').value;
+  return {
+    prixActuel,
+    donneesNecessaires: dn ? Number(dn) : null,
+    besoinEtranger: radio('etranger') === 'oui' ? true : radio('etranger') === 'non' ? false : null,
+    aDejaUneBox: radio('box') === 'oui' ? true : radio('box') === 'non' ? false : null,
+    prixActuelBox: prixBox,
+    remiseBoxDejaActive: radio('remise') === 'oui' ? true : radio('remise') === 'non' ? false : null,
+  };
+}
+
+/* ---------- Le rendu d'une offre : prix et période, condition, action ----- */
+function offreHTML(r, situation){
+  const o = r.offre;
+  const promo = o.dureePromoMois && o.prixApres;
+  const periode = promo
+    ? `${euros(o.prix)} par mois pendant ${o.dureePromoMois} mois, puis ${euros(o.prixApres)}`
+    : `${euros(o.prix)} par mois`;
+
+  /* La condition la plus lourde d'abord — une seule, en clair. Le reste est
+     dans le dépliant : on ne fait pas lire quatre conditions avant un prix. */
+  const conditionCle = promo
+    ? `Le prix change au bout de ${o.dureePromoMois} mois. Le coût ci-dessus en tient compte.`
+    : o.nouveauxClientsSeulement
+      ? "Réservé à une nouvelle souscription : si vous êtes déjà client de cet opérateur, ce prix ne vous est pas acquis."
+      : o.engagement
+        ? "Avec engagement."
+        : "Sans engagement, d'après la page de l'opérateur.";
+
+  let ecart = '';
+  if (r.ecart12 === null){
+    ecart = `<span class="ecart inconnu">Écart inconnu — votre prix actuel n'est pas renseigné</span>`;
+  } else if (r.ecart12 > 0){
+    ecart = `<span class="ecart moins">${euros(r.ecart12)} de moins sur douze mois, hors frais de sortie</span>`;
+  } else {
+    ecart = `<span class="ecart plus">${euros(-r.ecart12)} de plus sur douze mois</span>`;
+  }
+
+  const etranger = situation.besoinEtranger === true
+    ? `<br><b>À l'étranger :</b> ${o.donneesEurope} Go inclus.` : '';
+
+  return `<article class="offre${r.ecart12 !== null && r.ecart12 > 0 ? ' gagnante' : ''}">
+    <div class="offre-tete">
+      <div class="offre-nom"><span class="op">${ech(o.operateur)}</span>${ech(o.nom)}</div>
+      <div class="offre-prix">
+        <span class="m">${ech(euros(r.cout12))}</span>
+        <span class="p">sur douze mois</span>
+      </div>
+    </div>
+    <p class="offre-cle"><b>${ech(periode)}</b> · ${o.donneesFr} Go en France.${etranger}</p>
+    <p class="offre-cle">${ech(conditionCle)}</p>
+    ${ecart}
+    <details>
+      <summary>Le détail, et ce qui n'est pas compté</summary>
+      <ul>
+        ${o.conditions.map(c => `<li>${ech(c)}</li>`).join('')}
+        <li>Frais de mise en service <b>non relevés</b> : le coût sur douze mois ne les comprend pas.</li>
+        <li>${o.donneesEurope} Go utilisables hors de France, d'après la page de l'opérateur.</li>
+      </ul>
+    </details>
+    <div class="offre-actions">
+      <a class="btn-secondary btn-petit" href="${ech(o.url)}" target="_blank" rel="noopener noreferrer"
+         style="text-decoration:none">Voir l'offre chez ${ech(o.operateur)}</a>
+      <span class="hors-site">autre site</span>
+      <span class="date-verif${r.perimee ? ' perimee' : ''}">${r.perimee
+        ? 'Vérifiée le ' + ech(dateFrCourt(o.verifiee)) + ' — trop ancienne, à revérifier sur la page'
+        : 'Prix lu sur la page officielle le ' + ech(dateFrCourt(o.verifiee))}</span>
+    </div>
+  </article>`;
+}
+
+function scenarioHTML(s){
+  const sc = s.scenario;
+  return `<article class="offre">
+    <div class="offre-tete">
+      <div class="offre-nom"><span class="op">${ech(sc.operateur)}</span>${ech(sc.nomMobile)} + ${ech(sc.nomBox)}</div>
+      <div class="offre-prix">
+        <span class="m">${ech(euros(s.nouveau12))}</span>
+        <span class="p">sur douze mois, les deux contrats</span>
+      </div>
+    </div>
+    <p class="offre-cle"><b>${ech(euros(sc.mobileAvecBox))} par mois pendant ${sc.dureeRemiseMois} mois,
+    puis ${ech(euros(sc.mobileApresRemise))}</b> pour le mobile, <b>${ech(euros(sc.prixBox))} par mois</b>
+    pour la box.</p>
+    <p class="offre-cle">${ech(sc.conditionRemise)} <b>Sans la box, le mobile revient à
+    ${ech(euros(sc.mobileSeul))} par mois.</b></p>
+
+    <div class="a-confirmer">
+      <h3>Économie à confirmer</h3>
+      <p style="font-size:.9rem; color:var(--ink-muted); margin-top:6px">Nous n'annonçons aucun gain
+      ici, et ce n'est pas une prudence de façade&nbsp;: il manque ${s.manque.length} élément${s.manque.length > 1 ? 's' : ''}
+      sans lesquels le calcul serait faux.</p>
+      <ul>${s.manque.map(m => `<li>Il manque ${ech(m)}.</li>`).join('')}</ul>
+      ${s.actuel12 !== null ? `<p style="font-size:.9rem; color:var(--ink-muted); margin-top:10px">
+        À titre indicatif seulement, et sans les frais ni l'éligibilité : vos deux contrats actuels
+        coûtent ${ech(euros(s.actuel12))} sur douze mois, contre ${ech(euros(s.nouveau12))} ici.
+        <b>Ce n'est pas une économie</b> tant que les points ci-dessus ne sont pas levés.</p>` : ''}
+    </div>
+
+    <div class="offre-actions">
+      <a class="btn-secondary btn-petit" href="${ech(sc.url)}" target="_blank" rel="noopener noreferrer"
+         style="text-decoration:none">Tester mon éligibilité chez ${ech(sc.operateur)}</a>
+      <span class="hors-site">autre site</span>
+      <span class="date-verif${s.perimee ? ' perimee' : ''}">${s.perimee
+        ? 'Vérifiée le ' + ech(dateFrCourt(sc.verifiee)) + ' — trop ancienne, à revérifier'
+        : 'Prix lus sur la page officielle le ' + ech(dateFrCourt(sc.verifiee))}</span>
+    </div>
+  </article>`;
+}
+
+/* ---------- Le résultat ---------- */
+$('forme-cm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const situation = lireForme();
+  if (!situation) return;
+
+  const res = comparerMobile(situation, AUJ);
+  $('intro-mobile').innerHTML = `Ces offres <b>ne dépendent d'aucune box</b> : leur prix est celui que
+    vous paierez sans en souscrire une. ${res.besoinApplique
+      ? `Seules celles d'au moins ${res.besoinApplique} Go sont montrées${res.nombreEcartees ? ` — ${res.nombreEcartees} écartée${res.nombreEcartees > 1 ? 's' : ''}` : ''}.`
+      : `Vous n'avez pas précisé votre besoin en données : toutes sont montrées.`}
+    ${res.prixActuelConnu ? '' : ' Votre prix actuel n\'étant pas renseigné, nous affichons des coûts, pas des écarts.'}`;
+
+  $('liste-mobile').innerHTML = res.retenues.length
+    ? res.retenues.map(r => offreHTML(r, situation)).join('')
+    : `<p class="aide">Aucune offre de ce petit ensemble n'atteint le volume demandé. C'est une limite
+       de notre liste, pas du marché.</p>`;
+
+  const sc = scenarioBoxMobile({
+    prixActuelMobile: situation.prixActuel,
+    prixActuelBox: situation.prixActuelBox,
+    aDejaUneBox: situation.aDejaUneBox,
+    remiseBoxDejaActive: situation.remiseBoxDejaActive,
+  }, null, AUJ);
+  $('liste-box').innerHTML = scenarioHTML(sc);
+
+  $('zone-resultat').hidden = false;
+  $('zone-resultat').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+reprendre();
+try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
+</script>
+</body>
+</html>
