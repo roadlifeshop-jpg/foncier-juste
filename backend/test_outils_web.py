@@ -353,6 +353,130 @@ SCRIPT_TESTS = r"""
   vrai("la fonction de prorata a bien été retirée",
        typeof rembourseableCentimes === 'undefined');
 
+  /* ---- Inventaire : anciennes données locales, sans migration -----------
+     La clé de stockage et le schéma sont inchangés. `normaliserLignes` ne
+     fait que rendre inoffensive une ligne abîmée ; elle ne réinterprète
+     jamais ce qui est lisible — en particulier une périodicité que le
+     formulaire rapide ne propose plus. */
+  const ancien = [
+    { id:'a1', nom:'Salle de sport', montant: 2990, periodicite:'trimestrielle', categorie:'sport',
+      echeance:null, engagementDebut:null, engagementMois:null, souscritEnLigne:false, recent:false },
+    { id:'a2', nom:'Hebdo', montant: 500, periodicite:'hebdomadaire' },
+  ];
+  const norm = normaliserLignes(ancien);
+  eq("ancienne ligne trimestrielle : périodicité préservée", norm[0].periodicite, 'trimestrielle');
+  eq("ancienne ligne hebdomadaire : périodicité préservée", norm[1].periodicite, 'hebdomadaire');
+  eq("anciennes lignes : le total ne bouge pas", totaux(norm).annuel, 2990 * 4 + 500 * 52);
+
+  eq("ligne sans montant : écartée", normaliserLignes([{ nom:'X' }]).length, 0);
+  eq("montant en texte : converti en centimes", normaliserLignes([{ nom:'X', montant:'12,99' }])[0].montant, 1299);
+  eq("périodicité inconnue : repli sur mensuelle", normaliserLignes([{ nom:'X', montant:100, periodicite:'lunaire' }])[0].periodicite, 'mensuelle');
+  eq("catégorie inconnue : effacée", normaliserLignes([{ nom:'X', montant:100, categorie:'crypto' }])[0].categorie, '');
+  eq("date impossible : écartée", normaliserLignes([{ nom:'X', montant:100, echeance:'2026-02-31' }])[0].echeance, null);
+  eq("nom absent : nom de repli", normaliserLignes([{ montant:100 }])[0].nom, 'Contrat sans nom');
+  const engBoiteux = normaliserLignes([{ nom:'X', montant:100, engagementDebut:'2026-01-01' }])[0];
+  eq("début d'engagement sans durée : les deux tombent", [engBoiteux.engagementDebut, engBoiteux.engagementMois], [null, null]);
+  vrai("identifiant impropre : remplacé par un identifiant sûr",
+       /^reprise-/.test(normaliserLignes([{ id:'x" onerror=1', nom:'X', montant:100 }])[0].id));
+  eq("identifiants dupliqués : rendus uniques",
+     new Set(normaliserLignes([{ id:'z', nom:'A', montant:100 }, { id:'z', nom:'B', montant:100 }]).map(l => l.id)).size, 2);
+  eq("indicateur « archive » préservé : il pèse sur le total",
+     totaux(normaliserLignes([{ id:'w', nom:'A', montant:100, archive:true }])).annuel, 0);
+
+  /* ---- Ce qui distingue une ligne d'inventaire d'une ligne vérifiable --- */
+  const socleAbo = { id:'b1', nom:'B', montant: 999, periodicite:'mensuelle', categorie:'' };
+  vrai("montant seul : contrat non approfondi", contratApprofondi(socleAbo) === false);
+  vrai("catégorie seule : contrat non approfondi (elle est préremplie, pas vérifiée)",
+       contratApprofondi(Object.assign({}, socleAbo, { categorie:'telecom' })) === false);
+  vrai("échéance renseignée : contrat approfondi",
+       contratApprofondi(Object.assign({}, socleAbo, { echeance:'2026-12-01' })) === true);
+  vrai("souscription en ligne : contrat approfondi",
+       contratApprofondi(Object.assign({}, socleAbo, { souscritEnLigne:true })) === true);
+
+  /* ---- Répartition : un tri, pas une recommandation --------------------- */
+  const rep = repartition([
+    { id:'p1', nom:'Petit', montant: 500,  periodicite:'mensuelle' },
+    { id:'p2', nom:'Gros',  montant: 5000, periodicite:'mensuelle' },
+  ]);
+  eq("répartition : coût annuel décroissant", rep.map(r => r.ligne.nom), ['Gros', 'Petit']);
+  eq("répartition : parts en pourcentage", rep.map(r => r.part), [91, 9]);
+
+  /* ---- Inventaire : le total est exact à 1, 5 et 10 contrats ------------ */
+  const inv = ls => resultat4Inventaire(ls, AUJ);
+  const un = [{ id:'u1', nom:'Netflix', montant: 1349, periodicite:'mensuelle', categorie:'streaming' }];
+  eq("un contrat : total annuel exact", inv(un).annuel, 16188);
+  eq("un contrat : mensuel exact", inv(un).mensuel, 1349);
+
+  const cinq = [
+    { id:'c1', nom:'A', montant:  999, periodicite:'mensuelle' },
+    { id:'c2', nom:'B', montant: 9900, periodicite:'annuelle' },
+    { id:'c3', nom:'C', montant: 2500, periodicite:'trimestrielle' },
+    { id:'c4', nom:'D', montant: 1000, periodicite:'mensuelle' },
+    { id:'c5', nom:'E', montant: 4999, periodicite:'annuelle' },
+  ];
+  eq("cinq contrats, rythmes mêlés : total annuel exact", inv(cinq).annuel, 48887);
+  eq("cinq contrats : mensuel calculé sur l'annuel, pas comme somme d'arrondis", inv(cinq).mensuel, 4074);
+  eq("cinq contrats : nombre exact", inv(cinq).nombre, 5);
+
+  const dix = Array.from({ length: 10 }, (_, k) => ({ id:'d' + k, nom:'Contrat ' + k, montant: 999, periodicite:'mensuelle' }));
+  eq("dix contrats : total annuel exact", inv(dix).annuel, 119880);
+  eq("dix contrats : mensuel exact", inv(dix).mensuel, 9990);
+  eq("suppression d'un contrat : le total suit exactement", inv(dix.slice(0, 9)).annuel, 107892);
+
+  /* ---- Inventaire : ce que le total n'est pas --------------------------- */
+  vrai("la case somme porte le total comme un fait",
+       inv(cinq).somme.certitude === 'fait' && inv(cinq).somme.montant === 48887);
+  vrai("le total n'est jamais présenté comme une économie",
+       /pas une économie/.test(inv(cinq).somme.pourquoi) && !/économie/i.test(inv(cinq).somme.texte));
+  vrai("le total n'est jamais présenté comme récupérable",
+       /pas une somme récupérable/.test(inv(cinq).somme.pourquoi));
+  vrai("la répartition est un constat arithmétique, sans invitation à résilier",
+       inv(cinq).constat.some(c => /^Répartition de vos dépenses récurrentes$/.test(c.titre)) &&
+       inv(cinq).constat.some(c => /constat arithmétique, pas une recommandation/.test(c.texte)));
+  vrai("les limites rappellent que le total n'est ni une économie ni une somme récupérable",
+       inv(cinq).limites.some(l => /pas une économie ni une somme récupérable/.test(l)));
+
+  /* ---- Inventaire : une seule prochaine action par contrat approfondi --- */
+  vrai("aucun contrat approfondi : une seule action, et elle est générique",
+       inv(cinq).action.length === 1 && /Vérifier ce contrat/.test(inv(cinq).action[0].titre));
+
+  const approfondi = cinq.concat([
+    { id:'c6', nom:'Mobile', montant: 2499, periodicite:'mensuelle', categorie:'telecom',
+      engagementDebut: reculeMois(AUJ, 6), engagementMois: 24 },
+    { id:'c7', nom:'Presse', montant: 9900, periodicite:'annuelle',
+      echeance: iso(new Date(AUJ.getFullYear(), AUJ.getMonth() + 2, 20)) },
+  ]);
+  eq("une seule prochaine action par contrat approfondi", inv(approfondi).action.length, 2);
+  vrai("chaque action nomme le contrat auquel elle se rapporte",
+       inv(approfondi).action.every(a => /^(Mobile|Presse) — /.test(a.titre)));
+  vrai("vérification télécom avec engagement : la règle est citée",
+       inv(approfondi).verification.some(v => v.regle === 'engagement-telecom'));
+  vrai("les contrats restés sommaires sont regroupés en une seule ligne",
+       inv(approfondi).verification.filter(v => /sans vérification possible/.test(v.titre)).length === 1);
+  vrai("le total ne change pas selon qu'un contrat est approfondi ou non",
+       inv(approfondi).annuel === 48887 + 2499 * 12 + 9900);
+
+  /* Contrat sans catégorie : la règle télécom est signalée, jamais appliquée
+     d'office — rien ne dit que ce contrat en relève. */
+  const sansCategorie = [{ id:'s1', nom:'Contrat X', montant: 2499, periodicite:'mensuelle', categorie:'',
+                           engagementDebut: reculeMois(AUJ, 6), engagementMois: 24 }];
+  vrai("contrat sans catégorie : la règle télécom est signalée, jamais appliquée",
+       inv(sansCategorie).verification.some(v => /règle particulière existe pour la téléphonie/i.test(v.titre)) &&
+       !inv(sansCategorie).verification.some(v => v.regle === 'engagement-telecom'));
+
+  /* ---- Choix rapides : des noms pour éviter de taper, rien d'autre ------ */
+  eq("choix rapides : huit entrées", CHOIX_RAPIDES.length, 8);
+  vrai("choix rapides : chaque catégorie existe dans CATEGORIES, ou est vide",
+       CHOIX_RAPIDES.every(c => c.categorie === '' || !!CATEGORIES[c.categorie]));
+  vrai("« Autre » ne préremplit aucune catégorie : le chemin sans catégorie reste praticable",
+       CHOIX_RAPIDES.some(c => c.cle === 'autre' && c.categorie === '' && c.exemples.length === 0));
+  vrai("suggestions : ordre alphabétique, sans mise en avant",
+       CHOIX_RAPIDES.every(c => JSON.stringify(c.exemples) ===
+         JSON.stringify(c.exemples.slice().sort((a, b) => a.localeCompare(b, 'fr')))));
+  vrai("suggestions : aucun prix, aucun lien",
+       CHOIX_RAPIDES.every(c => c.exemples.every(n =>
+         typeof n === 'string' && !/\d+[.,]\d|€|https?:/i.test(n))));
+
   /* ---- Registre : les règles aériennes sont datées et sourcées ---------- */
   vrai("règle des montants : source DGAC et source secondaire EUR-Lex",
        /aviation-civile\.gouv\.fr/.test(REGLES['vol-montants'].source.url) &&

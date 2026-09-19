@@ -417,9 +417,253 @@ function resultat4Abonnement(ligne, aujourdhui) {
 }
 
 
+/* ==========================================================================
+   INVENTAIRE RAPIDE — plusieurs contrats d'abord, vérification ensuite.
+   --------------------------------------------------------------------------
+   Rien de ce qui précède n'est modifié. Les fonctions ajoutées ici servent un
+   parcours inversé : on saisit une liste en deux champs par contrat, on voit
+   le total, et on n'ouvre les champs avancés que pour les contrats qu'on veut
+   vraiment vérifier.
+
+   Trois précautions gouvernent ce bloc :
+
+   1. AUCUN PRIX N'EST PRÉREMPLI, et aucune suggestion n'est un classement.
+      Les noms proposés servent à éviter de taper, rien d'autre : pas de lien,
+      pas de logo, pas de partenariat, ordre alphabétique, et la saisie libre
+      reste toujours immédiatement accessible.
+
+   2. UNE PÉRIODICITÉ EXISTANTE N'EST JAMAIS CONVERTIE EN SILENCE. Le
+      formulaire rapide ne propose que « par mois » et « par an », mais une
+      ligne déjà enregistrée en hebdomadaire, bimestrielle, trimestrielle ou
+      semestrielle garde sa périodicité, son affichage et son poids dans le
+      total tant que l'utilisateur ne la change pas lui-même.
+
+   3. LE TOTAL N'EST PAS UNE ÉCONOMIE. C'est une addition de ce qui a été
+      saisi. Le classement par coût décroissant est un constat arithmétique :
+      il ne désigne pas un contrat à résilier, puisque nous ignorons si l'un
+      d'eux peut l'être, à quelle date et à quel coût.
+   ========================================================================== */
+
+/* Les huit entrées du choix rapide. `categorie` renvoie vers CATEGORIES, qui
+   reste la seule nomenclature du fichier : c'est elle qui conditionne la règle
+   des engagements télécom de plus de douze mois. « Autre » ne préremplit
+   aucune catégorie — le chemin sans catégorie doit rester praticable, parce
+   qu'une branche de `pistes()` lui est consacrée.
+
+   Les exemples sont des noms courants, en ordre alphabétique, sans aucun prix.
+   Pour l'assurance, ce sont des types de contrat et non des assureurs : le
+   marché est trop fragmenté pour qu'une liste de noms rende service, et citer
+   quelques compagnies reviendrait à en distinguer certaines sans raison. */
+const CHOIX_RAPIDES = [
+  { cle:'video',     libelle:'Streaming vidéo',  categorie:'streaming',
+    exemples:['Apple TV+','Canal+','Crunchyroll','Disney+','Max','Netflix','Paramount+','Prime Video'] },
+  { cle:'musique',   libelle:'Musique',          categorie:'streaming',
+    exemples:['Amazon Music','Apple Music','Deezer','Spotify','YouTube Premium'] },
+  { cle:'mobile',    libelle:'Téléphone mobile', categorie:'telecom',
+    exemples:['Bouygues Telecom','Free Mobile','Orange','Prixtel','RED by SFR','SFR','Sosh'] },
+  { cle:'box',       libelle:'Box internet',     categorie:'telecom',
+    exemples:['Bouygues Telecom','Free','Orange','SFR'] },
+  { cle:'sport',     libelle:'Salle de sport',   categorie:'sport',
+    exemples:['Basic-Fit','Fitness Park','Keep Cool','L’Orange bleue','Neoness','On Air'] },
+  { cle:'logiciel',  libelle:'Logiciel ou cloud', categorie:'logiciel',
+    exemples:['Adobe Creative Cloud','Dropbox','Google One','iCloud+','Microsoft 365','Proton'] },
+  { cle:'assurance', libelle:'Assurance',        categorie:'assurance',
+    exemples:['Assurance auto','Assurance habitation','Assurance téléphone','Mutuelle santé','Protection juridique'] },
+  { cle:'autre',     libelle:'Autre',            categorie:'',
+    exemples:[] },
+];
+
+/* --------------------------------------------------------------------------
+   Normalisation défensive — aucune migration, aucun changement de schéma.
+   La clé de stockage et les noms de champs restent ceux de la version
+   précédente ; cette fonction se contente de rendre inoffensive une ligne
+   incomplète ou abîmée, sans jamais réinterpréter ce qui est lisible.
+   -------------------------------------------------------------------------- */
+
+/** Ligne brute issue du stockage -> ligne exploitable, ou null si elle ne
+ *  porte aucun montant utilisable (il n'y a alors rien à calculer ni à
+ *  afficher). `rang` ne sert qu'à fabriquer un identifiant de repli stable,
+ *  pour que la fonction reste pure et testable. */
+function normaliserLigne(brut, rang) {
+  if (!brut || typeof brut !== 'object') return null;
+
+  const montant = Number.isInteger(brut.montant) ? brut.montant : enCentimes(brut.montant);
+  if (montant === null || montant <= 0) return null;
+
+  // Une périodicité connue est conservée telle quelle, y compris les quatre
+  // que le formulaire rapide ne propose pas. Le repli sur « mensuelle » ne
+  // concerne qu'une valeur absente ou inconnue : il n'y a alors rien à
+  // préserver, et c'était déjà la valeur par défaut de la saisie.
+  const periodicite = PERIODICITES[brut.periodicite] ? brut.periodicite : 'mensuelle';
+  const categorie = CATEGORIES[brut.categorie] ? brut.categorie : '';
+
+  const dateValide = v => (typeof v === 'string' && versDate(v)) ? v : null;
+  const engagementDebut = dateValide(brut.engagementDebut);
+  const mois = Number(brut.engagementMois);
+  const dureeOk = Number.isFinite(mois) && mois > 0;
+
+  const nom = (typeof brut.nom === 'string' && brut.nom.trim()) ? brut.nom.trim() : 'Contrat sans nom';
+
+  return {
+    // L'identifiant sert de fragment d'attribut et de sélecteur dans la page :
+    // une valeur venue du stockage ne doit contenir que des caractères sûrs.
+    id: (typeof brut.id === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(brut.id)) ? brut.id : 'reprise-' + rang,
+    nom,
+    montant,
+    periodicite,
+    categorie,
+    echeance: dateValide(brut.echeance),
+    // Une date de début sans durée, ou l'inverse, ne dit rien : les deux
+    // tombent ensemble plutôt que d'alimenter `engagement()` à moitié.
+    engagementDebut: dureeOk ? engagementDebut : null,
+    engagementMois: (engagementDebut && dureeOk) ? Math.round(mois) : null,
+    souscritEnLigne: brut.souscritEnLigne === true,
+    recent: brut.recent === true,
+    // Deux indicateurs d'anciennes versions qui pèsent sur `totaux()` : les
+    // laisser tomber changerait un total déjà affiché à l'utilisateur.
+    archive: brut.archive === true,
+    aArreter: brut.aArreter === true,
+  };
+}
+
+/** Contenu brut du stockage -> liste saine, identifiants uniques. */
+function normaliserLignes(brut) {
+  if (!Array.isArray(brut)) return [];
+  const vus = new Set();
+  const out = [];
+  brut.forEach((l, i) => {
+    const n = normaliserLigne(l, i);
+    if (!n) return;
+    if (vus.has(n.id)) n.id = n.id + '-' + i;
+    vus.add(n.id);
+    out.push(n);
+  });
+  return out;
+}
+
+/** Un contrat est « approfondi » dès qu'un champ avancé a été renseigné :
+ *  c'est ce qui distingue une ligne d'inventaire d'une ligne vérifiable. La
+ *  catégorie seule ne compte pas — elle est préremplie par le choix rapide,
+ *  sans que l'utilisateur ait rien vérifié. */
+function contratApprofondi(ligne) {
+  if (!ligne) return false;
+  return !!(ligne.echeance || ligne.engagementDebut || ligne.souscritEnLigne === true || ligne.recent === true);
+}
+
+/** Classement par coût annuel décroissant. Constat arithmétique : à parts
+ *  égales, l'ordre alphabétique tranche, pour que l'affichage soit stable. */
+function repartition(lignes) {
+  const actives = (lignes || []).filter(l => l && !l.archive);
+  const total = actives.reduce((t, l) => t + annuelCentimes(l.montant, l.periodicite), 0);
+  return actives
+    .map(l => {
+      const annuel = annuelCentimes(l.montant, l.periodicite);
+      return { ligne: l, annuel, part: total ? Math.round(annuel * 100 / total) : 0 };
+    })
+    .sort((a, b) => b.annuel - a.annuel || a.ligne.nom.localeCompare(b.ligne.nom, 'fr'));
+}
+
+/* --------------------------------------------------------------------------
+   La synthèse de l'inventaire, dans la forme attendue par resultat4.js.
+   `resultat4.js` n'est pas modifié : il est partagé par les trois outils, et
+   le vocabulaire des degrés de certitude doit rester fixé à un seul endroit.
+   Le total annuel y entre avec la certitude « fait » — que le rendu commun
+   intitule déjà « Coût actuel », jamais « économie ».
+   -------------------------------------------------------------------------- */
+function resultat4Inventaire(lignes, aujourdhui) {
+  const auj = aujourdhui || new Date();
+  const actives = normaliserLignes(lignes);
+  const t = totaux(actives);
+  const ordre = repartition(actives);
+  const approfondis = ordre.map(o => o.ligne).filter(contratApprofondi);
+  const sommaires = ordre.map(o => o.ligne).filter(l => !contratApprofondi(l));
+
+  /* ---- 1. Votre situation : des faits, tirés de la saisie ---- */
+  const constat = [{
+    titre: `${t.nombre} contrat${t.nombre > 1 ? 's' : ''} — ${euros(t.annuel)} par an`,
+    texte: `Soit ${euros(t.mensuel)} par mois en moyenne. C'est une addition de ce que vous avez saisi, rien de plus : aucun montant n'est deviné, aucun relevé n'est lu.`,
+  }];
+
+  if (ordre.length > 1) {
+    constat.push({
+      titre: "Répartition de vos dépenses récurrentes",
+      texte: "Par coût annuel décroissant : "
+        + ordre.map(o => `${o.ligne.nom}, ${euros(o.annuel)} (${o.part} %)`).join(' · ')
+        + ". C'est un constat arithmétique, pas une recommandation : ce classement ne dit pas lequel arrêter, puisque nous ignorons si l'un d'eux peut l'être, à quelle date et à quel coût.",
+    });
+  }
+
+  const peuVisibles = ordre.filter(o => o.ligne.periodicite === 'annuelle' || o.ligne.periodicite === 'semestrielle');
+  if (peuVisibles.length) {
+    constat.push({
+      titre: `${peuVisibles.length} contrat${peuVisibles.length > 1 ? 's' : ''} peu visible${peuVisibles.length > 1 ? 's' : ''} sur vos relevés`,
+      texte: `${peuVisibles.map(o => o.ligne.nom).join(', ')} : ${peuVisibles.length > 1 ? 'ces contrats ne figurent pas' : 'ce contrat ne figure pas'} sur vos relevés la plupart des mois. Le mensuel affiché est une moyenne lissée, utile pour comparer, pas pour prévoir un prélèvement.`,
+    });
+  }
+
+  // Les faits ouverts par les contrats approfondis, préfixés du nom du
+  // contrat : sans le préfixe, une échéance ou un engagement flotterait sans
+  // qu'on sache à quel contrat il se rapporte.
+  approfondis.forEach(l => {
+    pistes(l, auj).filter(x => x.type === 'fait')
+      .forEach(x => constat.push({ titre: `${l.nom} — ${x.titre}`, texte: x.texte }));
+  });
+
+  /* ---- 2. Le coût total, et rien d'autre ---- */
+  const somme = {
+    montant: t.annuel,
+    texte: `${euros(t.annuel)} par an`,
+    certitude: 'fait',
+    pourquoi: `C'est le coût actuel de ${t.nombre > 1 ? 'ces ' + t.nombre + ' contrats' : 'ce contrat'}, obtenu en additionnant ce que vous avez saisi, soit ${euros(t.mensuel)} par mois en moyenne. Ce n'est pas une économie, et ce n'est pas une somme récupérable : pour parler d'économie, il faudrait savoir quels contrats vous pouvez résilier, à quelle date, à quel coût, et ce que vous paieriez à la place. Nous ne connaissons aucun de ces quatre éléments.`,
+  };
+
+  /* ---- 3. Une seule prochaine action par contrat approfondi ---- */
+  const action = [];
+  approfondis.forEach(l => {
+    const a = resultat4Abonnement(l, auj).action[0];
+    if (a) action.push({ titre: `${l.nom} — ${a.titre}`, texte: a.texte, gratuit: a.gratuit, regle: a.regle });
+  });
+  if (!action.length) {
+    action.push({
+      titre: "Ouvrez « Vérifier ce contrat » sur celui qui vous intéresse",
+      texte: "Votre inventaire donne déjà un fait utile : ce que vous payez par mois et par an. Pour aller plus loin, choisissez un contrat et renseignez trois informations — la date de prochaine échéance, la durée d'engagement s'il en existe une, et si vous avez souscrit en ligne. Elles figurent sur votre contrat, une facture, ou le courriel de souscription. Ce sont elles qui déterminent ce que vous pouvez faire.",
+      gratuit: true,
+    });
+  }
+
+  /* ---- 4. Ce qu'il reste à vérifier ---- */
+  const verification = [];
+  approfondis.forEach(l => {
+    resultat4Abonnement(l, auj).verification
+      .forEach(v => verification.push({ titre: `${l.nom} — ${v.titre}`, texte: v.texte, regle: v.regle }));
+  });
+  if (sommaires.length) {
+    verification.push({
+      titre: `${sommaires.length} contrat${sommaires.length > 1 ? 's' : ''} sans vérification possible en l'état`,
+      texte: `${sommaires.map(l => l.nom).join(', ')} : nous n'en connaissons que le montant. Aucune démarche ne peut être évaluée sans la date de prochaine échéance, la durée d'engagement s'il en existe une, et le mode de souscription. Le bouton « Vérifier ce contrat » ouvre ces champs, contrat par contrat.`,
+    });
+  }
+
+  /* ---- Les limites ---- */
+  const limites = [
+    "Le total est une addition de vos saisies, pas une économie ni une somme récupérable.",
+    "Nous ne lisons aucun de vos contrats : ni préavis, ni frais de résiliation, ni clause particulière ne nous sont connus.",
+    "Aucune des règles citées ne rend un contrat résiliable à elle seule. Elles pèsent sur le professionnel.",
+    "Nous n'affichons aucun montant remboursable au titre de l'article L215-1 : il dépend de cinq faits que seuls vos contrats et vos courriers peuvent établir.",
+    "Le mensuel affiché est une moyenne lissée. Un contrat payé une fois par an ne coûte rien onze mois sur douze.",
+  ];
+
+  return { constat, somme, verification, action, limites,
+           annuel: t.annuel, mensuel: t.mensuel, nombre: t.nombre,
+           repartition: ordre, approfondis: approfondis.length };
+}
+
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { PERIODICITES, CATEGORIES, enCentimes, euros, annuelCentimes, mensuelCentimes,
                      totaux, ajouterMois, ajouterJours, versDate, joursEntre, prochaineEcheance,
                      fenetreNonReconduction, engagement, pistes,
-                     resultat4Abonnement };
+                     resultat4Abonnement,
+                     CHOIX_RAPIDES, normaliserLigne, normaliserLignes, contratApprofondi,
+                     repartition, resultat4Inventaire };
 }

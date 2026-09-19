@@ -3,47 +3,105 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dépense mensuelle : ce qu'un contrat vous coûte</title>
-<meta name="description" content="Le coût annuel d'un contrat, puis une action concrète : ce qu'un arrêt économiserait, et le cas précis où un remboursement peut être réclamé.">
+<title>Dépense mensuelle : l'inventaire de vos contrats</title>
+<meta name="description" content="Listez vos dépenses récurrentes en deux champs par contrat, voyez le coût mensuel et annuel total, puis n'approfondissez que les contrats que vous voulez vérifier.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/abonnements.html">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
 <link rel="stylesheet" href="base.css">
 <style>
-/* Composants propres à cet outil.
-   Les règles de l'ancienne mise en page à deux colonnes (.deux-colonnes,
-   .colonne-cote, .totaux, .hypothese, .piste, .vide) ont été retirées avec
-   elle : le parcours traite maintenant un contrat à la fois, et le résultat
-   est rendu par la charpente commune aux trois outils (.r4 dans base.css).
-   Vérifié : aucune de ces classes n'apparaît plus dans cette page. */
+/* Composants propres à cet outil. Rien n'est ajouté à base.css : cette
+   feuille sert les trois outils, et une règle écrite ici ne peut pas déplacer
+   un pixel ailleurs.
+
+   Le parcours a changé de priorité : l'inventaire d'abord — deux champs par
+   contrat — puis la vérification, contrat par contrat, à la demande. Les neuf
+   champs que la page imposait avant le premier résultat vivent maintenant
+   derrière « Vérifier ce contrat ». */
 
 .forme{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:22px 24px;}
-.forme-grille{display:grid; gap:0 18px; grid-template-columns:1fr;}
-@media(min-width:640px){ .forme-grille{grid-template-columns:1fr 1fr;} .forme-grille .plein{grid-column:1 / -1;} }
 @media(max-width:560px){ .forme{padding:18px;} }
-.cases-fines{display:grid; gap:10px; margin-top:8px;}
-.cases-fines label{display:flex; gap:10px; align-items:flex-start; font-size:.92rem; cursor:pointer;}
-.cases-fines input{margin-top:3px; width:18px; height:18px; accent-color:var(--accent); flex-shrink:0;}
-.cases-fines .d{display:block; color:var(--ink-muted); font-size:.85rem;}
 
-/* Rappel du total, sous le résultat du contrat en cours. Volontairement
-   secondaire : c'est une addition, pas une économie. */
+/* --- Choix rapide : la catégorie d'abord, le nom ensuite ------------------
+   En flex plutôt qu'en grille : à 320 px, des boutons dimensionnés par leur
+   contenu se replient sans jamais créer de débordement horizontal. */
+.choix-rapides{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+.puce{
+  font:inherit; font-size:.9rem; font-weight:500; cursor:pointer;
+  background:var(--surface); color:var(--ink); border:1px solid var(--line-strong);
+  border-radius:var(--r); padding:10px 14px; min-height:44px;
+  display:inline-flex; align-items:center; text-align:left;
+}
+.puce:hover{border-color:var(--ink-faint);}
+.puce[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); font-weight:600;}
+.puce:focus-visible{outline:none; box-shadow:var(--ring);}
+
+.zone-suggestions{margin-top:16px; padding-top:14px; border-top:1px solid var(--line);}
+.suggestions{display:flex; flex-wrap:wrap; gap:7px; margin-top:8px;}
+.sugg{
+  font:inherit; font-size:.88rem; cursor:pointer;
+  background:var(--surface-2); color:var(--ink); border:1px solid var(--line);
+  border-radius:var(--r); padding:9px 12px; min-height:40px;
+}
+.sugg:hover{border-color:var(--ink-faint);}
+.sugg:focus-visible{outline:none; box-shadow:var(--ring);}
+.sugg.libre{background:transparent; border-style:dashed;}
+.note-sugg{font-size:.8rem; color:var(--ink-faint); margin-top:9px;}
+
+/* --- Mini-formulaire : contrat, montant, mensuel ou annuel --------------- */
+.rapide-grille{display:grid; gap:0 18px; grid-template-columns:1fr;}
+@media(min-width:620px){ .rapide-grille{grid-template-columns:1.4fr 1fr;} }
+
+.bascule{display:flex; gap:8px; margin-top:7px;}
+.bascule label{
+  flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+  min-height:46px; padding:8px 10px; cursor:pointer; font-size:.94rem;
+  background:var(--surface); border:1px solid var(--line-strong); border-radius:var(--r);
+}
+.bascule input{width:18px; height:18px; accent-color:var(--accent); flex-shrink:0;}
+.bascule label:has(input:checked){background:var(--accent-soft); border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); font-weight:600;}
+.bascule label:has(input:focus-visible){box-shadow:var(--ring);}
+fieldset.sans-cadre{border:0; padding:0; margin:0;}
+
+/* --- Bande de totaux : toujours visible, recalculée sans clic ------------ */
 .totaux-bande{
   background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
   padding:18px 20px; margin-top:14px;
 }
 .totaux-bande .val{font-size:1.7rem; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.026em;}
+@media(max-width:360px){ .totaux-bande .val{font-size:1.48rem;} }
 .totaux-bande .unite-txt{font-size:.9rem; color:var(--ink-muted); margin-left:9px;}
 .totaux-bande .second{margin-top:5px; font-size:.93rem; color:var(--ink-muted); font-variant-numeric:tabular-nums;}
 
-.ligne-abo{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:18px 20px; margin-top:14px;}
-.abo-tete{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap;}
-.abo-nom{font-size:1.06rem; font-weight:600; letter-spacing:-.01em;}
-.abo-cat{display:block; font-size:.78rem; color:var(--ink-faint); margin-top:2px; letter-spacing:.04em; text-transform:uppercase;}
-.abo-cout{text-align:right; font-variant-numeric:tabular-nums;}
-.abo-cout .m{font-size:1.16rem; font-weight:700;}
-.abo-cout .a{display:block; font-size:.85rem; color:var(--ink-muted);}
-.abo-actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; padding-top:13px; border-top:1px solid var(--line);}
+/* --- Une ligne de l'inventaire ------------------------------------------ */
+.ligne-abo{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:16px 18px; margin-top:12px;}
+.abo-tete{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.abo-ident{min-width:0; flex:1 1 55%;}
+.abo-nom{font-size:1.04rem; font-weight:600; letter-spacing:-.01em; overflow-wrap:anywhere;}
+.abo-cat{display:block; font-size:.82rem; color:var(--ink-muted); margin-top:3px;}
+.abo-cout{text-align:right; font-variant-numeric:tabular-nums; flex:0 0 auto;}
+.abo-cout .m{font-size:1.1rem; font-weight:700;}
+.abo-cout .a{display:block; font-size:.82rem; color:var(--ink-muted);}
+.abo-actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; padding-top:11px; border-top:1px solid var(--line);}
+.marque-verif{display:inline-block; font-size:.7rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-line);
+  border-radius:99px; padding:2px 8px; margin-top:6px;}
+
+/* --- Le panneau d'un contrat : révélé à la demande, pour lui seul -------- */
+.abo-panneau{margin-top:14px; padding-top:14px; border-top:1px solid var(--line);}
+.abo-panneau[data-mode="edit"] .pan-avance{display:none;}
+.pan-bloc{border:0; padding:0; margin:0 0 4px;}
+.pan-bloc + .pan-bloc{margin-top:18px; padding-top:16px; border-top:1px dashed var(--line);}
+.pan-grille{display:grid; gap:0 18px; grid-template-columns:1fr;}
+@media(min-width:620px){ .pan-grille{grid-template-columns:1fr 1fr;} .pan-grille .plein{grid-column:1 / -1;} }
+.cases-fines{display:grid; gap:10px; margin-top:16px;}
+.cases-fines label{display:flex; gap:10px; align-items:flex-start; font-size:.92rem; cursor:pointer;}
+.cases-fines input{margin-top:3px; width:18px; height:18px; accent-color:var(--accent); flex-shrink:0;}
+.cases-fines .d{display:block; color:var(--ink-muted); font-size:.85rem;}
+.pan-pistes{margin-top:16px; font-size:.9rem;}
+.pan-pistes ul{margin:7px 0 0; padding-left:19px; color:var(--ink-muted);}
+.pan-pistes li{margin-top:5px;}
+.pan-fin{display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;}
 </style>
 <script src="regles.js"></script>
 <script src="abonnements.js"></script>
@@ -66,123 +124,113 @@
 <main>
   <section class="hero shell">
     <div class="eyebrow">Outil secondaire — bêta · gratuit, sans inscription</div>
-    <h1>Ce que vos abonnements coûtent réellement</h1>
+    <h1>Ce que tous vos contrats vous coûtent</h1>
     <p class="lede">
-      Vous les saisissez à la main&nbsp;; l'outil calcule le coût par mois et par an, paiements annuels
-      compris, et indique les vérifications utiles avant de résilier.
+      Deux champs par contrat&nbsp;: son nom et son montant. Le total par mois et par an s'affiche au fur
+      et à mesure, <b>puis vous n'approfondissez que les contrats que vous voulez vérifier</b>.
     </p>
     <div class="prerequis">
       <h2>Avant de commencer</h2>
       <ul>
-        <li><span class="cle">Combien de temps</span><b>Trois champs</b> par abonnement — nom, montant,
-        périodicité. Une minute pour le premier.</li>
-        <li><span class="cle">À avoir sous la main</span><b>Échéance et engagement</b>, si vous les
-        connaissez&nbsp;: facultatifs, mais ce sont eux qui ouvrent les vérifications utiles.</li>
+        <li><span class="cle">Combien de temps</span><b>Deux champs</b> par contrat — le nom et le
+        montant. Une liste de six ou sept contrats se saisit en moins de deux minutes.</li>
+        <li><span class="cle">À avoir sous la main</span><b>Rien pour l'inventaire.</b> Les dates
+        d'échéance et d'engagement ne sont demandées que si vous ouvrez « Vérifier ce contrat »&nbsp;:
+        ce sont elles qui ouvrent les démarches possibles.</li>
         <li class="rien"><span class="cle">Inutile de chercher</span>Aucun relevé bancaire, aucune connexion
         à votre banque. <b>La liste reste sur cet appareil.</b></li>
       </ul>
-      <p class="sans"><b>Cet outil est en bêta&nbsp;:</b> il calcule aujourd'hui le coût d'un contrat et
-      indique la vérification à mener. Il ne compare aucune offre et ne chiffre aucune économie — cela
-      demanderait des prix à jour et datés, une méthode de classement publique, et la transparence sur
-      tout lien commercial. Rien de cela n'existe encore.<br><br>
+      <p class="sans"><b>Cet outil est en bêta&nbsp;:</b> il additionne ce que vous payez et indique les
+      vérifications à mener. Il ne compare aucune offre et ne chiffre aucune économie — cela demanderait
+      des prix à jour et datés, une méthode de classement publique, et la transparence sur tout lien
+      commercial. Rien de cela n'existe encore.<br><br>
       <b>Nous ne pouvons pas dire qu'un contrat donné est résiliable</b> — cela dépend
       de ses conditions, que nous ne lisons pas.
       <a href="#limites-outil">Ce que cela signifie exactement</a>.</p>
     </div>
   </section>
 
+  <!-- ====================== 1. INVENTAIRE RAPIDE ====================== -->
   <section class="shell-lire" id="saisie">
     <div class="forme">
-      <h2 id="forme-titre" style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Un contrat à la fois</h2>
-      <p class="aide">Seuls le nom, le montant et la périodicité sont nécessaires. Les autres champs
-      ouvrent des vérifications supplémentaires&nbsp;: sans eux, l'outil se contente de calculer le coût.</p>
-      <form id="forme-abo" novalidate>
-        <div class="forme-grille">
+      <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Ajoutez vos contrats</h2>
+      <p class="aide">Le type sert à préremplir le nom et à situer le contrat&nbsp;; il n'est pas
+      obligatoire. Vous pouvez aussi écrire directement dans le champ « Contrat ».</p>
+
+      <div class="choix-rapides" id="choix-rapides" role="group" aria-label="Type de contrat"></div>
+
+      <div class="zone-suggestions" id="zone-suggestions" hidden>
+        <p class="aide" id="suggestions-titre" style="margin-top:0"></p>
+        <div class="suggestions" id="suggestions"></div>
+        <p class="note-sugg">Exemples courants, sans partenariat ni recommandation. Aucun prix n'est
+        prérempli&nbsp;: seul le nom l'est.</p>
+      </div>
+
+      <form id="forme-rapide" novalidate style="margin-top:18px">
+        <div class="rapide-grille">
           <div class="champ">
-            <label for="f-nom">Nom du contrat</label>
-            <input type="text" id="f-nom" placeholder="ex : forfait mobile, salle de sport" autocomplete="off">
+            <label for="f-nom">Contrat</label>
+            <input type="text" id="f-nom" placeholder="ex : forfait mobile" autocomplete="off">
             <p class="erreur-champ" id="e-nom" hidden></p>
           </div>
           <div class="champ">
             <label for="f-montant">Montant payé</label>
-            <div class="unite"><input type="text" id="f-montant" inputmode="decimal" placeholder="ex : 29,90"></div>
+            <div class="unite" data-unite="€"><input type="text" id="f-montant" inputmode="decimal" placeholder="ex : 29,90"></div>
             <p class="erreur-champ" id="e-montant" hidden></p>
           </div>
-          <div class="champ">
-            <label for="f-periodicite">Payé</label>
-            <select id="f-periodicite"></select>
-            <div class="aide" id="aide-periodicite"></div>
-          </div>
-          <div class="champ">
-            <label for="f-categorie">Catégorie <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
-            <select id="f-categorie"></select>
-            <div class="aide">Utile surtout pour la téléphonie et l'internet&nbsp;: une règle
-            particulière s'y applique aux engagements de plus de douze mois.</div>
-          </div>
-          <div class="champ">
-            <label for="f-echeance">Prochaine échéance <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
-            <input type="date" id="f-echeance">
-            <p class="aide date-lue" id="f-echeance-lue" hidden></p>
-            <p class="aide">Fin de la période en cours. C'est elle qui situe la fenêtre pendant laquelle
-            l'information sur la reconduction doit vous parvenir — et donc le remboursement possible.</p>
-            <p class="erreur-champ" id="e-echeance" hidden></p>
-          </div>
-          <div class="champ">
-            <label for="f-eng-debut">Début de l'engagement <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
-            <input type="date" id="f-eng-debut">
-            <p class="aide date-lue" id="f-eng-debut-lue" hidden></p>
-            <div style="margin-top:9px">
-              <label for="f-eng-mois" style="font-size:.9rem">Durée de l'engagement, en mois</label>
-              <input type="number" id="f-eng-mois" min="1" max="120" step="1" inputmode="numeric" placeholder="ex : 24">
-            </div>
-            <p class="erreur-champ" id="e-eng" hidden></p>
-          </div>
-          <div class="champ plein">
-            <div class="cases-fines">
-              <label><input type="checkbox" id="f-en-ligne"><span>J'ai souscrit ce contrat <b>en ligne</b><span class="d">Le professionnel doit alors proposer une résiliation en ligne, gratuite.</span></span></label>
-              <label><input type="checkbox" id="f-recent"><span>J'ai souscrit <b>il y a moins de quatorze jours</b><span class="d">Le droit de rétractation peut encore être ouvert.</span></span></label>
-            </div>
-          </div>
         </div>
+        <fieldset class="champ sans-cadre">
+          <legend class="lab">Payé</legend>
+          <div class="bascule">
+            <label><input type="radio" name="perio-rapide" value="mensuelle" checked><span>Par mois</span></label>
+            <label><input type="radio" name="perio-rapide" value="annuelle"><span>Par an</span></label>
+          </div>
+          <p class="aide">Les autres rythmes — semaine, deux mois, trimestre, semestre — sont
+          disponibles dans « Vérifier ce contrat », après l'ajout.</p>
+        </fieldset>
         <div class="cta-row">
-          <button type="submit" class="btn-primary" id="f-valider">Voir ce que ce contrat coûte</button>
-          <button type="button" class="btn-secondary" id="f-annuler" hidden>Annuler la modification</button>
+          <button type="submit" class="btn-primary" id="f-ajouter">Ajouter à ma liste</button>
         </div>
       </form>
     </div>
+    <p class="sr" role="status" aria-live="polite" id="annonce"></p>
   </section>
 
-  <section class="shell" id="zone-resultat" hidden aria-live="polite">
-    <div class="r4" id="abo-r4"></div>
-
-    <!-- Emplacement réservé. Aucune offre n'y est affichée, et ce n'est pas un
-         oubli : comparer suppose des prix à jour, une méthode publiable et une
-         indication des liens commerciaux. Nous n'avons ni l'un ni l'autre. -->
-    <div class="shell-lire" style="padding-inline:0">
-      <div class="emplacement">
-        <h3>Comparer des fournisseurs&nbsp;: emplacement réservé</h3>
-        <p><b>Aucune offre n'est affichée ici, et ce n'est pas un oubli.</b> Un comparateur suppose des
-        prix vérifiés à une date connue, une méthode de classement publiable, et la mention de tout lien
-        commercial avec les fournisseurs cités. Nous n'avons aujourd'hui aucun des trois.</p>
-        <p>Afficher un prix concurrent que nous ne pourrions ni tenir à jour ni justifier reviendrait à
-        vous faire changer de contrat sur une information périmée. Cet espace attend une source de prix
-        officielle ou contractuelle&nbsp;; d'ici là, il reste vide.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="shell-lire" id="zone-liste" hidden>
-    <h2 style="font-size:1.1rem; font-family:'Archivo',sans-serif; font-weight:600">Contrats déjà examinés
+  <!-- ================= 2. LA LISTE ET LE TOTAL EN DIRECT ================= -->
+  <section class="shell-lire" id="zone-liste" hidden style="margin-top:34px">
+    <h2 style="font-size:1.1rem; font-family:'Archivo',sans-serif; font-weight:600">Ma liste
     <span class="surtitre" id="compte-lignes"></span></h2>
-    <p class="aide">Conservés <b>dans ce navigateur, sur cet appareil</b>, jusqu'à leur effacement&nbsp;:
-    ils vous attendront à votre prochaine visite. <b>Rien n'est sauvegardé sur nos serveurs</b> — nous
+    <p class="aide">Conservée <b>dans ce navigateur, sur cet appareil</b>, jusqu'à son effacement&nbsp;:
+    elle vous attendra à votre prochaine visite. <b>Rien n'est sauvegardé sur nos serveurs</b> — nous
     n'en avons aucune copie.</p>
-    <div class="totaux-ligne" id="totaux-ligne"></div>
+    <div id="totaux-ligne"></div>
     <div id="liste"></div>
     <div class="cta-row">
       <button class="btn-secondary btn-petit" id="tout-effacer">Tout effacer</button>
     </div>
     <p class="erreur-champ" id="stockage-erreur" hidden></p>
+  </section>
+
+  <!-- ====================== 4. LA SYNTHÈSE ====================== -->
+  <section class="shell" id="zone-resultat" hidden style="margin-top:34px">
+    <div class="r4" id="abo-r4"></div>
+  </section>
+
+  <!-- Emplacement réservé. Aucune offre n'y est affichée, et ce n'est pas un
+       oubli : comparer suppose des prix à jour, une méthode publiable et une
+       indication des liens commerciaux. Nous n'avons aucun des trois. -->
+  <section class="shell-lire" style="margin-top:34px">
+    <div class="emplacement">
+      <h3>Comparer des fournisseurs&nbsp;: emplacement réservé</h3>
+      <p><b>Aucune offre n'est affichée ici, et ce n'est pas un oubli.</b> Un comparateur suppose des
+      prix vérifiés à une date connue, une méthode de classement publiable, et la mention de tout lien
+      commercial avec les fournisseurs cités. Nous n'avons aujourd'hui aucun des trois.</p>
+      <p>Les noms proposés à la saisie ne sont pas un comparateur&nbsp;: ils vous évitent de taper, ne
+      portent aucun prix, aucun lien et aucun classement. Afficher un prix concurrent que nous ne
+      pourrions ni tenir à jour ni justifier reviendrait à vous faire changer de contrat sur une
+      information périmée. Cet espace attend une source de prix officielle ou contractuelle&nbsp;; d'ici
+      là, il reste vide.</p>
+    </div>
   </section>
 
   <section class="band pale" id="limites-outil" style="margin-top:44px">
@@ -196,11 +244,11 @@
       conditions — durée d'engagement, préavis, clauses particulières — que nous ne lisons pas. Les
       règles citées pèsent sur le professionnel&nbsp;; aucune ne rend un contrat résiliable à elle
       seule.</p>
-      <p><b>Il ne calcule aucune économie.</b> Le total annuel est un fait, tiré de votre saisie.
-      L'« hypothèse d'arrêt » suppose que les abonnements marqués soient effectivement arrêtés&nbsp;:
-      un engagement en cours, un préavis ou des frais de résiliation peuvent la réduire, voire l'annuler
-      pour l'année en cours.</p>
-      <p><b>Le mensuel affiché est une moyenne lissée.</b> Un abonnement payé une fois par an ne coûte
+      <p><b>Il ne calcule aucune économie.</b> Le total est un fait, tiré de votre saisie. Le classement
+      par coût décroissant est une addition triée&nbsp;: il ne désigne pas un contrat à arrêter, puisque
+      nous ignorons si l'un d'eux peut l'être, à quelle date et à quel coût, et ce que vous paieriez à
+      la place.</p>
+      <p><b>Le mensuel affiché est une moyenne lissée.</b> Un contrat payé une fois par an ne coûte
       rien onze mois sur douze&nbsp;; le chiffre sert à comparer, pas à prévoir un prélèvement.</p>
     </div>
   </section>
@@ -241,69 +289,83 @@
 
 <script>
 const $ = id => document.getElementById(id);
-const CLE = 'dj_abonnements_v1';
+const CLE = 'dj_abonnements_v1';           /* inchangée : aucune migration, aucun v2 */
 const AUJ = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+const ech = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
 let lignes = [];
-let enEdition = null;
+let choixCourant = null;
+const panneauxOuverts = new Map();         /* id -> 'edit' | 'verif' */
 
 /* ---------- Stockage : le navigateur peut le refuser. Aucun chemin ne doit
-   casser pour autant. ---------------------------------------------------- */
+   casser pour autant. Le schéma et les noms de champs sont ceux de la version
+   précédente ; `normaliserLignes` ne fait que rendre inoffensive une ligne
+   incomplète, sans réinterpréter ce qui est lisible. ---------------------- */
+function signalerStockage(message){
+  $('stockage-erreur').textContent = message;
+  $('stockage-erreur').hidden = false;
+}
 function charger(){
   try {
     const brut = localStorage.getItem(CLE);
-    lignes = brut ? JSON.parse(brut) : [];
-    if (!Array.isArray(lignes)) lignes = [];
+    lignes = normaliserLignes(brut ? JSON.parse(brut) : []);
   } catch (_) {
     lignes = [];
-    $('stockage-erreur').textContent = "Votre navigateur refuse l'enregistrement local : le calcul fonctionne, mais la liste sera perdue en fermant l'onglet.";
-    $('stockage-erreur').hidden = false;
+    signalerStockage("Votre navigateur refuse l'enregistrement local : le calcul fonctionne, mais la liste sera perdue en fermant l'onglet.");
   }
 }
 function sauver(){
   try { localStorage.setItem(CLE, JSON.stringify(lignes)); }
-  catch (_) {
-    $('stockage-erreur').textContent = "Enregistrement impossible sur cet appareil. Le calcul reste utilisable jusqu'à la fermeture de l'onglet.";
-    $('stockage-erreur').hidden = false;
-  }
+  catch (_) { signalerStockage("Enregistrement impossible sur cet appareil. Le calcul reste utilisable jusqu'à la fermeture de l'onglet."); }
 }
-
-/* ---------- Listes déroulantes ---------- */
-Object.entries(PERIODICITES).forEach(([k, p]) => {
-  const o = document.createElement('option'); o.value = k;
-  o.textContent = p.nom.replace(/^par /, 'Par ').replace(/^tous/, 'Tous');
-  $('f-periodicite').appendChild(o);
-});
-$('f-periodicite').value = 'mensuelle';
-
-/* Option neutre, et AUCUNE présélection : la catégorie conditionne la règle
-   des engagements de plus de douze mois en téléphonie (voir abonnements.js).
-   Imposer « streaming » par défaut faisait disparaître cette règle en silence
-   pour un forfait mobile. */
-{
-  const neutre = document.createElement('option');
-  neutre.value = ''; neutre.textContent = '— à préciser';
-  $('f-categorie').appendChild(neutre);
-}
-Object.entries(CATEGORIES).forEach(([k, nom]) => {
-  const o = document.createElement('option'); o.value = k; o.textContent = nom;
-  $('f-categorie').appendChild(o);
-});
-$('f-categorie').value = '';
-
-function majAidePeriodicite(){
-  const k = $('f-periodicite').value;
-  $('aide-periodicite').textContent = k === 'hebdomadaire'
-    ? "Le calcul annuel retient 52 semaines — une approximation, l'année en comptant 52,18."
-    : k === 'annuelle'
-      ? "Un paiement annuel est ramené au mois pour comparaison : c'est une moyenne, pas un prélèvement mensuel."
-      : `Montant payé ${PERIODICITES[k].nom}.`;
-}
-$('f-periodicite').addEventListener('change', majAidePeriodicite);
-majAidePeriodicite();
 
 $('regles-abo').innerHTML = ['resiliation-trois-clics', 'tacite-reconduction', 'engagement-telecom'].map(citer).join('');
 
-/* ---------- Formulaire ---------- */
+/* ====================== 1. LE CHOIX RAPIDE ======================
+   La catégorie d'abord, les noms ensuite. Les noms ne préremplissent que le
+   champ « Contrat » : aucun prix, aucun lien, aucun classement. « Autre » ne
+   pose aucune catégorie — le chemin sans catégorie doit rester praticable,
+   une branche de `pistes()` lui étant consacrée. */
+$('choix-rapides').innerHTML = CHOIX_RAPIDES.map(c =>
+  `<button type="button" class="puce" data-cle="${ech(c.cle)}" aria-pressed="false">${ech(c.libelle)}</button>`
+).join('');
+
+function choisirType(cle){
+  const c = CHOIX_RAPIDES.find(x => x.cle === cle) || null;
+  choixCourant = (choixCourant === cle) ? null : (c ? cle : null);
+  const actif = choixCourant ? CHOIX_RAPIDES.find(x => x.cle === choixCourant) : null;
+
+  $('choix-rapides').querySelectorAll('.puce').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.cle === choixCourant));
+  });
+
+  if (!actif || !actif.exemples.length){
+    $('zone-suggestions').hidden = true;
+    $('suggestions').innerHTML = '';
+    if (actif) $('f-nom').focus();
+    return;
+  }
+  $('suggestions-titre').textContent = `${actif.libelle} — pour éviter de taper :`;
+  $('suggestions').innerHTML = actif.exemples.map(n =>
+    `<button type="button" class="sugg" data-nom="${ech(n)}">${ech(n)}</button>`
+  ).join('') + `<button type="button" class="sugg libre" data-nom="">Autre / saisir le nom</button>`;
+  $('zone-suggestions').hidden = false;
+}
+
+$('choix-rapides').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-cle]');
+  if (b) choisirType(b.dataset.cle);
+});
+$('suggestions').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-nom]');
+  if (!b) return;
+  $('f-nom').value = b.dataset.nom || '';
+  erreur('nom');
+  $('f-nom').focus();
+  if (!b.dataset.nom) $('f-nom').select();
+});
+
+/* ---------- Le mini-formulaire ---------- */
 function erreur(champ, message){
   const e = $('e-' + champ);
   if (!e) return;
@@ -311,162 +373,399 @@ function erreur(champ, message){
   e.hidden = !message;
 }
 
-function lireForme(){
-  ['nom','montant','echeance','eng'].forEach(c => erreur(c));
+function lireFormeRapide(){
+  ['nom','montant'].forEach(c => erreur(c));
   let ok = true;
   const nom = $('f-nom').value.trim();
   if (!nom){ erreur('nom', "Donnez un nom, même approximatif : c'est ce qui vous permettra de retrouver ce contrat."); ok = false; }
   const montant = enCentimes($('f-montant').value);
   if (montant === null){ erreur('montant', "Indiquez un montant, en euros. Exemples acceptés : 12, 12,99, 12.99."); ok = false; }
   else if (montant === 0){ erreur('montant', "Un montant de zéro n'a rien à calculer."); ok = false; }
-  const echeance = $('f-echeance').value || null;
-  if (echeance && !versDate(echeance)){ erreur('echeance', "Cette date n'existe pas."); ok = false; }
-  const engDebut = $('f-eng-debut').value || null;
-  const engMois = $('f-eng-mois').value ? Number($('f-eng-mois').value) : null;
-  if (engDebut && !engMois){ erreur('eng', "Précisez la durée de l'engagement, en mois, pour que la date de début serve à quelque chose."); ok = false; }
-  if (engMois && !engDebut){ erreur('eng', "Précisez la date de début de l'engagement."); ok = false; }
-  if (engDebut && !versDate(engDebut)){ erreur('eng', "Cette date de début n'existe pas."); ok = false; }
   if (!ok) return null;
+
+  const type = choixCourant ? CHOIX_RAPIDES.find(x => x.cle === choixCourant) : null;
+  const perio = document.querySelector('input[name="perio-rapide"]:checked');
   return {
-    id: enEdition || ('a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)),
-    nom, montant, periodicite: $('f-periodicite').value, categorie: $('f-categorie').value,
-    echeance, engagementDebut: engDebut, engagementMois: engMois,
-    souscritEnLigne: $('f-en-ligne').checked, recent: $('f-recent').checked,
+    id: 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    nom, montant,
+    periodicite: perio ? perio.value : 'mensuelle',
+    categorie: type ? type.categorie : '',
+    echeance: null, engagementDebut: null, engagementMois: null,
+    souscritEnLigne: false, recent: false,
   };
 }
 
-function viderForme(){
-  ['f-nom','f-montant','f-echeance','f-eng-debut','f-eng-mois'].forEach(i => { $(i).value = ''; });
-  ['f-echeance-lue','f-eng-debut-lue'].forEach(i => { $(i).hidden = true; });
-  $('f-en-ligne').checked = false; $('f-recent').checked = false;
-  $('f-periodicite').value = 'mensuelle'; $('f-categorie').value = '';
-  majAidePeriodicite();
-  enEdition = null;
-  $('forme-titre').textContent = 'Un contrat à la fois';
-  $('f-valider').textContent = 'Voir ce que ce contrat coûte';
-  $('f-annuler').hidden = true;
-  ['nom','montant','echeance','eng'].forEach(c => erreur(c));
+let dejaTracke = false;
+$('forme-rapide').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const ligne = lireFormeRapide();
+  if (!ligne) return;
+  lignes.push(ligne);
+  sauver();
+
+  $('zone-liste').hidden = false;
+  $('liste').insertAdjacentHTML('beforeend', ligneHTML(ligne));
+  majTout();
+  annoncer(`« ${ligne.nom} » ajouté. ${resume()}`);
+
+  /* Réinitialisation immédiate pour enchaîner. Le type est désélectionné lui
+     aussi, et ce n'est pas un détail de confort : le garder ferait hériter au
+     contrat suivant une catégorie que l'utilisateur n'a pas choisie. Or la
+     catégorie n'est pas décorative — c'est elle qui conditionne la règle des
+     engagements télécom de plus de douze mois dans `pistes()`. Un contrat
+     classé d'office serait exactement ce que le fichier de calcul refuse. */
+  $('f-nom').value = '';
+  $('f-montant').value = '';
+  if (choixCourant) choisirType(choixCourant);   /* la bascule désélectionne */
+  const parMois = document.querySelector('input[name="perio-rapide"][value="mensuelle"]');
+  if (parMois) parMois.checked = true;
+  ['nom','montant'].forEach(c => erreur(c));
+  $('f-nom').focus();
+
+  if (!dejaTracke){
+    dejaTracke = true;
+    try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'outil_utilise' })], { type: 'application/json' })); } catch (_) {}
+  }
+});
+
+function annoncer(texte){ $('annonce').textContent = texte; }
+function resume(){
+  const t = totaux(lignes);
+  return `${t.nombre} contrat${t.nombre > 1 ? 's' : ''}, ${euros(t.mensuel)} par mois en moyenne, ${euros(t.annuel)} par an.`;
 }
 
-$('forme-abo').addEventListener('submit', ev => {
-  ev.preventDefault();
-  const ligne = lireForme();
-  if (!ligne) return;
-  const i = lignes.findIndex(l => l.id === ligne.id);
-  if (i >= 0) lignes[i] = ligne; else lignes.push(ligne);
-  sauver();
-  afficherResultat(ligne);
-  viderForme();
-  rendreListe();
-  try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'outil_utilise' })], { type: 'application/json' })); } catch (_) {}
-});
-$('f-annuler').addEventListener('click', () => { viderForme(); });
+/* ====================== 2. LA LISTE ET LES TOTAUX ======================
+   Le total se recalcule à la frappe, sans clic. La liste entière n'est
+   reconstruite qu'au chargement et à l'effacement total : un ajout ajoute un
+   nœud, une suppression en retire un. C'est ce qui permet à un panneau ouvert
+   de le rester, et au champ en cours de saisie de garder le curseur. */
 
-/* ---------- Le résultat, dans les quatre cases communes aux trois outils --- */
-function afficherResultat(ligne){
-  const res = resultat4Abonnement(ligne, AUJ);
+function resumeLigne(l){
+  const p = PERIODICITES[l.periodicite];
+  const cat = l.categorie && CATEGORIES[l.categorie] ? ech(CATEGORIES[l.categorie]) + ' · ' : '';
+  return `${cat}${ech(euros(l.montant))} ${ech(p.nom)}`;
+}
+
+function ligneHTML(l){
+  return `<article class="ligne-abo" data-id="${ech(l.id)}">
+    <div class="abo-tete">
+      <div class="abo-ident">
+        <span class="abo-nom" data-champ-nom>${ech(l.nom)}</span>
+        <span class="abo-cat" data-champ-resume>${resumeLigne(l)}</span>
+        ${contratApprofondi(l) ? '<span class="marque-verif" data-marque>Vérification en cours</span>' : ''}
+      </div>
+      <div class="abo-cout">
+        <span class="m" data-champ-annuel>${ech(euros(annuelCentimes(l.montant, l.periodicite)))}</span>
+        <span class="a">par an</span>
+      </div>
+    </div>
+    <div class="abo-actions">
+      <button type="button" class="btn-secondary btn-petit" data-action="verifier" aria-expanded="false" aria-controls="p-${ech(l.id)}">Vérifier ce contrat</button>
+      <button type="button" class="btn-secondary btn-petit" data-action="modifier" aria-expanded="false" aria-controls="p-${ech(l.id)}">Modifier</button>
+      <button type="button" class="btn-secondary btn-petit" data-action="supprimer">Supprimer</button>
+    </div>
+    <div class="abo-panneau" id="p-${ech(l.id)}" data-mode="edit" hidden></div>
+  </article>`;
+}
+
+function rendreListe(){
+  $('zone-liste').hidden = !lignes.length;
+  $('liste').innerHTML = lignes.map(ligneHTML).join('');
+  panneauxOuverts.clear();
+  majTout();
+}
+
+function noeud(id){ return $('liste').querySelector(`article[data-id="${CSS.escape(id)}"]`); }
+
+function majLigne(id){
+  const l = lignes.find(x => x.id === id);
+  const art = noeud(id);
+  if (!l || !art) return;
+  art.querySelector('[data-champ-nom]').textContent = l.nom;
+  art.querySelector('[data-champ-resume]').innerHTML = resumeLigne(l);
+  art.querySelector('[data-champ-annuel]').textContent = euros(annuelCentimes(l.montant, l.periodicite));
+  const marque = art.querySelector('[data-marque]');
+  if (contratApprofondi(l) && !marque){
+    art.querySelector('.abo-ident').insertAdjacentHTML('beforeend', '<span class="marque-verif" data-marque>Vérification en cours</span>');
+  } else if (!contratApprofondi(l) && marque){
+    marque.remove();
+  }
+}
+
+function majTotaux(){
+  const t = totaux(lignes);
+  $('compte-lignes').textContent = t.nombre ? `— ${t.nombre} contrat${t.nombre > 1 ? 's' : ''}` : '';
+  if (!t.nombre){ $('totaux-ligne').innerHTML = ''; return; }
+  const peuVisibles = lignes.filter(l => l.periodicite === 'annuelle' || l.periodicite === 'semestrielle').length;
+  $('totaux-ligne').innerHTML = `<div class="totaux-bande">
+    <div><span class="val num">${ech(euros(t.mensuel))}</span><span class="unite-txt">par mois en moyenne</span></div>
+    <div class="second">${ech(euros(t.annuel))} par an, tous contrats confondus${peuVisibles ? ` · ${peuVisibles} contrat${peuVisibles > 1 ? 's' : ''} non prélevé${peuVisibles > 1 ? 's' : ''} chaque mois` : ''}</div>
+    <p class="aide" style="margin-top:8px">Une addition de ce que vous avez saisi. <b>Ce n'est pas une
+    économie</b> : rien n'est arrêté du seul fait d'être listé ici.</p>
+  </div>`;
+}
+
+/* ====================== 4. LA SYNTHÈSE ======================
+   Rendue par la charpente commune aux trois outils. `resultat4.js` n'est pas
+   modifié : le vocabulaire des degrés de certitude reste fixé à un seul
+   endroit, et le total y entre avec la certitude « fait ». */
+function majSynthese(){
+  if (!lignes.length){ $('zone-resultat').hidden = true; $('abo-r4').innerHTML = ''; return; }
+  const res = resultat4Inventaire(lignes, AUJ);
   res.autres = [{href:'vol-retarde.html',libelle:'Un vol retardé'},{href:'taxe-fonciere.html',libelle:'Ma taxe foncière'}];
   $('abo-r4').innerHTML = rendreResultat4(res);
   $('zone-resultat').hidden = false;
-  $('zone-resultat').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/* ---------- La liste : un rappel, plus le point d'entrée --------------- */
-const ech = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+function majTout(){ majTotaux(); majSynthese(); }
 
-function rendreListe(){
-  const t = totaux(lignes);
-  $('compte-lignes').textContent = t.nombre ? `— ${t.nombre} contrat${t.nombre > 1 ? 's' : ''}` : '';
-  $('zone-liste').hidden = !lignes.length;
-  if (!lignes.length){ $('liste').innerHTML = ''; $('totaux-ligne').innerHTML = ''; return; }
+/* ====================== 3. LE PANNEAU D'UN CONTRAT ======================
+   Construit à la première ouverture seulement : dix contrats ne créent pas
+   cent champs au chargement. « Modifier » n'ouvre que le contrat lui-même ;
+   « Vérifier ce contrat » ajoute les champs avancés, pour ce contrat seul. */
 
-  const annuels = lignes.filter(l => l.periodicite === 'annuelle' || l.periodicite === 'semestrielle').length;
-  $('totaux-ligne').innerHTML = `<div class="totaux-bande">
-    <div><span class="val num">${euros(t.annuel)}</span><span class="unite-txt">par an, tous contrats confondus</span></div>
-    <div class="second">${euros(t.mensuel)} par mois en moyenne${annuels ? ` · ${annuels} contrat${annuels > 1 ? 's' : ''} non prélevé${annuels > 1 ? 's' : ''} chaque mois` : ''}</div>
-    <p class="aide" style="margin-top:8px">Une addition de ce que vous avez saisi. Ce n'est pas une
-    économie : rien n'est arrêté du seul fait d'être listé ici.</p>
+function optionsPeriodicite(courante){
+  return Object.entries(PERIODICITES).map(([k, p]) =>
+    `<option value="${ech(k)}"${k === courante ? ' selected' : ''}>${ech(p.nom.replace(/^par /, 'Par ').replace(/^tous/, 'Tous'))}</option>`
+  ).join('');
+}
+function optionsCategorie(courante){
+  return `<option value=""${!courante ? ' selected' : ''}>— à préciser</option>`
+    + Object.entries(CATEGORIES).map(([k, nom]) =>
+        `<option value="${ech(k)}"${k === courante ? ' selected' : ''}>${ech(nom)}</option>`).join('');
+}
+
+function panneauHTML(l){
+  const i = ech(l.id);
+  return `
+  <fieldset class="pan-bloc">
+    <legend class="lab">Le contrat</legend>
+    <div class="pan-grille">
+      <div class="champ" style="margin-top:12px">
+        <label for="p-${i}-nom">Nom</label>
+        <input type="text" id="p-${i}-nom" data-ch="nom" value="${ech(l.nom)}" autocomplete="off">
+      </div>
+      <div class="champ" style="margin-top:12px">
+        <label for="p-${i}-montant">Montant payé</label>
+        <div class="unite" data-unite="€"><input type="text" id="p-${i}-montant" data-ch="montant" inputmode="decimal" value="${ech((l.montant / 100).toFixed(2).replace('.', ','))}"></div>
+        <p class="erreur-champ" data-err="montant" hidden></p>
+      </div>
+      <div class="champ" style="margin-top:12px">
+        <label for="p-${i}-perio">Payé</label>
+        <select id="p-${i}-perio" data-ch="periodicite">${optionsPeriodicite(l.periodicite)}</select>
+      </div>
+      <div class="champ" style="margin-top:12px">
+        <label for="p-${i}-cat">Catégorie <span style="font-weight:400;color:var(--ink-faint)">— facultatif</span></label>
+        <select id="p-${i}-cat" data-ch="categorie">${optionsCategorie(l.categorie)}</select>
+        <div class="aide">Utile surtout pour la téléphonie et l'internet&nbsp;: une règle particulière
+        s'y applique aux engagements de plus de douze mois. <b>« À préciser » reste un choix valable</b>
+        — nous n'appliquons aucune règle d'office.</div>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="pan-bloc pan-avance">
+    <legend class="lab">Pour aller plus loin — tout est facultatif</legend>
+    <p class="aide" style="margin-top:8px">Ces champs n'ont d'intérêt que si vous voulez vérifier ce
+    contrat précis. Sans eux, l'outil se contente d'en additionner le coût.</p>
+    <div class="pan-grille">
+      <div class="champ" style="margin-top:12px">
+        <label for="p-${i}-ech">Prochaine échéance</label>
+        <input type="date" id="p-${i}-ech" data-ch="echeance" value="${ech(l.echeance || '')}">
+        <p class="aide date-lue" data-lue="echeance" hidden></p>
+        <p class="aide">Fin de la période en cours. C'est elle qui situe la fenêtre pendant laquelle
+        l'information sur la reconduction doit vous parvenir.</p>
+        <p class="erreur-champ" data-err="echeance" hidden></p>
+      </div>
+      <div class="champ" style="margin-top:12px">
+        <label for="p-${i}-engd">Début de l'engagement</label>
+        <input type="date" id="p-${i}-engd" data-ch="engagementDebut" value="${ech(l.engagementDebut || '')}">
+        <p class="aide date-lue" data-lue="engagementDebut" hidden></p>
+        <div style="margin-top:9px">
+          <label for="p-${i}-engm" style="font-size:.9rem">Durée de l'engagement, en mois</label>
+          <input type="number" id="p-${i}-engm" data-ch="engagementMois" min="1" max="120" step="1" inputmode="numeric" placeholder="ex : 24" value="${ech(l.engagementMois || '')}">
+        </div>
+        <p class="erreur-champ" data-err="engagement" hidden></p>
+      </div>
+      <div class="champ plein" style="margin-top:12px">
+        <div class="cases-fines">
+          <label><input type="checkbox" data-ch="souscritEnLigne"${l.souscritEnLigne ? ' checked' : ''}><span>J'ai souscrit ce contrat <b>en ligne</b><span class="d">Le professionnel doit alors proposer une résiliation en ligne, gratuite.</span></span></label>
+          <label><input type="checkbox" data-ch="recent"${l.recent ? ' checked' : ''}><span>J'ai souscrit <b>il y a moins de quatorze jours</b><span class="d">Le droit de rétractation peut encore être ouvert.</span></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="pan-pistes" data-pistes></div>
+  </fieldset>
+
+  <div class="pan-fin">
+    <button type="button" class="btn-secondary btn-petit" data-action="fermer">Fermer</button>
+    <a class="btn-secondary btn-petit" href="#zone-resultat" style="text-decoration:none">Voir la synthèse</a>
   </div>`;
-
-  $('liste').innerHTML = lignes.map(l => {
-    const p = PERIODICITES[l.periodicite];
-    return `<article class="ligne-abo">
-      <div class="abo-tete">
-        <div>
-          <span class="abo-nom">${ech(l.nom)}</span>
-          <span class="abo-cat">${l.categorie && CATEGORIES[l.categorie] ? ech(CATEGORIES[l.categorie]) + ' · ' : ''}${ech(euros(l.montant))} ${ech(p.nom)}</span>
-        </div>
-        <div class="abo-cout">
-          <span class="m">${euros(annuelCentimes(l.montant, l.periodicite))}</span>
-          <span class="a">par an</span>
-        </div>
-      </div>
-      <div class="abo-actions">
-        <button class="btn-secondary btn-petit" data-action="revoir" data-id="${l.id}">Revoir le résultat</button>
-        <button class="btn-secondary btn-petit" data-action="editer" data-id="${l.id}">Modifier</button>
-        <button class="btn-secondary btn-petit" data-action="supprimer" data-id="${l.id}">Supprimer</button>
-      </div>
-    </article>`;
-  }).join('');
 }
 
-function editer(id){
+function majPistes(l, panneau){
+  const cible = panneau.querySelector('[data-pistes]');
+  if (!cible) return;
+  const ps = pistes(l, AUJ);
+  const ouvert = contratApprofondi(l);
+  cible.innerHTML = `<b>${ouvert ? 'Ce que vos réponses ouvrent' : 'Rien de renseigné pour l\'instant'}</b>
+    <ul>${ps.map(p => `<li>${ech(p.titre)}</li>`).join('')}</ul>
+    <p class="aide">Le détail, les textes applicables et la démarche à mener figurent dans la synthèse,
+    en bas de page.</p>`;
+}
+
+function ouvrirPanneau(id, mode){
   const l = lignes.find(x => x.id === id);
-  if (!l) return;
-  enEdition = id;
-  $('f-nom').value = l.nom;
-  $('f-montant').value = (l.montant / 100).toFixed(2).replace('.', ',');
-  $('f-periodicite').value = l.periodicite;
-  $('f-categorie').value = l.categorie || '';
-  $('f-echeance').value = l.echeance || '';
-  $('f-eng-debut').value = l.engagementDebut || '';
-  $('f-eng-mois').value = l.engagementMois || '';
-  $('f-en-ligne').checked = !!l.souscritEnLigne;
-  $('f-recent').checked = !!l.recent;
-  majAidePeriodicite();
-  relireDate('f-echeance', 'f-echeance-lue');
-  relireDate('f-eng-debut', 'f-eng-debut-lue');
-  $('forme-titre').textContent = 'Modifier « ' + l.nom + ' »';
-  $('f-valider').textContent = 'Revoir le résultat';
-  $('f-annuler').hidden = false;
-  $('saisie').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  $('f-nom').focus();
+  const art = noeud(id);
+  if (!l || !art) return;
+  const panneau = art.querySelector('.abo-panneau');
+
+  if (!panneauxOuverts.has(id)){
+    panneau.innerHTML = panneauHTML(l);
+    brancher(l, panneau);
+  }
+  // « Vérifier » élargit un panneau déjà ouvert en modification ; l'inverse ne
+  // referme pas les champs avancés déjà révélés.
+  const modeFinal = (mode === 'verif' || panneau.dataset.mode === 'verif') ? (mode === 'verif' ? 'verif' : panneau.dataset.mode) : 'edit';
+  panneau.dataset.mode = modeFinal;
+  panneau.hidden = false;
+  panneauxOuverts.set(id, modeFinal);
+  art.querySelectorAll('button[aria-controls]').forEach(b => b.setAttribute('aria-expanded', 'true'));
+  majPistes(l, panneau);
+
+  const premier = panneau.querySelector(modeFinal === 'verif' ? '[data-ch="echeance"]' : '[data-ch="nom"]');
+  if (premier) premier.focus({ preventScroll: true });
 }
 
+function fermerPanneau(id){
+  const art = noeud(id);
+  if (!art) return;
+  art.querySelector('.abo-panneau').hidden = true;
+  panneauxOuverts.delete(id);
+  art.querySelectorAll('button[aria-controls]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+  const b = art.querySelector('button[data-action="verifier"]');
+  if (b) b.focus();
+}
+
+function relireDate(champ, panneau){
+  const input = panneau.querySelector(`[data-ch="${champ}"]`);
+  const p = panneau.querySelector(`[data-lue="${champ}"]`);
+  if (!input || !p) return;
+  const d = versDate(input.value);
+  if (!d){ p.hidden = true; return; }
+  p.textContent = 'Date comprise : ' + d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) + '.';
+  p.hidden = false;
+}
+
+function errPan(panneau, cle, message){
+  const e = panneau.querySelector(`[data-err="${cle}"]`);
+  if (!e) return;
+  e.textContent = message || '';
+  e.hidden = !message;
+}
+
+/* Une saisie du panneau s'applique immédiatement au modèle, puis au stockage.
+   Une valeur inexploitable n'écrase jamais la précédente : elle affiche une
+   erreur et laisse la ligne intacte — ce qui garantit que le total reste
+   exact à tout instant. */
+function appliquer(l, panneau, cible){
+  const cle = cible.dataset.ch;
+  if (!cle) return;
+
+  if (cle === 'nom'){
+    const v = cible.value.trim();
+    if (v) l.nom = v;
+  } else if (cle === 'montant'){
+    const c = enCentimes(cible.value);
+    if (c === null || c === 0){
+      errPan(panneau, 'montant', "Montant non compris — l'ancien est conservé. Exemples acceptés : 12, 12,99, 12.99.");
+      return;
+    }
+    errPan(panneau, 'montant');
+    l.montant = c;
+  } else if (cle === 'periodicite'){
+    if (PERIODICITES[cible.value]) l.periodicite = cible.value;
+  } else if (cle === 'categorie'){
+    l.categorie = CATEGORIES[cible.value] ? cible.value : '';
+  } else if (cle === 'echeance'){
+    if (cible.value && !versDate(cible.value)){ errPan(panneau, 'echeance', "Cette date n'existe pas."); return; }
+    errPan(panneau, 'echeance');
+    l.echeance = cible.value || null;
+    relireDate('echeance', panneau);
+  } else if (cle === 'engagementDebut' || cle === 'engagementMois'){
+    const dInput = panneau.querySelector('[data-ch="engagementDebut"]');
+    const mInput = panneau.querySelector('[data-ch="engagementMois"]');
+    const d = dInput.value || null;
+    const m = mInput.value ? Number(mInput.value) : null;
+    if (d && !versDate(d)){ errPan(panneau, 'engagement', "Cette date de début n'existe pas."); return; }
+    if (d && !m){ errPan(panneau, 'engagement', "Précisez la durée de l'engagement, en mois, pour que la date de début serve à quelque chose."); l.engagementDebut = null; l.engagementMois = null; }
+    else if (m && !d){ errPan(panneau, 'engagement', "Précisez la date de début de l'engagement."); l.engagementDebut = null; l.engagementMois = null; }
+    else { errPan(panneau, 'engagement'); l.engagementDebut = d; l.engagementMois = m ? Math.round(m) : null; }
+    relireDate('engagementDebut', panneau);
+  } else if (cle === 'souscritEnLigne' || cle === 'recent'){
+    l[cle] = cible.checked === true;
+  }
+
+  sauver();
+  majLigne(l.id);
+  majTotaux();
+}
+
+function brancher(l, panneau){
+  panneau.addEventListener('input', ev => {
+    const c = ev.target.closest('[data-ch]');
+    if (!c) return;
+    appliquer(l, panneau, c);
+  });
+  panneau.addEventListener('change', ev => {
+    const c = ev.target.closest('[data-ch]');
+    if (!c) return;
+    appliquer(l, panneau, c);
+    majPistes(l, panneau);
+    majSynthese();
+  });
+  panneau.addEventListener('blur', ev => {
+    if (ev.target.closest('[data-ch]')) { majPistes(l, panneau); majSynthese(); }
+  }, true);
+  relireDate('echeance', panneau);
+  relireDate('engagementDebut', panneau);
+}
+
+/* ---------- Les boutons d'une ligne ---------- */
 $('liste').addEventListener('click', ev => {
   const b = ev.target.closest('button[data-action]');
   if (!b) return;
-  const id = b.dataset.id;
+  const art = b.closest('article[data-id]');
+  if (!art) return;
+  const id = art.dataset.id;
   const l = lignes.find(x => x.id === id);
-  if (b.dataset.action === 'editer') editer(id);
-  else if (b.dataset.action === 'revoir' && l) afficherResultat(l);
-  else if (b.dataset.action === 'supprimer' && l){
+  const action = b.dataset.action;
+
+  if (action === 'verifier' || action === 'modifier'){
+    const mode = action === 'verifier' ? 'verif' : 'edit';
+    if (panneauxOuverts.get(id) === mode) fermerPanneau(id);
+    else ouvrirPanneau(id, mode);
+  } else if (action === 'fermer'){
+    fermerPanneau(id);
+  } else if (action === 'supprimer' && l){
     if (!window.confirm(`Supprimer « ${l.nom} » de la liste ?`)) return;
     lignes = lignes.filter(x => x.id !== id);
-    if (enEdition === id) viderForme();
-    sauver(); rendreListe();
-    if (!lignes.length) $('zone-resultat').hidden = true;
+    panneauxOuverts.delete(id);
+    art.remove();
+    sauver();
+    $('zone-liste').hidden = !lignes.length;
+    majTout();
+    annoncer(lignes.length ? `« ${l.nom} » supprimé. ${resume()}` : `« ${l.nom} » supprimé. Votre liste est vide.`);
   }
 });
 
 $('tout-effacer').addEventListener('click', () => {
   if (!lignes.length) return;
   if (!window.confirm('Effacer toute la liste ? Cette action est définitive.')) return;
-  lignes = []; viderForme(); sauver(); rendreListe();
-  $('zone-resultat').hidden = true;
-});
-
-/* Écho des dates, indépendant de la locale du navigateur. */
-function relireDate(champ, cible){
-  const d = versDate($(champ).value);
-  const p = $(cible);
-  if (!d){ p.hidden = true; return; }
-  p.textContent = 'Date comprise : ' + d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) + '.';
-  p.hidden = false;
-}
-[['f-echeance','f-echeance-lue'], ['f-eng-debut','f-eng-debut-lue']].forEach(([c, t]) => {
-  $(c).addEventListener('change', () => relireDate(c, t));
-  $(c).addEventListener('input', () => relireDate(c, t));
+  lignes = [];
+  sauver();
+  rendreListe();
+  annoncer('Liste effacée.');
 });
 
 charger();
