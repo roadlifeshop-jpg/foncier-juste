@@ -4,47 +4,89 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dépense·Juste — vérifier ce que vous payez</title>
-<meta name="description" content="Vérifiez une somme que vous pourriez récupérer ou économiser, puis sachez quoi faire : vol retardé, dépense mensuelle, taxe foncière. Gratuit, sans compte.">
+<meta name="description" content="Vérifiez gratuitement si vous pouvez récupérer de l'argent : vol retardé, dépense récurrente, taxe foncière. Réponse immédiate, sans compte, sans coordonnées.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
 <link rel="stylesheet" href="base.css">
 <style>
-/* Composants propres à l'accueil. Les jetons et les composants partagés
-   (.departs, .depart, .carte, .band) restent dans base.css : aucun n'est
-   redéfini ici.
+/* Accueil : une seule porte d'entrée.
+   La page ne fait plus qu'une chose — faire choisir une situation et lancer le
+   parcours. Les exemples de résultats, les six principes et les guides ont été
+   déplacés (notre-methode.html et le pied de page) : ils expliquaient avant que
+   le visiteur ait obtenu quoi que ce soit.
 
-   Réorganisation de la page : le visiteur choisit d'abord sa situation, il lit
-   ensuite. L'ancienne version plaçait dans chaque carte de départ un exemple
-   fictif de quatre-vingt-dix mots avant le bouton — soit près de cent cinquante
-   mots à traverser pour décider d'un clic. Les exemples n'ont pas été
-   supprimés : ils descendent dans leur propre bande, après le choix, où ils
-   font leur vrai travail — montrer la forme d'un résultat. */
-.hero-accueil{padding-block:52px 30px;}
-.hero-accueil h1{max-width:26ch;}
-@media(max-width:560px){ .hero-accueil{padding-block:22px 16px;} }
+   Hiérarchie volontairement inégale. Trois cartes identiques donnaient trois
+   produits sans rapport et aucune action principale. Ici : un bloc prioritaire
+   pour le vol retardé — le seul outil qui affiche un montant — et deux lignes
+   sobres pour les deux autres. Une seule action principale par écran. */
+.hero-accueil{padding-block:34px 6px;}
+.hero-accueil h1{max-width:22ch;}
+.hero-accueil .lede{margin-top:14px; max-width:44ch;}
+@media(max-width:560px){ .hero-accueil{padding-block:16px 4px;} }
 
-.exemples{display:grid; gap:16px; margin-top:26px; grid-template-columns:repeat(auto-fit,minmax(285px,1fr));}
-.exemple{
-  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
-  padding:20px; font-size:.92rem; line-height:1.58; color:var(--ink-muted);
+/* Bande de confiance : uniquement des faits vérifiables sur ce site. */
+.confiance{display:flex; flex-wrap:wrap; gap:6px 8px; margin-top:14px; padding:0; list-style:none;}
+.confiance li{
+  font-family:'Archivo',sans-serif; font-size:.78rem; font-weight:600; letter-spacing:.02em;
+  color:var(--ink-muted); background:var(--surface); border:1px solid var(--line);
+  border-radius:999px; padding:5px 12px;
 }
-.exemple .marque{
-  display:inline-block; font-size:.66rem; font-weight:700; letter-spacing:.12em;
-  text-transform:uppercase; color:var(--warn); background:var(--warn-soft);
-  border:1px solid var(--warn-line); border-radius:3px; padding:2px 7px; margin-bottom:10px;
-}
-.exemple h3{font-size:.95rem; margin-bottom:6px;}
-.exemple p{margin-top:9px; max-width:none;}
-.exemple .dit{color:var(--ink); font-weight:600;}
-.exemple .pas{color:var(--ink); font-weight:600;}
+.confiance li::before{content:"✓ "; color:var(--ok); font-weight:700;}
 
-.principes{display:grid; gap:18px; margin-top:28px;}
-@media(min-width:760px){ .principes{grid-template-columns:repeat(2,1fr);} }
-.principe{padding-left:16px; border-left:2px solid var(--line-strong);}
-.principe h3{font-size:1rem;}
-.principe p{margin-top:6px; font-size:.94rem; color:var(--ink-muted); max-width:52ch;}
-.principe.fort{border-left-color:var(--gold);}
+.situations{margin-top:20px;}
+.situations > h2{font-size:1.18rem; font-family:'Archivo',sans-serif; font-weight:600; letter-spacing:-.01em;}
+
+/* ---- La situation prioritaire ---- */
+.situation-une{
+  margin-top:13px; background:var(--surface); border:1px solid var(--accent-line);
+  border-left:4px solid var(--accent); border-radius:var(--r-lg); padding:18px 17px;
+  box-shadow:var(--lift);
+}
+.situation-une h3{font-family:'Spectral',Georgia,serif; font-size:1.34rem; letter-spacing:-.016em;}
+.situation-une .dit{margin-top:9px; font-size:.95rem; color:var(--ink-muted); max-width:46ch;}
+.situation-une .montant{
+  margin-top:14px; font-family:'Spectral',Georgia,serif; font-size:1.5rem; font-weight:600;
+  color:var(--accent); letter-spacing:-.02em; font-variant-numeric:tabular-nums;
+}
+.situation-une .montant small{
+  display:block; font-family:'Archivo',sans-serif; font-size:.82rem; font-weight:500;
+  color:var(--ink-muted); letter-spacing:0; margin-top:3px;
+}
+.situation-une .btn-primary{margin-top:15px; width:100%;}
+.situation-une .duree{margin-top:10px; font-size:.84rem; color:var(--ink-faint); text-align:center;}
+
+/* ---- Les deux situations secondaires : des lignes, pas des cartes ---- */
+.situation-liste{list-style:none; padding:0; margin:14px 0 0; border-top:1px solid var(--line);}
+.situation-liste li{margin:0; border-bottom:1px solid var(--line);}
+.situation-liste a{
+  display:flex; align-items:baseline; gap:10px 14px; flex-wrap:wrap;
+  padding:16px 4px; text-decoration:none; color:inherit;
+}
+.situation-liste a:hover .t{text-decoration:underline;}
+.situation-liste .t{font-weight:600; font-size:1.02rem; color:var(--ink); flex:1 1 auto;}
+.situation-liste .fleche{color:var(--accent); font-weight:700;}
+.situation-liste .d{flex:1 1 100%; margin:0; font-size:.89rem; color:var(--ink-muted); max-width:52ch;}
+.situation-liste .bal{
+  font-family:'Archivo',sans-serif; font-size:.66rem; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--line-strong);
+  border-radius:3px; padding:2px 6px;
+}
+.situation-bientot{
+  margin-top:14px; font-size:.88rem; color:var(--ink-faint);
+}
+
+/* ---- Les trois étapes ---- */
+.etapes3{display:grid; gap:14px; margin-top:20px; counter-reset:e;}
+@media(min-width:720px){ .etapes3{grid-template-columns:repeat(3,1fr);} }
+.etapes3 li{margin:0; padding-left:34px; position:relative; font-size:.93rem; color:var(--ink-muted);}
+.etapes3 li::before{
+  counter-increment:e; content:counter(e);
+  position:absolute; left:0; top:-1px; width:24px; height:24px; border-radius:50%;
+  background:var(--accent-soft); color:var(--accent); display:grid; place-items:center;
+  font-family:'Archivo',sans-serif; font-size:.78rem; font-weight:700;
+}
+.etapes3 b{color:var(--ink);}
 </style>
 </head>
 <body>
@@ -63,191 +105,71 @@
 
 <main>
   <section class="hero-accueil shell">
-    <div class="eyebrow">Trois outils gratuits</div>
-    <!-- La promesse tient en une phrase, coupée entre le titre et le chapô : aucun
-         mot n'est perdu, et le premier choix remonte de deux lignes sur téléphone. -->
-    <h1>Vérifiez une somme que vous pourriez récupérer ou économiser</h1>
-    <p class="lede">
-      <b>Puis sachez quoi faire.</b> Chaque outil dit ce que son chiffre vaut — montant fixé par un
-      texte, coût constaté, hypothèse — et la démarche gratuite qui suit. Sans compte, sans paiement,
-      sans commission.
-    </p>
+    <h1>Vérifiez gratuitement si vous pouvez récupérer de l'argent</h1>
+    <p class="lede">Réponse immédiate, sans compte, puis les étapes pour agir.</p>
+    <ul class="confiance">
+      <li>Gratuit</li>
+      <li>Sans compte</li>
+      <li>Sans coordonnées</li>
+      <li>Sources officielles</li>
+    </ul>
+  </section>
 
-    <h2 class="sr">Choisissez votre situation</h2>
-    <div class="departs">
+  <section class="shell situations" id="situations">
+    <h2>Quelle situation vous concerne&nbsp;?</h2>
 
-      <article class="depart">
-        <div class="quoi">Vol retardé</div>
-        <p class="situation">«&nbsp;Mon vol est arrivé avec plus de trois heures de retard.&nbsp;»</p>
-        <p class="rend">Deux questions pour savoir si le règlement européen s'applique, puis le montant
-        qu'il prévoit.</p>
-        <p class="somme-type"><b>De 250 à 600 €</b>, montant fixé par le règlement (CE) n° 261/2004.</p>
-        <div class="cout">
-          <span><b>2</b> questions, puis 3</span>
-          <span><b>2</b> minutes environ</span>
-        </div>
-        <div class="aller"><a class="btn btn-primary" href="vol-retarde.html">Vérifier mon vol</a></div>
-      </article>
-
-      <article class="depart">
-        <div class="quoi">Dépense mensuelle</div>
-        <p class="situation">«&nbsp;Je paie un contrat dont je ne connais pas le coût réel.&nbsp;»</p>
-        <p class="rend">Un contrat à la fois&nbsp;: ce qu'il coûte réellement sur douze mois, puis quoi
-        faire.</p>
-        <p class="somme-type"><b>Le coût actuel</b>, pas une économie&nbsp;: celle-ci dépend de
-        vérifications que l'outil indique.</p>
-        <div class="cout">
-          <span><b>3</b> champs</span>
-          <span><b>1</b> minute</span>
-        </div>
-        <div class="aller"><a class="btn btn-primary" href="abonnements.html">Calculer ce que je paie</a></div>
-      </article>
-
-      <article class="depart">
-        <div class="quoi">Taxe foncière</div>
-        <p class="situation">«&nbsp;Ma taxe foncière me paraît élevée.&nbsp;»</p>
-        <p class="rend">Ce qui mérite d'être vérifié sur votre fiche d'évaluation, avec la démarche et
-        son délai.</p>
-        <p class="somme-type sans"><b>Aucune somme&nbsp;: non chiffrable.</b> Seule l'administration
-        recalcule une valeur locative.</p>
-        <div class="cout">
-          <span><b>3</b> étapes</span>
-          <span><b>2</b> minutes environ</span>
-        </div>
-        <div class="aller"><a class="btn btn-primary" href="taxe-fonciere.html">Vérifier ma taxe foncière</a></div>
-      </article>
-
+    <div class="situation-une">
+      <h3>Mon vol a été retardé ou annulé</h3>
+      <p class="dit">Deux questions suffisent pour savoir si le règlement européen s'applique.</p>
+      <p class="montant">250 à 600 €
+        <small>Barème du règlement (CE) n° 261/2004, quand vos réponses permettent de le situer.</small>
+      </p>
+      <a class="btn btn-primary" href="vol-retarde.html">Vérifier mon vol</a>
+      <p class="duree">2 questions, puis 3 · environ 2 minutes</p>
     </div>
 
-    <p class="aide" style="margin-top:16px; max-width:52ch">
-      Chaque outil indique, avant de commencer, le temps qu'il demande et le document à avoir sous la
-      main.
-    </p>
+    <ul class="situation-liste">
+      <li>
+        <a href="abonnements.html">
+          <span class="t">Je veux vérifier une dépense récurrente</span>
+          <span class="bal">Bêta</span>
+          <span class="fleche" aria-hidden="true">→</span>
+          <span class="d">Calcule aujourd'hui ce qu'un contrat vous coûte réellement sur douze mois et
+          indique la vérification à mener. <b>Aucune économie n'est chiffrée</b>&nbsp;: elle dépendrait
+          d'un prix de remplacement que nous n'avons pas.</span>
+        </a>
+      </li>
+      <li>
+        <a href="taxe-fonciere.html">
+          <span class="t">Je veux vérifier ma taxe foncière</span>
+          <span class="bal">Expert</span>
+          <span class="fleche" aria-hidden="true">→</span>
+          <span class="d">Signale ce qui mérite d'être vérifié sur votre fiche d'évaluation, avec la
+          démarche et son délai. <b>Aucune somme ne peut être chiffrée ici</b>&nbsp;: seule
+          l'administration recalcule une valeur locative.</span>
+        </a>
+      </li>
+    </ul>
 
-    <p class="limite-courte" style="margin-top:18px">
-      <b>Aucun de ces montants n'est une somme promise.</b> Nous n'avons accès à aucun dossier&nbsp;:
-      ni votre réservation, ni votre contrat, ni votre avis d'imposition. Chaque chiffre affiché porte
-      son degré de certitude, et aucun outil ne dit qu'une démarche aboutira.
-    </p>
+    <p class="situation-bientot">Autre situation&nbsp;: <b>prochainement</b>. Nous n'ouvrons un outil que
+    lorsqu'il repose sur un texte que nous avons vérifié.</p>
   </section>
 
   <section class="band">
     <div class="shell">
-      <div class="eyebrow">À quoi ressemble un résultat</div>
-      <h2>Les trois résultats ont la même charpente</h2>
-      <p>Quatre cases, toujours dans le même ordre&nbsp;: le constat, la somme éventuelle avec son degré
-      de certitude, ce qu'il reste à vérifier, et la prochaine action gratuite. Les situations ci-dessous
-      sont inventées pour montrer la forme d'un résultat. Aucune ne provient d'un cas réel, et le site
-      n'affiche ni avis, ni témoignage, ni statistique de réussite.</p>
-      <div class="exemples">
-
-        <article class="exemple">
-          <span class="marque">Exemple fictif</span>
-          <h3>Paris–New York, arrivé cinq heures en retard</h3>
-          <p><span class="dit">Somme éventuelle&nbsp;:</span> 600 €, <b>montant fixé par un texte</b> —
-          c'est ce que le règlement prévoit pour cette distance et ce retard.</p>
-          <p><span class="pas">Ce que l'outil ne dit pas&nbsp;:</span> si la compagnie paiera. Elle peut
-          s'en exonérer en prouvant une circonstance extraordinaire, et le motif réel du retard ne nous
-          est pas accessible.</p>
-        </article>
-
-        <article class="exemple">
-          <span class="marque">Exemple fictif</span>
-          <h3>Un abonnement presse à 99 € par an</h3>
-          <p><span class="dit">Coût actuel&nbsp;:</span> 99 € par an, <b>un fait</b> — l'addition de
-          ce qui a été saisi. L'outil signale aussi que nous sommes dans la fenêtre où l'information
-          avant reconduction doit parvenir.</p>
-          <p><span class="pas">Ce que l'outil ne dit pas&nbsp;:</span> «&nbsp;99 € d'économie&nbsp;», ni
-          un montant remboursable. L'un supposerait de savoir si vous pouvez résilier et ce que vous
-          paieriez à la place&nbsp;; l'autre, cinq faits que trois champs n'établissent pas. Il donne la
-          vérification à mener.</p>
-        </article>
-
-        <article class="exemple">
-          <span class="marque">Exemple fictif</span>
-          <h3>Une piscine comblée qui compte toujours</h3>
-          <p><span class="dit">Somme éventuelle&nbsp;:</span> <b>non chiffrable</b>. L'élément figure
-          peut-être encore sur la fiche d'évaluation, sous forme d'équivalence de surface&nbsp;; le
-          recalcul n'appartient qu'à l'administration.</p>
-          <p><span class="pas">Ce que l'outil ne dit pas&nbsp;:</span> combien vous récupérerez. Il dit
-          quelles pièces datent une disparition, et dans quel délai réclamer.</p>
-        </article>
-
-      </div>
-    </div>
-  </section>
-
-  <section class="band pale">
-    <div class="shell">
-      <div class="eyebrow">Ce que ce site fait, et ne fait pas</div>
-      <h2>Aucune promesse que nous ne pouvons pas tenir</h2>
-      <div class="principes">
-        <div class="principe fort">
-          <h3>Aucune économie annoncée, aucun remboursement garanti</h3>
-          <p>Un outil qui chiffrerait votre gain devrait connaître la décision de votre administration, de
-          votre opérateur ou de votre vendeur. Aucun ne la connaît. Nous disons ce qui mérite un contrôle
-          et quelle démarche existe&nbsp;; l'issue ne nous appartient pas.</p>
-        </div>
-        <div class="principe fort">
-          <h3>Un calcul et une possibilité juridique ne sont pas la même chose</h3>
-          <p>Un total d'abonnements ou un nombre de mois depuis un achat sont des faits&nbsp;: ils
-          découlent de ce que vous saisissez. Savoir si un contrat peut être rompu ou une garantie
-          invoquée dépend de pièces que nous ne lisons pas. Les deux sont toujours présentés séparément,
-          et étiquetés.</p>
-        </div>
-        <div class="principe">
-          <h3>Rien à créer, rien à connecter</h3>
-          <p>Pas de compte, pas de paiement, pas d'accès à vos comptes bancaires. Les trois outils
-          calculent dans votre navigateur&nbsp;; ce que vous saisissez y reste.</p>
-        </div>
-        <div class="principe">
-          <h3>Un service privé, pas un site officiel</h3>
-          <p>Dépense·Juste n'a aucun lien avec l'administration, ni avec aucun opérateur ou vendeur. Nous
-          n'engageons aucune démarche à votre place et ne vous représentons devant personne.</p>
-        </div>
-        <div class="principe">
-          <h3>Des sources datées, pas des affirmations</h3>
-          <p>Chaque règle affichée porte son texte, sa source officielle, sa date d'application et la date
-          à laquelle nous l'avons vérifiée. Ce qui n'est pas encore applicable est signalé comme tel.
-          <a href="sources.html">Voir toutes les sources</a>.</p>
-        </div>
-        <div class="principe">
-          <h3>Ni témoignage, ni chiffre de réussite</h3>
-          <p>Le site n'affiche aucun avis, aucun cas client et aucune statistique de succès. Les exemples
-          ci-dessus sont fictifs et marqués comme tels&nbsp;: ils montrent la forme d'un résultat, pas un
-          résultat obtenu.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="band">
-    <div class="shell-lire">
-      <div class="eyebrow">Comprendre avant d'agir</div>
-      <h2>Quelques réponses précises</h2>
-      <div class="cartes">
-        <article class="carte">
-          <div class="carte-num">Taxe foncière</div>
-          <h3>Les erreurs fréquentes, et comment les vérifier</h3>
-          <p>Ce que contient la fiche 6675-M, pourquoi la surface pondérée dépasse normalement la surface
-          mesurée, et quelles erreurs se rencontrent réellement.</p>
-          <div class="apres"><a href="guide-erreurs-taxe-fonciere.html">Lire le guide</a></div>
-        </article>
-        <article class="carte">
-          <div class="carte-num">Abonnements</div>
-          <h3>Résilier un abonnement&nbsp;: ce que la loi impose</h3>
-          <p>La résiliation en ligne, l'information avant reconduction tacite, l'engagement de plus de
-          douze mois. Ce qui est une obligation du professionnel, et ce qui dépend de votre contrat.</p>
-          <div class="apres"><a href="resilier-un-abonnement.html">Lire la page</a></div>
-        </article>
-        <article class="carte">
-          <div class="carte-num">Garanties</div>
-          <h3>Un produit tombe en panne&nbsp;: quelle garantie&nbsp;?</h3>
-          <p>Garantie légale de conformité, vice caché, garantie commerciale&nbsp;: à qui s'adresser, dans
-          quel délai, avec quelles preuves. Et où en est le droit à la réparation européen.</p>
-          <div class="apres"><a href="produit-defectueux-que-faire.html">Lire la page</a></div>
-        </article>
-      </div>
+      <h2>Comment ça se passe</h2>
+      <ol class="etapes3">
+        <li><b>Vous décrivez votre situation.</b> Quelques questions, aucune pièce à téléverser.</li>
+        <li><b>Vous obtenez une réponse immédiate.</b> Un montant, une fourchette, ou la raison précise
+        pour laquelle rien n'est chiffrable — avec son degré de certitude.</li>
+        <li><b>Vous savez quoi faire ensuite.</b> La démarche gratuite, et le récapitulatif à télécharger
+        si vous le souhaitez.</li>
+      </ol>
+      <p style="margin-top:22px; font-size:.93rem">
+        <a href="notre-methode.html">Ce que chaque outil sait dire, et ce qu'il ne dira jamais</a>
+        &nbsp;·&nbsp;
+        <a href="sources.html">Les sources officielles et leurs dates</a>
+      </p>
     </div>
   </section>
 </main>

@@ -13,7 +13,8 @@
        somme:        { montant, texte, certitude, pourquoi },
        verification: [{ titre, texte, regle? }],
        action:       [{ titre, texte, gratuit?, regle? }],
-       limites:      [ "…" ] }
+       limites:      [ "…" ],
+       autres:       [{ href, libelle }] }   // sortie neutre, facultative
    ========================================================================== */
 
 const CERTITUDES = {
@@ -51,7 +52,7 @@ function rendreResultat4(r){
   const chiffre = r.somme && r.somme.montant != null;
 
   return [
-    bloc4('1', 'Le constat', items4(r.constat), 'plein'),
+    bloc4('1', 'Votre situation', items4(r.constat), 'plein'),
 
     /* Une seule somme par résultat, volontairement.
        La version précédente en affichait deux dans cette case pour les
@@ -61,7 +62,12 @@ function rendreResultat4(r){
        seconde parce qu'un remboursement au titre de l'article L215-1 dépend de
        cinq faits qu'un formulaire de trois champs n'établit pas. Cette case ne
        porte plus qu'un chiffre, et son étiquette dit ce qu'il vaut. */
-    bloc4('2', r.somme && r.somme.certitude === 'fait' ? 'Coût actuel' : 'Somme éventuelle', `
+    /* L'intitulé dit ce que la case contient vraiment : un coût constaté, une
+       somme possible, ou la raison pour laquelle rien n'est chiffrable. */
+    bloc4('2', r.somme && r.somme.certitude === 'fait' ? 'Coût actuel'
+             : (r.somme && r.somme.certitude === 'non-chiffrable'
+                 ? 'Pourquoi aucune somme n\'est calculable'
+                 : 'La somme possible'), `
       <div class="chiffre${chiffre ? '' : ' sans'}">${ech4(r.somme ? r.somme.texte : 'Non chiffrable')}</div>
       <span class="certitude ${c.classe}">${ech4(c.libelle)}</span>
       <p>${ech4(r.somme ? r.somme.pourquoi : '')}</p>
@@ -74,9 +80,19 @@ function rendreResultat4(r){
        textes cités. Quelqu'un qui vient de lire « 600 € » veut savoir quoi
        faire, pas lire un article du règlement. Les textes ne disparaissent
        pas — ils restent en dessous, et chacun garde son dépliant de source. */
-    bloc4('3', 'Prochaine action, gratuite', items4(r.action), 'r4-action', 'r4-action'),
+    bloc4('3', 'Ce que vous pouvez faire maintenant', items4(r.action), 'r4-action', 'r4-action'),
 
     bloc4('4', 'Ce qu\'il reste à vérifier', items4(r.verification)),
+
+    /* Sortie neutre. Pas « passez aux abonnements » : le visiteur n'a aucune
+       raison d'exécuter les trois outils, et le lui suggérer serait pousser un
+       parcours qui ne le concerne peut-être pas. */
+    r.autres && r.autres.length
+      ? `<div class="r4-bloc plein autres-verifs">
+           <h2>Voir les autres vérifications</h2>
+           <p>${r.autres.map(a => `<a href="${ech4(a.href)}">${ech4(a.libelle)}</a>`).join(' · ')}</p>
+         </div>`
+      : '',
 
     r.limites && r.limites.length
       ? bloc4('—', 'Ce que nous ne garantissons pas',

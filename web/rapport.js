@@ -334,15 +334,34 @@ function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
       : "Fiche d'évaluation 6675-M : non consultée. Aucune comparaison de surface n'a donc été possible.",
     { taille: 10, espace: 3 }
   );
-  w.ligne(`Surface habitable aujourd'hui : ${Number(d.surfReelle).toFixed(0)} m², ${
-    d.sourceSurface === 'mesuree' ? 'que vous déclarez avoir mesurée vous-même'
-    : d.sourceSurface === 'acte' ? 'issue de votre acte de vente ou d\'un diagnostic'
-    : 'estimée de mémoire'}.`, { taille: 10, espace: 3 });
+  /* Parcours court : aucune surface n'est demandée sans la fiche. Imprimer
+     « 0 m² » donnerait un chiffre que personne n'a saisi. */
+  const sr = Number(d.surfReelle) || 0;
+  if (sr > 0) {
+    w.ligne(`Surface habitable aujourd'hui : ${sr.toFixed(0)} m², ${
+      d.sourceSurface === 'mesuree' ? 'que vous déclarez avoir mesurée vous-même'
+      : d.sourceSurface === 'acte' ? 'issue de votre acte de vente ou d\'un diagnostic'
+      : 'estimée de mémoire'}.`, { taille: 10, espace: 3 });
+  } else {
+    w.ligne("Surfaces : non renseignées. Sans la fiche d'évaluation, aucune surface administrative n'est connue, et nous n'en avons donc demandé aucune.",
+      { taille: 10, espace: 3 });
+  }
+
+  /* La question posée à l'écran porte sur l'ÉCART : quel élément a disparu.
+     `ee` est donc vide par construction, et l'imprimer donnerait « existant
+     aujourd'hui : aucun », qui se lirait comme un constat alors que ce n'est
+     que la forme de la question. */
   const ef = (d.entree && d.entree.ef) || [];
-  const ee = (d.entree && d.entree.ee) || [];
-  w.ligne(`${d.avecFiche ? 'Éléments lus sur votre fiche' : 'Éléments que vous pensez portés à l\'évaluation'} : ${
-    ef.length ? ef.join(', ') : 'aucun'}. Existant aujourd'hui : ${ee.length ? ee.join(', ') : 'aucun'}.`,
-    { taille: 10, espace: 8 });
+  w.ligne(`${d.avecFiche
+      ? 'Éléments que votre fiche mentionnerait et qui n\'existent plus'
+      : 'Éléments disparus de votre logement, à confirmer sur la fiche'} : ${
+    ef.length ? ef.join(', ') : 'aucun signalé'}.`, { taille: 10, espace: 3 });
+  if (d.autreElement) {
+    w.ligne(`Élément signalé en texte libre : « ${d.autreElement} ». À vérifier manuellement sur la fiche : nous ignorons s'il y figure et sous quelle forme, et il n'entre dans aucun calcul de ce document.`,
+      { taille: 10, espace: 8 });
+  } else {
+    w.espace(5);
+  }
 
   // 3 — Chaque élément détecté
   if (reels.length) {

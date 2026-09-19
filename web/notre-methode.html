@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Comment nous répondons</title>
+<meta name="description" content="Ce que chaque outil de Dépense·Juste sait dire, ce qu'il ne dira jamais, et à quoi ressemble un résultat. Sources officielles, degrés de certitude, limites assumées.">
+<link rel="canonical" href="https://foncier-juste.vercel.app/notre-methode.html">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<link rel="stylesheet" href="base.css">
+<style>
+.exemples{display:grid; gap:16px; margin-top:26px; grid-template-columns:repeat(auto-fit,minmax(285px,1fr));}
+.exemple{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+  padding:20px; font-size:.92rem; line-height:1.58; color:var(--ink-muted);}
+.exemple .marque{display:inline-block; font-size:.66rem; font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--warn); background:var(--warn-soft);
+  border:1px solid var(--warn-line); border-radius:3px; padding:2px 7px; margin-bottom:10px;}
+.exemple h3{font-size:.95rem; margin-bottom:6px;}
+.exemple p{margin-top:9px; max-width:none;}
+.exemple .dit, .exemple .pas{color:var(--ink); font-weight:600;}
+.principes{display:grid; gap:18px; margin-top:28px;}
+@media(min-width:760px){ .principes{grid-template-columns:repeat(2,1fr);} }
+.principe{padding-left:16px; border-left:2px solid var(--line-strong);}
+.principe h3{font-size:1rem;}
+.principe p{margin-top:6px; font-size:.94rem; color:var(--ink-muted); max-width:52ch;}
+.principe.fort{border-left-color:var(--gold);}
+.echelle{margin-top:24px; display:grid; gap:12px;}
+.echelle div{display:flex; gap:12px; align-items:baseline; flex-wrap:wrap;
+  padding:14px 16px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r);}
+.echelle p{margin:0; font-size:.92rem; color:var(--ink-muted); flex:1 1 220px; max-width:none;}
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="shell">
+    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Vérifier ce que vous payez</small></a>
+    <nav class="nav" aria-label="Outils">
+      <a href="vol-retarde.html">Vol retardé</a>
+      <a href="abonnements.html">Dépense mensuelle</a>
+      <a href="taxe-fonciere.html">Taxe foncière</a>
+      <a href="sources.html">Sources</a>
+    </nav>
+  </div>
+</header>
+
+<main class="shell doc">
+  <div class="eyebrow">Notre méthode</div>
+  <h1>Comment nous répondons</h1>
+  <p class="lede">Cette page rassemble ce que les outils savent dire, ce qu'ils ne diront jamais, et à
+  quoi ressemble un résultat. Elle a été sortie de l'accueil pour que celui-ci serve à une seule chose :
+  choisir sa situation et commencer.</p>
+
+  <h2 style="margin-top:34px">Les quatre degrés de certitude</h2>
+  <p>Chaque chiffre affiché par le site porte l'un de ces quatre repères. C'est ce qui distingue un
+  montant fixé par un texte d'une addition, et une addition d'une hypothèse.</p>
+  <div class="echelle">
+    <div><span class="certitude bareme">Montant fixé par un texte</span>
+      <p>Un règlement ou une loi fixe la somme. Exemple : le barème d'indemnisation des vols retardés.
+      Cela ne veut pas dire qu'elle vous sera versée.</p></div>
+    <div><span class="certitude fait">Calculé sur vos réponses</span>
+      <p>Une addition de ce que vous avez saisi. Exemple : le coût annuel d'un contrat. C'est un fait,
+      pas un gain.</p></div>
+    <div><span class="certitude hypothese">Hypothèse, pas un acquis</span>
+      <p>Un chiffre qui dépend de conditions que nous ne pouvons pas vérifier.</p></div>
+    <div><span class="certitude non-chiffrable">Non chiffrable</span>
+      <p>Aucun texte ne fixe de montant et rien de ce que vous avez saisi n'en constitue un. C'est le
+      cas de la taxe foncière : seule l'administration recalcule une valeur locative.</p></div>
+  </div>
+</main>
+
+<section class="band">
+    <div class="shell">
+      <div class="eyebrow">À quoi ressemble un résultat</div>
+      <h2>Les trois résultats ont la même charpente</h2>
+      <p>Quatre cases, toujours dans le même ordre&nbsp;: le constat, la somme éventuelle avec son degré
+      de certitude, ce qu'il reste à vérifier, et la prochaine action gratuite. Les situations ci-dessous
+      sont inventées pour montrer la forme d'un résultat. Aucune ne provient d'un cas réel, et le site
+      n'affiche ni avis, ni témoignage, ni statistique de réussite.</p>
+      <div class="exemples">
+
+        <article class="exemple">
+          <span class="marque">Exemple fictif</span>
+          <h3>Paris–New York, arrivé cinq heures en retard</h3>
+          <p><span class="dit">Somme éventuelle&nbsp;:</span> 600 €, <b>montant fixé par un texte</b> —
+          c'est ce que le règlement prévoit pour cette distance et ce retard.</p>
+          <p><span class="pas">Ce que l'outil ne dit pas&nbsp;:</span> si la compagnie paiera. Elle peut
+          s'en exonérer en prouvant une circonstance extraordinaire, et le motif réel du retard ne nous
+          est pas accessible.</p>
+        </article>
+
+        <article class="exemple">
+          <span class="marque">Exemple fictif</span>
+          <h3>Un abonnement presse à 99 € par an</h3>
+          <p><span class="dit">Coût actuel&nbsp;:</span> 99 € par an, <b>un fait</b> — l'addition de
+          ce qui a été saisi. L'outil signale aussi que nous sommes dans la fenêtre où l'information
+          avant reconduction doit parvenir.</p>
+          <p><span class="pas">Ce que l'outil ne dit pas&nbsp;:</span> «&nbsp;99 € d'économie&nbsp;», ni
+          un montant remboursable. L'un supposerait de savoir si vous pouvez résilier et ce que vous
+          paieriez à la place&nbsp;; l'autre, cinq faits que trois champs n'établissent pas. Il donne la
+          vérification à mener.</p>
+        </article>
+
+        <article class="exemple">
+          <span class="marque">Exemple fictif</span>
+          <h3>Une piscine comblée qui compte toujours</h3>
+          <p><span class="dit">Somme éventuelle&nbsp;:</span> <b>non chiffrable</b>. L'élément figure
+          peut-être encore sur la fiche d'évaluation, sous forme d'équivalence de surface&nbsp;; le
+          recalcul n'appartient qu'à l'administration.</p>
+          <p><span class="pas">Ce que l'outil ne dit pas&nbsp;:</span> combien vous récupérerez. Il dit
+          quelles pièces datent une disparition, et dans quel délai réclamer.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+<section class="band pale">
+    <div class="shell">
+      <div class="eyebrow">Ce que ce site fait, et ne fait pas</div>
+      <h2>Aucune promesse que nous ne pouvons pas tenir</h2>
+      <div class="principes">
+        <div class="principe fort">
+          <h3>Aucune économie annoncée, aucun remboursement garanti</h3>
+          <p>Un outil qui chiffrerait votre gain devrait connaître la décision de votre administration, de
+          votre opérateur ou de votre vendeur. Aucun ne la connaît. Nous disons ce qui mérite un contrôle
+          et quelle démarche existe&nbsp;; l'issue ne nous appartient pas.</p>
+        </div>
+        <div class="principe fort">
+          <h3>Un calcul et une possibilité juridique ne sont pas la même chose</h3>
+          <p>Un total d'abonnements ou un nombre de mois depuis un achat sont des faits&nbsp;: ils
+          découlent de ce que vous saisissez. Savoir si un contrat peut être rompu ou une garantie
+          invoquée dépend de pièces que nous ne lisons pas. Les deux sont toujours présentés séparément,
+          et étiquetés.</p>
+        </div>
+        <div class="principe">
+          <h3>Rien à créer, rien à connecter</h3>
+          <p>Pas de compte, pas de paiement, pas d'accès à vos comptes bancaires. Les trois outils
+          calculent dans votre navigateur&nbsp;; ce que vous saisissez y reste.</p>
+        </div>
+        <div class="principe">
+          <h3>Un service privé, pas un site officiel</h3>
+          <p>Dépense·Juste n'a aucun lien avec l'administration, ni avec aucun opérateur ou vendeur. Nous
+          n'engageons aucune démarche à votre place et ne vous représentons devant personne.</p>
+        </div>
+        <div class="principe">
+          <h3>Des sources datées, pas des affirmations</h3>
+          <p>Chaque règle affichée porte son texte, sa source officielle, sa date d'application et la date
+          à laquelle nous l'avons vérifiée. Ce qui n'est pas encore applicable est signalé comme tel.
+          <a href="sources.html">Voir toutes les sources</a>.</p>
+        </div>
+        <div class="principe">
+          <h3>Ni témoignage, ni chiffre de réussite</h3>
+          <p>Le site n'affiche aucun avis, aucun cas client et aucune statistique de succès. Les exemples
+          ci-dessus sont fictifs et marqués comme tels&nbsp;: ils montrent la forme d'un résultat, pas un
+          résultat obtenu.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<footer class="site-foot">
+  <div class="shell">
+    <div class="cols">
+      <div><h4>Les outils</h4><ul>
+        <li><a href="vol-retarde.html">Vol retardé</a></li>
+        <li><a href="abonnements.html">Dépense mensuelle</a></li>
+        <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
+        <li><a href="garanties.html">Garanties après achat</a></li></ul></div>
+      <div><h4>Comprendre</h4><ul>
+        <li><a href="notre-methode.html">Comment nous répondons</a></li>
+        <li><a href="guide-erreurs-taxe-fonciere.html">Erreurs fréquentes de taxe foncière</a></li>
+        <li><a href="resilier-un-abonnement.html">Résilier un abonnement</a></li>
+        <li><a href="produit-defectueux-que-faire.html">Un produit tombe en panne</a></li>
+        <li><a href="sources.html">Toutes les sources</a></li></ul></div>
+      <div><h4>Le site</h4><ul>
+        <li><a href="mentions-legales.html">Mentions légales</a></li>
+        <li><a href="confidentialite.html">Confidentialité</a></li></ul></div>
+    </div>
+    <p class="fine">Service d'information gratuit. Ne constitue ni un conseil juridique ou fiscal
+    personnalisé, ni une garantie de résultat.</p>
+  </div>
+</footer>
+</body>
+</html>

@@ -348,6 +348,7 @@ function afficher(){
   const err = $('v-e-date');
   if (res.invalide){ err.textContent = res.invalide; err.hidden = false; return; }
   err.hidden = true;
+  res.autres = [{href:'abonnements.html',libelle:'Une dépense récurrente'},{href:'taxe-fonciere.html',libelle:'Ma taxe foncière'}];
   $('v-r4').innerHTML = rendreResultat4(res);
   $('v-resultat').hidden = false;
   try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'resultat_affiche' })], { type: 'application/json' })); } catch (_) {}

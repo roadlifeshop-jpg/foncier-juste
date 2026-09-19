@@ -65,7 +65,7 @@
 
 <main>
   <section class="hero shell">
-    <div class="eyebrow">Outil 2 sur 3 — gratuit, sans inscription</div>
+    <div class="eyebrow">Outil secondaire — bêta · gratuit, sans inscription</div>
     <h1>Ce que vos abonnements coûtent réellement</h1>
     <p class="lede">
       Vous les saisissez à la main&nbsp;; l'outil calcule le coût par mois et par an, paiements annuels
@@ -81,7 +81,11 @@
         <li class="rien"><span class="cle">Inutile de chercher</span>Aucun relevé bancaire, aucune connexion
         à votre banque. <b>La liste reste sur cet appareil.</b></li>
       </ul>
-      <p class="sans"><b>Nous ne pouvons pas dire qu'un contrat donné est résiliable</b> — cela dépend
+      <p class="sans"><b>Cet outil est en bêta&nbsp;:</b> il calcule aujourd'hui le coût d'un contrat et
+      indique la vérification à mener. Il ne compare aucune offre et ne chiffre aucune économie — cela
+      demanderait des prix à jour et datés, une méthode de classement publique, et la transparence sur
+      tout lien commercial. Rien de cela n'existe encore.<br><br>
+      <b>Nous ne pouvons pas dire qu'un contrat donné est résiliable</b> — cela dépend
       de ses conditions, que nous ne lisons pas.
       <a href="#limites-outil">Ce que cela signifie exactement</a>.</p>
     </div>
@@ -360,7 +364,9 @@ $('f-annuler').addEventListener('click', () => { viderForme(); });
 
 /* ---------- Le résultat, dans les quatre cases communes aux trois outils --- */
 function afficherResultat(ligne){
-  $('abo-r4').innerHTML = rendreResultat4(resultat4Abonnement(ligne, AUJ));
+  const res = resultat4Abonnement(ligne, AUJ);
+  res.autres = [{href:'vol-retarde.html',libelle:'Un vol retardé'},{href:'taxe-fonciere.html',libelle:'Ma taxe foncière'}];
+  $('abo-r4').innerHTML = rendreResultat4(res);
   $('zone-resultat').hidden = false;
   $('zone-resultat').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }

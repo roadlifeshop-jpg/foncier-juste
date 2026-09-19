@@ -611,8 +611,9 @@ ferme de contenu.*
 >
 > Un exemple de ce qu'ils refusent de faire : si la surface de votre fiche ne
 > correspond pas à votre mètre ruban, l'outil ne vous dira pas que c'est une
-> erreur. La surface cadastrale dépasse normalement la surface mesurée de 20 à
-> 40 %, parce qu'elle ajoute des mètres carrés fictifs pour les équipements.
+> erreur. La surface cadastrale n'est pas de même nature : des correctifs
+> peuvent l'augmenter comme la diminuer, et des mètres carrés fictifs s'ajoutent
+> pour les équipements.
 > Réclamer sur cette base, c'est perdre son temps et faire perdre le sien à un
 > service qui traitera moins bien le dossier suivant.
 >

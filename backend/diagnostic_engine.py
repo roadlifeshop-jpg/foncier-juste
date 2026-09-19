@@ -159,7 +159,9 @@ class UserInput:
     source_surface: str = "acte"          # "mesuree" | "acte" | "estimee"
     surface_fiche_m2: Optional[float] = None
     # ^ ligne « surface réelle » de la fiche 6675-M — JAMAIS la surface
-    #   pondérée, qui dépasse normalement la surface mesurée de 20 à 40 %.
+    #   pondérée, qui applique des correctifs pouvant l'augmenter comme la
+    #   diminuer, puis ajoute des équivalences (article 324 T annexe III CGI).
+    #   Aucune source officielle n'énonce d'ordre de grandeur pour cet écart.
 
     # Étape 3.
     elements_confort_factures: list[str] = field(default_factory=list)

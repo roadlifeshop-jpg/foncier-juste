@@ -132,16 +132,60 @@
   <section class="shell" id="diagnostic" hidden>
     <div class="panneau">
       <div class="panneau-tete">
-        <div class="jauge" role="presentation"><i id="p1"></i><i id="p2"></i><i id="p3"></i></div>
+        <div class="jauge" role="presentation" id="jauge"></div>
       </div>
       <div class="panneau-corps">
 
-        <div class="etape" data-step="1">
-          <div class="etape-label">Étape 1 sur 3</div>
+        <!-- ÉTAPE 1 — la fiche gouverne tout le reste. Elle était auparavant la
+             deuxième question, après la commune et le type de bien : on demandait
+             donc deux surfaces à des gens qui n'avaient aucun moyen de connaître
+             la première. La poser d'abord permet de ne proposer que ce qui est
+             réellement possible. -->
+        <div class="etape" data-etape="fiche">
+          <div class="etape-label"></div>
+          <h2>Votre fiche d'évaluation</h2>
+          <p class="intro">La fiche d'évaluation, ou formulaire 6675-M, est le document où l'administration
+          inscrit ce qu'elle retient pour votre logement. C'est le seul, et c'est lui qui décide de ce que
+          nous pouvons vérifier.</p>
+          <fieldset class="champ">
+            <legend class="lab">Avez-vous votre fiche d'évaluation 6675-M sous les yeux&nbsp;?</legend>
+            <div class="choix">
+              <label>
+                <input type="radio" name="fiche" value="oui" id="fiche-oui">
+                <span><span class="t">Oui, je l'ai</span><span class="d">Parcours complet&nbsp;: surfaces et éléments comptabilisés.</span></span>
+              </label>
+              <label>
+                <input type="radio" name="fiche" value="non" id="fiche-non" checked>
+                <span><span class="t">Non, pas encore</span><span class="d">Parcours court&nbsp;: comment l'obtenir, et le seul point vérifiable sans elle.</span></span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="encart info" id="notice-sans-fiche">
+            <p style="margin-top:0"><b>Elle s'obtient gratuitement.</b> Demandez «&nbsp;la fiche
+            d'évaluation de mon local&nbsp;» par la messagerie sécurisée de votre espace particulier sur
+            impots.gouv.fr. Sans elle, nous ne comparerons aucune surface&nbsp;: la surface retenue par
+            l'administration ne figure sur aucun autre document.</p>
+            <details class="schema" style="margin-top:12px">
+              <summary>Comment obtenir ma fiche&nbsp;?</summary>
+              <p>Depuis <b>impots.gouv.fr</b>, dans votre espace particulier&nbsp;: ouvrez la messagerie
+              sécurisée, choisissez d'écrire au service, et demandez la fiche d'évaluation de votre local
+              en indiquant son adresse. La demande est gratuite et sans conséquence.</p>
+              <p>Vous pouvez aussi vous adresser directement au <b>service des impôts fonciers</b> dont
+              dépend le bien. Le délai de réponse dépend du service saisi.</p>
+              <p><b>Il n'existe pas de formulaire vierge à télécharger.</b> La fiche est un document propre
+              à votre logement, produit par l'administration&nbsp;: aucun site ne peut vous la fournir à
+              sa place.</p>
+            </details>
+          </div>
+        </div>
+
+        <!-- ÉTAPE 2 — situer le bien. -->
+        <div class="etape" data-etape="bien" hidden>
+          <div class="etape-label"></div>
           <h2>Votre bien</h2>
-          <p class="intro">Nous commençons par situer le logement. Dans certaines communes, nous pouvons
-          aussi afficher un repère de prix issu des ventes enregistrées&nbsp;— une indication de marché,
-          sans rapport avec le calcul de votre taxe.</p>
+          <p class="intro">Dans certaines communes, nous pouvons aussi afficher un repère de prix issu des
+          ventes enregistrées&nbsp;— une indication de marché, sans rapport avec le calcul de votre taxe.</p>
           <div class="champ">
             <label for="commune">Commune</label>
             <input type="text" id="commune" list="communes-list" placeholder="Tapez les premières lettres…" autocomplete="off" spellcheck="false">
@@ -159,135 +203,78 @@
           </div>
         </div>
 
-        <div class="etape" data-step="2" hidden>
-          <div class="etape-label">Étape 2 sur 3</div>
+        <!-- ÉTAPE 3 — les surfaces, uniquement quand la fiche est là. -->
+        <div class="etape" data-etape="surfaces" hidden>
+          <div class="etape-label"></div>
           <h2>Les surfaces</h2>
-          <p class="intro">C'est l'étape décisive. Une surface n'a de sens que comparée à une surface de même nature&nbsp;: nous vous demandons donc précisément laquelle vous saisissez.</p>
-
-          <fieldset class="champ">
-            <legend class="lab">Avez-vous votre fiche d'évaluation (formulaire 6675-M) sous les yeux&nbsp;?</legend>
-            <div class="choix">
-              <label>
-                <input type="radio" name="fiche" value="oui" id="fiche-oui">
-                <span><span class="t">Oui, je l'ai</span><span class="d">Vous pouvez y lire les chiffres réellement retenus par l'administration.</span></span>
-              </label>
-              <label>
-                <input type="radio" name="fiche" value="non" id="fiche-non" checked>
-                <span><span class="t">Non, pas encore</span><span class="d">Elle s'obtient gratuitement sur impots.gouv.fr. Le pré-diagnostic reste possible, mais il sera limité.</span></span>
-              </label>
-            </div>
-            <div class="encart info" id="notice-sans-fiche">
-              <p style="margin-top:0"><b>Sans la fiche, aucune surface ne sera comparée</b> — la surface
-              retenue par l'administration n'existe que sur ce document, ni sur votre avis d'imposition ni
-              sur votre acte de vente. Nous préférons ne rien calculer plutôt que de comparer deux
-              chiffres qui ne mesurent pas la même chose.</p>
-              <p><b>Ce qui reste possible aujourd'hui, sans elle&nbsp;:</b> signaler un élément de confort
-              qui n'existe plus (piscine comblée, dépendance démolie, véranda retirée) — c'est le motif le
-              plus simple à documenter, et il ne dépend d'aucune surface. Vous repartirez aussi avec la
-              marche à suivre et les délais.</p>
-              <p><b>Comment l'obtenir, gratuitement&nbsp;:</b> depuis la messagerie sécurisée de votre
-              espace particulier sur impots.gouv.fr, en demandant « la fiche d'évaluation (6675-M) de mon
-              local », ou directement auprès de votre centre des impôts fonciers. <b>Ne cherchez pas de
-              PDF à télécharger&nbsp;:</b> il n'en existe pas. Ce n'est pas un formulaire vierge mais un
-              dossier déjà rempli, propre à votre bien, que l'administration vous transmet sur demande.</p>
-            </div>
-          </fieldset>
-
-          <div class="champ" id="champ-fiche" hidden>
-            <label for="surf_fiche">Surface réelle totale indiquée sur la fiche</label>
-            <div class="unit" data-unit="m²"><input type="number" id="surf_fiche" min="8" max="400" step="1" inputmode="numeric" placeholder="ex : 104"></div>
-            <details class="schema">
-              <summary>Voir où lire ce chiffre sur la fiche</summary>
-              <p class="schema-avert"><b>Schéma de lecture, pas une reproduction.</b> Nous ne montrons pas
-              d'image de fiche&nbsp;: la vôtre est un document nominatif, et il n'existe aucun modèle
-              vierge publié. Le tableau ci-dessous reprend les rubriques que la fiche comporte, dans
-              l'ordre où elles apparaissent, d'après les articles 324 L à 324 V de l'annexe III au code
-              général des impôts et les commentaires du BOFiP.</p>
-              <div class="tableau-enveloppe">
-                <table class="tableau-adaptatif">
-                  <thead><tr><th>Rubrique de la fiche</th><th>Ce qu'on y lit</th><th class="nombre">À saisir ici&nbsp;?</th></tr></thead>
-                  <tbody>
-                    <tr><td data-label="Rubrique de la fiche">Désignation du local</td><td data-label="Ce qu'on y lit">Adresse, références cadastrales, nature du local</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
-                    <tr><td data-label="Rubrique de la fiche">Catégorie</td><td data-label="Ce qu'on y lit">Le classement de 1 à 8, qui traduit le niveau de confort général</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
-                    <tr><td data-label="Rubrique de la fiche"><b>Surface réelle</b>, partie par partie</td><td data-label="Ce qu'on y lit">Des mètres carrés bruts, sans correction. C'est la seule rubrique en mètres carrés réels.</td><td class="nombre" data-label="À saisir ici ?"><b>oui</b></td></tr>
-                    <tr><td data-label="Rubrique de la fiche">Correctifs</td><td data-label="Ce qu'on y lit">Coefficients d'importance, d'entretien, de situation — des multiplicateurs, pas des surfaces</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
-                    <tr><td data-label="Rubrique de la fiche">Équivalences superficielles</td><td data-label="Ce qu'on y lit">Des mètres carrés fictifs ajoutés pour les éléments de confort</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
-                    <tr><td data-label="Rubrique de la fiche">Surface pondérée</td><td data-label="Ce qu'on y lit">Le résultat du calcul&nbsp;: surface réelle corrigée par les coefficients, plus les équivalences. Elle ne se compare pas à un relevé au mètre ruban.</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
-                    <tr><td data-label="Rubrique de la fiche">Valeur locative</td><td data-label="Ce qu'on y lit">Un montant en euros, base de l'imposition</td><td class="nombre" data-label="À saisir ici ?">non</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p class="schema-avert">Le repère le plus sûr&nbsp;: <b>si le chiffre que vous lisez est
-              nettement plus grand que ce que vous mesurez chez vous, c'est la surface pondérée</b> —
-              ce n'est pas celle-là.</p>
-            </details>
-            <div class="hint-bloc">
-              <p><b>Où la trouver</b>
-                La fiche décompose votre logement partie par partie, avec pour chacune une colonne
-                « surface réelle ». Additionnez ces surfaces, ou reprenez le total si la fiche
-                l'indique. C'est un nombre de mètres carrés bruts, sans correction.</p>
-              <p class="attention"><b>Ce n'est pas la surface pondérée</b>
-                Celle-ci figure plus bas sur la même fiche, après correctifs et équivalences
-                (environ 5&nbsp;m² pour une baignoire, 3&nbsp;m² pour un WC, 2&nbsp;m² par pièce
-                chauffée). Elle ne se compare donc pas à une mesure au mètre ruban&nbsp;: si le
-                chiffre lu est nettement plus grand que ce que vous mesurez chez vous, ce n'est pas
-                celui-là.</p>
-              <p class="encours"><b>Point que nous vérifions actuellement</b>
-                Nous contrôlons, sur de vraies fiches, quelles parties du logement entrent dans
-                chacun des deux chiffres que nous vous demandons. Tant que ce point n'est pas tranché,
-                un écart entre eux peut venir de la question que nous posons plutôt que de votre
-                situation.</p>
+          <p class="intro">Une surface n'a de sens que comparée à une surface de même nature. Nous vous
+          demandons donc précisément laquelle vous saisissez.</p>
+          <div id="champ-fiche">
+            <div class="champ">
+              <label for="surf_fiche">Surface réelle inscrite sur votre fiche, en m²</label>
+              <div class="unite"><input type="text" id="surf_fiche" inputmode="decimal" placeholder="ex : 104"></div>
+              <div class="aide"><b>La ligne «&nbsp;surface réelle&nbsp;», pas la surface pondérée.</b>
+              Celle-ci figure plus bas sur la même fiche, après correctifs et équivalences (5&nbsp;m² pour
+              une baignoire, 3&nbsp;m² pour un WC particulier, 2&nbsp;m² de chauffage central par pièce et
+              annexe d'hygiène&nbsp;— article 324 T de l'annexe III au CGI). Les correctifs peuvent
+              l'augmenter comme la diminuer&nbsp;: elle ne se compare pas à une mesure au mètre ruban.</div>
+              <div class="erreur-champ" id="e-surf-fiche" hidden></div>
+              <details class="schema">
+                <summary>Voir où lire ce chiffre sur la fiche</summary>
+                <div id="schema-fiche"></div>
+              </details>
             </div>
           </div>
-
           <div class="champ">
-            <label for="surf_reelle">Surface habitable du bien aujourd'hui</label>
-            <div class="unit" data-unit="m²"><input type="number" id="surf_reelle" min="8" max="400" step="1" inputmode="numeric" placeholder="ex : 108"></div>
-            <div class="aide">
-              Mesurée au sol, à l'intérieur des murs, pièces habitables uniquement — hors garage, cave,
-              et combles non aménagés. Si vous ne l'avez jamais mesurée, reprenez la surface de votre
-              acte de vente et indiquez-le juste en dessous.
-            </div>
+            <label for="surf_reelle">Surface habitable que vous mesurez aujourd'hui, en m²</label>
+            <div class="unite"><input type="text" id="surf_reelle" inputmode="decimal" placeholder="ex : 96"></div>
+            <div class="aide">Au mètre ruban, ou d'après un plan à jour.</div>
+            <div class="erreur-champ" id="e-surf-reelle" hidden></div>
           </div>
-
           <div class="champ">
-            <label for="certitude">D'où vient la surface que vous venez de saisir&nbsp;?</label>
+            <label for="certitude">D'où vient ce chiffre&nbsp;?</label>
             <select id="certitude">
-              <option value="mesuree">Je l'ai mesurée moi-même, au mètre</option>
-              <option value="acte" selected>Elle vient de mon acte de vente ou d'un diagnostic</option>
-              <option value="estimee">C'est une estimation de mémoire</option>
+              <option value="mesuree">Je l'ai mesuré moi-même</option>
+              <option value="acte">Il vient de mon acte ou d'un diagnostic</option>
+              <option value="estimee">C'est une estimation</option>
             </select>
-            <div class="aide">Nous ne fabriquons jamais un signal à partir d'un chiffre approximatif. Une réponse incertaine réduit seulement le crédit que nous accordons au constat — et nous l'écrivons noir sur blanc dans le résultat.</div>
+            <div class="aide">Un chiffre estimé ne disparaît pas du résultat&nbsp;: il y est signalé comme tel.</div>
           </div>
         </div>
 
-        <div class="etape" data-step="3" hidden>
-          <div class="etape-label">Étape 3 sur 3</div>
-          <h2>Les éléments de confort</h2>
-          <p class="intro">Rien ne se met à jour tout seul : un élément disparu continue d'entrer dans le calcul tant que personne ne l'a signalé. C'est le point le plus simple à démontrer, et le plus souvent négligé.</p>
-
+        <!-- ÉTAPE 4 — une seule question, centrée sur l'écart.
+             Les deux listes parallèles « éléments portés à l'évaluation » et
+             « éléments existants aujourd'hui » demandaient au visiteur de faire
+             lui-même la soustraction. La question porte maintenant directement
+             sur ce que le moteur cherche. Le moteur, lui, reçoit exactement les
+             mêmes entrées qu'avant : ef = les éléments cochés, ee = vide. -->
+        <div class="etape" data-etape="elements" hidden>
+          <div class="etape-label"></div>
+          <h2 id="titre-elements">Un élément disparu</h2>
+          <p class="intro" id="intro-elements"></p>
           <fieldset class="champ">
-            <legend class="lab" id="lab-factures">Éléments pris en compte dans votre évaluation</legend>
-            <div class="grille-cases" id="confort-factures">
+            <legend class="lab" id="lab-elements"></legend>
+            <div class="grille-cases" id="elements-disparus">
               <label><input type="checkbox" value="piscine"> Piscine</label>
               <label><input type="checkbox" value="garage"> Garage</label>
               <label><input type="checkbox" value="dependance"> Dépendance</label>
               <label><input type="checkbox" value="veranda"> Véranda</label>
+              <label><input type="checkbox" value="autre" id="el-autre"> Autre élément</label>
+              <label><input type="checkbox" value="aucun" id="el-aucun"> Aucun</label>
+              <label><input type="checkbox" value="nesaispas" id="el-nesaispas"> Je ne sais pas</label>
             </div>
-            <div class="aide" id="hint-factures">À votre connaissance&nbsp;: ce qui a été déclaré à la construction, lors de travaux, ou repris dans l'acte d'achat.</div>
-          </fieldset>
-
-          <fieldset class="champ">
-            <legend class="lab">Éléments qui existent réellement aujourd'hui</legend>
-            <div class="grille-cases" id="confort-existants">
-              <label><input type="checkbox" value="piscine"> Piscine</label>
-              <label><input type="checkbox" value="garage"> Garage</label>
-              <label><input type="checkbox" value="dependance"> Dépendance</label>
-              <label><input type="checkbox" value="veranda"> Véranda</label>
+            <div class="champ" id="zone-autre" hidden style="margin-top:12px">
+              <label for="el-autre-texte">Lequel&nbsp;?</label>
+              <input type="text" id="el-autre-texte" placeholder="ex : cheminée, cave aménagée…" autocomplete="off" maxlength="80">
+              <div class="aide">Ce que vous écrivez ici <b>ne produit aucun motif automatique</b>&nbsp;:
+              nous ne savons pas comment cet élément est traité sur votre fiche. Il sera signalé comme
+              «&nbsp;à vérifier manuellement&nbsp;».</div>
             </div>
-            <div class="aide">Ne cochez que ce qui est physiquement présent sur la propriété au moment où vous répondez.</div>
+            <div class="aide" id="hint-elements"></div>
+            <div class="erreur-champ" id="e-elements" hidden></div>
           </fieldset>
         </div>
+
 
         <div class="nav-etapes">
           <button class="btn-secondary" id="back-btn" hidden>Précédent</button>
@@ -306,6 +293,42 @@
        le seul des trois outils où c'est le cas. -->
   <section class="shell" id="resultats" hidden aria-live="polite">
     <div class="r4" id="tf-r4" style="margin-bottom:26px"></div>
+        <div class="apres-resultat">
+          <div class="bloc">
+            <h3>Emporter le récapitulatif</h3>
+            <p>Deux documents PDF, gratuits, générés dans votre navigateur. Rien n'est envoyé nulle part.</p>
+            <div class="telecharge">
+              <div>
+                <button class="btn-secondary" id="dl-recap">Télécharger le récapitulatif (PDF)</button>
+                <p class="quoi">Vos réponses, chaque élément relevé avec ce que nous en déduisons et ce qu'il
+                reste à vérifier, la valeur de chaque constat, et les sources. 2 pages.</p>
+              </div>
+              <div id="dl-dossier-zone" hidden>
+                <button class="btn-secondary" id="dl-dossier">Télécharger le dossier complet (PDF)</button>
+                <p class="quoi">Le récapitulatif, plus un <b>projet de courrier</b> à relire, compléter et
+                signer, la liste des pièces à joindre et les délais. À vérifier avant envoi&nbsp;: c'est un
+                modèle, pas une pièce prête à poster.</p>
+              </div>
+              <div id="dl-dossier-non" hidden>
+                <p class="quoi"><b>Le projet de courrier n'est pas proposé ici.</b> Nous ne produisons un
+                modèle de réclamation que lorsqu'un élément est retenu comme motif et repose sur une donnée
+                lue sur votre fiche. Écrire à l'administration sans motif documenté vous ferait perdre du
+                temps, et nous ne voulons pas y contribuer.</p>
+              </div>
+            </div>
+            <p class="aide" id="pdf-erreur" hidden></p>
+          </div>
+  
+          <div class="bloc">
+            <div class="cta-row" style="margin-top:0">
+              <button class="btn-secondary" id="restart-btn">Refaire le pré-diagnostic</button>
+              <a class="btn btn-secondary" href="index.html#situations">Voir les autres vérifications</a>
+            </div>
+          </div>
+        </div>
+
+        <details class="detail-diagnostic">
+          <summary>Voir le diagnostic détaillé&nbsp;: chaque élément, les sources, et le contexte de marché</summary>
     <div class="resultat-grille">
       <div>
         <div class="panneau">
@@ -356,37 +379,6 @@
 
 
 
-          <div class="bloc">
-            <h3>Emporter le récapitulatif</h3>
-            <p>Deux documents PDF, gratuits, générés dans votre navigateur. Rien n'est envoyé nulle part.</p>
-            <div class="telecharge">
-              <div>
-                <button class="btn-secondary" id="dl-recap">Télécharger le récapitulatif (PDF)</button>
-                <p class="quoi">Vos réponses, chaque élément relevé avec ce que nous en déduisons et ce qu'il
-                reste à vérifier, la valeur de chaque constat, et les sources. 2 pages.</p>
-              </div>
-              <div id="dl-dossier-zone" hidden>
-                <button class="btn-secondary" id="dl-dossier">Télécharger le dossier complet (PDF)</button>
-                <p class="quoi">Le récapitulatif, plus un <b>projet de courrier</b> à relire, compléter et
-                signer, la liste des pièces à joindre et les délais. À vérifier avant envoi&nbsp;: c'est un
-                modèle, pas une pièce prête à poster.</p>
-              </div>
-              <div id="dl-dossier-non" hidden>
-                <p class="quoi"><b>Le projet de courrier n'est pas proposé ici.</b> Nous ne produisons un
-                modèle de réclamation que lorsqu'un élément est retenu comme motif et repose sur une donnée
-                lue sur votre fiche. Écrire à l'administration sans motif documenté vous ferait perdre du
-                temps, et nous ne voulons pas y contribuer.</p>
-              </div>
-            </div>
-            <p class="aide" id="pdf-erreur" hidden></p>
-          </div>
-
-          <div class="bloc">
-            <div class="cta-row" style="margin-top:0">
-              <button class="btn-secondary" id="restart-btn">Refaire le pré-diagnostic</button>
-              <a class="btn btn-secondary" href="abonnements.html">Passer aux abonnements</a>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -409,6 +401,7 @@
         </div>
       </aside>
     </div>
+        </details>
   </section>
 
   <section class="band pale" id="limites-outil">
@@ -650,21 +643,43 @@ document.getElementById('commune').addEventListener('input', () => {
 /* =========================================================================
    Navigation du questionnaire
    ========================================================================= */
-const steps = [...document.querySelectorAll('.etape')];
+/* Le parcours est désormais à géométrie variable : l'étape « surfaces » n'existe
+   que si la fiche est en main. Les étapes sont donc désignées par un NOM, pas
+   par un indice — un indice se serait décalé silencieusement d'un parcours à
+   l'autre. `parcours()` renvoie la liste des étapes actives, dans l'ordre. */
+const ETAPES = Object.fromEntries(
+  [...document.querySelectorAll('.etape')].map(e => [e.dataset.etape, e])
+);
 let current = 0;
 let communeChoisie = null;
 
 const $ = id => document.getElementById(id);
 
-function renderProgress(){
-  [1,2,3].forEach(n => $('p'+n).classList.toggle('faite', n <= current + 1));
+function aLaFiche(){ return $('fiche-oui').checked; }
+
+function parcours(){
+  return aLaFiche()
+    ? ['fiche', 'bien', 'surfaces', 'elements']
+    : ['fiche', 'bien', 'elements'];
 }
+
+function renderProgress(){
+  const n = parcours().length;
+  $('jauge').innerHTML = Array.from({ length: n },
+    (_, i) => `<i class="${i <= current ? 'faite' : ''}"></i>`).join('');
+}
+
 function showStep(i){
-  steps.forEach((s, idx) => s.hidden = idx !== i);
+  const liste = parcours();
+  Object.values(ETAPES).forEach(e => { e.hidden = true; });
+  const nom = liste[i];
+  ETAPES[nom].hidden = false;
+  ETAPES[nom].querySelector('.etape-label').textContent = `Étape ${i + 1} sur ${liste.length}`;
   $('back-btn').hidden = i === 0;
-  $('next-btn').textContent = i === steps.length - 1 ? 'Voir mon résultat' : 'Continuer';
+  $('next-btn').textContent = i === liste.length - 1 ? 'Voir mon résultat' : 'Continuer';
   renderProgress();
 }
+
 function demarrer(){
   chargerCommunes().catch(() => {});   // le message d'erreur s'affiche dans l'aide du champ
   $('diagnostic').hidden = false;
@@ -679,22 +694,63 @@ $('restart-btn').addEventListener('click', demarrer);
 
 /* La présence de la fiche 6675-M gouverne tout le questionnaire : c'est le
    seul document où figurent la surface retenue et les éléments comptabilisés.
-   Sans elle, on n'invente pas ces chiffres — on adapte les questions. */
-function aLaFiche(){ return $('fiche-oui').checked; }
-
+   Sans elle, on n'invente pas ces chiffres — on retire les questions auxquelles
+   personne ne peut répondre, et on reformule celle qui reste. */
 function majModeFiche(){
   const avec = aLaFiche();
-  $('champ-fiche').hidden = !avec;
   $('notice-sans-fiche').hidden = avec;
-  $('lab-factures').textContent = avec
-    ? 'Éléments listés sur votre fiche d’évaluation'
-    : 'Éléments que vous pensez pris en compte dans votre évaluation';
-  $('hint-factures').textContent = avec
-    ? 'Reprenez exactement les éléments mentionnés dans le cadre « éléments de confort » de la fiche.'
-    : 'À votre connaissance : ce qui a été déclaré à la construction, lors de travaux, ou repris dans l’acte d’achat.';
+
+  $('titre-elements').textContent = avec ? 'Un élément qui n’existe plus' : 'Un élément disparu';
+  $('intro-elements').textContent = avec
+    ? 'Rien ne se met à jour tout seul. Un élément disparu peut encore être pris en compte s’il figure toujours sur votre fiche d’évaluation : c’est le point le plus simple à faire corriger.'
+    : 'Sans la fiche, nous ne savons pas ce qu’elle mentionne. Mais si un élément a disparu de votre logement, il peut encore y figurer — et c’est le seul point que vous puissiez préparer dès maintenant.';
+  $('lab-elements').textContent = avec
+    ? 'Votre fiche mentionne-t-elle un élément qui n’existe plus aujourd’hui ?'
+    : 'Un élément a-t-il disparu de votre logement depuis son évaluation ?';
+  $('hint-elements').textContent = avec
+    ? 'Reprenez le cadre « éléments de confort » de la fiche, et comparez-le à ce qui existe aujourd’hui.'
+    : 'Piscine comblée, dépendance démolie, véranda retirée… Ce que vous indiquez ici reste à confirmer sur la fiche.';
+  if (!$('diagnostic').hidden) showStep(Math.min(current, parcours().length - 1));
 }
 document.querySelectorAll('input[name=fiche]').forEach(r => r.addEventListener('change', majModeFiche));
 majModeFiche();
+
+/* Exclusivité de « Aucun » et « Je ne sais pas », et champ libre pour « Autre ».
+   Un élément libre ne doit JAMAIS produire une anomalie : nous ignorons comment
+   il est traité sur la fiche. Il n'est donc pas transmis au moteur — il est
+   rendu à part, comme un point à vérifier manuellement. */
+const CASES_ELEMENTS = [...document.querySelectorAll('#elements-disparus input')];
+const EXCLUSIFS = ['aucun', 'nesaispas'];
+CASES_ELEMENTS.forEach(c => c.addEventListener('change', () => {
+  if (c.checked && EXCLUSIFS.includes(c.value)){
+    CASES_ELEMENTS.forEach(a => { if (a !== c) a.checked = false; });
+  } else if (c.checked){
+    CASES_ELEMENTS.filter(a => EXCLUSIFS.includes(a.value)).forEach(a => { a.checked = false; });
+  }
+  $('zone-autre').hidden = !$('el-autre').checked;
+  $('e-elements').hidden = true;
+}));
+
+function elementsDisparus(){
+  return CASES_ELEMENTS.filter(c => c.checked && !EXCLUSIFS.includes(c.value) && c.value !== 'autre')
+                       .map(c => c.value);
+}
+function autreElement(){
+  return $('el-autre').checked ? $('el-autre-texte').value.trim().slice(0, 80) : '';
+}
+function controlerElements(){
+  const e = $('e-elements');
+  const rienCoche = !CASES_ELEMENTS.some(c => c.checked);
+  if (rienCoche){
+    e.textContent = "Choisissez une réponse, même « Aucun » ou « Je ne sais pas » : c'est ce qui nous dit quoi chercher.";
+    e.hidden = false; return false;
+  }
+  if ($('el-autre').checked && !autreElement()){
+    e.textContent = "Indiquez de quel élément il s'agit, ou décochez « Autre élément ».";
+    e.hidden = false; $('el-autre-texte').focus(); return false;
+  }
+  e.hidden = true; return true;
+}
 
 /* Validation des surfaces. Les bornes ne sont pas un choix métier : ce sont
    celles du jeu de données DVF (8 à 400 m²), donc le domaine sur lequel le
@@ -736,7 +792,7 @@ function restaurerHint(id){
 }
 ['surf_fiche','surf_reelle'].forEach(memoriserHint);
 
-function controlerEtape2(){
+function controlerSurfaces(){
   ['surf_fiche','surf_reelle'].forEach(restaurerHint);
   const sr = $('surf_reelle'), sf = $('surf_fiche');
   const vr = parseFloat(sr.value);
@@ -763,7 +819,10 @@ function controlerEtape2(){
 }
 
 $('next-btn').addEventListener('click', async () => {
-  if (current === 0){
+  const liste = parcours();
+  const etape = liste[current];
+
+  if (etape === 'bien'){
     const saisie = $('commune').value.trim();
     const hint = $('commune-hint');
     communeChoisie = communesIndex.get(saisie);
@@ -784,10 +843,11 @@ $('next-btn').addEventListener('click', async () => {
     if (communeChoisie.marche) statsPourDepartement(communeChoisie.code_dept).catch(() => {});
     majAvisCouverture();
   }
-  if (current === 1 && !controlerEtape2()) return;
+  if (etape === 'surfaces' && !controlerSurfaces()) return;
+  if (etape === 'elements' && !controlerElements()) return;
 
   track(`etape_${current + 1}_validee`);
-  if (current < steps.length - 1){ current++; showStep(current); }
+  if (current < liste.length - 1){ current++; showStep(current); }
   else { await runDiagnostic(); }
 });
 
@@ -807,10 +867,21 @@ function lireEntree(){
     sf: aLaFiche() ? (parseFloat($('surf_fiche').value) || 0) : null,
     sr: parseFloat($('surf_reelle').value) || 0,
     ss: $('certitude').value,
-    ef: [...document.querySelectorAll('#confort-factures input:checked')].map(i => i.value),
-    ee: [...document.querySelectorAll('#confort-existants input:checked')].map(i => i.value),
+    /* Le moteur reçoit EXACTEMENT le même contrat qu'avant : `ef` les éléments
+       portés à l'évaluation, `ee` ceux qui existent encore. La question posée a
+       changé — « lequel a disparu ? » au lieu de deux listes à soustraire — mais
+       la traduction est directe : un élément disparu est porté à l'évaluation et
+       n'existe plus. `ee` est donc vide, et moteur.js n'est pas modifié.
+       « Autre élément » n'entre PAS ici : un texte libre ne peut pas devenir un
+       motif automatique. Il voyage à part, dans `autre`. */
+    ef: elementsDisparus(),
+    ee: [],
   };
 }
+
+/* Hors contrat du moteur, volontairement : ce champ ne participe à aucun
+   calcul, à aucun score, à aucune règle de vente. */
+function lireAutreElement(){ return autreElement(); }
 
 async function runDiagnostic(){
   const entree = lireEntree();
@@ -824,6 +895,7 @@ async function runDiagnostic(){
     catch (e) { /* données indisponibles : on continue sans repère */ }
   }
   dernierDiagnostic = calculerDiagnostic(entree, stats);
+  dernierDiagnostic.autreElement = lireAutreElement();
   renderResults(dernierDiagnostic);
 }
 
@@ -921,6 +993,12 @@ function remplirRecapQuatreCases(d){
       titre: "Chaque élément, ligne par ligne sur la fiche",
       texte: "Confirmez que l'élément y figure bien, et réunissez de quoi dater sa disparition ou sa modification. Le détail des pièces utiles figure plus bas, élément par élément.",
       regle: 'tf-delai-reclamation',
+    });
+  }
+  if (d.autreElement){
+    verification.push({
+      titre: `« ${d.autreElement} » : à vérifier manuellement sur la fiche`,
+      texte: "Vous avez signalé cet élément vous-même. Nous ne le traitons pas comme un motif et nous ne l'avons pas fait entrer dans le diagnostic : nous ignorons s'il figure sur votre fiche d'évaluation et, le cas échéant, sous quelle forme il y est compté. Cherchez-le dans le cadre « éléments de confort » ; s'il y figure et qu'il n'existe plus, il rejoint les points à faire corriger.",
     });
   }
   if (observations.length){
