@@ -522,6 +522,11 @@ function normaliserLigne(brut, rang) {
     engagementMois: dureeOk ? Math.round(mois) : null,
     souscritEnLigne: brut.souscritEnLigne === true,
     recent: brut.recent === true,
+    // Confirmation d'avoir consulté le document contractuel. Rien ne la pose
+    // aujourd'hui : aucune question du parcours ne la demande, et une date
+    // tapée peut parfaitement l'être de mémoire. Tant qu'elle est fausse,
+    // aucune information n'est présentée comme « lue sur le contrat ».
+    documentConsulte: brut.documentConsulte === true,
     // Réponses du parcours de vérification. Ce sont des DÉCLARATIONS : elles
     // aiguillent les questions et ne déclenchent aucune règle. Une valeur
     // inconnue retombe sur null, jamais sur « sans engagement » — ce serait
@@ -777,9 +782,25 @@ function demarcheContrat(ligne, aujourdhui) {
   }
 
   if (cat === 'assurance') {
+    const st = sousTypeAssurance(ligne.nom);
+    if (st === 'habitation' || st === 'auto') {
+      const quoi = st === 'habitation' ? 'une assurance habitation' : 'une assurance de véhicule à moteur';
+      return {
+        titre: "Relevez la date d'échéance annuelle sur votre avis de cotisation",
+        texte: `Le nom que vous avez donné — « ${ligne.nom} » — désigne ${quoi}, et la règle rappelée ci-dessous s'applique à ce type de contrat : résiliation à chaque échéance annuelle, et à tout moment après la première année. Nous ne vérifions pas pour autant que votre contrat en est bien un, ni depuis quand il court : ces deux points figurent sur votre avis de cotisation, avec la date d'échéance qui commande tout le reste.${st === 'auto' ? " Un véhicule à moteur doit rester assuré : ne résiliez pas avant d'avoir souscrit ailleurs." : ''}`,
+        regle: 'assurance-resiliation-annuelle', liens: [],
+      };
+    }
+    if (st === 'autre-regime') {
+      return {
+        titre: "Vérifiez le régime propre à ce type d'assurance",
+        texte: `Le nom que vous avez donné — « ${ligne.nom} » — ne correspond ni à une assurance habitation ni à une assurance de véhicule. La règle rappelée ci-dessous ne le couvre donc pas : complémentaire santé, assurance d'un appareil et assurance emprunteur relèvent chacune de dispositions distinctes, que ce site ne traite pas. Demandez par écrit à votre assureur les conditions et la date d'échéance de ce contrat précis.`,
+        regle: 'assurance-resiliation-annuelle', liens: [],
+      };
+    }
     return {
-      titre: "Identifiez le type exact de cette assurance, puis sa date d'échéance",
-      texte: "La catégorie « assurance » recouvre des contrats qui n'obéissent pas aux mêmes règles : habitation et véhicule à moteur d'un côté, complémentaire santé, assurance d'un appareil ou assurance emprunteur de l'autre. Commencez par nommer le vôtre, puis relevez sa date d'échéance annuelle sur l'avis de cotisation. Ces deux éléments décident de ce que vous pouvez faire, et nous ne les devinons pas.",
+      titre: "Précisez de quelle assurance il s'agit, puis relevez son échéance",
+      texte: "Le nom enregistré ne nous dit pas de quel contrat il s'agit, et la catégorie « assurance » recouvre des régimes qui n'obéissent pas aux mêmes règles : habitation et véhicule à moteur d'un côté, complémentaire santé, assurance d'un appareil ou assurance emprunteur de l'autre. Renommez la ligne pour vous y retrouver, puis relevez la date d'échéance annuelle sur l'avis de cotisation.",
       regle: 'assurance-resiliation-annuelle', liens: [],
     };
   }
@@ -808,14 +829,28 @@ function demarcheContrat(ligne, aujourdhui) {
     };
   }
 
-  /* Sans catégorie, et sans aucune date : la seule action utile est d'aller
-     chercher l'information qui débloque le reste. Nous n'attribuons pas de
-     catégorie d'office — rien ne nous dit de quel contrat il s'agit. */
+  /* Sans catégorie, on ne sait pas de quel contrat il s'agit — et demander
+     une date d'échéance à quelqu'un qui n'a pas encore identifié le
+     professionnel met la charrue devant les bœufs. On remet les deux étapes
+     dans l'ordre : nommer, retrouver le contrat, puis en lire l'échéance.
+     Nous n'attribuons toujours aucune catégorie d'office. */
   return {
-    titre: "Retrouvez la date de prochaine échéance de ce contrat",
-    texte: "C'est l'information qui débloque le reste : elle situe la fenêtre pendant laquelle l'information sur la reconduction doit vous parvenir. Elle figure sur votre contrat, une facture, ou le courriel de souscription. Préciser la catégorie du contrat permettra en outre d'appliquer les règles qui lui sont propres.",
+    titre: "Identifiez le professionnel, puis retrouvez le contrat",
+    texte: "Tant que vous ne savez pas qui prélève, il n'y a rien à vérifier. Relevez le libellé exact sur votre relevé bancaire et cherchez ce nom dans vos courriels : la confirmation de souscription s'y trouve presque toujours, et c'est elle qui donne le contrat. Votre banque peut aussi vous communiquer le créancier d'un prélèvement. Une fois le professionnel identifié et le contrat en main, relevez-y la date de prochaine échéance : c'est elle qui débloquera la suite.",
     regle: null, liens: [],
   };
+}
+
+/** Lit le NOM que l'utilisateur a donné à sa ligne d'assurance, pour savoir
+ *  quelle question lui poser. C'est un repérage lexical sur son propre texte,
+ *  rien d'autre : il choisit une formulation, jamais une conclusion. Un nom
+ *  qui ne dit rien renvoie null, et la question redevient générale. */
+function sousTypeAssurance(nom) {
+  const n = String(nom || '').toLowerCase();
+  if (/habitation|logement|appartement|maison|locataire|propri[ée]taire|mrh/.test(n)) return 'habitation';
+  if (/auto|voiture|v[ée]hicule|moto|scooter|deux[- ]roues/.test(n)) return 'auto';
+  if (/sant[ée]|mutuelle|compl[ée]mentaire|pr[eê]voyance|emprunteur|pr[eê]t|cr[ée]dit|t[ée]l[ée]phone|mobile|appareil|nomade|scolaire|animal|animaux/.test(n)) return 'autre-regime';
+  return null;
 }
 
 /* --------------------------------------------------------------------------
@@ -825,10 +860,17 @@ function demarcheContrat(ligne, aujourdhui) {
    téléphone : une carte par contrat, pas quatre listes par thème.
    -------------------------------------------------------------------------- */
 
-/** `source` distingue ce qui a été LU sur un document ('saisi') de ce qui a
- *  été déclaré de mémoire ('declare'), et de ce qui est calculé ('calcule').
- *  L'interface le montre : un souvenir et une date de contrat ne valent pas
- *  la même chose, et la page ne doit pas laisser croire l'inverse. */
+/** `source` dit d'où vient chaque information :
+ *    'calcule' — nous l'avons obtenue par calcul sur le montant saisi ;
+ *    'declare' — l'utilisateur l'a répondue de mémoire, au parcours ;
+ *    'indique' — l'utilisateur l'a saisie, sans nous dire d'où elle venait ;
+ *    'saisi'   — elle a été relevée sur le document contractuel.
+ *
+ *  Le dernier niveau exige `documentConsulte`, que rien ne pose aujourd'hui :
+ *  aucune question ne demande à l'utilisateur s'il a bien ouvert son contrat.
+ *  Une date tapée l'est donc « par vous », pas « d'après le contrat » — la
+ *  différence compte, puisque c'est elle qui sépare un souvenir d'une preuve.
+ *  Le niveau reste dans le code, prêt pour le jour où la question sera posée. */
 function ficheContrat(ligne, aujourdhui) {
   const auj = aujourdhui || new Date();
   const p = PERIODICITES[ligne.periodicite] || PERIODICITES.mensuelle;
@@ -845,9 +887,10 @@ function ficheContrat(ligne, aujourdhui) {
   if (ligne.categorie && CATEGORIES[ligne.categorie]) {
     sais.push({ source: 'declare', texte: `Catégorie : ${CATEGORIES[ligne.categorie].toLowerCase()}.` });
   }
+  const provDate = ligne.documentConsulte === true ? 'saisi' : 'indique';
   if (eng) {
     sais.push({
-      source: 'saisi',
+      source: provDate,
       texte: eng.termine
         ? `Engagement de ${eng.dureeMois} mois terminé depuis le ${eng.fin.toLocaleDateString('fr-FR')}.`
         : `Engagement de ${eng.dureeMois} mois, en cours jusqu'au ${eng.fin.toLocaleDateString('fr-FR')}.`,
@@ -863,7 +906,7 @@ function ficheContrat(ligne, aujourdhui) {
     });
   }
   if (fen) {
-    sais.push({ source: 'saisi', texte: `Prochaine échéance le ${fen.echeance.toLocaleDateString('fr-FR')}.` });
+    sais.push({ source: provDate, texte: `Prochaine échéance le ${fen.echeance.toLocaleDateString('fr-FR')}.` });
   }
   if (ligne.souscritEnLigne) sais.push({ source: 'declare', texte: 'Souscrit en ligne.' });
   if (ligne.recent) sais.push({ source: 'declare', texte: 'Souscrit il y a moins de quatorze jours.' });
@@ -1012,5 +1055,5 @@ if (typeof module !== 'undefined' && module.exports) {
                      CHOIX_RAPIDES, normaliserLigne, normaliserLignes, contratApprofondi,
                      etatLigne, repartition, resultat4Inventaire,
                      RESSOURCES, ENGAGEMENT_DECLARE, etapeSuivante, resteAVerifier,
-                     avancement, demarcheContrat, ficheContrat };
+                     avancement, sousTypeAssurance, demarcheContrat, ficheContrat };
 }

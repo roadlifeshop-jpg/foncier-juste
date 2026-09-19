@@ -1076,8 +1076,12 @@ function majParcours(){
 }
 
 /* ====================== LES FICHES, UN CONTRAT PAR CARTE ====================== */
+/* « Lu sur le contrat » est le seul niveau qui vaille preuve, et il exige une
+   confirmation que rien ne demande encore : une date tapée est donc « indiquée
+   par vous », pas relevée sur un document. */
 const PROVENANCE = {
   saisi:   { libelle: 'lu sur le contrat', classe: 'saisi' },
+  indique: { libelle: 'indiqué par vous',  classe: 'declare' },
   declare: { libelle: 'déclaré',           classe: 'declare' },
   calcule: { libelle: 'calculé',           classe: 'calcule' },
 };

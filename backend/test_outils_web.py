@@ -565,12 +565,28 @@ SCRIPT_TESTS = r"""
   /* ---- Déclaré n'est pas vérifié, et la fiche le montre ------------------ */
   const fi = o => ficheContrat(Object.assign({}, base5, o), AUJ);
 
-  vrai("une date lue sur le contrat est marquée « saisi »",
-       fi({ echeance:'2027-03-10' }).sais.some(x => x.source === 'saisi' && /échéance/i.test(x.texte)));
-  vrai("une réponse de mémoire est marquée « déclaré »",
-       fi({ engagementDeclare:'sans' }).sais.some(x => x.source === 'declare' && /pas engagé/.test(x.texte)));
-  vrai("le montant est marqué « calculé »",
-       fi({}).sais.some(x => x.source === 'calcule'));
+  /* « Lu sur le contrat » exige une confirmation que rien ne pose aujourd'hui :
+     une date tapée est « indiquée par vous », jamais présentée comme relevée
+     sur un document. Le niveau reste atteignable le jour où la question sera
+     posée — l'assertion suivante l'exerce explicitement. */
+  vrai("une date saisie sans confirmation est marquée « indiqué par vous »",
+       fi({ echeance:'2027-03-10' }).sais.some(x => x.source === 'indique' && /échéance/i.test(x.texte)));
+  vrai("un engagement daté sans confirmation est marqué « indiqué par vous »",
+       fi({ engagementDebut: reculeMois(AUJ, 6), engagementMois: 24 })
+         .sais.some(x => x.source === 'indique' && /Engagement de 24 mois/.test(x.texte)));
+  vrai("aucune fiche ne prétend lire un contrat tant que rien n'est confirmé",
+       [{}, { echeance:'2027-03-10' }, { engagementDebut: reculeMois(AUJ, 6), engagementMois: 24 },
+        { souscritEnLigne:true }, { recent:true }]
+         .every(o => fi(o).sais.every(x => x.source !== 'saisi')));
+  vrai("confirmation donnée : la date devient « lue sur le contrat »",
+       fi({ echeance:'2027-03-10', documentConsulte:true })
+         .sais.some(x => x.source === 'saisi' && /échéance/i.test(x.texte)));
+  eq("la confirmation est normalisée, et fausse par défaut",
+     [normaliserLignes([{ id:'dc', nom:'D', montant:100 }])[0].documentConsulte,
+      normaliserLignes([{ id:'dc', nom:'D', montant:100, documentConsulte:'oui' }])[0].documentConsulte,
+      normaliserLignes([{ id:'dc', nom:'D', montant:100, documentConsulte:true }])[0].documentConsulte],
+     [false, false, true]);
+
   vrai("« sans engagement » ne conclut jamais à une résiliation libre",
        fi({ categorie:'telecom', engagementDeclare:'sans' }).verifier
          .some(v => /déclaration, pas une vérification/.test(v) && /sans frais ni condition/.test(v)));
@@ -597,9 +613,36 @@ SCRIPT_TESTS = r"""
              d.liens.some(x => /F22479/.test(x.url)))(dem({ categorie:'telecom', engagementDeclare:'sans' })));
   vrai("télécom : aucune conclusion de résiliation sans frais",
        /ne rend pas le contrat résiliable sans condition/.test(dem({ categorie:'telecom', engagementDeclare:'sans' }).texte));
-  vrai("assurance : la règle est citée, et l'hétérogénéité de la catégorie est dite",
-       (d => d.regle === 'assurance-resiliation-annuelle' && /n'obéissent pas aux mêmes règles/.test(d.texte))
-         (dem({ categorie:'assurance' })));
+  /* ---- Assurance : la formulation tient compte du nom déjà saisi -------- */
+  eq("le nom est lu, pas interprété au-delà",
+     ['Assurance habitation', 'Assurance auto', 'Mutuelle santé', 'Assurance emprunteur', 'Contrat AXA', ''].map(sousTypeAssurance),
+     ['habitation', 'auto', 'autre-regime', 'autre-regime', null, null]);
+  vrai("assurance habitation : le nom est repris, l'échéance est la démarche",
+       (d => /« Assurance habitation »/.test(d.texte) && /avis de cotisation/.test(d.titre + d.texte) &&
+             !/Identifiez le type exact/.test(d.titre))
+         (dem({ categorie:'assurance', nom:'Assurance habitation' })));
+  vrai("assurance habitation : rien n'est conclu sur la nature du contrat",
+       /Nous ne vérifions pas pour autant/.test(dem({ categorie:'assurance', nom:'Assurance habitation' }).texte));
+  vrai("assurance auto : le rappel d'obligation d'assurance est donné",
+       /ne résiliez pas avant d'avoir souscrit ailleurs/.test(dem({ categorie:'assurance', nom:'Assurance auto' }).texte));
+  vrai("mutuelle santé : la règle habitation/auto est dite non applicable",
+       /ne le couvre donc pas/.test(dem({ categorie:'assurance', nom:'Mutuelle santé' }).texte));
+  vrai("nom muet : la question redevient générale",
+       /Précisez de quelle assurance/.test(dem({ categorie:'assurance', nom:'Contrat AXA' }).titre));
+
+  /* ---- Sans catégorie : identifier avant de dater ----------------------- */
+  vrai("prélèvement non identifié : identifier le professionnel vient en premier",
+       /Identifiez le professionnel/.test(dem({}).titre));
+  vrai("prélèvement non identifié : l'échéance est l'étape d'après, pas la première",
+       (t => t.indexOf('relevé bancaire') < t.indexOf('date de prochaine échéance'))
+         (dem({}).texte));
+  vrai("une réponse de mémoire est marquée « déclaré »",
+       fi({ engagementDeclare:'sans' }).sais.some(x => x.source === 'declare' && /pas engagé/.test(x.texte)));
+  vrai("le montant est marqué « calculé »",
+       fi({}).sais.some(x => x.source === 'calcule'));
+  vrai("assurance : la règle est citée quelle que soit la formulation retenue",
+       ['Assurance habitation', 'Mutuelle santé', 'Contrat AXA'].every(n =>
+         dem({ categorie:'assurance', nom:n }).regle === 'assurance-resiliation-annuelle'));
   vrai("énergie : aucune économie déduite de la mensualité",
        (d => /acompte estimé/.test(d.texte) && /n'en déduisons aucune économie/.test(d.texte) && !d.liens.length)
          (dem({ categorie:'energie' })));
