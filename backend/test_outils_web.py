@@ -701,11 +701,18 @@ SCRIPT_TESTS = r"""
        new Set(OFFRES_MOBILES.map(o => o.operateur)).size >= 3);
   vrai("comparatif : trié par mensualités croissantes",
        cmp.retenues.every((r, i) => i === 0 || cmp.retenues[i - 1].recurrent12 <= r.recurrent12));
-  vrai("à 24,99 €/mois, une offre aux frais connus est moins chère, écart chiffré",
+  /* Le verdict « moins cher » exige désormais un besoin en données déclaré :
+     sans lui, un forfait 1 Go serait le moins cher de la liste sans forcément
+     convenir. L'assertion en fournit donc un. */
+  const cmpBesoin = comparerMobile(situ({ donneesNecessaires: 20 }), AUJ);
+  vrai("à 24,99 €/mois et 20 Go déclarés, une offre aux frais connus est moins chère",
        (x => x.moinsCher === true && x.ecart12 === 2499 * 12 - x.coutTotalConnu)
-         (cmp.retenues.find(r => r.fraisConnus && r.moinsCher)));
+         (cmpBesoin.retenues.find(r => r.fraisConnus && r.moinsCher)));
+  vrai("la même liste sans besoin déclaré ne désigne aucune offre moins chère",
+       cmp.retenues.every(r => r.moinsCher === null));
   eq("écart calculé sur douze mois, frais compris, pas sur la mensualité affichée",
-     comparerMobile(situ({ prixActuel: 1999 }), AUJ).retenues.find(r => r.offre.id === 'sosh-20go').ecart12,
+     comparerMobile(situ({ prixActuel: 1999, donneesNecessaires: 20 }), AUJ)
+       .retenues.find(r => r.offre.id === 'sosh-20go').ecart12,
      1999 * 12 - (11988 + 1000));
 
   /* ---- Une promotion qui expire ---- */
@@ -844,6 +851,8 @@ SCRIPT_TESTS = r"""
   vrai("une offre aux frais connus, elle, porte bien son écart",
        (x => x.moinsCher === true && x.coutTotalConnu === 16588)
          (cas.retenues.find(r => r.offre.id === 'free-serie-110go')));
+  vrai("le besoin étant déclaré dans ce cas, le verdict est permis",
+       cas.retenues.every(r => r.besoinInconnu === false));
   vrai("le tri ne récompense pas l'absence de frais : il porte sur les mensualités",
        cas.retenues.every((r, i) => i === 0 || cas.retenues[i - 1].recurrent12 <= r.recurrent12));
   vrai("la synthèse signale que des frais manquent dans la liste",
@@ -948,6 +957,43 @@ SCRIPT_TESTS = r"""
   eq("la box aussi, pour le scénario groupé", boxDuBilan(plusieurs).montant, 3999);
   eq("sans mobile : rien n'est prérempli",
      mobileDuBilan(plusieurs.filter(d => d.poste !== 'mobile')), null);
+
+  /* ---- Reprise du bilan vers l'inventaire : offerte et filtrée ---------- */
+  eq("les postes qui ne sont pas des contrats n'ont aucune catégorie de contrat",
+     ['logement','transport','autre'].map(p => POSTES[p].categorieContrat), [null, null, null]);
+  eq("les contrats en ont une, sauf « Abonnements » qui reste à préciser",
+     ['mobile','box','energie','assurance','abonnements'].map(p => POSTES[p].categorieContrat),
+     ['telecom', 'telecom', 'energie', 'assurance', '']);
+  vrai("chaque catégorie de contrat proposée existe bien dans CATEGORIES",
+       Object.values(POSTES).every(p => p.categorieContrat === null || p.categorieContrat === '' ||
+         !!CATEGORIES[p.categorieContrat]));
+
+  const bilanMixte = [
+    { id:'r1', poste:'mobile',   montant: 2490, periodicite:'mensuelle' },
+    { id:'r2', poste:'logement', montant: 70000, periodicite:'mensuelle' },
+    { id:'r3', poste:'energie',  montant: 12000, periodicite:'mensuelle' },
+    { id:'r4', poste:'transport', montant: 8000, periodicite:'mensuelle' },
+  ];
+  eq("un loyer et du carburant ne sont jamais proposés à la reprise",
+     postesReprenables(bilanMixte, []).map(x => x.poste), ['mobile', 'energie']);
+  eq("la reprise conserve montant et rythme, sans rien réinterpréter",
+     postesReprenables(bilanMixte, []).map(x => [x.montant, x.periodicite]),
+     [[2490, 'mensuelle'], [12000, 'mensuelle']]);
+  eq("un poste déjà présent dans l'inventaire n'est pas proposé deux fois",
+     postesReprenables(bilanMixte, [{ nom:'Forfait mobile' }]).map(x => x.poste), ['energie']);
+  eq("bilan vide : rien à reprendre", postesReprenables([], []).length, 0);
+
+  /* ---- Aucun « de moins » tant que le besoin en données est inconnu ----- */
+  const sansBesoin = comparerMobile({ prixActuel: 2490, donneesNecessaires: null, besoinEtranger: null }, AUJ);
+  const avecBesoin = comparerMobile({ prixActuel: 2490, donneesNecessaires: 60, besoinEtranger: null }, AUJ);
+  vrai("besoin inconnu : aucune offre n'est déclarée moins chère",
+       sansBesoin.retenues.every(r => r.moinsCher === null && r.besoinInconnu === true));
+  vrai("besoin inconnu : l'écart reste calculé, pour être dit sous réserve",
+       sansBesoin.retenues.some(r => r.ecart12 !== null && r.ecart12 > 0));
+  vrai("le forfait 1 Go ne peut plus être présenté comme un gain",
+       sansBesoin.retenues.find(r => r.offre.donneesFr === 1).moinsCher === null);
+  vrai("besoin déclaré : le verdict redevient possible",
+       avecBesoin.retenues.some(r => r.moinsCher === true && r.besoinInconnu === false));
 
   /* ---- Choix rapides : des noms pour éviter de taper, rien d'autre ------ */
   eq("choix rapides : huit entrées", CHOIX_RAPIDES.length, 8);

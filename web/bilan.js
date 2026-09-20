@@ -32,41 +32,41 @@
    sélectionné d'office. L'interface le dit à côté d'eux. */
 const POSTES = {
   mobile: {
-    nom: 'Forfait mobile', reglesContrat: true,
+    nom: 'Forfait mobile', reglesContrat: true, categorieContrat: 'telecom',
     comparatif: 'comparer-mobile.html',
     suggestions: [1000, 1500, 2000, 3000],
   },
   box: {
-    nom: 'Box internet', reglesContrat: true, comparatif: null,
+    nom: 'Box internet', reglesContrat: true, categorieContrat: 'telecom', comparatif: null,
     suggestions: [2000, 3000, 4000, 5000],
   },
   energie: {
-    nom: 'Énergie', reglesContrat: true, comparatif: null,
+    nom: 'Énergie', reglesContrat: true, categorieContrat: 'energie', comparatif: null,
     suggestions: [5000, 8000, 12000, 16000],
     /* La mensualité d'énergie est un acompte estimé, régularisé une fois par
        an : ce n'est pas un coût constaté. Le bilan doit le dire. */
     avertissement: "Ce que vous payez chaque mois pour l’énergie est un acompte estimé, régularisé une fois par an : ce n’est pas votre coût réel.",
   },
   assurance: {
-    nom: 'Assurances', reglesContrat: true, comparatif: null,
+    nom: 'Assurances', reglesContrat: true, categorieContrat: 'assurance', comparatif: null,
     suggestions: [2000, 4000, 6000, 10000],
   },
   abonnements: {
-    nom: 'Abonnements', reglesContrat: true, comparatif: null,
+    nom: 'Abonnements', reglesContrat: true, categorieContrat: '', comparatif: null,
     suggestions: [500, 1000, 1500, 2500],
   },
   logement: {
-    nom: 'Logement', reglesContrat: false, comparatif: null,
+    nom: 'Logement', reglesContrat: false, categorieContrat: null, comparatif: null,
     suggestions: [50000, 70000, 90000, 120000],
     avertissement: "Un loyer ou une mensualité de prêt ne relève d’aucune des règles de résiliation que ce site connaît. Il compte dans votre total, et rien de plus.",
   },
   transport: {
-    nom: 'Transport', reglesContrat: false, comparatif: null,
+    nom: 'Transport', reglesContrat: false, categorieContrat: null, comparatif: null,
     suggestions: [5000, 10000, 15000, 20000],
     avertissement: "Carburant, péages ou titres de transport ne sont pas des contrats résiliables : ils comptent dans votre total, sans démarche associée.",
   },
   autre: {
-    nom: 'Autre', reglesContrat: false, comparatif: null,
+    nom: 'Autre', reglesContrat: false, categorieContrat: null, comparatif: null,
     suggestions: [1000, 3000, 5000, 10000],
   },
 };
@@ -186,8 +186,31 @@ function boxDuBilan(depenses) {
   return normaliserBilan(depenses).find(d => d.poste === 'box') || null;
 }
 
+/** Les postes du bilan qui peuvent devenir des contrats dans l'inventaire.
+ *
+ *  La reprise est OFFERTE, jamais automatique : c'est l'utilisateur qui
+ *  décide. Et elle est FILTRÉE — un loyer ou du carburant (`categorieContrat`
+ *  à null) n'entre pas dans un inventaire régi par des règles de résiliation.
+ *  « Abonnements » entre avec une catégorie vide : le parcours de vérification
+ *  la demandera, plutôt que nous ne l'inventions.
+ *
+ *  Renvoie des objets à la forme des lignes de `abonnements.js`. */
+function postesReprenables(depenses, deja) {
+  const presents = new Set((deja || []).map(l => String(l.nom || '').toLowerCase()));
+  return normaliserBilan(depenses)
+    .filter(d => POSTES[d.poste].categorieContrat !== null)
+    .map(d => ({
+      poste: d.poste,
+      nom: POSTES[d.poste].nom,
+      categorie: POSTES[d.poste].categorieContrat,
+      montant: d.montant,
+      periodicite: d.periodicite,
+    }))
+    .filter(x => !presents.has(x.nom.toLowerCase()));
+}
+
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { POSTES, RYTHMES_BILAN, normaliserDepense, normaliserBilan,
                      totauxBilan, repartitionBilan, pistePrioritaire,
-                     mobileDuBilan, boxDuBilan };
+                     mobileDuBilan, boxDuBilan, postesReprenables };
 }

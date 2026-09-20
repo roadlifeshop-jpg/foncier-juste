@@ -57,10 +57,13 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 .en-direct{
   margin-top:14px; padding:12px 14px; border-radius:var(--r);
   background:var(--accent-soft); border:1px solid var(--accent-line);
-  font-variant-numeric:tabular-nums; min-height:52px; display:flex; align-items:center;
+  font-variant-numeric:tabular-nums; min-height:52px; display:flex; align-items:baseline;
+  flex-wrap:wrap; gap:2px 10px;
 }
+.en-direct .saisi{flex:1 0 100%; font-size:.86rem; color:var(--ink-muted); margin-bottom:3px;}
+.en-direct .saisi b{color:var(--ink);}
 .en-direct .m{font-size:1.2rem; font-weight:700; color:var(--accent);}
-.en-direct .a{font-size:.92rem; color:var(--ink-muted); margin-left:10px;}
+.en-direct .a{font-size:.92rem; color:var(--ink-muted);}
 .en-direct.vide{background:var(--surface-2); border-color:var(--line); color:var(--ink-faint);
   font-size:.9rem;}
 
@@ -153,6 +156,8 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
           <legend class="lab">À quel rythme&nbsp;?</legend>
           <div class="rythme" id="rythme"></div>
         </fieldset>
+
+        <p class="avert" id="avert-poste" hidden></p>
 
         <div class="en-direct vide" id="en-direct" aria-live="polite">Le coût s'affiche ici dès que
         vous tapez un montant.</div>
@@ -249,9 +254,22 @@ function choisirPoste(cle){
   $('zone-montant').hidden = !posteChoisi;
   if (!posteChoisi) return;
   const p = POSTES[posteChoisi];
+
+  /* La fréquence REPART À « par mois » à chaque changement de poste.
+     Elle restait auparavant sur le choix précédent : après une assurance
+     saisie « par an », choisir « Logement » et toucher le raccourci 700 €
+     enregistrait un loyer de 700 € PAR AN, soit 58,33 € par mois. L'erreur
+     ne se voyait pas, et faussait tout le bilan. */
+  const parMois = document.querySelector('input[name="rythme"][value="mensuelle"]');
+  if (parMois) parMois.checked = true;
+
   $('lab-montant').textContent = `Combien pour « ${p.nom} » ?`;
   $('raccourcis').innerHTML = p.suggestions.map(c =>
     `<button type="button" data-c="${c}">${ech(euros(c))}</button>`).join('');
+  /* Ce que le poste ne permettra pas de vérifier est dit MAINTENANT, avant la
+     saisie, et non seulement dans le résultat. */
+  $('avert-poste').innerHTML = p.avertissement ? ech(p.avertissement) : '';
+  $('avert-poste').hidden = !p.avertissement;
   $('f-montant').focus();
   majDirect();
 }
@@ -282,7 +300,11 @@ function majDirect(){
     return;
   }
   d.className = 'en-direct';
-  d.innerHTML = `<span class="m">${ech(euros(mensuelCentimes(c, rythmeCourant())))} par mois</span>
+  /* La saisie est répétée telle qu'elle sera enregistrée. Sans cela, un
+     montant annuel saisi par erreur se lit comme un mensuel plus petit, et
+     rien à l'écran ne signale la confusion. */
+  d.innerHTML = `<span class="saisi">Saisi&nbsp;: <b>${ech(euros(c))} ${ech(LIB_RYTHME[rythmeCourant()].toLowerCase())}</b></span>
+    <span class="m">${ech(euros(mensuelCentimes(c, rythmeCourant())))} par mois</span>
     <span class="a">${ech(euros(annuelCentimes(c, rythmeCourant())))} par an</span>`;
 }
 $('f-montant').addEventListener('input', majDirect);

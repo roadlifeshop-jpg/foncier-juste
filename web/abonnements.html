@@ -166,6 +166,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 </style>
 <script src="regles.js"></script>
 <script src="abonnements.js"></script>
+<script src="bilan.js"></script>
 <script src="resultat4.js"></script>
 </head>
 <body>
@@ -193,6 +194,22 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
   </section>
 
   <!-- ====================== 1. INVENTAIRE RAPIDE ====================== -->
+  <!-- Reprise depuis le bilan : OFFERTE, jamais automatique, et filtrée.
+       Un loyer ou du carburant n'entrent pas dans un inventaire régi par des
+       règles de résiliation ; seuls les postes qui sont des contrats sont
+       proposés, et « Abonnements » arrive sans catégorie, que le parcours
+       demandera plutôt que nous ne l'inventions. -->
+  <section class="shell-lire" id="zone-reprise" hidden style="margin-top:20px">
+    <div class="encart info">
+      <h3>Reprendre les postes de votre bilan&nbsp;?</h3>
+      <p id="reprise-texte"></p>
+      <div class="cta-row" style="margin-top:14px">
+        <button type="button" class="btn-primary btn-petit" id="reprise-oui">Reprendre ces postes</button>
+        <button type="button" class="btn-secondary btn-petit" id="reprise-non">Non, je saisis moi-même</button>
+      </div>
+    </div>
+  </section>
+
   <section class="shell-lire" id="saisie">
     <div class="forme">
       <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Ajoutez vos contrats</h2>
@@ -1159,8 +1176,47 @@ function majFiches(){
   $('zone-fiches').hidden = false;
 }
 
+/* ---------- La reprise depuis le bilan ----------
+   Rien n'est importé sans clic. Le bilan n'est jamais modifié, et un poste
+   déjà présent dans l'inventaire n'est pas proposé une seconde fois. */
+let aReprendre = [];
+function proposerReprise(){
+  let bilan = [];
+  try { bilan = normaliserBilan(JSON.parse(localStorage.getItem('dj_bilan_v1') || '[]')); }
+  catch (_) { return; }
+  if (!bilan.length) return;
+  try { if (localStorage.getItem('dj_reprise_refusee') === '1') return; } catch (_) {}
+  aReprendre = postesReprenables(bilan, lignes);
+  if (!aReprendre.length) return;
+  const noms = aReprendre.map(x => x.nom).join(', ');
+  $('reprise-texte').innerHTML = `Vous avez saisi <b>${ech(noms)}</b> dans votre bilan. `
+    + `Nous pouvons ${aReprendre.length > 1 ? 'les' : 'le'} reprendre ici pour vous éviter de tout retaper — `
+    + `montant et rythme compris. <b>Votre bilan n'est pas modifié.</b> `
+    + `Les postes qui ne sont pas des contrats, comme un loyer ou du carburant, ne sont pas repris : `
+    + `les règles de résiliation ne les concernent pas.`;
+  $('zone-reprise').hidden = false;
+}
+$('reprise-oui').addEventListener('click', () => {
+  aReprendre.forEach(x => lignes.push({
+    id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+    nom: x.nom, montant: x.montant, periodicite: x.periodicite, categorie: x.categorie,
+    echeance: null, engagementDebut: null, engagementMois: null,
+    souscritEnLigne: false, recent: false,
+  }));
+  sauver();
+  $('zone-reprise').hidden = true;
+  rendreListe();
+  annoncer(`${aReprendre.length} poste${aReprendre.length > 1 ? 's repris' : ' repris'}. ${resume()}`);
+  $('zone-liste').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+$('reprise-non').addEventListener('click', () => {
+  try { localStorage.setItem('dj_reprise_refusee', '1'); } catch (_) {}
+  $('zone-reprise').hidden = true;
+});
+
 charger();
 rendreListe();
+proposerReprise();
 try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
 </script>
 </body>

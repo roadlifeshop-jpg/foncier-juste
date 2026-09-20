@@ -395,9 +395,16 @@ function comparerMobile(situation, aujourdhui, offres) {
            chère : son total est incomplet, et un total incomplet gagne
            toujours contre un total complet. */
         coutTotalConnu: c.fraisConnus ? c.total : null,
+        /* Sans besoin en données déclaré, nous ignorons si l'offre couvre
+           l'usage : un forfait 1 Go peut « faire économiser 264 € » et ne pas
+           convenir du tout. L'écart reste calculé, mais il n'est plus annoncé
+           comme un gain — l'interface le présente sous réserve. */
+        besoinInconnu: !aBesoin,
         ecart12: (actuel12 === null || !c.fraisConnus) ? null : actuel12 - c.total,
         ecartMensualites: actuel12 === null ? null : actuel12 - c.recurrent,
-        moinsCher: (actuel12 === null || !c.fraisConnus) ? null : actuel12 - c.total > 0,
+        /* `moinsCher` vaut le liseré vert et la mention « de moins ». Il exige
+           donc les deux : des frais établis ET un besoin connu. */
+        moinsCher: (actuel12 === null || !c.fraisConnus || !aBesoin) ? null : actuel12 - c.total > 0,
         ecartIndeterminable: actuel12 !== null && !c.fraisConnus,
       };
     })
