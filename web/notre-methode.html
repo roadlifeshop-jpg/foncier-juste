@@ -8,9 +8,10 @@
 <link rel="canonical" href="https://foncier-juste.vercel.app/notre-methode.html">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
-<!-- Applique le thème choisi avant le premier rendu. Le clair est le défaut :
-     sans choix enregistré, rien n'est posé et la feuille commune décide. -->
-<script>try{var t=localStorage.getItem('dj_theme');if(t==='dark'||t==='auto')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<!-- Thème : fichier externe et non script intégré, pour survivre au retrait
+     éventuel de 'unsafe-inline' dans la CSP. Doit rester dans <head>, sans
+     defer ni async : il pose data-theme avant le premier rendu. -->
+<script src="theme.js"></script>
 <link rel="stylesheet" href="base.css">
 <style>
 .exemples{display:grid; gap:16px; margin-top:26px; grid-template-columns:repeat(auto-fit,minmax(285px,1fr));}

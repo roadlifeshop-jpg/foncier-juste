@@ -8,10 +8,10 @@
 <link rel="canonical" href="https://foncier-juste.vercel.app/">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
-<!-- Applique le thème choisi avant le premier rendu, pour éviter un
-     clignotement. Le clair est le défaut : sans choix enregistré, on ne
-     touche à rien. -->
-<script>try{var t=localStorage.getItem('dj_theme');if(t==='dark'||t==='auto')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<!-- Thème : fichier externe et non script intégré, pour survivre au retrait
+     éventuel de 'unsafe-inline' dans la CSP. Doit rester dans <head>, sans
+     defer ni async : il pose data-theme avant le premier rendu. -->
+<script src="theme.js"></script>
 <link rel="stylesheet" href="base.css">
 <style>
 /* ACCUEIL — une promesse, une action, trois portes.
@@ -201,28 +201,6 @@
 </footer>
 
 <script>
-/* Le choix de thème. `light` est le défaut : on retire alors l'attribut
-   plutôt que d'en poser un, pour que la feuille commune décide seule. */
-(function(){
-  var racine = document.documentElement;
-  var boutons = document.querySelectorAll('.theme-choix button');
-  function courant(){
-    try { return localStorage.getItem('dj_theme') || 'light'; } catch (e) { return 'light'; }
-  }
-  function peindre(v){
-    if (v === 'light') racine.removeAttribute('data-theme');
-    else racine.setAttribute('data-theme', v);
-    boutons.forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.themeVal === v)); });
-  }
-  boutons.forEach(function(b){
-    b.addEventListener('click', function(){
-      var v = b.dataset.themeVal;
-      try { localStorage.setItem('dj_theme', v); } catch (e) {}
-      peindre(v);
-    });
-  });
-  peindre(courant());
-})();
 try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
 </script>
 </body>
