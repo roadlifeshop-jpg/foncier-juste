@@ -259,6 +259,9 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
   <section class="shell-lire" id="zone-liste" hidden style="margin-top:34px">
     <h2 style="font-size:1.1rem; font-family:'Archivo',sans-serif; font-weight:600">Ma liste
     <span class="surtitre" id="compte-lignes"></span></h2>
+    <p class="aide" id="deux-listes" hidden><b>Cette liste et votre bilan sont indépendants.</b>
+    Corriger un montant ici ne met pas à jour votre bilan, et l'inverse est vrai aussi&nbsp;:
+    <a href="bilan.html">voir mon bilan</a>.</p>
     <p class="aide">Conservée <b>dans ce navigateur, sur cet appareil</b>, jusqu'à son effacement&nbsp;:
     elle vous attendra à votre prochaine visite. <b>Rien n'est sauvegardé sur nos serveurs</b> — nous
     n'en avons aucune copie.</p>
@@ -620,7 +623,18 @@ function majLigne(id){
   if (html) art.querySelector('.abo-ident').insertAdjacentHTML('beforeend', html);
 }
 
+/* La mention d'indépendance ne s'affiche que si les deux listes existent
+   réellement : la poser d'office parlerait d'un bilan que le visiteur n'a
+   peut-être jamais ouvert. */
+function majDeuxListes(){
+  let bilan = [];
+  try { bilan = normaliserBilan(JSON.parse(localStorage.getItem('dj_bilan_v1') || '[]')); }
+  catch (_) { bilan = []; }
+  $('deux-listes').hidden = !(bilan.length && lignes.length);
+}
+
 function majTotaux(){
+  majDeuxListes();
   const t = totaux(lignes);
   $('compte-lignes').textContent = t.nombre ? `— ${t.nombre} contrat${t.nombre > 1 ? 's' : ''}` : '';
   if (!t.nombre){ $('totaux-ligne').innerHTML = ''; return; }
@@ -1193,7 +1207,9 @@ function proposerReprise(){
     + `Nous pouvons ${aReprendre.length > 1 ? 'les' : 'le'} reprendre ici pour vous éviter de tout retaper — `
     + `montant et rythme compris. <b>Votre bilan n'est pas modifié.</b> `
     + `Les postes qui ne sont pas des contrats, comme un loyer ou du carburant, ne sont pas repris : `
-    + `les règles de résiliation ne les concernent pas.`;
+    + `les règles de résiliation ne les concernent pas.<br><br>`
+    + `<b>Une fois repris, les deux listes deviennent indépendantes</b> : corriger un montant ici ne `
+    + `met pas à jour votre bilan, et corriger votre bilan ne met pas à jour cette liste.`;
   $('zone-reprise').hidden = false;
 }
 $('reprise-oui').addEventListener('click', () => {
@@ -1206,7 +1222,8 @@ $('reprise-oui').addEventListener('click', () => {
   sauver();
   $('zone-reprise').hidden = true;
   rendreListe();
-  annoncer(`${aReprendre.length} poste${aReprendre.length > 1 ? 's repris' : ' repris'}. ${resume()}`);
+  annoncer(`${aReprendre.length} poste${aReprendre.length > 1 ? 's repris' : ' repris'}. ${resume()} `
+    + `Les deux listes sont désormais indépendantes.`);
   $('zone-liste').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 $('reprise-non').addEventListener('click', () => {

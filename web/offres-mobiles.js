@@ -400,7 +400,12 @@ function comparerMobile(situation, aujourdhui, offres) {
            convenir du tout. L'écart reste calculé, mais il n'est plus annoncé
            comme un gain — l'interface le présente sous réserve. */
         besoinInconnu: !aBesoin,
-        ecart12: (actuel12 === null || !c.fraisConnus) ? null : actuel12 - c.total,
+        /* Aucun écart en euros n'est calculé tant que le besoin est inconnu.
+           Le chiffre existait auparavant, assorti d'une réserve — mais un
+           « 264,92 € de moins » se retient, et sa réserve s'oublie. La liste
+           reste consultable pour explorer les prix et les caractéristiques ;
+           elle ne chiffre un gain que lorsqu'il veut dire quelque chose. */
+        ecart12: (actuel12 === null || !c.fraisConnus || !aBesoin) ? null : actuel12 - c.total,
         ecartMensualites: actuel12 === null ? null : actuel12 - c.recurrent,
         /* `moinsCher` vaut le liseré vert et la mention « de moins ». Il exige
            donc les deux : des frais établis ET un besoin connu. */

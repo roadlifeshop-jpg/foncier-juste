@@ -988,8 +988,14 @@ SCRIPT_TESTS = r"""
   const avecBesoin = comparerMobile({ prixActuel: 2490, donneesNecessaires: 60, besoinEtranger: null }, AUJ);
   vrai("besoin inconnu : aucune offre n'est déclarée moins chère",
        sansBesoin.retenues.every(r => r.moinsCher === null && r.besoinInconnu === true));
-  vrai("besoin inconnu : l'écart reste calculé, pour être dit sous réserve",
-       sansBesoin.retenues.some(r => r.ecart12 !== null && r.ecart12 > 0));
+  vrai("besoin inconnu : aucun écart en euros n'est calculé",
+       sansBesoin.retenues.every(r => r.ecart12 === null));
+  vrai("besoin inconnu : les prix et les volumes restent là, pour explorer",
+       sansBesoin.retenues.length === 9 &&
+       sansBesoin.retenues.every(r => r.recurrent12 > 0 && r.offre.donneesFr > 0));
+  vrai("besoin déclaré : les écarts reviennent pour les offres qui y répondent",
+       avecBesoin.retenues.every(r => r.offre.donneesFr >= 60) &&
+       avecBesoin.retenues.some(r => r.ecart12 !== null));
   vrai("le forfait 1 Go ne peut plus être présenté comme un gain",
        sansBesoin.retenues.find(r => r.offre.donneesFr === 1).moinsCher === null);
   vrai("besoin déclaré : le verdict redevient possible",

@@ -381,13 +381,14 @@ function offreHTML(r, situation){
      toujours sur un total complet. On dit alors l'écart sur les mensualités,
      en précisant qu'il ne suffit pas à conclure. */
   let ecart = '';
-  if (r.besoinInconnu && r.ecart12 !== null && r.ecart12 > 0){
-    /* L'écart existe, mais rien ne dit que l'offre couvre l'usage. Il est
-       donné sans le vert ni le mot « économie », et assorti du volume inclus
-       pour que la comparaison reste possible à l'œil. */
-    ecart = `<span class="ecart inconnu">${euros(r.ecart12)} de moins sur douze mois —
-      <b>mais vous n'avez pas dit combien de données il vous faut</b>, et cette offre en inclut
-      ${o.donneesFr} Go</span>`;
+  if (r.besoinInconnu){
+    /* Aucun montant d'écart ici. Les prix et les caractéristiques restent
+       affichés pour explorer ; le gain, lui, ne se chiffre qu'une fois le
+       besoin connu — sans quoi un forfait 1 Go remporterait toujours la
+       comparaison. */
+    ecart = `<span class="ecart inconnu">Écart non chiffré&nbsp;: cette offre inclut
+      ${o.donneesFr} Go en France, et vous n'avez pas dit combien il vous en faut.
+      <b>Précisez votre besoin pour comparer</b>.</span>`;
   } else if (r.ecartIndeterminable){
     ecart = `<span class="ecart inconnu">Frais de souscription inconnus — impossible de dire si cette offre est moins chère${
       r.ecartMensualites !== null && r.ecartMensualites > 0
@@ -498,7 +499,7 @@ $('forme-cm').addEventListener('submit', ev => {
   $('intro-mobile').innerHTML = `Ces offres <b>ne dépendent d'aucune box</b> : leur prix est celui que
     vous paierez sans en souscrire une. ${res.besoinApplique
       ? `Seules celles d'au moins ${res.besoinApplique} Go sont montrées${res.nombreEcartees ? ` — ${res.nombreEcartees} écartée${res.nombreEcartees > 1 ? 's' : ''}` : ''}.`
-      : `<b>Vous n'avez pas précisé votre besoin en données</b> : toutes sont montrées, et aucune n'est désignée comme moins chère — un forfait à 1 Go serait le moins cher de la liste sans forcément vous convenir. Indiquez votre besoin ci-dessus pour que les écarts deviennent comparables.`}
+      : `<b>Vous n'avez pas précisé votre besoin en données.</b> Les prix et les caractéristiques sont affichés pour que vous puissiez explorer, mais <b>aucun écart en euros n'est chiffré</b> : sans savoir combien de données il vous faut, un forfait à 1 Go remporterait toujours la comparaison. Choisissez votre besoin ci-dessus pour voir les écarts.`}
     ${res.prixActuelConnu ? '' : ' Votre prix actuel n\'étant pas renseigné, nous affichons des coûts, pas des écarts.'}`;
 
   $('liste-mobile').innerHTML = res.retenues.length
