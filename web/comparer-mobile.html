@@ -76,6 +76,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 .a-confirmer li{font-size:.9rem; color:var(--ink-muted); margin-top:6px;}
 </style>
 <script src="abonnements.js"></script>
+<script src="bilan.js"></script>
 <script src="offres-mobiles.js"></script>
 </head>
 <body>
@@ -84,6 +85,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
   <div class="shell">
     <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Payer moins, ou récupérer son dû</small></a>
     <nav class="nav" aria-label="Outils">
+      <a href="bilan.html">Mes dépenses</a>
       <a href="comparer-mobile.html" aria-current="page">Forfait mobile</a>
       <a href="vol-retarde.html">Vol retardé</a>
       <a href="abonnements.html">Dépense mensuelle</a>
@@ -230,6 +232,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
   <div class="shell">
     <div class="cols">
       <div><h4>Les outils</h4><ul>
+        <li><a href="bilan.html">Faire le point sur mes dépenses</a></li>
         <li><a href="comparer-mobile.html">Comparer mon forfait mobile</a></li>
         <li><a href="vol-retarde.html">Vol retardé</a></li>
         <li><a href="abonnements.html">Dépense mensuelle</a></li>
@@ -258,6 +261,28 @@ const dateFrCourt = iso => { const d = versDate(iso); return d ? d.toLocaleDateS
    Cette page ne réécrit jamais `dj_abonnements_v1` : elle propose ce qu'elle
    y trouve, et l'utilisateur reste libre de corriger le champ. ------------ */
 function reprendre(){
+  /* Deux sources, dans cet ordre. Le BILAN d'abord : si le visiteur vient d'y
+     saisir son forfait, lui redemander le montant serait absurde. L'inventaire
+     des CONTRATS ensuite, pour qui arrive par l'autre chemin. Aucune des deux
+     n'est réécrite par cette page. */
+  let duBilan = [];
+  try { duBilan = normaliserBilan(JSON.parse(localStorage.getItem('dj_bilan_v1') || '[]')); }
+  catch (_) { duBilan = []; }
+  const mBilan = mobileDuBilan(duBilan), bBilan = boxDuBilan(duBilan);
+  if (mBilan){
+    $('f-prix').value = (mensuelCentimes(mBilan.montant, mBilan.periodicite) / 100).toFixed(2).replace('.', ',');
+    let dit = `<b>${ech(euros(mensuelCentimes(mBilan.montant, mBilan.periodicite)))} par mois</b> pour votre forfait mobile`;
+    if (bBilan){
+      $('f-prix-box').value = (mensuelCentimes(bBilan.montant, bBilan.periodicite) / 100).toFixed(2).replace('.', ',');
+      document.querySelector('input[name="box"][value="oui"]').checked = true;
+      dit += `, et <b>${ech(euros(mensuelCentimes(bBilan.montant, bBilan.periodicite)))} par mois</b> pour votre box`;
+    }
+    $('repris').innerHTML = `Repris de votre bilan&nbsp;: ${dit}. Corrigez si besoin —
+      <b>rien n'est réécrit dans votre bilan</b>. <a href="bilan.html">Revenir au bilan</a>.`;
+    $('repris').hidden = false;
+    return;
+  }
+
   let lignes = [];
   try { lignes = normaliserLignes(JSON.parse(localStorage.getItem(CLE) || '[]')); }
   catch (_) { return; }

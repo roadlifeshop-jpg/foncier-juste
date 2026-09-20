@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Faire le point sur mes dépenses</title>
+<meta name="description" content="Renseignez une dépense, voyez son coût par mois et par an, et obtenez un premier bilan dès la première ligne. Sans compte, sans coordonnées.">
+<link rel="canonical" href="https://foncier-juste.vercel.app/bilan.html">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<script src="theme.js"></script>
+<link rel="stylesheet" href="base.css">
+<style>
+/* BILAN — une dépense suffit pour un premier résultat.
+   --------------------------------------------------------------------------
+   Le moins de gestes possible : choisir un poste, taper un montant, voir le
+   coût apparaître. Pas de bouton « Calculer », pas de formulaire à huit
+   champs, et « Voir mes résultats » fonctionne dès la première ligne. */
+
+.forme{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px 22px;}
+@media(max-width:560px){ .forme{padding:16px;} }
+
+.postes{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+.poste{
+  font:inherit; font-size:.93rem; font-weight:500; cursor:pointer; min-height:46px;
+  background:var(--surface); color:var(--ink); border:1px solid var(--line-strong);
+  border-radius:var(--r); padding:10px 14px;
+}
+.poste:hover{border-color:var(--ink-faint);}
+.poste[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent);
+  box-shadow:inset 0 0 0 1px var(--accent); font-weight:600;}
+.poste:focus-visible{outline:none; box-shadow:var(--ring);}
+
+.saisie-montant{margin-top:18px; padding-top:16px; border-top:1px solid var(--line);}
+.raccourcis{display:flex; flex-wrap:wrap; gap:7px; margin-top:8px;}
+.raccourcis button{
+  font:inherit; font-size:.9rem; cursor:pointer; min-height:40px;
+  background:var(--surface-2); color:var(--ink); border:1px solid var(--line);
+  border-radius:var(--r); padding:8px 13px; font-variant-numeric:tabular-nums;
+}
+.raccourcis button:hover{border-color:var(--ink-faint);}
+.raccourcis button:focus-visible{outline:none; box-shadow:var(--ring);}
+.note-raccourcis{font-size:.8rem; color:var(--ink-faint); margin-top:8px;}
+
+.rythme{display:flex; gap:8px; margin-top:7px;}
+.rythme label{
+  flex:1; display:flex; align-items:center; justify-content:center; gap:7px; min-height:46px;
+  padding:8px; cursor:pointer; font-size:.92rem; background:var(--surface);
+  border:1px solid var(--line-strong); border-radius:var(--r);
+}
+.rythme input{width:17px; height:17px; accent-color:var(--accent); flex-shrink:0;}
+.rythme label:has(input:checked){background:var(--accent-soft); border-color:var(--accent);
+  box-shadow:inset 0 0 0 1px var(--accent); font-weight:600;}
+fieldset.sans-cadre{border:0; padding:0; margin:0;}
+
+/* Le coût, en direct, sans bouton « Calculer ». */
+.en-direct{
+  margin-top:14px; padding:12px 14px; border-radius:var(--r);
+  background:var(--accent-soft); border:1px solid var(--accent-line);
+  font-variant-numeric:tabular-nums; min-height:52px; display:flex; align-items:center;
+}
+.en-direct .m{font-size:1.2rem; font-weight:700; color:var(--accent);}
+.en-direct .a{font-size:.92rem; color:var(--ink-muted); margin-left:10px;}
+.en-direct.vide{background:var(--surface-2); border-color:var(--line); color:var(--ink-faint);
+  font-size:.9rem;}
+
+/* ---- La liste ---- */
+/* `minmax(0,1fr)` et non `1fr` : sans cela le rail conserve la largeur
+   minimale du menu déroulant et la ligne déborde de l'écran à 320 px. */
+.ligne-d{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  padding:13px 14px; margin-top:10px; display:grid; grid-template-columns:minmax(0,1fr) auto;
+  gap:6px 12px; align-items:center;}
+.ligne-d .nom{font-weight:600; font-size:.98rem;}
+.ligne-d .nom small{display:block; font-weight:400; font-size:.82rem; color:var(--ink-faint); margin-top:2px;}
+.ligne-d .corr{display:flex; align-items:center; gap:6px; justify-self:end;}
+.ligne-d .corr input{width:6.4em; text-align:right; font-variant-numeric:tabular-nums;
+  padding:8px 9px; min-height:42px;}
+.ligne-d .corr select{padding:8px 6px; min-height:42px; font-size:.86rem; width:auto;}
+.ligne-d .an{grid-column:1 / -1; font-size:.85rem; color:var(--ink-muted); font-variant-numeric:tabular-nums;}
+.ligne-d .sup{grid-column:1 / -1; justify-self:start;}
+/* Sous 420 px, le champ de correction et son menu ne tiennent plus à côté du
+   nom du poste : ils passent dessous plutôt que de déborder de l'écran. */
+@media(max-width:420px){
+  .ligne-d{grid-template-columns:minmax(0,1fr);}
+  .ligne-d .corr{justify-self:stretch; width:100%;}
+  .ligne-d .corr input{flex:1 1 4em; width:auto; min-width:0;}
+  .ligne-d .corr select{flex:1 1 6em; min-width:0; width:auto;}
+}
+
+.totaux{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+  padding:18px 20px; margin-top:14px;}
+.totaux .val{font-size:1.75rem; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.026em;}
+@media(max-width:360px){ .totaux .val{font-size:1.5rem;} }
+.totaux .u{font-size:.9rem; color:var(--ink-muted); margin-left:9px;}
+.totaux .second{margin-top:5px; font-size:.93rem; color:var(--ink-muted); font-variant-numeric:tabular-nums;}
+.totaux .portee{margin-top:10px; font-size:.87rem; color:var(--ink-muted);}
+
+/* Les deux actions, toujours visibles ensemble sur téléphone. */
+.deux-actions{display:grid; gap:10px; margin-top:16px;}
+@media(min-width:520px){ .deux-actions{grid-template-columns:1fr 1fr;} }
+.deux-actions .btn{width:100%;}
+
+/* ---- Le résultat ---- */
+.piste{background:var(--accent-soft); border:1px solid var(--accent-line);
+  border-radius:var(--r-lg); padding:18px 20px; margin-top:14px;}
+.piste h3{font-family:'Archivo',sans-serif; font-size:1.05rem; color:var(--accent);}
+.piste p{font-size:.94rem; line-height:1.6; color:var(--ink-muted); margin-top:8px;}
+.piste p b{color:var(--ink);}
+.piste .btn{margin-top:14px;}
+.avert{font-size:.87rem; line-height:1.55; color:var(--warn); background:var(--warn-soft);
+  border:1px solid var(--warn-line); border-radius:var(--r); padding:11px 13px; margin-top:12px;}
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="shell">
+    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Payer moins, ou récupérer son dû</small></a>
+    <nav class="nav" aria-label="Outils">
+      <a href="bilan.html" aria-current="page">Mes dépenses</a>
+      <a href="comparer-mobile.html">Forfait mobile</a>
+      <a href="vol-retarde.html">Vol retardé</a>
+      <a href="taxe-fonciere.html">Taxe foncière</a>
+      <a href="sources.html">Sources</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="shell-lire" style="margin-top:26px">
+    <h1 style="max-width:18ch">Faire le point sur mes dépenses</h1>
+    <p class="lede" style="margin-top:12px; font-size:1.06rem; max-width:46ch">
+      Une seule dépense suffit pour un premier résultat. Ajoutez les autres si vous voulez.
+    </p>
+  </section>
+
+  <section class="shell-lire" id="saisie" style="margin-top:22px">
+    <div class="forme">
+      <h2 style="font-size:1.06rem; font-family:'Archivo',sans-serif; font-weight:600">Quel poste&nbsp;?</h2>
+      <div class="postes" id="postes" role="group" aria-label="Poste de dépense"></div>
+
+      <div class="saisie-montant" id="zone-montant" hidden>
+        <div class="champ" style="margin-top:0">
+          <label for="f-montant" id="lab-montant">Combien&nbsp;?</label>
+          <div class="unite" data-unite="€"><input type="text" id="f-montant" inputmode="decimal" placeholder="ex : 24,90" autocomplete="off"></div>
+          <div class="raccourcis" id="raccourcis"></div>
+          <p class="note-raccourcis">Raccourcis de saisie, en nombres ronds. <b>Ce ne sont pas des
+          prix constatés</b>, et aucun n'est choisi pour vous.</p>
+          <p class="erreur-champ" id="e-montant" hidden></p>
+        </div>
+
+        <fieldset class="champ sans-cadre">
+          <legend class="lab">À quel rythme&nbsp;?</legend>
+          <div class="rythme" id="rythme"></div>
+        </fieldset>
+
+        <div class="en-direct vide" id="en-direct" aria-live="polite">Le coût s'affiche ici dès que
+        vous tapez un montant.</div>
+
+        <div class="cta-row">
+          <button type="button" class="btn-primary" id="ajouter">Ajouter à mon bilan</button>
+        </div>
+      </div>
+    </div>
+    <p class="sr" role="status" aria-live="polite" id="annonce"></p>
+  </section>
+
+  <section class="shell-lire" id="zone-liste" hidden style="margin-top:26px">
+    <h2 style="font-size:1.06rem; font-family:'Archivo',sans-serif; font-weight:600">Vos dépenses
+    <span class="surtitre" id="compte"></span></h2>
+    <div id="totaux"></div>
+    <div id="liste"></div>
+    <div class="deux-actions">
+      <button type="button" class="btn btn-secondary" id="encore">+ Ajouter une dépense</button>
+      <button type="button" class="btn btn-primary" id="voir">Voir mes résultats</button>
+    </div>
+  </section>
+
+  <section class="shell-lire" id="zone-resultat" hidden style="margin-top:32px" aria-live="polite">
+    <h2 style="font-size:1.14rem; font-family:'Archivo',sans-serif; font-weight:600">Votre bilan</h2>
+    <div id="resultat"></div>
+
+    <div class="deux-actions" style="margin-top:20px">
+      <button type="button" class="btn btn-secondary" id="encore-2">+ Ajouter une dépense</button>
+      <a class="btn btn-secondary" href="#autres-verifs" style="text-decoration:none; text-align:center">Voir d'autres vérifications</a>
+    </div>
+
+    <div id="autres-verifs" style="margin-top:34px; padding-top:22px; border-top:1px solid var(--line)">
+      <h2 style="font-size:1.02rem; font-family:'Archivo',sans-serif; font-weight:600">Vérifier une somme à récupérer</h2>
+      <p class="aide">Deux sujets qui ne relèvent pas d'une dépense mensuelle, mais d'une somme
+      qu'on peut vous devoir.</p>
+      <p style="margin-top:12px; line-height:2">
+        <a href="vol-retarde.html">Un vol retardé ou annulé</a> — de 250 à 600 €, barème fixé par un
+        règlement européen.<br>
+        <a href="taxe-fonciere.html">Ma taxe foncière</a> — ce qui mérite vérification sur votre fiche&nbsp;;
+        aucune somme n'y est chiffrable.
+      </p>
+      <p class="aide" style="margin-top:18px">
+        <a href="notre-methode.html">Ce que chaque outil sait dire</a> ·
+        <a href="sources.html">Les sources et leurs dates</a> ·
+        <a href="confidentialite.html">Ce qui est enregistré</a>
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="shell">
+    <p class="fine">Service d'information gratuit. Ne constitue ni un conseil juridique personnalisé,
+    ni une garantie de résultat. Aucun lien affilié, aucune rémunération d'aucun opérateur.</p>
+    <p class="fine">Votre bilan est enregistré dans ce navigateur et n'en sort pas.
+    <a href="confidentialite.html">Ce qui est enregistré lors de votre visite</a>.</p>
+  </div>
+</footer>
+
+<script src="abonnements.js"></script>
+<script src="bilan.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+/* Clé DISTINCTE de `dj_abonnements_v1` : le bilan contient des postes de
+   dépense, pas des contrats. Les contrats déjà enregistrés ne sont jamais
+   lus en écriture par cette page. */
+const CLE_BILAN = 'dj_bilan_v1';
+const ech = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+let depenses = [];
+let posteChoisi = null;
+
+function charger(){
+  try { depenses = normaliserBilan(JSON.parse(localStorage.getItem(CLE_BILAN) || '[]')); }
+  catch (_) { depenses = []; }
+}
+function sauver(){
+  try { localStorage.setItem(CLE_BILAN, JSON.stringify(depenses)); } catch (_) {}
+}
+
+/* ---------- Le choix du poste ---------- */
+$('postes').innerHTML = Object.entries(POSTES).map(([k, p]) =>
+  `<button type="button" class="poste" data-poste="${ech(k)}" aria-pressed="false">${ech(p.nom)}</button>`).join('');
+
+const LIB_RYTHME = { mensuelle:'Par mois', trimestrielle:'Par trimestre', annuelle:'Par an' };
+$('rythme').innerHTML = RYTHMES_BILAN.map((r, i) =>
+  `<label><input type="radio" name="rythme" value="${ech(r)}"${i === 0 ? ' checked' : ''}><span>${ech(LIB_RYTHME[r])}</span></label>`).join('');
+
+function choisirPoste(cle){
+  posteChoisi = (posteChoisi === cle) ? null : cle;
+  $('postes').querySelectorAll('.poste').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.poste === posteChoisi)));
+  $('zone-montant').hidden = !posteChoisi;
+  if (!posteChoisi) return;
+  const p = POSTES[posteChoisi];
+  $('lab-montant').textContent = `Combien pour « ${p.nom} » ?`;
+  $('raccourcis').innerHTML = p.suggestions.map(c =>
+    `<button type="button" data-c="${c}">${ech(euros(c))}</button>`).join('');
+  $('f-montant').focus();
+  majDirect();
+}
+
+$('postes').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-poste]');
+  if (b) choisirPoste(b.dataset.poste);
+});
+$('raccourcis').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-c]');
+  if (!b) return;
+  $('f-montant').value = (Number(b.dataset.c) / 100).toFixed(2).replace('.', ',').replace(',00', '');
+  majDirect();
+  $('f-montant').focus();
+});
+
+/* ---------- Le coût, en direct ---------- */
+function rythmeCourant(){
+  const r = document.querySelector('input[name="rythme"]:checked');
+  return r ? r.value : 'mensuelle';
+}
+function majDirect(){
+  const c = enCentimes($('f-montant').value);
+  const d = $('en-direct');
+  if (c === null || c === 0){
+    d.className = 'en-direct vide';
+    d.textContent = "Le coût s'affiche ici dès que vous tapez un montant.";
+    return;
+  }
+  d.className = 'en-direct';
+  d.innerHTML = `<span class="m">${ech(euros(mensuelCentimes(c, rythmeCourant())))} par mois</span>
+    <span class="a">${ech(euros(annuelCentimes(c, rythmeCourant())))} par an</span>`;
+}
+$('f-montant').addEventListener('input', majDirect);
+$('rythme').addEventListener('change', majDirect);
+
+/* ---------- Ajouter ---------- */
+$('ajouter').addEventListener('click', () => {
+  const c = enCentimes($('f-montant').value);
+  if (c === null || c === 0){
+    $('e-montant').textContent = "Indiquez un montant, en euros. Exemples acceptés : 24, 24,90.";
+    $('e-montant').hidden = false;
+    return;
+  }
+  $('e-montant').hidden = true;
+  depenses.push({
+    id: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+    poste: posteChoisi || 'autre', libelle: '',
+    montant: c, periodicite: rythmeCourant(),
+  });
+  sauver();
+  $('f-montant').value = '';
+  choisirPoste(posteChoisi);          /* referme la saisie de ce poste */
+  majTout();
+  $('annonce').textContent = `Ajouté. ${resumeCourt()}`;
+  $('zone-liste').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+function resumeCourt(){
+  const t = totauxBilan(depenses);
+  return `${t.nombre} dépense${t.nombre > 1 ? 's' : ''}, ${euros(t.mensuel)} par mois, ${euros(t.annuel)} par an.`;
+}
+
+/* ---------- La liste, corrigeable ---------- */
+function ligneHTML(d){
+  const p = POSTES[d.poste];
+  const val = (d.montant / 100).toFixed(2).replace('.', ',');
+  return `<div class="ligne-d" data-id="${ech(d.id)}">
+    <div class="nom">${ech(p.nom)}<small>${ech(LIB_RYTHME[d.periodicite])}</small></div>
+    <div class="corr">
+      <label class="sr" for="m-${ech(d.id)}">Montant pour ${ech(p.nom)}</label>
+      <input type="text" id="m-${ech(d.id)}" inputmode="decimal" value="${ech(val)}" data-corr="montant">
+      <span aria-hidden="true">€</span>
+      <label class="sr" for="r-${ech(d.id)}">Rythme pour ${ech(p.nom)}</label>
+      <select id="r-${ech(d.id)}" data-corr="periodicite">${RYTHMES_BILAN.map(r =>
+        `<option value="${ech(r)}"${r === d.periodicite ? ' selected' : ''}>${ech(LIB_RYTHME[r])}</option>`).join('')}</select>
+    </div>
+    <div class="an" data-an>${ech(euros(annuelCentimes(d.montant, d.periodicite)))} par an</div>
+    <button type="button" class="btn-secondary btn-petit sup" data-sup>Retirer</button>
+  </div>`;
+}
+
+function majListe(){
+  $('zone-liste').hidden = !depenses.length;
+  $('liste').innerHTML = depenses.map(ligneHTML).join('');
+  const t = totauxBilan(depenses);
+  $('compte').textContent = t.nombre ? `— ${t.nombre}` : '';
+  $('totaux').innerHTML = !t.nombre ? '' : `<div class="totaux">
+    <div><span class="val num">${ech(euros(t.mensuel))}</span><span class="u">par mois</span></div>
+    <div class="second">${ech(euros(t.annuel))} par an</div>
+    <p class="portee"><b>Total des dépenses renseignées</b> — il ne couvre que
+    ${t.nombre > 1 ? 'les ' + t.nombre + ' lignes que vous avez saisies' : 'la ligne que vous avez saisie'},
+    pas l'ensemble des dépenses de votre foyer.</p>
+  </div>`;
+}
+
+$('liste').addEventListener('input', ev => {
+  const c = ev.target.closest('[data-corr="montant"]');
+  if (!c) return;
+  const ligne = c.closest('.ligne-d');
+  const d = depenses.find(x => x.id === ligne.dataset.id);
+  const v = enCentimes(c.value);
+  if (!d || v === null || v === 0) return;      /* une saisie en cours n'écrase rien */
+  d.montant = v;
+  sauver();
+  ligne.querySelector('[data-an]').textContent = euros(annuelCentimes(d.montant, d.periodicite)) + ' par an';
+  majTotauxSeuls();
+  majResultat();
+});
+$('liste').addEventListener('change', ev => {
+  const s = ev.target.closest('[data-corr="periodicite"]');
+  if (!s) return;
+  const ligne = s.closest('.ligne-d');
+  const d = depenses.find(x => x.id === ligne.dataset.id);
+  if (!d) return;
+  d.periodicite = RYTHMES_BILAN.indexOf(s.value) >= 0 ? s.value : 'mensuelle';
+  sauver(); majTout();
+});
+$('liste').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-sup]');
+  if (!b) return;
+  const id = b.closest('.ligne-d').dataset.id;
+  depenses = depenses.filter(x => x.id !== id);
+  sauver(); majTout();
+  $('annonce').textContent = depenses.length ? `Retiré. ${resumeCourt()}` : 'Retiré. Votre bilan est vide.';
+});
+
+function majTotauxSeuls(){
+  const t = totauxBilan(depenses);
+  const bloc = $('totaux').querySelector('.totaux');
+  if (!bloc) return;
+  bloc.querySelector('.val').textContent = euros(t.mensuel);
+  bloc.querySelector('.second').textContent = euros(t.annuel) + ' par an';
+}
+
+/* ---------- Le résultat ---------- */
+function majResultat(){
+  if (!depenses.length){ $('zone-resultat').hidden = true; return; }
+  const t = totauxBilan(depenses);
+  const rep = repartitionBilan(depenses);
+  const piste = pistePrioritaire(depenses);
+  const avertissements = [...new Set(rep.map(r => POSTES[r.depense.poste].avertissement).filter(Boolean))];
+
+  $('resultat').innerHTML = `<div class="totaux">
+      <div><span class="val num">${ech(euros(t.mensuel))}</span><span class="u">par mois</span></div>
+      <div class="second">${ech(euros(t.annuel))} par an</div>
+      <p class="portee"><b>Total des dépenses renseignées.</b> Il ne couvre que
+      ${t.nombre > 1 ? 'vos ' + t.nombre + ' lignes' : 'cette seule ligne'}, pas l'ensemble du foyer.</p>
+    </div>
+    <p class="aide" style="margin-top:14px">${rep.map(r =>
+      `${ech(POSTES[r.depense.poste].nom)} · ${ech(euros(r.annuel))} par an`).join(' &nbsp;·&nbsp; ')}
+      <br>Corrigez un montant dans la liste ci-dessus&nbsp;: le bilan suit.</p>
+    ${avertissements.map(a => `<p class="avert">${ech(a)}</p>`).join('')}
+    ${piste ? `<div class="piste">
+      <h3>${ech(piste.titre)}</h3>
+      <p>${piste.phrase}</p>
+      ${piste.action ? `<a class="btn btn-primary" href="${ech(piste.action.href)}"
+        style="text-decoration:none">${ech(piste.action.libelle)}</a>` : ''}
+    </div>` : ''}`;
+  $('zone-resultat').hidden = false;
+}
+
+function majTout(){ majListe(); if (!$('zone-resultat').hidden) majResultat(); }
+
+$('voir').addEventListener('click', () => {
+  majResultat();
+  $('zone-resultat').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+[$('encore'), $('encore-2')].forEach(b => b.addEventListener('click', () => {
+  $('saisie').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!posteChoisi) $('postes').querySelector('.poste').focus();
+  else $('f-montant').focus();
+}));
+
+charger();
+majListe();
+if (depenses.length) majResultat();
+try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
+</script>
+</body>
+</html>

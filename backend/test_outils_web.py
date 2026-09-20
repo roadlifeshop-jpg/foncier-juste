@@ -866,6 +866,89 @@ SCRIPT_TESTS = r"""
   vrai("aucun frais inconnu n'est compté comme zéro",
        OFFRES_MOBILES.every(o => o.fraisSouscription === null || o.fraisSouscription > 0));
 
+  /* ================= BILAN DES DÉPENSES DU FOYER =================
+     Le point architectural : un loyer ou du carburant ne sont pas des
+     contrats soumis aux règles de résiliation. Le registre des POSTES est
+     distinct de celui des CATEGORIES de contrats, et le dit. */
+
+  eq("huit postes proposés", Object.keys(POSTES).length, 8);
+  eq("logement, transport et autre ne relèvent d'aucune règle de résiliation",
+     ['logement','transport','autre'].map(p => POSTES[p].reglesContrat), [false, false, false]);
+  eq("mobile, box, énergie, assurances et abonnements sont des contrats",
+     ['mobile','box','energie','assurance','abonnements'].map(p => POSTES[p].reglesContrat),
+     [true, true, true, true, true]);
+  vrai("le registre des postes est distinct de celui des contrats",
+       Object.keys(POSTES).some(p => !CATEGORIES[p]) &&
+       ['logement','transport'].every(p => !CATEGORIES[p]));
+  vrai("seul le mobile porte un comparatif : c'est le seul où des prix sont relevés",
+       Object.entries(POSTES).filter(([, p]) => p.comparatif).map(([k]) => k).join(',') === 'mobile');
+  vrai("les montants suggérés sont des nombres ronds, jamais des centimes précis",
+       Object.values(POSTES).every(p => p.suggestions.every(c => c % 100 === 0)));
+  vrai("le loyer, l'énergie et le transport portent leur avertissement propre",
+       ['logement','energie','transport'].every(p => typeof POSTES[p].avertissement === 'string'));
+
+  /* ---- Normalisation ---- */
+  eq("poste inconnu : rabattu sur « autre », jamais deviné",
+     normaliserBilan([{ id:'a', poste:'crypto', montant: 1000 }])[0].poste, 'autre');
+  eq("rythme inconnu : repli sur mensuelle",
+     normaliserBilan([{ id:'a', poste:'mobile', montant: 1000, periodicite:'lunaire' }])[0].periodicite, 'mensuelle');
+  eq("montant inexploitable : la ligne est écartée, le total n'est pas faussé",
+     normaliserBilan([{ id:'a', poste:'mobile' }, { id:'b', poste:'box', montant: 0 }]).length, 0);
+  eq("montant en texte : converti", normaliserBilan([{ id:'a', poste:'box', montant:'29,99' }])[0].montant, 2999);
+  eq("identifiants dupliqués : rendus uniques",
+     new Set(normaliserBilan([{ id:'z', poste:'mobile', montant:100 }, { id:'z', poste:'box', montant:100 }]).map(d => d.id)).size, 2);
+
+  /* ---- Une seule dépense suffit ---- */
+  const uneSeule = [{ id:'u', poste:'mobile', montant: 2499, periodicite:'mensuelle' }];
+  eq("une dépense : total mensuel et annuel",
+     [totauxBilan(uneSeule).nombre, totauxBilan(uneSeule).mensuel, totauxBilan(uneSeule).annuel],
+     [1, 2499, 29988]);
+  vrai("une dépense : une piste existe déjà", pistePrioritaire(uneSeule) !== null);
+
+  /* ---- Plusieurs dépenses, rythmes mêlés ---- */
+  const plusieurs = [
+    { id:'a', poste:'mobile',    montant: 2499, periodicite:'mensuelle' },
+    { id:'b', poste:'box',       montant: 3999, periodicite:'mensuelle' },
+    { id:'c', poste:'assurance', montant: 18000, periodicite:'annuelle' },
+    { id:'d', poste:'logement',  montant: 75000, periodicite:'mensuelle' },
+    { id:'e', poste:'energie',   montant: 27000, periodicite:'trimestrielle' },
+  ];
+  eq("cinq dépenses, rythmes mêlés : annuel exact",
+     totauxBilan(plusieurs).annuel, 2499*12 + 3999*12 + 18000 + 75000*12 + 27000*4);
+  eq("mensuel calculé sur l'annuel, pas comme somme d'arrondis",
+     totauxBilan(plusieurs).mensuel, Math.round(totauxBilan(plusieurs).annuel / 12));
+  eq("répartition triée par coût annuel décroissant",
+     repartitionBilan(plusieurs).map(r => r.depense.poste), ['logement','energie','box','mobile','assurance']);
+
+  /* ---- La piste prioritaire : fiabilité d'abord, jamais d'économie promise ---- */
+  eq("avec un mobile : le comparatif, seul poste où des prix sont relevés",
+     pistePrioritaire(plusieurs).cle, 'comparer-mobile');
+  vrai("la piste mobile reprend le montant déjà saisi",
+       /24,99 €/.test(pistePrioritaire(plusieurs).phrase));
+  eq("sans mobile mais avec un contrat : vérifier les conditions",
+     pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile')).cle, 'verifier-contrats');
+  vrai("cette piste-là annonce explicitement qu'aucune économie n'est chiffrée",
+       /Aucune économie n.est annoncée/.test(
+         pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile')).phrase));
+  eq("uniquement logement et transport : rien de chiffrable, et on le dit",
+     pistePrioritaire([{ id:'x', poste:'logement', montant: 75000, periodicite:'mensuelle' },
+                       { id:'y', poste:'transport', montant: 12000, periodicite:'mensuelle' }]).cle,
+     'rien-de-chiffrable');
+  vrai("cette dernière piste ne propose aucun bouton vers un outil inexistant",
+       pistePrioritaire([{ id:'x', poste:'logement', montant: 75000, periodicite:'mensuelle' }]).action === null);
+  vrai("aucune piste n'annonce une économie ni une somme récupérable",
+       [plusieurs, plusieurs.filter(d => d.poste !== 'mobile'),
+        [{ id:'x', poste:'logement', montant: 75000, periodicite:'mensuelle' }]]
+         .every(l => !/\b(économisez|vous économiserez|gain garanti|récupérez)\b/i.test(pistePrioritaire(l).phrase)));
+  eq("bilan vide : aucune piste inventée", pistePrioritaire([]), null);
+
+  /* ---- La continuité vers le comparatif ---- */
+  eq("le mobile du bilan est retrouvé pour éviter une ressaisie",
+     mobileDuBilan(plusieurs).montant, 2499);
+  eq("la box aussi, pour le scénario groupé", boxDuBilan(plusieurs).montant, 3999);
+  eq("sans mobile : rien n'est prérempli",
+     mobileDuBilan(plusieurs.filter(d => d.poste !== 'mobile')), null);
+
   /* ---- Choix rapides : des noms pour éviter de taper, rien d'autre ------ */
   eq("choix rapides : huit entrées", CHOIX_RAPIDES.length, 8);
   vrai("choix rapides : chaque catégorie existe dans CATEGORIES, ou est vide",
@@ -967,7 +1050,7 @@ async def executer():
         page = await (await nav.new_context()).new_page()
         await page.goto("about:blank")
         for f in ("regles.js", "aeroports.js", "abonnements.js", "garanties.js", "vol.js",
-                  "offres-mobiles.js"):
+                  "offres-mobiles.js", "bilan.js"):
             await page.add_script_tag(content=(WEB / f).read_text(encoding="utf-8"))
         resultats = await page.evaluate(SCRIPT_TESTS)
         await nav.close()
