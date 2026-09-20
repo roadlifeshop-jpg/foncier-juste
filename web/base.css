@@ -56,8 +56,19 @@
   --r-lg:8px;
   --mesure:66ch;      /* largeur de lecture du texte courant */
 }
+/* Le thème clair est le thème par défaut, sans condition.
+   --------------------------------------------------------------------------
+   Il l'était déjà sur le papier, mais le bloc ci-dessous basculait tout le
+   site en sombre dès que le système le demandait — c'est-à-dire, pour
+   beaucoup de gens, toujours. Un fond presque noir sur un service qui parle
+   d'argent et de droit se lit comme une application, pas comme un document.
+
+   Le sombre reste entièrement disponible, par deux chemins :
+     `data-theme="dark"` sur <html> — le choix explicite du visiteur ;
+     `data-theme="auto"` sur <html> — suivre à nouveau le réglage du système.
+   Aucun jeton n'est modifié : ce sont exactement les mêmes palettes. */
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
+  :root[data-theme="auto"]{
     --bg:#0D1418; --surface:#141D23; --surface-2:#1B252C; --surface-3:#233038;
     --ink:#E9EEF2; --ink-muted:#A0AEB8; --ink-faint:#7B8992;
     --line:#233038; --line-strong:#35444E;
