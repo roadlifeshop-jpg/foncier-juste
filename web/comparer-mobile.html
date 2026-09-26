@@ -78,21 +78,27 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 <script src="abonnements.js"></script>
 <script src="bilan.js"></script>
 <script src="offres-mobiles.js"></script>
+<link rel="stylesheet" href="parcours-interface.css">
 </head>
 <body>
 
-<header class="site-head">
-  <div class="shell">
-    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Payer moins, ou récupérer son dû</small></a>
-    <nav class="nav" aria-label="Outils">
-      <a href="bilan.html">Mes dépenses</a>
-      <a href="comparer-mobile.html" aria-current="page">Forfait mobile</a>
-      <a href="vol-retarde.html">Vol retardé</a>
-      <a href="abonnements.html">Dépense mensuelle</a>
-      <a href="taxe-fonciere.html">Taxe foncière</a>
-      <a href="sources.html">Sources</a>
-    </nav>
-  </div>
+<header class="parcours-head">
+  <a class="parcours-brand" href="accueil-variante.html">Dépense<span>·</span>Juste</a>
+  <nav aria-label="Navigation principale">
+    <a href="bilan.html">Mon bilan</a>
+    <details class="outils-menu">
+      <summary>Les outils</summary>
+      <div class="outils-liens">
+        <strong>Mes dépenses</strong>
+        <a href="comparer-mobile.html">Comparer mon forfait mobile</a>
+        <a href="abonnements.html">Vérifier mes contrats</a>
+        <strong>Une somme à récupérer</strong>
+        <a href="vol-retarde.html">Vol retardé ou annulé</a>
+        <a href="taxe-fonciere.html">Taxe foncière</a>
+        <a href="sources.html">Sources et dates</a>
+      </div>
+    </details>
+  </nav>
 </header>
 
 <main>

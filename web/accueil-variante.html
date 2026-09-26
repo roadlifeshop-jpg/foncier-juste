@@ -10,15 +10,30 @@
 <script src="theme.js"></script>
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="accueil-variante.css">
+<link rel="stylesheet" href="parcours-interface.css">
 </head>
 <body>
 
 <main class="shell-lire">
 
-  <div class="tete">
-    <a class="marque" href="accueil-variante.html">Dépense<span class="pt">·</span>Juste</a>
-    <a class="menu" href="#autres">Les autres outils</a>
-  </div>
+<header class="parcours-head">
+  <a class="parcours-brand" href="accueil-variante.html">Dépense<span>·</span>Juste</a>
+  <nav aria-label="Navigation principale">
+    <a href="bilan.html">Mon bilan</a>
+    <details class="outils-menu">
+      <summary>Les outils</summary>
+      <div class="outils-liens">
+        <strong>Mes dépenses</strong>
+        <a href="comparer-mobile.html">Comparer mon forfait mobile</a>
+        <a href="abonnements.html">Vérifier mes contrats</a>
+        <strong>Une somme à récupérer</strong>
+        <a href="vol-retarde.html">Vol retardé ou annulé</a>
+        <a href="taxe-fonciere.html">Taxe foncière</a>
+        <a href="sources.html">Sources et dates</a>
+      </div>
+    </details>
+  </nav>
+</header>
 
   <section class="promesse">
     <h1>Vos dépenses,<br>plus <em>claires.</em><span class="l2">Vos prochaines actions, aussi.</span></h1>

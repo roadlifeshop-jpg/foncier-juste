@@ -114,23 +114,31 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
   border:1px solid var(--warn-line); border-radius:var(--r); padding:11px 13px; margin-top:12px;}
 </style>
 <link rel="stylesheet" href="bilan-interface.css">
+<link rel="stylesheet" href="parcours-interface.css">
 </head>
 <body>
 
-<header class="site-head">
-  <div class="shell">
-    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Payer moins, ou récupérer son dû</small></a>
-    <nav class="nav" aria-label="Outils">
-      <a href="bilan.html" aria-current="page">Mes dépenses</a>
-      <a href="comparer-mobile.html">Forfait mobile</a>
-      <a href="vol-retarde.html">Vol retardé</a>
-      <a href="taxe-fonciere.html">Taxe foncière</a>
-      <a href="sources.html">Sources</a>
-    </nav>
-  </div>
+<header class="parcours-head">
+  <a class="parcours-brand" href="accueil-variante.html">Dépense<span>·</span>Juste</a>
+  <nav aria-label="Navigation principale">
+    <a href="bilan.html">Mon bilan</a>
+    <details class="outils-menu">
+      <summary>Les outils</summary>
+      <div class="outils-liens">
+        <strong>Mes dépenses</strong>
+        <a href="comparer-mobile.html">Comparer mon forfait mobile</a>
+        <a href="abonnements.html">Vérifier mes contrats</a>
+        <strong>Une somme à récupérer</strong>
+        <a href="vol-retarde.html">Vol retardé ou annulé</a>
+        <a href="taxe-fonciere.html">Taxe foncière</a>
+        <a href="sources.html">Sources et dates</a>
+      </div>
+    </details>
+  </nav>
 </header>
 
 <main>
+  <div id="suppression" class="suppression" hidden><span role="status">Dépense supprimée.</span> <button type="button" id="annuler-suppression">Annuler</button></div>
   <section class="shell-lire" style="margin-top:26px">
     <h1 id="titre-etape" tabindex="-1" style="max-width:18ch">Choisissez une dépense</h1>
     <p class="lede" style="margin-top:12px; font-size:1.06rem; max-width:46ch">
@@ -235,6 +243,7 @@ const CLE_BILAN = 'dj_bilan_v1';
 const ech = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 
 let depenses = [];
+let derniereSuppression = null;
 let posteChoisi = null;
 
 function charger(){
@@ -361,7 +370,7 @@ function ligneHTML(d){
         `<option value="${ech(r)}"${r === d.periodicite ? ' selected' : ''}>${ech(LIB_RYTHME[r])}</option>`).join('')}</select>
     </div>
     <div class="an" data-an>${ech(euros(annuelCentimes(d.montant, d.periodicite)))} par an</div>
-    <button type="button" class="btn-secondary btn-petit sup" data-sup>Retirer</button>
+    <button type="button" class="btn-secondary btn-petit sup" data-sup aria-label="Supprimer la dépense ${ech(p.nom)}" title="Supprimer cette dépense"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button>
   </div>`;
 }
 
@@ -405,10 +414,21 @@ $('liste').addEventListener('click', ev => {
   const b = ev.target.closest('[data-sup]');
   if (!b) return;
   const id = b.closest('.ligne-d').dataset.id;
+  derniereSuppression = { ligne: depenses.find(x => x.id === id), index: depenses.findIndex(x => x.id === id) };
   depenses = depenses.filter(x => x.id !== id);
+  $('suppression').hidden = false;
   sauver(); majTout();
   if (!depenses.length) afficherEtape('saisie');
   $('annonce').textContent = depenses.length ? `Retiré. ${resumeCourt()}` : 'Retiré. Votre bilan est vide.';
+});
+
+$('annuler-suppression').addEventListener('click', () => {
+  if (!derniereSuppression) return;
+  depenses.splice(derniereSuppression.index, 0, derniereSuppression.ligne);
+  derniereSuppression = null;
+  sauver(); majListe(); majResultat(); afficherEtape('resultat');
+  $('suppression').hidden = true;
+  $('titre-etape').focus();
 });
 
 function majTotauxSeuls(){

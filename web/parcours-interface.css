@@ -1,0 +1,30 @@
+/* Identité commune aux trois pages du premier parcours seulement. */
+body{--accent:#b23c19;--accent-soft:#fff0e8;--accent-line:#d49b83;--accent-ink:#fff;--ring:0 0 0 3px #b23c1960;}
+:root[data-theme=dark] body{--accent:#ffad86;--accent-soft:#30231e;--accent-line:#946c59;--accent-ink:#17212b;}
+@media(prefers-color-scheme:dark){:root[data-theme=auto] body{--accent:#ffad86;--accent-soft:#30231e;--accent-line:#946c59;--accent-ink:#17212b;}}
+.parcours-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;width:calc(100% - 44px);max-width:1080px;margin:0 auto;padding:22px 0;border-bottom:1px solid var(--line-strong);position:relative;z-index:5;}
+.shell-lire>.parcours-head{width:100%;}
+.parcours-brand{font:750 23px Archivo,sans-serif;letter-spacing:-1px;text-decoration:none;color:var(--ink);white-space:nowrap;}
+.parcours-brand span{color:var(--accent);}
+.parcours-head nav{display:flex;align-items:center;gap:20px;font-size:14px;}
+.parcours-head nav>a,.outils-menu summary{color:var(--ink);text-decoration:none;padding:12px 0;min-height:44px;}
+.outils-menu{border:0;padding:0;margin:0;background:transparent;}
+.outils-menu summary{cursor:pointer;font:inherit;}
+.outils-liens{position:absolute;right:0;top:100%;width:300px;max-width:100%;background:var(--surface);border:1px solid var(--line-strong);padding:18px;box-shadow:0 12px 30px #0002;display:grid;gap:4px;}
+.outils-liens strong{font-size:12px;color:var(--ink-muted);margin-top:8px;}
+.outils-liens a{padding:12px 0;color:var(--ink);line-height:1.4;}
+a:focus-visible,summary:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
+main h1{font-family:Archivo,sans-serif;font-weight:650;letter-spacing:-.045em;}
+.hero.shell{max-width:800px;}
+.forme{border-radius:0;border-top:3px solid var(--accent);}
+.offre{border-radius:0;padding:22px;margin-top:20px;}
+.offre-prix .m{font-size:28px;letter-spacing:-.04em;}
+.offre-prix{max-width:100%;flex-shrink:1;}
+.offre.gagnante{border-color:var(--line-strong);box-shadow:none;}
+.a-confirmer{border-radius:0;}
+.sup{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-muted);}
+.sup:hover{color:var(--alert);background:var(--alert-soft);}
+.suppression{max-width:756px;margin:16px auto;padding:12px 18px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.suppression[hidden]{display:none;}
+.suppression button{font:inherit;color:var(--accent);background:var(--surface);border:1px solid var(--line-strong);min-height:44px;padding:8px 16px;cursor:pointer;}
+@media(max-width:560px){.parcours-head{gap:8px;flex-wrap:wrap;padding:14px 0;}.parcours-brand{font-size:21px;}.parcours-head nav{gap:16px;font-size:13px;}.offre{padding:16px;}.offre-prix{text-align:left;}.suppression{margin-inline:16px;}}
