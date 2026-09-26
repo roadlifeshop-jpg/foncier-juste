@@ -71,8 +71,21 @@ par quelle porte, et à quel moment. **Ne jamais la désigner.** Si elle ne la
 trouve pas, ne pas la montrer avant la fin du parcours.
 
 **Cette question n'est observable que si un forfait mobile a été saisi.** Si
-moins de trois personnes en saisissent un, le constat porte alors sur le bilan
-lui-même, pas sur la porte — et c'est en soi le résultat le plus instructif.
+moins de trois personnes en saisissent un, **les observations sont insuffisantes
+pour évaluer la découverte de la comparaison mobile**. Le noter comme tel.
+
+**Ne pas en conclure que le bilan oriente mal.** Deux causes très différentes
+produisent le même silence, et il faut les séparer dans les notes :
+
+- **le besoin du participant** — il n'a pas de forfait mobile à déclarer, il ne
+  l'a pas en tête, ou il a jugé d'autres postes plus importants. Cela ne dit
+  rien du parcours ;
+- **une difficulté de navigation effectivement observée** — il a saisi un
+  mobile, a cherché quelque chose, et n'a pas trouvé la comparaison. Cela seul
+  s'impute au parcours.
+
+**Ne jamais orienter quelqu'un vers le poste mobile** pour rendre la question
+observable : un participant poussé à saisir un forfait ne mesure plus rien.
 
 **À noter sans seuil**, parce que c'est trop récent pour avoir été vu :
 une personne arrivée au comparatif sans avoir déclaré son besoin en gigaoctets
@@ -125,7 +138,7 @@ après coup en fonction de ce qui arrange.
 | Repart avec une intention **datée** | **≥ 3 / 5** | Le refus de chiffrer une économie est tenable. |
 | | 1 ou 2 / 5 | Le site informe sans mobiliser. Travailler les démarches, pas les chiffres. |
 | | 0 / 5 | Le site répond à une question que personne ne se pose. Poser franchement la question de son abandon. |
-| Moins de 3 personnes sur 5 saisissent un forfait mobile | — | La question 2 devient inexploitable. Constat à porter tel quel au rapport : le bilan ne conduit pas au poste que nous savons traiter. |
+| Moins de 3 personnes sur 5 saisissent un forfait mobile | — | **Observations insuffisantes** pour évaluer la question 2 : aucune décision ne s'en déduit. Porter le constat tel quel au rapport, en distinguant les participants sans besoin mobile des difficultés de navigation réellement observées. Ne pas conclure que le bilan oriente mal. |
 
 ---
 
@@ -151,8 +164,11 @@ s'il se réalise, il prime sur tout le reste.
 **Durée : trente minutes.** Sur le téléphone de la personne, pas sur le nôtre.
 
 1. **Deux minutes.** Dire ce qu'on fait : « je teste un outil, pas vous. Tout ce
-   qui vous bloque est une information utile. Rien de ce que vous tapez ne sort
-   de votre téléphone. » Ne pas expliquer le site.
+   qui vous bloque est une information utile. Ce que vous saisissez est
+   enregistré dans le navigateur de votre téléphone, et de mon côté je ne prends
+   que des notes écrites. » Ne pas expliquer le site. **Ne pas promettre
+   qu'aucune donnée n'est transmise** : ce n'est pas établi, et une phrase
+   rassurante que nous ne pouvons pas démontrer n'a rien à faire ici.
 2. **Une phrase de consigne**, toujours la même : « Vous êtes tombé sur ce site.
    Faites ce que vous feriez. » Puis se taire.
 3. **Quinze minutes d'observation.** Ne pas aider, ne pas corriger, ne pas
@@ -206,8 +222,8 @@ partie de la version testée.** Ils sont préservés tels quels, et copiés dans
 vers le SSO Vercel, y compris les fichiers statiques : aucun lien de
 prévisualisation n'est ouvrable sans compte, et aucun ne peut donc être vérifié.
 
-Le parcours est servi depuis une **copie inerte de la version figée**, sur le
-réseau local.
+Le parcours est servi depuis une **copie de la version figée**, extraite du
+commit de référence, sur le réseau local.
 
 ```bash
 mkdir -p /Users/marvin/Desktop/foncier-juste-T2/site
@@ -216,7 +232,21 @@ git -C /Users/marvin/Desktop/foncier-juste archive cc9c3a6 \
 python3 -m http.server 8973 --directory /Users/marvin/Desktop/foncier-juste-T2/site/web
 ```
 
-La copie ne contient aucun dépôt Git : elle ne peut ni être commitée, ni dériver.
+La copie ne contient aucun dépôt Git : elle ne peut donc être ni commitée, ni
+poussée par mégarde. **Elle reste en revanche modifiable comme n'importe quel
+fichier** — une édition, un outil, une manipulation accidentelle suffisent. Rien
+dans le dispositif ne l'empêche.
+
+C'est donc le **contrôle de conformité au commit de référence, exécuté avant
+chaque session**, qui maintient l'identité de la version testée — et non une
+propriété de la copie :
+
+```bash
+cd /Users/marvin/Desktop/foncier-juste && for f in $(git ls-tree -r --name-only cc9c3a6 web/); do a=$(git cat-file blob "cc9c3a6:$f" | shasum -a 256 | cut -d' ' -f1); b=$(shasum -a 256 "/Users/marvin/Desktop/foncier-juste-T2/site/$f" 2>/dev/null | cut -d' ' -f1); [ "$a" != "$b" ] && echo "ECART $f"; done; echo "contrôle terminé"
+```
+
+Aucune ligne « ECART » : la copie est conforme. Une seule ligne « ECART » : la
+copie est reconstruite avant la session, et la session ne commence pas avant.
 
 **L'adresse à donner au téléphone** se lit avant chaque session, car elle change
 avec le réseau :
@@ -225,11 +255,17 @@ avec le réseau :
 ipconfig getifaddr en0
 ```
 
-Le téléphone doit être sur le même Wi-Fi. Le 26/09/2026, l'adresse était
-`http://192.168.1.194:8973`.
+Le 26/09/2026, l'adresse était `http://192.168.1.194:8973`.
 
-**Ce qui a été vérifié le 26/09/2026, et qu'il faut refaire si la copie est
-reconstruite :**
+**Cette adresse n'est pas une prévisualisation publique.** Elle ne fonctionne que
+pendant que le serveur tourne, et seulement pour un téléphone qui peut le
+joindre sur le même réseau. Hors de ces deux conditions, elle ne mène à rien :
+elle ne se partage pas, ne se garde pas pour plus tard, et ne remplace pas un
+déploiement. **Aucun déploiement Vercel n'a été vérifié**, le SSO interceptant
+toutes les URL.
+
+**Ce qui a été vérifié le 26/09/2026.** Les deux premiers points sont à refaire
+**avant chaque session**, par le contrôle de conformité ci-dessus :
 
 - les 61 fichiers de `web/` sont identiques au commit, octet pour octet ;
 - les 16 pages **telles que servies par l'adresse réseau** sont identiques au
@@ -241,12 +277,19 @@ reconstruite :**
   résultats » → total, réserve, piste mobile → comparatif, avec le montant
   repris et le lien « Revenir au bilan ».
 
-**Une conséquence utile du service local :** les appels à `/api/track`
-échouent (501), donc **aucune visite n'est enregistrée** pendant les sessions.
-La phrase dite à l'étape 1 — « rien de ce que vous tapez ne sort de votre
-téléphone » — est littéralement vraie dans ce dispositif. Nous n'y perdons rien,
-les notes étant manuscrites. Ces échecs n'apparaissent que dans la console du
-navigateur, invisible pour la personne.
+**Ce que le service local établit, et ce qu'il n'établit pas.** Les appels à
+`/api/track` échouent (501) : **cet appel-là n'enregistre donc rien** pendant les
+sessions, et l'échec n'apparaît que dans la console du navigateur, invisible pour
+la personne.
+
+**Cela ne prouve pas qu'aucune donnée n'est transmise ni traitée.** Un échec sur
+un point d'entrée ne dit rien du reste : requêtes du navigateur, système
+d'exploitation, réseau. Ne pas transformer ce constat en garantie.
+
+Ce qui est établi, et qui suffit à décrire le dispositif : **les dépenses saisies
+sont enregistrées dans le navigateur du téléphone**, et **nos observations sont
+des notes manuscrites**. Rien de plus ne doit être affirmé, ni dans ce document,
+ni devant la personne.
 
 **Plan B**, à préparer avant et non devant la personne : si le réseau échoue,
 la session est reportée. Ne pas basculer sur un autre appareil ni sur une autre
