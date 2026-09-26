@@ -15,18 +15,21 @@ bx('box-form').onsubmit=ev=>{
  if(bx('remise').value!=='non')action+=' Vérifiez aussi le prix de votre mobile si vous quittez cette box : sa remise peut disparaître.';
  paragraphe(bx('synthese'),'Votre prochaine action : '+action,'reserve');
  if(besoin==='inconnu')paragraphe(bx('synthese'),'Précisez si vous utilisez un décodeur TV ou les appels fixes avant de choisir. Les pistes ci-dessous ne sont pas déclarées équivalentes à votre contrat.');
+ paragraphe(bx('synthese'),'Économie à confirmer : éligibilité, accès aux offres, frais de sortie et remise mobile éventuelle restent à vérifier.');
  const date=new Date().toLocaleDateString('sv-SE');const offres=offresBoxPour(besoin,date);
  if(!offres.length)paragraphe(bx('offres'),'Aucune offre de ce relevé ne peut être présentée actuellement pour ce besoin. Consultez les conditions officielles ou revenez après actualisation.');
  offres.forEach(o=>{
  const art=document.createElement('article');const h=document.createElement('h3');h.textContent=o.nom;art.append(h);
  const tv=besoin==='tv';const a=coutBox(o,12,tv),b=coutBox(o,24,tv);
  paragraphe(art,`${euros(o.prix+(tv&&o.optionTV||0))} / mois${tv?' avec option décodeur':''}. Aucun changement programmé de prix relevé.`);
- paragraphe(art,`Mensualités : ${euros(a.recurrent)} sur 12 mois · ${euros(b.recurrent)} sur 24 mois.`,'box-cout');
+ const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent='Frais, conditions et sources';details.append(summary);
+ paragraphe(details,`Mensualités : ${euros(a.recurrent)} sur 12 mois · ${euros(b.recurrent)} sur 24 mois.`,'box-cout');
  paragraphe(art,a.total===null?'Coût total inconnu : frais de souscription non confirmés.':`Coût connu avec souscription : ${euros(a.total)} sur 12 mois · ${euros(b.total)} sur 24 mois, hors sortie actuelle et options supplémentaires.`);
- paragraphe(art,`Souscription : ${o.entree===null?'à confirmer':euros(o.entree)}. Résiliation future de cette nouvelle offre : ${o.sortie===null?'à confirmer':euros(o.sortie)}, non incluse dans ces projections.`);
+ paragraphe(details,`Souscription : ${o.entree===null?'à confirmer':euros(o.entree)}. Résiliation future de cette nouvelle offre : ${o.sortie===null?'à confirmer':euros(o.sortie)}, non incluse dans ces projections.`);
  paragraphe(art,o.condition);
- paragraphe(art,'Économie à confirmer : éligibilité à votre adresse, accès à l’offre, frais de sortie actuels et éventuelle perte de remise mobile non établis.');
- const aLien=document.createElement('a');aLien.href=o.url;aLien.target='_blank';aLien.rel='noopener noreferrer';aLien.textContent='Vérifier le prix et mon éligibilité — site de l’opérateur';art.append(aLien);
+
+ const aLien=document.createElement('a');aLien.href=o.url;aLien.target='_blank';aLien.rel='noopener noreferrer';aLien.className='btn-secondary';aLien.textContent='Voir l’offre chez '+(o.nom.startsWith('Sosh')?'Sosh':'B&YOU')+' ↗';art.append(aLien);
+ art.append(details);
  paragraphe(art,`Prix relevé le ${o.date}. À revérifier ; aucune disponibilité garantie.`);bx('offres').append(art);
  });
  bx('box-form').hidden=true;bx('resultat-box').hidden=false;bx('resultat-box').focus();

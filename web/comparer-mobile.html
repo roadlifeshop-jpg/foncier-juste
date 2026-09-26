@@ -123,9 +123,9 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
       <form id="forme-cm" novalidate style="margin-top:16px">
         <div class="forme-grille">
           <div class="champ">
-            <label for="f-prix">Ce que vous payez aujourd'hui, par mois</label>
+            <label for="f-prix">Montant mensuel sur votre dernière facture (€)</label>
             <div class="unite" data-unite="€"><input type="text" id="f-prix" inputmode="decimal" placeholder="ex : 19,99"></div>
-            <p class="aide">Sans ce montant, nous affichons des coûts, pas des écarts.</p>
+            <p class="aide">Regardez la ligne de votre forfait, hors achats et hors-forfait. Sans montant : prix des offres, sans écart calculé.</p><button type="button" class="btn-secondary btn-petit" id="prix-inconnu">Je ne sais pas</button>
             <p class="erreur-champ" id="e-prix" hidden></p>
           </div>
           <div class="champ">
@@ -392,9 +392,7 @@ function offreHTML(r, situation){
        affichés pour explorer ; le gain, lui, ne se chiffre qu'une fois le
        besoin connu — sans quoi un forfait 1 Go remporterait toujours la
        comparaison. */
-    ecart = `<span class="ecart inconnu">Écart non chiffré&nbsp;: cette offre inclut
-      ${o.donneesFr} Go en France, et vous n'avez pas dit combien il vous en faut.
-      <b>Précisez votre besoin pour comparer</b>.</span>`;
+    ecart = `<span class="ecart inconnu">Écart non chiffré : précisez votre besoin en données.</span>`;
   } else if (r.ecartIndeterminable){
     ecart = `<span class="ecart inconnu">Frais de souscription inconnus — impossible de dire si cette offre est moins chère${
       r.ecartMensualites !== null && r.ecartMensualites > 0
@@ -422,17 +420,18 @@ function offreHTML(r, situation){
       </div>
     </div>
     <p class="offre-cle"><b>${ech(periode)}</b> · ${o.donneesFr} Go en France.${etranger}</p>
-    <p class="offre-cle">${ech(conditionCle)}</p>
-    ${o.exclusionChangementOffre ? `<p class="offre-cle"><b>${ech(o.exclusionChangementOffre)}</b></p>` : ''}
+    ${o.exclusionChangementOffre ? '' : `<p class="offre-cle">${ech(conditionCle)}</p>`}
+    ${o.exclusionChangementOffre ? `<p class="offre-cle"><b>Non accessible en changement d’offre Orange ou Sosh.</b></p>` : ''}
+    ${ecart}
+    <details>
+      <summary>Frais, conditions et sources</summary>
     <p class="offre-cle">${r.fraisConnus
       ? `<b>Pour entrer :</b> ${ech(euros(r.frais))} de frais de souscription. Coût total connu : ${ech(euros(r.recurrent12))} de mensualités + ${ech(euros(r.frais))} = ${ech(euros(r.coutTotalConnu))}.`
       : `<b>Frais de souscription non établis</b>, malgré la lecture des documents tarifaires officiels. <b>Aucun coût total ne peut donc être donné</b>, et cette offre n'est pas classée comme moins chère.`}
       ${Number.isFinite(o.fraisResiliationNouvelle)
         ? `<br><b>Pour repartir :</b> ${ech(euros(o.fraisResiliationNouvelle))} de frais de résiliation de cette offre — non comptés, puisqu'on ne les paie qu'en partant.`
         : `<br><b>Pour repartir :</b> frais de résiliation de cette offre non établis.`}</p>
-    ${ecart}
-    <details>
-      <summary>Le détail, et ce qui n'est pas compté</summary>
+
       <ul>
         ${o.conditions.map(c => `<li>${ech(c)}</li>`).join('')}
         <li>${ech(o.sourceFrais)}</li>
@@ -445,7 +444,7 @@ function offreHTML(r, situation){
          style="text-decoration:none">Voir l'offre chez ${ech(o.operateur)}</a>
       <span class="hors-site">autre site</span>
       <span class="date-verif${r.ancien ? ' perimee' : ''}">Prix relevé le ${ech(dateFrCourt(o.verifiee))}${r.ancien
-        ? ' — relevé ancien, cette offre a pu changer ou disparaître' : ''}. À revérifier sur la page avant de décider.</span>
+        ? ' — relevé ancien, cette offre a pu changer ou disparaître' : ''}. À revérifier.</span>
     </div>
   </article>`;
 }
@@ -490,12 +489,17 @@ function scenarioHTML(s){
          style="text-decoration:none">Tester mon éligibilité chez ${ech(sc.operateur)}</a>
       <span class="hors-site">autre site</span>
       <span class="date-verif${s.ancien ? ' perimee' : ''}">Prix relevés le ${ech(dateFrCourt(sc.verifiee))}${s.ancien
-        ? ' — relevés anciens, l’offre a pu changer' : ''}. À revérifier sur la page avant de décider.</span>
+        ? ' — relevés anciens, l’offre a pu changer' : ''}. À revérifier.</span>
     </div>
   </article>`;
 }
 
 /* ---------- Le résultat ---------- */
+$('prix-inconnu').addEventListener('click', () => {
+  $('f-prix').value = '';
+  $('e-prix').hidden = true;
+  $('f-donnees').focus();
+});
 $('forme-cm').addEventListener('submit', ev => {
   ev.preventDefault();
   const situation = lireForme();
