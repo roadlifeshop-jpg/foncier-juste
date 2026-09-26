@@ -132,15 +132,17 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 
 <main>
   <section class="shell-lire" style="margin-top:26px">
-    <h1 style="max-width:18ch">Faire le point sur mes dépenses</h1>
+    <h1 id="titre-etape" tabindex="-1" style="max-width:18ch">Choisissez une dépense</h1>
     <p class="lede" style="margin-top:12px; font-size:1.06rem; max-width:46ch">
-      Une seule dépense suffit pour un premier résultat. Ajoutez les autres si vous voulez.
+      Un poste, un montant : votre bilan commence ici.
     </p>
   </section>
 
   <section class="shell-lire" id="saisie" style="margin-top:22px">
+    <p id="resume-bilan" class="aide" hidden></p>
     <div class="forme">
-      <h2 style="font-size:1.06rem; font-family:'Archivo',sans-serif; font-weight:600">Quel poste&nbsp;?</h2>
+      <button id="modifier-poste" class="btn-secondary" type="button" hidden>← Modifier le poste</button>
+      <h2 id="titre-postes" style="font-size:1.06rem; font-family:'Archivo',sans-serif; font-weight:600">Quel poste&nbsp;?</h2>
       <div class="postes" id="postes" role="group" aria-label="Poste de dépense"></div>
 
       <div class="saisie-montant" id="zone-montant" hidden>
@@ -175,7 +177,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
     <h2 style="font-size:1.06rem; font-family:'Archivo',sans-serif; font-weight:600">Vos dépenses
     <span class="surtitre" id="compte"></span></h2>
     <div id="totaux"></div>
-    <div id="liste"></div>
+
     <div class="deux-actions">
       <button type="button" class="btn btn-secondary" id="encore">+ Ajouter une dépense</button>
       <button type="button" class="btn btn-primary" id="voir">Voir mes résultats</button>
@@ -190,6 +192,9 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
       <button type="button" class="btn btn-secondary" id="encore-2">+ Ajouter une dépense</button>
       <a class="btn btn-secondary" href="#autres-verifs" style="text-decoration:none; text-align:center">Voir d'autres vérifications</a>
     </div>
+
+    <h3 class="detail-depenses">Vos dépenses · montants modifiables</h3>
+    <div id="liste"></div>
 
     <div id="autres-verifs" style="margin-top:34px; padding-top:22px; border-top:1px solid var(--line)">
       <h2 style="font-size:1.02rem; font-family:'Archivo',sans-serif; font-weight:600">Vérifier une somme à récupérer</h2>
@@ -253,6 +258,7 @@ function choisirPoste(cle){
   $('postes').querySelectorAll('.poste').forEach(b =>
     b.setAttribute('aria-pressed', String(b.dataset.poste === posteChoisi)));
   $('zone-montant').hidden = !posteChoisi;
+  afficherEtape('saisie');
   if (!posteChoisi) return;
   const p = POSTES[posteChoisi];
 
@@ -329,8 +335,10 @@ $('ajouter').addEventListener('click', () => {
   $('f-montant').value = '';
   choisirPoste(posteChoisi);          /* referme la saisie de ce poste */
   majTout();
+  majResultat();
+  afficherEtape('resultat');
+  $('titre-etape').focus();
   $('annonce').textContent = `Ajouté. ${resumeCourt()}`;
-  $('zone-liste').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
 function resumeCourt(){
@@ -358,7 +366,7 @@ function ligneHTML(d){
 }
 
 function majListe(){
-  $('zone-liste').hidden = !depenses.length;
+  $('zone-liste').hidden = true;
   $('liste').innerHTML = depenses.map(ligneHTML).join('');
   const t = totauxBilan(depenses);
   $('compte').textContent = t.nombre ? `— ${t.nombre}` : '';
@@ -399,6 +407,7 @@ $('liste').addEventListener('click', ev => {
   const id = b.closest('.ligne-d').dataset.id;
   depenses = depenses.filter(x => x.id !== id);
   sauver(); majTout();
+  if (!depenses.length) afficherEtape('saisie');
   $('annonce').textContent = depenses.length ? `Retiré. ${resumeCourt()}` : 'Retiré. Votre bilan est vide.';
 });
 
@@ -426,7 +435,7 @@ function majResultat(){
     </div>
     <p class="aide" style="margin-top:14px">${rep.map(r =>
       `${ech(POSTES[r.depense.poste].nom)} · ${ech(euros(r.annuel))} par an`).join(' &nbsp;·&nbsp; ')}
-      <br>Corrigez un montant dans la liste ci-dessus&nbsp;: le bilan suit.</p>
+      <br>Vous pouvez corriger les montants ci-dessous.</p>
     ${avertissements.map(a => `<p class="avert">${ech(a)}</p>`).join('')}
     ${piste ? `<div class="piste">
       <h3>${ech(piste.titre)}</h3>
@@ -443,10 +452,27 @@ $('voir').addEventListener('click', () => {
   majResultat();
   $('zone-resultat').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
+function afficherEtape(etape){
+  const resultat = etape === 'resultat' && depenses.length;
+  $('saisie').hidden = !!resultat;
+  $('zone-liste').hidden = true;
+  $('zone-resultat').hidden = !resultat;
+  $('postes').hidden = !!posteChoisi;
+  $('titre-postes').hidden = !!posteChoisi;
+  $('modifier-poste').hidden = !posteChoisi;
+  document.querySelector('main .lede').hidden = !!resultat;
+  $('titre-etape').textContent = resultat ? 'Votre bilan' : posteChoisi ? POSTES[posteChoisi].nom : 'Choisissez une dépense';
+  $('resume-bilan').hidden = !depenses.length;
+  $('resume-bilan').textContent = depenses.length ? 'Déjà renseigné : ' + resumeCourt() : '';
+}
+$('modifier-poste').addEventListener('click', () => {
+  choisirPoste(posteChoisi);
+  $('postes').querySelector('button').focus();
+});
 [$('encore'), $('encore-2')].forEach(b => b.addEventListener('click', () => {
-  $('saisie').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  if (!posteChoisi) $('postes').querySelector('.poste').focus();
-  else $('f-montant').focus();
+  if (posteChoisi) choisirPoste(posteChoisi);
+  afficherEtape('saisie');
+  $('titre-etape').focus();
 }));
 
 /* ---------- Le poste transmis dans l'URL ---------- */
@@ -475,6 +501,7 @@ if (depenses.length) majResultat();
 
 const posteURL = posteDeLURL();
 if (posteURL) choisirPoste(posteURL);
+else afficherEtape(depenses.length ? 'resultat' : 'saisie');
 try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
 </script>
 </body>

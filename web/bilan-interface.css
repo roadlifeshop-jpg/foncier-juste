@@ -22,3 +22,10 @@ main .shell-lire{max-width:800px;}
 .btn,.btn-primary,.btn-secondary{min-height:46px;}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
 @media(max-width:560px){.postes{grid-template-columns:repeat(2,minmax(0,1fr));}.site-head .brand small{display:none;}.totaux{padding:20px;}.rythme{flex-wrap:wrap;}.rythme label{min-width:80px;}.piste{padding:18px;}}
+/* Une tâche à la fois : poste, montant, bilan. */
+[hidden],.postes[hidden]{display:none!important;}
+.raccourcis,.note-raccourcis,#zone-liste{display:none;}
+#zone-resultat>h2{display:none;}
+#modifier-poste{margin-bottom:10px;}
+.detail-depenses{font:600 17px Archivo,sans-serif;margin-top:28px;}
+#titre-etape:focus{outline:none;}
