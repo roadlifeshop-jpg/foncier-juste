@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T2 — Feuille de relevé</title>
+<style>
+/* FEUILLE DE RELEVÉ T2 — document de travail, hors du site.
+   Ouvrir ce fichier dans un navigateur, puis Cmd+P.
+   Page 1 : une session. À imprimer en cinq exemplaires.
+   Page 2 : le récapitulatif des cinq, avec les seuils arrêtés d'avance. */
+@page { size:A4; margin:13mm; }
+*{box-sizing:border-box;}
+body{margin:0; padding:20px; background:#EEEDEA; color:#000;
+  font:11.3px/1.38 -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}
+.page{background:#fff; max-width:186mm; margin:0 auto 20px; padding:12mm 13mm;
+  box-shadow:0 2px 14px rgba(0,0,0,.18);}
+h1{font-size:15px; margin:0; letter-spacing:.01em;}
+h1 small{display:block; font-size:10.5px; font-weight:400; color:#444; margin-top:3px;}
+h2{font-size:12.5px; margin:10px 0 4px; padding-bottom:3px; border-bottom:1.5px solid #000;}
+h2 .n{display:inline-block; min-width:16px;}
+p.q{margin:5px 0 3px; font-size:11px;}
+p.c{margin:3px 0; font-size:10px; color:#333; font-style:italic;}
+.ent{display:flex; gap:14px; flex-wrap:wrap; font-size:11px; margin-top:9px;
+  padding-bottom:9px; border-bottom:1px solid #000;}
+.ent span{flex:1 1 auto;}
+.lg{border-bottom:1px solid #999; height:17px; margin-top:3px;}
+.lg.h{height:25px;}
+.cases{margin:4px 0 0; font-size:10.5px;}
+.cases label{display:inline-block; margin-right:14px; white-space:nowrap;}
+.cases i{display:inline-block; width:10px; height:10px; border:1px solid #000;
+  margin-right:4px; vertical-align:-1px; font-style:normal;}
+table{width:100%; border-collapse:collapse; margin-top:6px; font-size:10.5px;}
+th,td{border:1px solid #000; padding:2.5px 5px; text-align:left; vertical-align:top;}
+th{background:#EEE; font-weight:600;}
+td.v{height:22px;}
+.stop{margin-top:10px; border:2px solid #000; padding:6px 9px;}
+.stop b{font-size:11.5px;}
+.stop p{margin:4px 0 0; font-size:10.5px;}
+.avant{margin-top:12px; font-size:10.5px;}
+.avant li{margin-top:3px;}
+.pied{margin-top:12px; font-size:9.5px; color:#333; border-top:1px solid #999; padding-top:6px;}
+@media print{
+  body{background:#fff; padding:0;}
+  .page{box-shadow:none; margin:0; max-width:none; padding:0; page-break-after:always;}
+  .page:last-child{page-break-after:auto;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================ PAGE 1 : UNE SESSION ==================== -->
+<section class="page">
+
+  <h1>T2 — Feuille de relevé, une session
+    <small>Notes manuscrites et anonymes. Aucun enregistrement, aucune capture, aucune coordonnée.
+    Ne pas aider, ne pas corriger, ne pas expliquer.</small></h1>
+
+  <div class="ent">
+    <span>Session n°&nbsp;____ / 5</span>
+    <span>Prénom ou code&nbsp;: ____________</span>
+    <span>Date&nbsp;: ____ / ____ / 2026</span>
+    <span>Commit servi&nbsp;: ______________</span>
+  </div>
+
+  <h2><span class="n">1.</span> Le total est-il compris pour ce qu'il est&nbsp;?</h2>
+  <p class="q"><b>Dès l'apparition du résultat</b>, sans rien souffler&nbsp;:
+  « pouvez-vous me dire avec vos mots ce qu'est ce chiffre&nbsp;? » — noter mot pour mot.</p>
+  <div class="lg h"></div><div class="lg h"></div>
+  <p class="q">Puis seulement, deux questions fermées&nbsp;:</p>
+  <div class="cases">
+    <label>« Ce chiffre couvre tout ce que dépense votre foyer&nbsp;? »</label>
+    <label><i></i>oui</label><label><i></i>non</label><label><i></i>ne sait pas</label>
+  </div>
+  <div class="cases">
+    <label>« C'est de l'argent que vous pourriez récupérer ou économiser&nbsp;? »</label>
+    <label><i></i>oui</label><label><i></i>non</label><label><i></i>ne sait pas</label>
+  </div>
+  <p class="c">Un « oui » à la seconde question&nbsp;: voir le critère d'arrêt, en bas.</p>
+  <p class="q">D'où vient chaque montant saisi&nbsp;? (M = mémoire, B = appli bancaire,
+  C = courriel, F = facture, E = estimation au jugé)</p>
+  <table>
+    <tr><th style="width:42%">Poste saisi</th><th style="width:16%">Origine</th>
+        <th>Temps passé à chercher, poste abandonné</th></tr>
+    <tr><td class="v"></td><td class="v"></td><td class="v"></td></tr>
+    <tr><td class="v"></td><td class="v"></td><td class="v"></td></tr>
+    <tr><td class="v"></td><td class="v"></td><td class="v"></td></tr>
+  </table>
+  <div class="cases" style="margin-top:5px">
+    <label>Si Énergie saisi — l'avertissement sur l'acompte est lu&nbsp;:</label>
+    <label><i></i>lu</label><label><i></i>sauté</label><label><i></i>sans objet</label>
+  </div>
+
+  <h2><span class="n">2.</span> La comparaison mobile est-elle trouvée sans qu'on la montre&nbsp;?</h2>
+  <p class="c">S'observe pendant le parcours — cette question ne se pose jamais à voix haute.
+  Ne jamais désigner le comparatif. Ne jamais orienter quelqu'un vers le poste mobile.</p>
+  <div class="cases">
+    <label>Un forfait mobile a été saisi&nbsp;:</label>
+    <label><i></i>oui</label><label><i></i>non → question inexploitable pour cette session</label>
+  </div>
+  <div class="cases">
+    <label>Le comparatif est atteint&nbsp;:</label>
+    <label><i></i>oui</label><label><i></i>non</label>
+  </div>
+  <div class="cases">
+    <label>Par quelle porte&nbsp;:</label>
+    <label><i></i>lien de l'accueil</label><label><i></i>bouton de la piste</label>
+    <label><i></i>menu du haut</label>
+  </div>
+  <p class="q">À quel moment, et qu'a-t-on vu chercher avant&nbsp;?</p>
+  <div class="lg"></div>
+  <p class="q">Sans besoin en Go déclaré, aucun écart en euros n'est affiché. Réaction&nbsp;?
+  (à noter, sans seuil)</p>
+  <div class="lg"></div>
+
+  <h2><span class="n">3.</span> Quelle prochaine action, et est-elle datée&nbsp;?</h2>
+  <p class="q">Sans question dirigée&nbsp;: « qu'est-ce que vous faites en sortant d'ici&nbsp;? »
+  — mot pour mot.</p>
+  <div class="lg h"></div><div class="lg h"></div>
+  <p class="q">Puis&nbsp;: « quelque chose que vous feriez cette semaine&nbsp;? Quoi, et quand&nbsp;? »</p>
+  <div class="lg"></div>
+  <div class="cases">
+    <label>Intention <b>datée</b>&nbsp;:</label>
+    <label><i></i>oui</label><label><i></i>non</label>
+    <label>L'action existe-t-elle sur le site&nbsp;:</label>
+    <label><i></i>oui</label><label><i></i>non — laquelle&nbsp;: ____________</label>
+  </div>
+
+  <div class="stop">
+    <b>Critères d'arrêt immédiat — cocher, noter en toutes lettres, interrompre la série</b>
+    <div class="cases" style="margin-top:5px">
+      <label><i></i>repart en croyant pouvoir résilier sans frais, alors que le site ne l'a jamais dit</label>
+    </div>
+    <div class="cases">
+      <label><i></i>repart avec un montant qu'elle croit gagné, économisé ou récupérable</label>
+    </div>
+    <p>Si l'un des deux est coché&nbsp;: la série s'arrête, la correction est faite, et les
+    cinq sessions repartent de zéro sur le nouveau build. Les sessions déjà menées restent
+    des observations mais ne comptent plus dans les seuils.</p>
+  </div>
+
+  <p class="q" style="margin-top:12px"><b>Ce qui a cassé et n'était pas prévu</b></p>
+  <div class="lg"></div><div class="lg"></div>
+
+  <div class="pied">Fin de session&nbsp;: faire effacer la liste devant la personne, répondre à ses
+  questions. Réponse préparée à « c'est vous qui avez fait ça&nbsp;? ».</div>
+
+</section>
+
+<!-- ======================= PAGE 2 : RÉCAPITULATIF ====================== -->
+<section class="page">
+
+  <h1>T2 — Récapitulatif des cinq sessions
+    <small>Seuils arrêtés le 26/09/2026, avant la première session. Ne pas les ajuster après coup.</small></h1>
+
+  <table style="margin-top:10px">
+    <tr>
+      <th style="width:46%">Constat</th>
+      <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th style="width:11%">Total</th>
+    </tr>
+    <tr><td>Explique le total comme « ce que j'ai saisi, pas tout le foyer »</td>
+      <td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td></tr>
+    <tr><td>A saisi un forfait mobile</td>
+      <td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td></tr>
+    <tr><td>Atteint le comparatif sans qu'on le montre <i>(parmi celles ci-dessus)</i></td>
+      <td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td></tr>
+    <tr><td>Repart avec une intention <b>datée</b></td>
+      <td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td></tr>
+    <tr><td>Critère d'arrêt déclenché</td>
+      <td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td><td class="v"></td></tr>
+  </table>
+
+  <h2>Ce que chaque total décide</h2>
+  <table>
+    <tr><th style="width:30%">Constat</th><th style="width:13%">Seuil</th><th>Décision</th></tr>
+    <tr><td rowspan="3">Total compris</td><td><b>≥ 4 / 5</b></td>
+        <td>La formulation tient. Continuer.</td></tr>
+    <tr><td>2 ou 3 / 5</td><td>La réserve est lue sans être retenue. Retravailler l'étiquette du total, pas le calcul.</td></tr>
+    <tr><td>≤ 1 / 5</td><td>Le total induit en erreur. Faut-il l'afficher dès la première ligne, ou le nommer autrement&nbsp;?</td></tr>
+    <tr><td rowspan="3">Comparatif atteint</td><td><b>≥ 3 / 5</b></td><td>La porte fonctionne.</td></tr>
+    <tr><td>1 ou 2 / 5</td><td>La piste est écrite mais pas vue comme une action. Travailler le bouton, pas le texte.</td></tr>
+    <tr><td>0 / 5</td><td>Le bilan ne mène pas au seul outil qui produit des prix. C'est le parcours d'entrée qui est en cause.</td></tr>
+    <tr><td rowspan="3">Intention datée</td><td><b>≥ 3 / 5</b></td><td>Le refus de chiffrer une économie est tenable.</td></tr>
+    <tr><td>1 ou 2 / 5</td><td>Le site informe sans mobiliser. Travailler les démarches, pas les chiffres.</td></tr>
+    <tr><td>0 / 5</td><td>Le site répond à une question que personne ne se pose. Poser franchement la question de son abandon.</td></tr>
+    <tr><td>Moins de 3 mobiles saisis</td><td>—</td>
+        <td><b>Observations insuffisantes</b> pour la question 2. Aucune décision ne s'en déduit. Distinguer les participants sans besoin mobile des difficultés de navigation observées. <b>Ne pas conclure que le bilan oriente mal.</b></td></tr>
+  </table>
+
+  <h2>Observation secondaire — la date d'échéance <span style="font-weight:400">(sans seuil)</span></h2>
+  <p class="c">Seulement si la personne atteint la vérification approfondie d'un contrat. Aucune
+  décision ne sera prise sur cette base&nbsp;: une ou deux réponses ne tranchent rien.</p>
+  <table><tr><th style="width:20%">Session</th><th>Saurait la trouver&nbsp;? En combien de temps&nbsp;?</th></tr>
+  <tr><td class="v"></td><td class="v"></td></tr><tr><td class="v"></td><td class="v"></td></tr></table>
+
+  <h2>Avant chaque session</h2>
+  <ol class="avant">
+    <li>Contrôle de conformité au commit de référence — aucune ligne «&nbsp;ECART&nbsp;».</li>
+    <li>Serveur lancé, adresse relue (elle change avec le réseau), téléphone sur le même Wi-Fi.</li>
+    <li>Empêcher la mise en veille de l'ordinateur — elle coupe le serveur en pleine session.</li>
+    <li>Sur le téléphone de la personne. Ni la variante d'accueil, ni un autre port.</li>
+    <li>Plan B décidé d'avance&nbsp;: si le réseau échoue, la session est reportée. Ne pas basculer
+    sur un autre appareil ni sur une autre version.</li>
+  </ol>
+
+  <h2>Après les cinq</h2>
+  <p class="q">Écrire, dans l'ordre&nbsp;: les trois questions et leur réponse chiffrée sur cinq&nbsp;;
+  la décision qui découle de chaque seuil&nbsp;; ce qui a cassé et n'était pas prévu&nbsp;; les portes
+  empruntées vers le comparatif&nbsp;; et <b>ce que ces cinq sessions ne permettent pas de conclure</b>.</p>
+  <p class="c">Cinq personnes peuvent montrer qu'une promesse est fausse. Elles ne peuvent pas
+  montrer qu'elle est vraie, ni mesurer une proportion. Aucun chiffre tiré d'ici n'est un taux.</p>
+
+  <div class="pied">Protocole complet&nbsp;: <b>T2-protocole-parcours-entree.md</b>.</div>
+
+</section>
+
+</body>
+</html>
