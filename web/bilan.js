@@ -162,7 +162,7 @@ function pistePrioritaire(depenses) {
       phrase: `C’est le poste pour lequel nous disposons du relevé le plus large — plusieurs opérateurs, à une date connue : votre ${euros(mensuelCentimes(mobile.montant, mobile.periodicite))} par mois peut être mis en face de leur coût sur douze mois.`,
       action: { libelle: 'Comparer mon forfait mobile', href: 'comparer-mobile.html' },
       secondaire: box ? {
-        texte: `Vous avez aussi saisi une box à ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois. Un premier relevé existe, limité à des offres fibre sans engagement chez deux opérateurs.`,
+        texte: `Vous avez aussi saisi une box à ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois. Un premier relevé existe, limité à des offres fibre sans engagement.`,
         libelle: 'Examiner ma box internet',
         href: 'comparer-box.html',
       } : null,
@@ -173,7 +173,7 @@ function pistePrioritaire(depenses) {
     return {
       cle: 'comparer-box',
       titre: 'Examiner votre box internet',
-      phrase: `Votre ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois peut être mis en face d’un premier relevé d’offres fibre sans engagement, chez deux opérateurs, à une date connue. <b>Aucune économie n’est annoncée</b> : le comparatif montre des coûts, et dit ce qu’il ignore.`,
+      phrase: `Votre ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois peut être mis en face d’un premier relevé d’offres fibre sans engagement, relevées à une date connue. <b>Aucune économie n’est annoncée</b> : le comparatif montre des coûts, et dit ce qu’il ignore.`,
       action: { libelle: 'Examiner ma box internet', href: 'comparer-box.html' },
       secondaire: null,
     };

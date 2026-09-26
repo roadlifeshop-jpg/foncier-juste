@@ -5,6 +5,10 @@ function montrerBox(n){etapeBox=n;document.querySelectorAll('[data-etape]').forE
 try{const brut=JSON.parse(localStorage.getItem('dj_bilan_v1')||'[]');const box=boxDuBilan(brut);if(box){bx('prix').value=(mensuelCentimes(box.montant,box.periodicite)/100).toFixed(2);bx('repris').textContent='Montant repris du bilan, modifiable ici sans modifier votre bilan.';}}catch(_){}
 bx('suite').onclick=()=>{const c=enCentimes(bx('prix').value);if(bx('prix').value.trim()&&(c===null||c<=0)){bx('erreur').textContent='Indiquez un montant positif ou laissez vide si vous ne savez pas.';bx('prix').focus();return;}bx('erreur').textContent='';montrerBox(1);};
 bx('retour').onclick=()=>montrerBox(0);bx('modifier').onclick=()=>montrerBox(0);
+/* Les dates du relevé sont stockées en ISO pour être comparables ; elles ne
+   doivent jamais s'afficher ainsi. Une date inattendue est rendue telle quelle
+   plutôt que déformée. */
+function dateFr(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?`${m[3]}/${m[2]}/${m[1]}`:String(iso||'');}
 function paragraphe(parent,texte,classe){const p=document.createElement('p');p.textContent=texte;if(classe)p.className=classe;parent.append(p);}
 bx('box-form').onsubmit=ev=>{
  ev.preventDefault();if(etapeBox===0){bx('suite').click();return;}
@@ -30,7 +34,7 @@ bx('box-form').onsubmit=ev=>{
 
  const aLien=document.createElement('a');aLien.href=o.url;aLien.target='_blank';aLien.rel='noopener noreferrer';aLien.className='btn-secondary';aLien.textContent='Voir l’offre chez '+(o.nom.startsWith('Sosh')?'Sosh':'B&YOU')+' ↗';art.append(aLien);
  art.append(details);
- paragraphe(art,`Prix relevé le ${o.date}. À revérifier ; aucune disponibilité garantie.`);bx('offres').append(art);
+ paragraphe(art,`Prix relevé le ${dateFr(o.date)}. À revérifier ; aucune disponibilité garantie.`);bx('offres').append(art);
  });
  bx('box-form').hidden=true;bx('resultat-box').hidden=false;bx('resultat-box').focus();
 };
