@@ -199,12 +199,24 @@ session.
 git -C /Users/marvin/Desktop/foncier-juste log -1 --format='%h %s' cc9c3a6
 ```
 
-Rien ne doit changer sous `web/` jusqu'à la cinquième session. Deux personnes qui
-n'ont pas vu la même page ne se comparent pas, et cinq cas sont déjà trop peu
-pour se permettre de mélanger deux versions.
+Deux personnes qui n'ont pas vu la même page ne se comparent pas, et cinq cas
+sont déjà trop peu pour se permettre de mélanger deux versions.
 
-**Ce document-ci n'est pas servi** et peut être amendé sans rompre la règle.
-Toute modification sous `web/`, en revanche, rompt la série.
+**Ce qui est figé, exactement : la copie servie, et non le dépôt.** La copie est
+extraite du commit de référence et ne reçoit rien de ce qui est commité ensuite.
+Le travail peut donc continuer sur `refonte-trois-outils` sans rompre la série —
+corrections, variantes, documents. Ce qui garantit l'identité de la version
+testée n'est pas l'immobilité du dépôt, mais le **contrôle de conformité exécuté
+avant chaque session**, décrit plus bas. Une seule ligne « ECART » et la session
+ne commence pas.
+
+**La variante d'accueil est exclue des cinq essais.** `web/accueil-variante.html`
+ne fait pas partie de la version testée, n'est liée depuis aucune page servie, et
+ne doit jamais être ouverte pendant une session — ni montrée à un participant.
+Elle sert à juger une hypothèse de hiérarchie ; elle ne mesure rien.
+
+Si elle est servie pour être regardée, **c'est depuis un autre port que celui des
+essais**, et jamais pendant une session.
 
 **Seule exception : les critères d'arrêt immédiat.** S'ils se réalisent, la série
 s'interrompt, la correction est faite, et les sessions repartent de zéro sur le

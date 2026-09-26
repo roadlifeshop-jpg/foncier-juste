@@ -448,9 +448,32 @@ $('voir').addEventListener('click', () => {
   else $('f-montant').focus();
 }));
 
+/* ---------- Le poste transmis dans l'URL ---------- */
+/* `bilan.html?poste=mobile` ouvre directement la saisie de ce poste, pour que
+   la catégorie choisie sur la page précédente n'ait pas à l'être une seconde
+   fois. Quatre garde-fous, dans cet ordre :
+
+     — seul un poste DU REGISTRE est accepté. `hasOwnProperty` et non
+       `POSTES[v]`, sinon « constructor » ou « toString » passeraient ;
+     — sans paramètre, ou avec un paramètre invalide, la page se comporte
+       exactement comme avant : aucun poste présélectionné ;
+     — RIEN N'EST ENREGISTRÉ. Le paramètre ouvre un champ vide ; il ne crée
+       aucune dépense et n'écrit pas une ligne dans `dj_bilan_v1` ;
+     — les dépenses déjà saisies sont chargées et affichées AVANT, et le poste
+       reste modifiable : les huit boutons continuent de fonctionner. */
+function posteDeLURL(){
+  let v = null;
+  try { v = new URLSearchParams(location.search).get('poste'); }
+  catch (_) { return null; }
+  return (v && Object.prototype.hasOwnProperty.call(POSTES, v)) ? v : null;
+}
+
 charger();
 majListe();
 if (depenses.length) majResultat();
+
+const posteURL = posteDeLURL();
+if (posteURL) choisirPoste(posteURL);
 try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
 </script>
 </body>

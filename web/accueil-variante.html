@@ -25,9 +25,9 @@
      — texte secondaire en `--ink-muted` et non `--ink-faint`, peu de bordures,
        un seul menu.
 
-   LIMITE CONNUE : les boutons mènent à `bilan.html`, qui redemande le poste.
-   La présélection exigerait une addition à `bilan.html` — un fichier de la
-   version testée. Reportée après les essais. */
+   L'entrée directe est câblée : chaque bouton passe son poste à `bilan.html`
+   par `?poste=`, qui ouvre la saisie correspondante sans second choix. Le
+   paramètre ne fait qu'ouvrir un champ ; il n'enregistre rien. */
 
 /* ---- En-tête réduit à une marque et un menu ---- */
 .tete{display:flex; align-items:baseline; justify-content:space-between; gap:16px;
@@ -123,14 +123,14 @@
     <p class="portee">Tous les postes permettent de calculer votre budget.
     <b>La comparaison d'offres est actuellement disponible pour le mobile.</b></p>
     <div class="postes">
-      <a href="bilan.html">Mobile <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html">Box <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html">Énergie <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html">Assurances <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html">Abonnements <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html">Logement <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html">Transport <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html">Autre <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=mobile">Mobile <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=box">Box <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=energie">Énergie <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=assurance">Assurances <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=abonnements">Abonnements <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=logement">Logement <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=transport">Transport <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=autre">Autre <span class="fl" aria-hidden="true">→</span></a>
     </div>
     <p class="sans">Aucun nom, e-mail ni téléphone n'est demandé pour voir le résultat.</p>
   </section>
