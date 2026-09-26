@@ -320,12 +320,19 @@ function majDirect(){
     return;
   }
   d.className = 'en-direct';
-  /* La saisie est répétée telle qu'elle sera enregistrée. Sans cela, un
+  /* La saisie est répétée telle qu'elle sera enregistrée : sans cela, un
      montant annuel saisi par erreur se lit comme un mensuel plus petit, et
-     rien à l'écran ne signale la confusion. */
-  d.innerHTML = `<span class="saisi">Saisi&nbsp;: <b>${ech(euros(c))} ${ech(LIB_RYTHME[rythmeCourant()].toLowerCase())}</b></span>
-    <span class="m">${ech(euros(mensuelCentimes(c, rythmeCourant())))} par mois</span>
-    <span class="a">${ech(euros(annuelCentimes(c, rythmeCourant())))} par an</span>`;
+     rien à l'écran ne signale la confusion.
+     Mais quand le rythme EST « par mois », cet écho répète mot pour mot la
+     ligne suivante — « Saisi : 24,90 € par mois » puis « 24,90 € par mois ».
+     Le doublon n'avertit de rien et fait douter de la lecture : l'écho ne
+     s'affiche donc que lorsque la conversion change réellement le montant. */
+  const r = rythmeCourant();
+  const echo = r === 'mensuelle' ? '' :
+    `<span class="saisi">Saisi&nbsp;: <b>${ech(euros(c))} ${ech(LIB_RYTHME[r].toLowerCase())}</b></span>`;
+  d.innerHTML = `${echo}
+    <span class="m">${ech(euros(mensuelCentimes(c, r)))} par mois</span>
+    <span class="a">${ech(euros(annuelCentimes(c, r)))} par an</span>`;
 }
 $('f-montant').addEventListener('input', majDirect);
 $('rythme').addEventListener('change', majDirect);

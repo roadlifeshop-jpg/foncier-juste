@@ -2,7 +2,7 @@
 const bx=id=>document.getElementById(id);
 let etapeBox=0;
 function montrerBox(n){etapeBox=n;document.querySelectorAll('[data-etape]').forEach(s=>s.hidden=Number(s.dataset.etape)!==n);bx('box-form').hidden=false;bx('resultat-box').hidden=true;bx('titre').focus();}
-try{const brut=JSON.parse(localStorage.getItem('dj_bilan_v1')||'[]');const box=boxDuBilan(brut);if(box){bx('prix').value=(mensuelCentimes(box.montant,box.periodicite)/100).toFixed(2);bx('repris').textContent='Montant repris du bilan, modifiable ici sans modifier votre bilan.';}}catch(_){}
+try{const brut=JSON.parse(localStorage.getItem('dj_bilan_v1')||'[]');const box=boxDuBilan(brut);if(box){bx('prix').value=(mensuelCentimes(box.montant,box.periodicite)/100).toFixed(2).replace('.',',');bx('repris').textContent='Montant repris du bilan, modifiable ici sans modifier votre bilan.';}}catch(_){}
 bx('suite').onclick=()=>{const c=enCentimes(bx('prix').value);if(bx('prix').value.trim()&&(c===null||c<=0)){bx('erreur').textContent='Indiquez un montant positif ou laissez vide si vous ne savez pas.';bx('prix').focus();return;}bx('erreur').textContent='';montrerBox(1);};
 bx('retour').onclick=()=>montrerBox(0);bx('modifier').onclick=()=>montrerBox(0);
 /* Les dates du relevé sont stockées en ISO pour être comparables ; elles ne
