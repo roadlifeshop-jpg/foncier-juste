@@ -37,7 +37,8 @@ const POSTES = {
     suggestions: [1000, 1500, 2000, 3000],
   },
   box: {
-    nom: 'Box internet', reglesContrat: true, categorieContrat: 'telecom', comparatif: null,
+    nom: 'Box internet', reglesContrat: true, categorieContrat: 'telecom',
+    comparatif: 'comparer-box.html',
     suggestions: [2000, 3000, 4000, 5000],
   },
   energie: {
@@ -147,12 +148,34 @@ function pistePrioritaire(depenses) {
   if (!l.length) return null;
 
   const mobile = l.find(d => d.poste === 'mobile');
+  const box = l.find(d => d.poste === 'box');
+
+  /* Une SEULE piste reste mise en avant. Quand les deux postes existent, la box
+     ne devient pas une seconde piste concurrente : elle est offerte en second
+     lien dans le même bloc. Le relevé box est plus étroit que le relevé mobile
+     — moins d'opérateurs, des frais moins souvent établis — et l'ordre reste
+     celui de la fiabilité, pas celui du montant. */
   if (mobile) {
     return {
       cle: 'comparer-mobile',
       titre: 'Comparer votre forfait mobile',
-      phrase: `C’est le seul poste pour lequel nous disposons d’offres relevées chez plusieurs opérateurs, à une date connue : votre ${euros(mensuelCentimes(mobile.montant, mobile.periodicite))} par mois peut être mis en face de leur coût sur douze mois.`,
+      phrase: `C’est le poste pour lequel nous disposons du relevé le plus large — plusieurs opérateurs, à une date connue : votre ${euros(mensuelCentimes(mobile.montant, mobile.periodicite))} par mois peut être mis en face de leur coût sur douze mois.`,
       action: { libelle: 'Comparer mon forfait mobile', href: 'comparer-mobile.html' },
+      secondaire: box ? {
+        texte: `Vous avez aussi saisi une box à ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois. Un premier relevé existe, limité à des offres fibre sans engagement chez deux opérateurs.`,
+        libelle: 'Examiner ma box internet',
+        href: 'comparer-box.html',
+      } : null,
+    };
+  }
+
+  if (box) {
+    return {
+      cle: 'comparer-box',
+      titre: 'Examiner votre box internet',
+      phrase: `Votre ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois peut être mis en face d’un premier relevé d’offres fibre sans engagement, chez deux opérateurs, à une date connue. <b>Aucune économie n’est annoncée</b> : le comparatif montre des coûts, et dit ce qu’il ignore.`,
+      action: { libelle: 'Examiner ma box internet', href: 'comparer-box.html' },
+      secondaire: null,
     };
   }
 

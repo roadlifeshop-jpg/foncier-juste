@@ -889,8 +889,12 @@ SCRIPT_TESTS = r"""
   vrai("le registre des postes est distinct de celui des contrats",
        Object.keys(POSTES).some(p => !CATEGORIES[p]) &&
        ['logement','transport'].every(p => !CATEGORIES[p]));
-  vrai("seul le mobile porte un comparatif : c'est le seul où des prix sont relevés",
-       Object.entries(POSTES).filter(([, p]) => p.comparatif).map(([k]) => k).join(',') === 'mobile');
+  /* Le mobile n'est plus seul : un relevé box existe depuis le 26/09/2026. Les
+     six autres postes n'ont toujours aucun prix de référence, et l'assertion
+     garde son vrai rôle — empêcher qu'un comparatif soit déclaré pour un poste
+     que nous ne savons pas comparer. */
+  vrai("seuls le mobile et la box portent un comparatif : les six autres n'ont aucun prix relevé",
+       Object.entries(POSTES).filter(([, p]) => p.comparatif).map(([k]) => k).join(',') === 'mobile,box');
   vrai("les montants suggérés sont des nombres ronds, jamais des centimes précis",
        Object.values(POSTES).every(p => p.suggestions.every(c => c % 100 === 0)));
   vrai("le loyer, l'énergie et le transport portent leur avertissement propre",
@@ -934,11 +938,33 @@ SCRIPT_TESTS = r"""
      pistePrioritaire(plusieurs).cle, 'comparer-mobile');
   vrai("la piste mobile reprend le montant déjà saisi",
        /24,99 €/.test(pistePrioritaire(plusieurs).phrase));
-  eq("sans mobile mais avec un contrat : vérifier les conditions",
-     pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile')).cle, 'verifier-contrats');
-  vrai("cette piste-là annonce explicitement qu'aucune économie n'est chiffrée",
+  /* La box est entrée dans l'ordre de fiabilité, derrière le mobile : un bilan
+     sans mobile mais avec une box mène désormais au relevé box, et non plus
+     directement à la vérification des contrats. */
+  eq("sans mobile mais avec une box : le relevé box",
+     pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile')).cle, 'comparer-box');
+  vrai("la piste box reprend le montant déjà saisi",
+       /39,99 €/.test(pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile')).phrase));
+  vrai("la piste box n'annonce aucune économie",
        /Aucune économie n.est annoncée/.test(
          pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile')).phrase));
+  eq("ni mobile ni box, mais un contrat : vérifier les conditions",
+     pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile' && d.poste !== 'box')).cle,
+     'verifier-contrats');
+  vrai("cette piste-là annonce explicitement qu'aucune économie n'est chiffrée",
+       /Aucune économie n.est annoncée/.test(
+         pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile' && d.poste !== 'box')).phrase));
+
+  /* Mobile ET box : une seule piste mise en avant, la box en second lien. */
+  vrai("mobile et box : la box est offerte en second lien, pas en seconde piste",
+       pistePrioritaire(plusieurs).cle === 'comparer-mobile'
+       && pistePrioritaire(plusieurs).secondaire !== null
+       && pistePrioritaire(plusieurs).secondaire.href === 'comparer-box.html');
+  vrai("sans box saisie, aucun second lien n'est inventé",
+       pistePrioritaire(plusieurs.filter(d => d.poste !== 'box')).secondaire === null);
+  eq("le registre sait où mène chaque poste comparable",
+     [POSTES.mobile.comparatif, POSTES.box.comparatif, POSTES.energie.comparatif],
+     ['comparer-mobile.html', 'comparer-box.html', null]);
   eq("uniquement logement et transport : rien de chiffrable, et on le dit",
      pistePrioritaire([{ id:'x', poste:'logement', montant: 75000, periodicite:'mensuelle' },
                        { id:'y', poste:'transport', montant: 12000, periodicite:'mensuelle' }]).cle,
@@ -947,6 +973,7 @@ SCRIPT_TESTS = r"""
        pistePrioritaire([{ id:'x', poste:'logement', montant: 75000, periodicite:'mensuelle' }]).action === null);
   vrai("aucune piste n'annonce une économie ni une somme récupérable",
        [plusieurs, plusieurs.filter(d => d.poste !== 'mobile'),
+        plusieurs.filter(d => d.poste !== 'mobile' && d.poste !== 'box'),
         [{ id:'x', poste:'logement', montant: 75000, periodicite:'mensuelle' }]]
          .every(l => !/\b(économisez|vous économiserez|gain garanti|récupérez)\b/i.test(pistePrioritaire(l).phrase)));
   eq("bilan vide : aucune piste inventée", pistePrioritaire([]), null);

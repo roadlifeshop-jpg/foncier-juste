@@ -110,6 +110,9 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 .piste p{font-size:.94rem; line-height:1.6; color:var(--ink-muted); margin-top:8px;}
 .piste p b{color:var(--ink);}
 .piste .btn{margin-top:14px;}
+/* Le second lien reste un lien : il ne doit pas concurrencer la piste. */
+.piste .piste-second{margin-top:14px; padding-top:12px; border-top:1px solid var(--accent-line);
+  font-size:.9rem; line-height:1.6; color:var(--ink-muted);}
 .avert{font-size:.87rem; line-height:1.55; color:var(--warn); background:var(--warn-soft);
   border:1px solid var(--warn-line); border-radius:var(--r); padding:11px 13px; margin-top:12px;}
 </style>
@@ -127,6 +130,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
       <div class="outils-liens">
         <strong>Mes dépenses</strong>
         <a href="comparer-mobile.html">Comparer mon forfait mobile</a>
+        <a href="comparer-box.html">Examiner ma box internet</a>
         <a href="abonnements.html">Vérifier mes contrats</a>
         <strong>Une somme à récupérer</strong>
         <a href="vol-retarde.html">Vol retardé ou annulé</a>
@@ -462,6 +466,8 @@ function majResultat(){
       <p>${piste.phrase}</p>
       ${piste.action ? `<a class="btn btn-primary" href="${ech(piste.action.href)}"
         style="text-decoration:none">${ech(piste.action.libelle)}</a>` : ''}
+      ${piste.secondaire ? `<p class="piste-second">${ech(piste.secondaire.texte)}
+        <a href="${ech(piste.secondaire.href)}">${ech(piste.secondaire.libelle)}</a></p>` : ''}
     </div>` : ''}`;
   $('zone-resultat').hidden = false;
 }
