@@ -1090,6 +1090,13 @@ SCRIPT_TESTS = r"""
   vrai("réception dans le futur : refusée",
        /futur/.test(orienter({ ...socle, dateAchat:'2026-09-01', dateReception:'2027-01-01' }, AUJ).invalide || ''));
 
+  const boxTest = {prix:2499, entree:3900, optionTV:500};
+  eq('box : frais souscription inclus une fois', coutBox(boxTest,12,false).total,33888);
+  eq('box : TV sur 24 mois', coutBox(boxTest,24,true).total,75876);
+  eq('box : frais inconnus bloquent total', coutBox({...boxTest,entree:null},12,false).total,null);
+  eq('box : mensualités connues malgré frais inconnus', coutBox({...boxTest,entree:null},12,false).recurrent,29988);
+  eq('box : relevés expirés retirés', offresBoxPour('internet','2099-01-01').length,0);
+  vrai('box : filtre TV exclut internet seul', offresBoxPour('tv','2026-09-26').every(o=>o.tv));
   return T;
 }
 """
@@ -1102,7 +1109,7 @@ async def executer():
         page = await (await nav.new_context()).new_page()
         await page.goto("about:blank")
         for f in ("regles.js", "aeroports.js", "abonnements.js", "garanties.js", "vol.js",
-                  "offres-mobiles.js", "bilan.js"):
+                  "offres-mobiles.js", "bilan.js", "box.js"):
             await page.add_script_tag(content=(WEB / f).read_text(encoding="utf-8"))
         resultats = await page.evaluate(SCRIPT_TESTS)
         await nav.close()

@@ -1,0 +1,35 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Examiner ma box internet — Dépense·Juste</title><script src="theme.js"></script><link rel="stylesheet" href="base.css"><link rel="stylesheet" href="parcours-interface.css"><link rel="stylesheet" href="box.css"></head><body><header class="parcours-head">
+  <a class="parcours-brand" href="accueil-variante.html">Dépense<span>·</span>Juste</a>
+  <nav aria-label="Navigation principale">
+    <a href="bilan.html">Mon bilan</a>
+    <details class="outils-menu">
+      <summary>Les outils</summary>
+      <div class="outils-liens">
+        <strong>Mes dépenses</strong>
+        <a href="comparer-mobile.html">Comparer mon forfait mobile</a>
+        <a href="abonnements.html">Vérifier mes contrats</a>
+        <strong>Une somme à récupérer</strong>
+        <a href="vol-retarde.html">Vol retardé ou annulé</a>
+        <a href="taxe-fonciere.html">Taxe foncière</a>
+        <a href="sources.html">Sources et dates</a>
+      </div>
+    </details>
+  </nav>
+</header>
+<main class="shell-lire">
+<h1 tabindex="-1" id="titre">Votre box vaut-elle le coût ?</h1><p class="lede">Votre situation, vos besoins, puis les pistes à examiner. Sans coordonnées.</p>
+<form id="box-form">
+<section data-etape="0"><p class="aide">1 / 2 · Votre situation</p>
+<label for="prix">Prix actuel de la box, par mois (€)</label><input id="prix" inputmode="decimal" placeholder="Je ne sais pas : laisser vide"><p id="repris" class="aide"></p>
+<label for="engagement">Votre engagement actuel</label><select id="engagement"><option value="inconnu">Je ne sais pas</option><option value="oui">Encore engagé</option><option value="non">Sans engagement ou terminé</option></select>
+<label for="remise">Votre mobile bénéficie-t-il d’une remise liée à cette box ?</label><select id="remise"><option value="inconnu">Je ne sais pas</option><option value="oui">Oui</option><option value="non">Non</option></select>
+<p id="erreur" role="alert"></p><button type="button" id="suite" class="btn-primary">Continuer →</button></section>
+<section data-etape="1" hidden><p class="aide">2 / 2 · Vos besoins</p>
+<label for="besoin">À conserver dans votre prochaine box</label><select id="besoin"><option value="inconnu">Je ne sais pas encore</option><option value="internet">Internet seulement</option><option value="tv">Internet et décodeur TV</option><option value="fixe">Internet et appels vers les fixes</option></select>
+<p class="aide">Premier relevé : trois offres sans engagement uniquement. Ce n’est pas tout le marché. Les offres groupées avec mobile ne sont pas chiffrées ici.</p>
+<button type="button" id="retour" class="btn-secondary">← Retour</button> <button class="btn-primary">Voir mes pistes</button></section>
+</form>
+<section id="resultat-box" hidden tabindex="-1"><h2>Vos pistes box</h2><div id="synthese"></div><div id="offres"></div><button id="modifier" type="button" class="btn-secondary">Modifier mes réponses</button></section>
+<p><a href="bilan.html">Revenir à mon bilan</a></p>
+<details><summary>Méthode, sources et limites</summary><p>Relevé manuel du 26 septembre 2026. Coûts sur 12 et 24 mois : mensualités au tarif relevé + frais de souscription connus, hors frais de sortie du contrat actuel. Projection à tarif inchangé, pas une garantie de prix. Aucun remboursement conditionnel déduit. Les frais de résiliation de la nouvelle offre sont séparés. Pas de classement ni de partenariat.</p><p>Les offres expirées ou désactivées sont retirées. Les conditions doivent être relues avant toute souscription ; une date de fin publiée ne garantit pas leur disponibilité jusque-là.</p><p>Confirmez l’éligibilité auprès de chaque opérateur. <a href="https://www.arcep.fr/mes-demarches-et-services/consommateurs/fiches-pratiques/comment-utiliser-ma-connexion-internet-1.html" target="_blank" rel="noopener">Explications de l’Arcep — autre site</a>.</p><p>Aucune réponse n’est envoyée par cet outil. Le bilan existant est lu uniquement ; aucune dépense n’est écrasée. <a href="confidentialite.html">Données de visite</a>.</p></details>
+</main><script src="abonnements.js"></script><script src="bilan.js"></script><script src="box.js"></script><script src="box-interface.js"></script></body></html>

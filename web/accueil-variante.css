@@ -58,3 +58,5 @@ a:focus-visible,button:focus-visible {outline:3px solid var(--signature);outline
 }
 @media(max-width:350px){.shell-lire{padding-inline:16px;}.promesse h1{font-size:42px;}.promesse .l2{font-size:25px;}}
 @media(prefers-reduced-motion:reduce){.postes a,.fl{transition:none;}}
+.entree-directe{grid-column:1/-1;margin:0 0 32px;}.entree-directe p{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:14px;}.entree-directe .btn-primary{text-decoration:none;}
+.exemple{grid-row:4;}
