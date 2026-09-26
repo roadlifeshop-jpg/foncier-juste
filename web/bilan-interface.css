@@ -1,0 +1,24 @@
+/* Présentation du bilan uniquement ; données et moteurs inchangés. */
+body{--accent:#b23c19;--accent-soft:#fff0e8;--accent-line:#d49b83;--accent-ink:#fff;--ring:0 0 0 3px #b23c1960;}
+:root[data-theme=dark] body{--accent:#ffad86;--accent-soft:#30231e;--accent-line:#946c59;--accent-ink:#17212b;}
+@media(prefers-color-scheme:dark){:root[data-theme=auto] body{--accent:#ffad86;--accent-soft:#30231e;--accent-line:#946c59;--accent-ink:#17212b;}}
+.site-head{background:var(--bg);}
+.brand{font-family:Archivo,sans-serif;font-weight:750;letter-spacing:-.04em;}
+.brand .dot{color:var(--accent);}
+main h1{font-family:Archivo,sans-serif;font-size:clamp(30px,5vw,44px);font-weight:650;letter-spacing:-.045em;line-height:1.12;}
+main .shell-lire{max-width:800px;}
+.forme{padding:22px 0;border:0;border-top:1px solid var(--line-strong);border-radius:0;background:transparent;}
+.postes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+.poste{padding:10px 6px;font-size:14px;min-height:48px;}
+.saisie-montant{margin-top:24px;padding-top:22px;}
+#f-montant{font-size:30px;font-weight:600;letter-spacing:-.03em;min-height:64px;}
+.en-direct{padding:18px;border:0;border-left:3px solid var(--accent);border-radius:0;}
+.en-direct .m{font-size:24px;}
+.totaux{border-radius:0;border-top:4px solid var(--accent);padding:24px;box-shadow:6px 6px 0 var(--surface-2);}
+.totaux .val{font-size:clamp(32px,7vw,48px);letter-spacing:-.05em;}
+.totaux .second{font-size:18px;}
+.ligne-d{border:0;border-bottom:1px solid var(--line-strong);border-radius:0;background:transparent;padding:18px 0;}
+.piste{border:0;border-left:3px solid var(--accent);border-radius:0;padding:22px;}
+.btn,.btn-primary,.btn-secondary{min-height:46px;}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
+@media(max-width:560px){.postes{grid-template-columns:repeat(2,minmax(0,1fr));}.site-head .brand small{display:none;}.totaux{padding:20px;}.rythme{flex-wrap:wrap;}.rythme label{min-width:80px;}.piste{padding:18px;}}

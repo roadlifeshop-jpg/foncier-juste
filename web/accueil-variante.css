@@ -18,10 +18,10 @@ h2 {font:600 19px/1.35 Archivo,sans-serif;letter-spacing:-.02em;color:var(--ink)
 .portee b {font-weight:550;color:var(--ink);}
 .postes {display:grid;grid-template-columns:1fr 1fr;column-gap:22px;border-top:1px solid var(--line-strong);}
 .postes a {display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:62px;border-bottom:1px solid var(--line-strong);text-decoration:none;color:var(--ink);font-weight:550;font-size:16px;transition:background .15s,color .15s;padding:0 8px;}
-.postes a:hover {background:var(--accent-soft);color:var(--accent);}
+.postes a:hover {background:var(--surface-2);color:var(--signature);}
 .fl {color:var(--signature);font-size:23px;transition:transform .15s;}
 .postes a:hover .fl {transform:translateX(3px);}
-a:focus-visible,button:focus-visible {outline:3px solid var(--accent);outline-offset:4px;}
+a:focus-visible,button:focus-visible {outline:3px solid var(--signature);outline-offset:4px;}
 .sans {font-size:12px;color:var(--ink-muted);line-height:1.6;margin-top:16px;}
 .exemple {grid-column:2;grid-row:3;align-self:start;margin:12px 0 0;padding:28px;background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--signature);box-shadow:8px 10px 0 var(--surface-2);}
 .eti {font:600 10px/1.6 Archivo,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin:0 0 24px;}
@@ -43,14 +43,14 @@ a:focus-visible,button:focus-visible {outline:3px solid var(--accent);outline-of
 .pied {grid-column:1/-1;border-top:1px solid var(--line);margin-top:24px;padding-top:20px;color:var(--ink-muted);font-size:12px;line-height:1.7;}
 .theme-choix {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px;}
 .theme-choix button {font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);padding:8px 12px;min-height:44px;cursor:pointer;}
-.theme-choix button[aria-pressed=true] {background:var(--accent);color:var(--accent-ink);}
+.theme-choix button[aria-pressed=true] {background:var(--signature);color:var(--bg);}
 :root[data-theme=dark] body {--signature:#ffad86;}
 @media(prefers-color-scheme:dark){:root[data-theme=auto] body{--signature:#ffad86;}}
 @media(max-width:760px){
  .shell-lire {display:block;padding:0 22px 28px;}
  .tete {padding:20px 0;}.marque {font-size:21px;}.menu {font-size:12px;}
  .promesse {margin:30px 0 28px;}.promesse .surtitre {font-size:10px;margin-bottom:14px;}
- .promesse h1 {font-size:48px;}.promesse .l2 {font-size:27px;max-width:20ch;margin-top:12px;}
+ .promesse h1 {font-size:42px;}.promesse .l2 {font-size:24px;max-width:20ch;margin-top:12px;}
  .promesse p {font-size:15px;margin-top:16px;}.choix h2 {font-size:18px;}
  .portee {font-size:12px;margin:8px 0 12px;}.postes {column-gap:14px;}.postes a {font-size:14px;min-height:54px;padding:0 4px;}
  .exemple {margin:32px 0;padding:24px;}.discrets {display:flex;margin:28px 0;gap:12px 20px;}
