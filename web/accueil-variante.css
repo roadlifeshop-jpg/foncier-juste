@@ -60,3 +60,15 @@ a:focus-visible,button:focus-visible {outline:3px solid var(--signature);outline
 @media(prefers-reduced-motion:reduce){.postes a,.fl{transition:none;}}
 .entree-directe{grid-column:1/-1;margin:0 0 32px;}.entree-directe p{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:14px;}.entree-directe .btn-primary{text-decoration:none;}
 
+
+/* CIBLES TACTILES — mesurées à 390 px, huit liens sous 44 px.
+   Les accès directs tombaient à 28 px, les liens de confiance à 21, vol et
+   taxe à 19. Sur un pouce, c'est la différence entre atteindre et réessayer.
+   On agrandit la zone atteignable, pas le texte : `inline-flex` + `min-height`
+   étend la boîte du lien sans toucher à la taille de police ni à la casse. */
+.entree-directe p a,.discrets a,.recuperer a{
+ display:inline-flex;align-items:center;min-height:44px;}
+/* Ces deux-là portent une description en dessous : la zone s'étend vers le
+   haut et le bas du seul libellé, sans avaler le paragraphe qui suit. */
+.recuperer li{margin-top:8px;}
+.recuperer p{margin-top:0;}

@@ -4,7 +4,10 @@ body{--accent:#b23c19;--accent-soft:#fff0e8;--accent-line:#d49b83;--accent-ink:#
 @media(prefers-color-scheme:dark){:root[data-theme=auto] body{--accent:#ffad86;--accent-soft:#30231e;--accent-line:#946c59;--accent-ink:#17212b;}}
 .parcours-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;width:calc(100% - 44px);max-width:1080px;margin:0 auto;padding:22px 0;border-bottom:1px solid var(--line-strong);position:relative;z-index:5;}
 .shell-lire>.parcours-head{width:100%;}
-.parcours-brand{font:750 23px Archivo,sans-serif;letter-spacing:-1px;text-decoration:none;color:var(--ink);white-space:nowrap;}
+/* La marque mesurait 23 px de haut : trop peu pour un pouce. La zone
+   atteignable est étendue à 45 px par du remplissage, que des marges
+   négatives compensent — l'en-tête garde exactement la même hauteur. */
+.parcours-brand{font:750 23px Archivo,sans-serif;letter-spacing:-1px;text-decoration:none;color:var(--ink);white-space:nowrap;display:inline-flex;align-items:center;padding:11px 0;margin:-11px 0;}
 .parcours-brand span{color:var(--accent);}
 .parcours-head nav{display:flex;align-items:center;gap:20px;font-size:14px;}
 .parcours-head nav>a,.outils-menu summary{color:var(--ink);text-decoration:none;padding:12px 0;min-height:44px;}

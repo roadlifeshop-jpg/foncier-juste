@@ -110,6 +110,13 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 .piste p{font-size:.94rem; line-height:1.6; color:var(--ink-muted); margin-top:8px;}
 .piste p b{color:var(--ink);}
 .piste .btn{margin-top:14px;}
+/* Cibles tactiles du pied de résultat : les cinq liens vers les autres outils
+   mesuraient 16 à 19 px de haut. Ils sont autonomes, pas enchâssés dans une
+   phrase : leur zone peut s'étendre sans disloquer un paragraphe. Le lien de
+   confidentialité du pied de page, lui, est au milieu d'une phrase et reste
+   inline — l'agrandir casserait l'interligne pour rien. */
+#autres-verifs a{display:inline-flex; align-items:center; min-height:44px;}
+#autres-verifs p{margin-top:2px;}
 /* Le second lien reste un lien : il ne doit pas concurrencer la piste. */
 .piste .piste-second{margin-top:14px; padding-top:12px; border-top:1px solid var(--accent-line);
   font-size:.9rem; line-height:1.6; color:var(--ink-muted);}
