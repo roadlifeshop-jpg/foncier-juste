@@ -59,13 +59,21 @@ Site **statique** servi depuis `web/`, plus trois fonctions serverless. **Aucune
 npm**, aucune étape de construction, aucune base de données. Node 20.x déclaré pour les
 seules fonctions.
 
-### Pages servies — 14
+### Pages servies
+
+Le décompte se lit :
+
+```bash
+ls web/*.html | wc -l
+```
 
 | Page | Rôle |
 |---|---|
-| `index.html` | Accueil : promesse, sélection de situation, bande de confiance, trois étapes |
+| `index.html` | Accueil : promesse générale, une action principale vers le bilan, les autres outils en second rang, sélecteur de thème au pied de page |
+| `bilan.html` | Bilan des dépenses du foyer — **postes, pas contrats**. Point d'entrée du parcours principal |
+| `comparer-mobile.html` | Comparatif mobile, seul outil du site qui produit des prix. Lit le bilan et les contrats, n'écrit ni l'un ni l'autre |
 | `vol-retarde.html` | Outil vol retardé |
-| `abonnements.html` | Outil dépense mensuelle (bêta) |
+| `abonnements.html` | Outil dépense mensuelle : inventaire de contrats, puis parcours de vérification et fiches |
 | `taxe-fonciere.html` | Outil taxe foncière, parcours court et parcours complet |
 | `garanties.html` | Outil garanties, hors navigation principale |
 | `notre-methode.html` | Ce que les outils savent dire, degrés de certitude, exemples |
@@ -227,14 +235,13 @@ directeur de la publication, email de contact. Le statut juridique et le SIRET s
   l'état, une campagne de sept jours est immesurable. L'alternative — Vercel Web Analytics,
   gratuit sur Hobby, fenêtre d'un mois — étendrait la collecte à la ville et à l'appareil et
   imposerait de mettre à jour `confidentialite.html`.
-- **Indexation.** `noindex` sur les 14 pages et `Disallow: /` dans `robots.txt`.
+- **Indexation.** `noindex` sur toutes les pages et `Disallow: /` dans `robots.txt`
+  (`grep -l noindex web/*.html | wc -l` face à `ls web/*.html | wc -l`).
   `scripts/ouvrir-indexation.sh` prépare l'ouverture sur le domaine définitif&nbsp;; il n'a
   jamais été exécuté.
 
 ### Limites assumées du produit
 
-- À **320 px**, le bouton principal de l'accueil reste environ 74 px sous la ligne de
-  flottaison. La situation et le montant, eux, sont visibles.
 - Le résultat taxe foncière complet fait près de **10 000 px une fois déplié**. Il est
   rangé, pas raccourci.
 - L'outil taxe foncière **ne détecte ni une hausse du taux voté par la commune, ni la fin
@@ -252,13 +259,14 @@ directeur de la publication, email de contact. Le statut juridique et le SIRET s
 
 - Le délai de **remboursement sous trente jours** de l'article L215-1 n'est mentionné ni
   dans le guide abonnements, ni dans l'outil, ni dans `regles.js`.
-- La comparaison de fournisseurs **n'a plus d'emplacement dans l'interface publique** :
-  le bloc « emplacement réservé » a été retiré de l'outil dépense mensuelle, un espace vide
-  n'étant d'aucun secours au visiteur. Le refus de comparer reste énoncé dans la section
-  repliée « Ce que cet outil ne fait pas ». L'ouvrir demandera des prix datés, une méthode
-  de classement publiable et la transparence sur tout lien commercial.
+- La comparaison de fournisseurs n'existe **que pour le mobile**, dans
+  `comparer-mobile.html`, sur un registre d'offres relevées à une date connue et maintenu à
+  la main. Les sept autres postes du bilan n'ont aucun prix de référence. L'étendre
+  demanderait des prix datés, une méthode de classement publiable, la transparence sur tout
+  lien commercial — et une charge d'entretien qui n'a pas été chiffrée.
 - L'architecture visuelle permettrait d'ajouter, **après le résultat**, une option
   facultative de type « recevoir mon résultat ». Aucune de ces fonctions ne sera activée
   sans service réel, politique de confidentialité adaptée et consentement explicite.
 - **Aucun utilisateur réel n'a jamais parcouru ces outils.** Les cinq sessions accompagnées
-  prévues dans `PLAN-LANCEMENT-7-JOURS.md` restent le premier travail utile.
+  restent le premier travail utile. Le protocole, ses seuils arrêtés d'avance et le
+  dispositif d'accès vérifié sont dans `T2-protocole-parcours-entree.md`.
