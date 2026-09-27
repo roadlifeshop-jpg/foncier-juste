@@ -31,3 +31,7 @@ main h1{font-family:Archivo,sans-serif;font-weight:650;letter-spacing:-.045em;}
 .suppression[hidden]{display:none;}
 .suppression button{font:inherit;color:var(--accent);background:var(--surface);border:1px solid var(--line-strong);min-height:44px;padding:8px 16px;cursor:pointer;}
 @media(max-width:560px){.parcours-head{gap:8px;flex-wrap:wrap;padding:14px 0;}.parcours-brand{font-size:21px;}.parcours-head nav{gap:16px;font-size:13px;}.offre{padding:16px;}.offre-prix{text-align:left;}.suppression{margin-inline:16px;}}
+/* `.btn-petit` mesurait 40 px : quatre de moins que le seuil, sur les liens
+   « Voir l'offre chez… », « Je ne sais pas » et « Tester mon éligibilité ».
+   Ces quatre pixels décident si le pouce atteint du premier coup. */
+.btn-petit{min-height:44px;display:inline-flex;align-items:center;justify-content:center;}

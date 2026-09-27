@@ -110,6 +110,19 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
       douze mois, puis frais de souscription lorsqu’ils sont connus. Aucun partenaire, aucun classement
       sponsorisé, aucun lien affilié. <b>Revérifiez le prix chez l'opérateur avant de décider.</b>
     </p>
+    <!-- Les prix sont affichés dès l'ouverture, mais sous le formulaire : sans
+         cette ligne, un visiteur qui ne remplit rien croit qu'il n'y a rien. -->
+    <p class="lede" style="margin-top:12px; font-size:1.02rem; max-width:52ch">
+      <b>Les prix sont déjà affichés plus bas</b>, sans rien remplir. Le
+      formulaire ne sert qu'à chiffrer <i>votre</i> écart.
+    </p>
+    <!-- Lien autonome et non enchâssé dans la phrase : c'est une action, elle
+         doit être atteignable au pouce comme les autres. -->
+    <p style="margin-top:6px">
+      <a href="#zone-resultat"
+         style="display:inline-flex; align-items:center; min-height:44px; font-weight:600">Voir
+      les prix tout de suite&nbsp;↓</a>
+    </p>
   </section>
 
   <section class="shell-lire" id="saisie">
@@ -511,8 +524,19 @@ $('prix-inconnu').addEventListener('click', () => {
   $('e-prix').hidden = true;
   $('f-donnees').focus();
 });
-$('forme-cm').addEventListener('submit', ev => {
-  ev.preventDefault();
+/* Les prix s'affichent SANS RIEN DEMANDER, dès l'ouverture de la page.
+   Le site faisait travailler avant de rien montrer : on saisissait son
+   montant, son besoin, sa box, et seulement ensuite on voyait des offres.
+   Un visiteur qui ne sait pas encore ce qu'il cherche repartait les mains
+   vides. Le relevé est pourtant public et daté : rien n'oblige à le retenir.
+
+   Le formulaire ne sert donc plus qu'à CHIFFRER L'ÉCART. Sans montant, sans
+   besoin déclaré, la page montre les prix et dit qu'aucun écart n'est calculé
+   — c'est déjà la règle posée le 26/09, elle s'applique simplement plus tôt.
+
+   `defiler` distingue les deux appels : à l'ouverture on n'emmène personne
+   nulle part ; après un envoi du formulaire, on va au résultat. */
+function afficherResultat(defiler){
   const situation = lireForme();
   if (!situation) return;
 
@@ -550,10 +574,19 @@ $('forme-cm').addEventListener('submit', ev => {
   $('liste-box').innerHTML = scenarioHTML(sc);
 
   $('zone-resultat').hidden = false;
-  $('zone-resultat').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (defiler) $('zone-resultat').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+$('forme-cm').addEventListener('submit', ev => {
+  ev.preventDefault();
+  afficherResultat(true);
 });
 
 reprendre();
+/* Le relevé est montré d'emblée. Si `reprendre()` a rempli un montant depuis
+   le bilan, l'écart est déjà chiffré ; sinon ce sont des prix, et la page le
+   dit. */
+afficherResultat(false);
 try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
 </script>
 </body>
