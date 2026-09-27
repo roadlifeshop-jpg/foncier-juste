@@ -322,9 +322,15 @@ const REGLES = {
               url: 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006316633' },
     statut: 'en vigueur',
     applicable: null,
-    verifiee: '2026-09-17',
+    verifiee: '2026-09-27',
     concerne: "Tout auteur d'une réclamation contentieuse.",
-    exceptions: ["Un vice de forme est régularisable à tout moment : une réclamation incomplète n'est pas perdue."],
+    /* La formulation précédente — « un vice de forme est régularisable à tout
+       moment » — étendait à toute la forme ce que le texte réserve aux seules
+       pièces du d. Deux régimes distincts, relevés dans l'article même. */
+    exceptions: [
+      "La régularisation à tout moment ne vaut que pour les pièces du d : avis d'imposition, copie de cet avis ou extrait du rôle. Le texte l'écrit de ces pièces-là, et d'elles seules.",
+      "La signature manuscrite manquante suit un autre régime : l'administration invite par lettre recommandée avec accusé de réception à signer dans un délai de trente jours.",
+    ],
   },
 
   'tf-delai-reponse': {

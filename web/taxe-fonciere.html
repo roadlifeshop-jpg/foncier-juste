@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Vérifier sa taxe foncière — outil gratuit</title>
-<meta name="description" content="Repérez gratuitement ce qui mérite d'être vérifié sur votre fiche d'évaluation, et les démarches possibles. Trois étapes, sans compte. Aucun gain promis.">
+<meta name="description" content="Repérez gratuitement ce qui mérite d'être vérifié sur votre fiche d'évaluation, et les démarches possibles. Trois ou quatre étapes, sans compte. Aucun gain promis.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/taxe-fonciere.html">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
@@ -115,8 +115,9 @@
     <div class="prerequis">
       <h2>Avant de commencer</h2>
       <ul>
-        <li><span class="cle">Combien de temps</span><b>Trois étapes</b>, environ deux minutes avec la
-        fiche sous les yeux.</li>
+        <li><span class="cle">Combien de temps</span><b>Trois étapes</b>, environ deux minutes —
+        <b>quatre</b> si vous avez votre fiche d'évaluation sous les yeux, car nous vous demandons alors
+        les surfaces qui y figurent.</li>
         <li><span class="cle">À avoir sous la main</span><b>Votre fiche d'évaluation</b> (formulaire
         6675-M), si vous l'avez — elle s'obtient gratuitement sur impots.gouv.fr. Sans elle le parcours
         reste possible, mais aucune surface n'est comparée.</li>
@@ -127,7 +128,7 @@
       aucun accès à votre dossier fiscal. <a href="#limites-outil">Ce que cela signifie exactement</a>.</p>
     </div>
     <div class="cta-row">
-      <button class="btn-primary" id="start-btn">Commencer — 3 étapes</button>
+      <button class="btn-primary" id="start-btn">Commencer</button>
       <a class="btn btn-secondary" href="guide-erreurs-taxe-fonciere.html">Lire le guide d'abord</a>
     </div>
   </section>
@@ -300,7 +301,7 @@
         <div class="apres-resultat">
           <div class="bloc">
             <h3>Emporter le récapitulatif</h3>
-            <p>Deux documents PDF, gratuits, générés dans votre navigateur. Rien n'est envoyé nulle part.</p>
+            <p id="pdf-annonce">Gratuit, généré dans votre navigateur. Rien n'est envoyé nulle part.</p>
             <div class="telecharge">
               <div>
                 <button class="btn-secondary" id="dl-recap">Télécharger le récapitulatif (PDF)</button>
@@ -325,8 +326,9 @@
   
           <div class="bloc">
             <div class="cta-row" style="margin-top:0">
-              <button class="btn-secondary" id="restart-btn">Refaire le pré-diagnostic</button>
-              <a class="btn btn-secondary" href="index.html#situations">Voir les autres vérifications</a>
+              <button class="btn-secondary" id="modify-btn">Modifier mes réponses</button>
+              <button class="btn-secondary" id="restart-btn">Nouveau diagnostic</button>
+              <a class="btn btn-secondary" href="index.html#autres">Voir les autres vérifications</a>
             </div>
           </div>
         </div>
@@ -694,7 +696,18 @@ function demarrer(){
 }
 $('start-btn').addEventListener('click', demarrer);
 $('back-btn').addEventListener('click', () => { if (current > 0){ current--; showStep(current); } });
-$('restart-btn').addEventListener('click', demarrer);
+/* « Modifier mes réponses » reprend le questionnaire tel qu'il a été rempli.
+   « Nouveau diagnostic » repart de zéro : un même bouton faisait les deux, et
+   les chiffres d'un logement se retrouvaient dans le diagnostic du suivant. */
+$('modify-btn').addEventListener('click', demarrer);
+$('restart-btn').addEventListener('click', () => {
+  ['surf_fiche', 'surf_reelle'].forEach(id => { const c = $(id); if (c) c.value = ''; });
+  document.querySelectorAll('#diagnostic input[type="checkbox"]').forEach(c => { c.checked = false; });
+  const autre = $('el-autre-texte'); if (autre) autre.value = '';
+  const zone = $('zone-autre'); if (zone) zone.hidden = true;
+  const certitude = $('certitude'); if (certitude) certitude.selectedIndex = 0;
+  demarrer();
+});
 
 /* La présence de la fiche 6675-M gouverne tout le questionnaire : c'est le
    seul document où figurent la surface retenue et les éléments comptabilisés.
@@ -869,7 +882,11 @@ function lireEntree(){
     t: $('type_local').value,
     f: aLaFiche() ? 1 : 0,
     sf: aLaFiche() ? (parseFloat($('surf_fiche').value) || 0) : null,
-    sr: parseFloat($('surf_reelle').value) || 0,
+    /* `sr` était lu inconditionnellement. Or le parcours « sans fiche » saute
+       l'étape des surfaces : la valeur transmise était alors celle d'un
+       diagnostic précédent, et elle alimentait aussi la comparaison de marché.
+       Une surface jamais saisie dans ce parcours ne doit rien alimenter. */
+    sr: aLaFiche() ? (parseFloat($('surf_reelle').value) || 0) : null,
     ss: $('certitude').value,
     /* Le moteur reçoit EXACTEMENT le même contrat qu'avant : `ef` les éléments
        portés à l'évaluation, `ee` ceux qui existent encore. La question posée a
@@ -927,8 +944,8 @@ function blocSignal(a, opts = {}){
     ${nonValide ? `<p class="obs-note">
       <b>Ce constat n'est pas retenu comme motif.</b> Nous vérifions actuellement, sur de vraies fiches
       d'évaluation, que les deux surfaces comparées recouvrent bien le même périmètre. Tant que ce point
-      n'est pas tranché, cet élément n'ouvre aucune offre payante et ne figure pas dans le projet de
-      courrier si vous achetez le dossier. Il vous indique où regarder, rien de plus.</p>` : ''}
+      n'est pas tranché, cet élément ne figure pas dans le projet de courrier&nbsp;: il vous indique où
+      regarder, rien de plus.</p>` : ''}
     <p class="why"><span class="k">Ce que vous avez indiqué</span>${echappe(a.vosReponses)}</p>
     <p class="why"><span class="k">Ce que nous en déduisons</span>${echappe(a.calcul)}</p>
     <p class="why"><span class="k">Ce qu'il reste à vérifier</span>${echappe(a.aVerifier)}</p>
@@ -974,7 +991,14 @@ function remplirRecapQuatreCases(d){
   if (observations.length){
     constat.push({
       titre: "Une observation qui ne compte pas comme motif",
-      texte: "L'écart entre vos deux surfaces est présenté à part, et n'ouvre aucune démarche : la surface cadastrale pondérée n'est pas de même nature que votre mesure : elle applique des coefficients, qui peuvent la relever comme l'abaisser, puis ajoute des mètres carrés fictifs pour les équipements. L'écart n'a donc ni sens ni ampleur prévisibles.",
+      /* Ce texte expliquait l'écart par la surface PONDÉRÉE, alors que la
+         question demande explicitement la ligne « surface réelle » et écarte
+         la pondérée. Le visiteur pouvait croire que sa saisie avait été mal
+         comprise. La réserve reste entière — l'écart n'ouvre toujours aucune
+         démarche — mais pour le motif qui est réellement le nôtre : nous
+         n'avons pas encore établi, sur de vraies fiches, que les deux mesures
+         recouvrent le même périmètre. */
+      texte: "L'écart entre vos deux surfaces est présenté à part, et n'ouvre aucune démarche. Nous vous avons demandé la ligne « surface réelle » de votre fiche, qui est bien de même nature que votre mesure — mais nous n'avons pas encore vérifié, sur de vraies fiches, que les deux recouvrent exactement le même périmètre : combles, annexes et dépendances ne s'y comptent pas toujours de la même façon. Tant que ce point n'est pas tranché, l'écart vous indique où regarder, et rien de plus. Si vous aviez relevé la surface pondérée, la comparaison n'aurait de toute façon aucun sens : celle-là applique des coefficients et ajoute des mètres carrés d'équivalence.",
     });
   }
 
@@ -1008,33 +1032,55 @@ function remplirRecapQuatreCases(d){
   if (observations.length){
     verification.push({
       titre: "Ne réclamez pas sur le seul écart de surface",
-      texte: "Comparer la surface pondérée de la fiche à un relevé au mètre ruban n'est pas un motif valable : ce sont deux grandeurs de nature différente. Seule la surface réelle inscrite sur la fiche se compare à votre mesure.",
+      texte: "Vérifiez d'abord que vous avez bien relevé la ligne « surface réelle » de la fiche, et non la surface pondérée — celle-là applique des coefficients et ajoute des équivalences, elle ne se compare pas à un mètre ruban. Même en ayant relevé la bonne ligne, l'écart ne suffit pas : nous n'avons pas encore établi que les deux mesures recouvrent le même périmètre.",
       regle: 'tf-surface-ponderee',
     });
   }
   if (!verification.length){
     verification.push({
       titre: "Rien de particulier à vérifier",
-      texte: "Vous pouvez tout de même demander votre fiche d'évaluation pour contrôler vous-même chaque ligne : la demande est gratuite et sans conséquence.",
+      texte: avecFiche
+        ? "Vous avez déjà votre fiche : relisez-la ligne par ligne, c'est le document qui fait foi. La demande gratuite n'a plus lieu d'être."
+        : "Vous pouvez tout de même demander votre fiche d'évaluation pour contrôler vous-même chaque ligne : la demande est gratuite et sans conséquence.",
     });
   }
 
-  const action = [{
-    titre: avecFiche && n > 0
-      ? "Déposez une réclamation depuis votre espace particulier"
-      : "Demandez votre fiche d'évaluation (formulaire 6675-M)",
-    texte: avecFiche && n > 0
-      ? "Depuis votre espace sur impots.gouv.fr, par la messagerie sécurisée. La démarche est gratuite et n'exige aucun intermédiaire. Attention : une réclamation ne dispense pas de payer l'avis en cours ; un sursis de paiement peut être demandé séparément."
-      : "Depuis la messagerie sécurisée de votre espace particulier sur impots.gouv.fr, en demandant « la fiche d'évaluation de mon local ». C'est gratuit, sans conséquence, et c'est l'étape qui débloque tout le reste.",
-    gratuit: true,
-    regle: avecFiche && n > 0 ? 'tf-forme-reclamation' : null,
-  }];
+  /* Trois cas, et non deux. Le repli « demandez votre fiche » s'appliquait
+     aussi à quelqu'un qui venait de déclarer l'avoir sous les yeux et pour qui
+     aucun motif n'était retenu : la prochaine action lui redemandait un
+     document qu'il possédait déjà. */
+  const action = [
+    avecFiche && n > 0 ? {
+      titre: "Déposez une réclamation depuis votre espace particulier",
+      texte: "Depuis votre espace sur impots.gouv.fr, par la messagerie sécurisée. La démarche est gratuite et n'exige aucun intermédiaire. Attention : une réclamation ne dispense pas de payer l'avis en cours ; un sursis de paiement peut être demandé séparément.",
+      gratuit: true,
+      regle: 'tf-forme-reclamation',
+    } : avecFiche ? {
+      titre: "Relisez votre fiche, ligne par ligne",
+      texte: "Vous l'avez déjà, et c'est le document qui fait foi. Deux points que nous ne diagnostiquons pas ici méritent votre œil : que chaque élément de confort porté sur la fiche existe encore, et que la catégorie retenue corresponde à l'état réel du logement. Si vous relevez une différence, la réclamation se dépose gratuitement depuis votre espace particulier sur impots.gouv.fr.",
+      gratuit: true,
+      regle: null,
+    } : {
+      titre: "Demandez votre fiche d'évaluation (formulaire 6675-M)",
+      texte: "Depuis la messagerie sécurisée de votre espace particulier sur impots.gouv.fr, en demandant « la fiche d'évaluation de mon local ». C'est gratuit, sans conséquence, et c'est l'étape qui débloque tout le reste.",
+      gratuit: true,
+      regle: null,
+    },
+  ];
 
-  const limites = [
+  /* La réserve territoriale n'était affichée qu'à l'étape « commune », donc
+     bien avant qu'une démarche ne soit proposée. Elle est rappelée ici, en
+     tête des limites, au moment où le résultat invite à agir. */
+  const limites = [];
+  if (communeChoisie && communeChoisie.aVerifier){
+    const dl = ['57', '67', '68'].includes(communeChoisie.code_dept);
+    limites.push(`${communeChoisie.dept_nom} : nous appliquons les règles du régime général. Les particularités ${dl ? "du droit local d'Alsace-Moselle" : "propres aux départements d'outre-mer"} n'ont pas été contrôlées — faites confirmer ce résultat par votre service des impôts fonciers avant toute démarche.`);
+  }
+  limites.push(
     "Nous n'avons aucun accès à votre dossier fiscal : tout ce qui précède découle de ce que vous venez de saisir.",
     "Aucune correction ni aucun remboursement n'est garanti. Seule l'administration peut recalculer une valeur locative.",
     "Cet outil ne détecte ni une hausse du taux voté par votre commune, ni la fin d'une exonération temporaire — deux causes fréquentes d'augmentation, qui ne se contestent pas par une réclamation.",
-  ];
+  );
 
   document.getElementById('tf-r4').innerHTML =
     rendreResultat4({ constat, somme, verification, action, limites });
@@ -1245,6 +1291,12 @@ function renderResults(d){
   courrierPossible = d.vente;
   $('dl-dossier-zone').hidden = !courrierPossible;
   $('dl-dossier-non').hidden = courrierPossible;
+  /* L'annonce disait « Deux documents PDF » dans tous les cas, alors que le
+     projet de courrier n'est proposé que si un motif documenté existe. Elle
+     compte désormais ce qui est réellement offert. */
+  $('pdf-annonce').textContent = courrierPossible
+    ? "Deux documents PDF, gratuits, générés dans votre navigateur. Rien n'est envoyé nulle part."
+    : "Un document PDF, gratuit, généré dans votre navigateur. Rien n'est envoyé nulle part.";
 
   $('resultats').scrollIntoView({ behavior: 'smooth', block: 'start' });
   track('resultat_affiche', { signal: courrierPossible, anomalies: reels.length });

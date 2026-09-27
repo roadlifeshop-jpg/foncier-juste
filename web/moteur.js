@@ -211,10 +211,14 @@ function calculerDiagnostic(e, stats){
         : (obsoletes.length > 1
             ? `Vous avez indiqué de mémoire, sans consulter votre fiche, que ces éléments entrent dans votre évaluation alors qu'ils n’existent plus aujourd'hui : ${obsoletes.join(', ')}.`
             : `Vous avez indiqué de mémoire, sans consulter votre fiche, que cet élément entre dans votre évaluation alors qu'il n’existe plus aujourd'hui : ${obsoletes.join(', ')}.`),
+      /* « Vos deux réponses se contredisent » décrivait mal ce qui se passe :
+         une seule question est posée, celle de savoir si un élément porté sur
+         la fiche a disparu. L'écart n'est pas entre deux réponses du visiteur,
+         il est entre la fiche et la réalité. */
       calcul: e.f
         ? (obsoletes.length > 1
-            ? 'Vos deux réponses se contredisent : ces éléments sont portés à votre évaluation mais n’existent plus.'
-            : 'Vos deux réponses se contredisent : cet élément est porté à votre évaluation mais n’existe plus.')
+            ? 'Ces éléments sont portés à votre évaluation alors qu’ils n’existent plus : l’écart est entre votre fiche et la réalité, pas entre vos réponses.'
+            : 'Cet élément est porté à votre évaluation alors qu’il n’existe plus : l’écart est entre votre fiche et la réalité, pas entre vos réponses.')
         : (obsoletes.length > 1
             ? 'Hypothèse à confirmer, et non contradiction établie : SI ces éléments figurent sur votre fiche d’évaluation, ils entrent encore dans le calcul alors qu’ils n’existent plus. Seule la fiche permet de le savoir — demandez-la, c’est gratuit.'
             : 'Hypothèse à confirmer, et non contradiction établie : SI cet élément figure sur votre fiche d’évaluation, il entre encore dans le calcul alors qu’il n’existe plus. Seule la fiche permet de le savoir — demandez-la, c’est gratuit.'),
