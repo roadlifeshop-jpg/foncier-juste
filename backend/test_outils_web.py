@@ -948,12 +948,23 @@ SCRIPT_TESTS = r"""
   vrai("la piste box n'annonce aucune économie",
        /Aucune économie n.est annoncée/.test(
          pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile')).phrase));
-  eq("ni mobile ni box, mais un contrat : vérifier les conditions",
+  /* L'énergie s'est insérée entre nos relevés et la vérification des contrats :
+     un comparateur public existe pour elle, édité par le médiateur national de
+     l'énergie. Nous n'y répondons pas, nous y renvoyons. */
+  eq("ni mobile ni box, mais de l'énergie : le comparateur officiel",
      pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile' && d.poste !== 'box')).cle,
-     'verifier-contrats');
+     'comparer-energie');
+  vrai("cette piste nomme l'éditeur de l'outil et dit que nous n'en tirons rien",
+       /médiateur national/.test(pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile' && d.poste !== 'box')).phrase)
+       && /n’en tirons rien/.test(pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile' && d.poste !== 'box')).phrase));
+  vrai("elle sort du site, et le dit",
+       pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile' && d.poste !== 'box')).action.externe === true);
+
+  const sansComparatif = plusieurs.filter(d => !['mobile','box','energie'].includes(d.poste));
+  eq("aucun poste comparable, mais un contrat : vérifier les conditions",
+     pistePrioritaire(sansComparatif).cle, 'verifier-contrats');
   vrai("cette piste-là annonce explicitement qu'aucune économie n'est chiffrée",
-       /Aucune économie n.est annoncée/.test(
-         pistePrioritaire(plusieurs.filter(d => d.poste !== 'mobile' && d.poste !== 'box')).phrase));
+       /Aucune économie n.est annoncée/.test(pistePrioritaire(sansComparatif).phrase));
 
   /* Mobile ET box : une seule piste mise en avant, la box en second lien. */
   vrai("mobile et box : la box est offerte en second lien, pas en seconde piste",
@@ -974,6 +985,7 @@ SCRIPT_TESTS = r"""
   vrai("aucune piste n'annonce une économie ni une somme récupérable",
        [plusieurs, plusieurs.filter(d => d.poste !== 'mobile'),
         plusieurs.filter(d => d.poste !== 'mobile' && d.poste !== 'box'),
+        plusieurs.filter(d => !['mobile','box','energie'].includes(d.poste)),
         [{ id:'x', poste:'logement', montant: 75000, periodicite:'mensuelle' }]]
          .every(l => !/\b(économisez|vous économiserez|gain garanti|récupérez)\b/i.test(pistePrioritaire(l).phrase)));
   eq("bilan vide : aucune piste inventée", pistePrioritaire([]), null);

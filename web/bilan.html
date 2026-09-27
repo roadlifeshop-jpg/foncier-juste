@@ -479,7 +479,9 @@ function majResultat(){
       <h3>${ech(piste.titre)}</h3>
       <p>${piste.phrase}</p>
       ${piste.action ? `<a class="btn btn-primary" href="${ech(piste.action.href)}"
-        style="text-decoration:none">${ech(piste.action.libelle)}</a>` : ''}
+        ${piste.action.externe ? 'target="_blank" rel="noopener noreferrer"' : ''}
+        style="text-decoration:none">${ech(piste.action.libelle)}${piste.action.externe
+          ? ' <span class="hors-site">autre site</span>' : ''}</a>` : ''}
       ${piste.secondaire ? `<p class="piste-second">${ech(piste.secondaire.texte)}
         <a href="${ech(piste.secondaire.href)}">${ech(piste.secondaire.libelle)}</a></p>` : ''}
     </div>` : ''}`;

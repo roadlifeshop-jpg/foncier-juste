@@ -43,6 +43,18 @@ const POSTES = {
   },
   energie: {
     nom: 'Énergie', reglesContrat: true, categorieContrat: 'energie', comparatif: null,
+    /* Nous ne comparerons jamais les offres d'énergie : un comparateur public
+       existe, édité par le médiateur national de l'énergie — autorité publique
+       indépendante, gratuit, indépendant des fournisseurs et des gestionnaires
+       de réseaux (page consultée le 27/09/2026). Il fait mieux que nous ne
+       ferions, sans relevé à tenir. `outilOfficiel` est donc distinct de
+       `comparatif` : l'un renvoie à une page du site, l'autre à un tiers dont
+       on nomme l'éditeur et dont on ne tire rien. */
+    outilOfficiel: {
+      nom: 'le comparateur officiel des offres d’électricité et de gaz',
+      editeur: 'le médiateur national de l’énergie, autorité publique indépendante',
+      url: 'https://comparateur-offres.energie-info.fr/comparateur-offres-electricite-gaz-naturel/criteria.action?profil=particulier',
+    },
     suggestions: [5000, 8000, 12000, 16000],
     /* La mensualité d'énergie est un acompte estimé, régularisé une fois par
        an : ce n'est pas un coût constaté. Le bilan doit le dire. */
@@ -175,6 +187,22 @@ function pistePrioritaire(depenses) {
       titre: 'Examiner votre box internet',
       phrase: `Votre ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois peut être mis en face d’un premier relevé d’offres fibre sans engagement, relevées à une date connue. <b>Aucune économie n’est annoncée</b> : le comparatif montre des coûts, et dit ce qu’il ignore.`,
       action: { libelle: 'Examiner ma box internet', href: 'comparer-box.html' },
+      secondaire: null,
+    };
+  }
+
+  /* L'énergie vient après nos deux relevés — non parce qu'elle vaudrait moins,
+     mais parce que le comparateur officiel est un outil tiers : on y envoie,
+     on n'y répond pas. Elle passe en revanche devant la vérification des
+     contrats, qui ne compare aucun prix. */
+  const energie = l.find(d => d.poste === 'energie');
+  if (energie) {
+    const o = POSTES.energie.outilOfficiel;
+    return {
+      cle: 'comparer-energie',
+      titre: 'Comparer vos offres d’énergie',
+      phrase: `Nous ne comparons pas l’énergie, et nous ne le ferons pas : ${o.nom} est édité par ${o.editeur}. Il est gratuit, nous n’en tirons rien, et il compare ce que nous ne savons pas comparer. Vos ${euros(mensuelCentimes(energie.montant, energie.periodicite))} par mois sont un acompte estimé, pas un coût constaté : munissez-vous de votre consommation annuelle en kWh, elle figure sur votre facture de régularisation.`,
+      action: { libelle: 'Ouvrir le comparateur officiel', href: o.url, externe: true },
       secondaire: null,
     };
   }
