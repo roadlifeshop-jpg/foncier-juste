@@ -106,8 +106,8 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
     <div class="eyebrow">Premier essai — gratuit, sans inscription</div>
     <h1>Comparer mon forfait mobile</h1>
     <p class="lede" style="margin-top:14px; font-size:1.1rem; max-width:52ch">
-      Un petit ensemble d'offres <b>lues sur les pages officielles à une date connue</b>. Coût sur
-      douze mois, promotions et frais de souscription compris. Aucun partenaire, aucun classement
+      Un petit ensemble d'offres <b>lues sur les pages officielles à une date connue</b>. Mensualités sur
+      douze mois, puis frais de souscription lorsqu’ils sont connus. Aucun partenaire, aucun classement
       sponsorisé, aucun lien affilié. <b>Revérifiez le prix chez l'opérateur avant de décider.</b>
     </p>
   </section>
@@ -192,12 +192,23 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
     <div class="groupe">
       <h2>Mobile seul</h2>
       <p class="aide" id="intro-mobile"></p>
+      <p class="aide" id="selection-mobile"></p>
       <div id="liste-mobile"></div>
+      <details id="autres-offres" class="detail-diagnostic" hidden>
+        <summary>Voir les autres offres du relevé</summary>
+        <div id="liste-autres"></div>
+      </details>
+      <div class="a-confirmer" id="avant-changement">
+        <h3>Avant de changer</h3>
+        <ul><li>Vérifiez le prix actuel et votre accès à l’offre chez l’opérateur.</li>
+        <li>Contrôlez le réseau et les destinations incluses selon vos usages.</li>
+        <li>Retrouvez votre engagement, les frais de départ et les remises liées à votre box. S’ils sont inconnus, le gain net du changement reste inconnu.</li></ul>
+      </div>
     </div>
 
     <div class="groupe">
-      <h2>Box + mobile</h2>
-      <p class="aide">Ici, la remise mobile <b>dépend d'une box</b>. Ce n'est donc pas une économie sur
+      <h2>Box + mobile : une piste à examiner</h2>
+      <p class="aide">Notre relevé ne contient qu’un scénario groupé, pas un comparatif des box. Ici, la remise mobile <b>dépend d'une box</b>. Ce n'est donc pas une économie sur
       le mobile seul&nbsp;: c'est la dépense de deux contrats, à comparer à celle de deux contrats.</p>
       <div id="liste-box"></div>
     </div>
@@ -506,16 +517,29 @@ $('forme-cm').addEventListener('submit', ev => {
   if (!situation) return;
 
   const res = comparerMobile(situation, AUJ);
-  $('intro-mobile').innerHTML = `Ces offres <b>ne dépendent d'aucune box</b> : leur prix est celui que
-    vous paierez sans en souscrire une. ${res.besoinApplique
+  $('intro-mobile').innerHTML = `Ces offres <b>ne dépendent d'aucune box</b> : les prix ont été relevés hors remise liée à une box et restent soumis aux conditions de chaque offre. ${res.besoinApplique
       ? `Seules celles d'au moins ${res.besoinApplique} Go sont montrées${res.nombreEcartees ? ` — ${res.nombreEcartees} écartée${res.nombreEcartees > 1 ? 's' : ''}` : ''}.`
       : `<b>Vous n'avez pas précisé votre besoin en données.</b> Les prix et les caractéristiques sont affichés pour que vous puissiez explorer, mais <b>aucun écart en euros n'est chiffré</b> : sans savoir combien de données il vous faut, un forfait à 1 Go remporterait toujours la comparaison. Choisissez votre besoin ci-dessus pour voir les écarts.`}
     ${res.prixActuelConnu ? '' : ' Votre prix actuel n\'étant pas renseigné, nous affichons des coûts, pas des écarts.'}`;
 
-  $('liste-mobile').innerHTML = res.retenues.length
-    ? res.retenues.map(r => offreHTML(r, situation)).join('')
-    : `<p class="aide">Aucune offre de ce petit ensemble n'atteint le volume demandé. C'est une limite
-       de notre liste, pas du marché.</p>`;
+  // Présentation seulement : le filtre et le tri du moteur restent inchangés.
+  // Une offre par opérateur dans la première lecture ; le reste reste accessible.
+  const operateurs = new Set();
+  const principales = [], autres = [];
+  res.retenues.forEach(r => {
+    if (principales.length < 3 && !operateurs.has(r.offre.operateur)) {
+      principales.push(r); operateurs.add(r.offre.operateur);
+    } else autres.push(r);
+  });
+  $('selection-mobile').textContent = principales.length
+    ? `${principales.length} piste${principales.length > 1 ? 's' : ''} pour commencer, une par opérateur, dans l’ordre des mensualités sur douze mois. Les frais ne sont pas tous connus : ce n’est pas un classement du coût total ni de tout le marché.`
+    : '';
+  $('liste-mobile').innerHTML = principales.length
+    ? principales.map(r => offreHTML(r, situation)).join('')
+    : `<p class="aide">Aucune offre de ce petit ensemble n'atteint le volume demandé. C'est une limite de notre liste, pas du marché.</p>`;
+  $('liste-autres').innerHTML = autres.map(r => offreHTML(r, situation)).join('');
+  $('autres-offres').hidden = !autres.length;
+  $('autres-offres').open = false;
 
   const sc = scenarioBoxMobile({
     prixActuelMobile: situation.prixActuel,
