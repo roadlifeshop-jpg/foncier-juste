@@ -185,7 +185,22 @@ function nomDeFichier(prefixe, d) {
 }
 
 // Remplace doc.save() : contrôle le document, puis déclenche le téléchargement.
+/* Les documents n'étaient pas paginés : sur cinq pages, rien ne disait où
+   l'on en était, ni si une page manquait à l'impression. Le total n'est connu
+   qu'une fois le document terminé, donc la numérotation est apposée ici, juste
+   avant l'enregistrement, page par page. */
+function paginer(doc) {
+  const total = doc.internal.getNumberOfPages();
+  if (total < 2) return;
+  for (let i = 1; i <= total; i++) {
+    doc.setPage(i);
+    doc.setFont(POLICE_NOM, 'normal'); doc.setFontSize(7.5); doc.setTextColor(124, 137, 148);
+    doc.text(`${i} / ${total}`, 190, 271, { align: 'right' });
+  }
+}
+
 function enregistrerPDF(doc, nom) {
+  paginer(doc);
   const brut = doc.output();
   const anomalies = verifierPDF(brut);
   if (anomalies.length) throw new Error('PDF non conforme : ' + anomalies.join(', '));
@@ -398,9 +413,21 @@ function dessinerPageAnalyse(doc, d, { exemple, avecCourrier = false }) {
     });
   }
 
+  // 4 bis — La prochaine action, telle que l'écran l'a énoncée.
+  // Le document repartait sans elle : le lecteur savait ce qu'il restait à
+  // vérifier, mais plus par quoi commencer.
+  if (d.prochaineAction){
+    w.ligne('Ce que vous pouvez faire maintenant', { taille: 12, style: 'bold', espace: 3 });
+    w.ligne(d.prochaineAction.titre, { taille: 10, style: 'bold', espace: 2.5 });
+    w.ligne(d.prochaineAction.texte, { taille: 9.5, espace: 7 });
+  }
+
   // 5 — Limites
   w.ligne("Limites de cette analyse", { taille: 12, style: 'bold', espace: 3 });
   [
+    /* La réserve territoriale n'existait qu'à l'écran. Elle ouvre les limites
+       du document comme elle ouvre celles du résultat. */
+    ...(d.reserveTerritoriale ? [d.reserveTerritoriale] : []),
     "Nous n'avons pas accès à votre dossier fiscal. Tout ce qui précède est calculé à partir des chiffres que vous avez saisis.",
     "La catégorie de confort (échelle de 1 à 8) et le local de référence retenu pour votre commune ne sont pas analysés : ils supposent une appréciation comparative que nous ne pouvons pas automatiser.",
     "Un écart inférieur à 5 m² n'est pas signalé, même s'il représente une part importante d'une petite surface. Cette limite est connue et en cours de réévaluation.",
@@ -561,7 +588,6 @@ function dessinerPageCourrier(doc, d) {
     sousTitre: "À recopier sur papier libre et à signer, ou à transmettre depuis votre espace sur impots.gouv.fr. Les mentions entre crochets sont à compléter par vos soins.",
   });
 
-  const annee = new Date().getFullYear();
   w.espace(2);
   w.ligne('[Vos NOM et Prénom]', { taille: 10, espace: 2 });
   w.ligne('[Votre adresse complète]', { taille: 10, espace: 2 });
@@ -574,7 +600,11 @@ function dessinerPageCourrier(doc, d) {
 
   w.ligne(
     `Objet : réclamation contentieuse relative à la taxe foncière sur les propriétés bâties — ` +
-    `avis n° [référence de l'avis contesté], année ${annee} — article L.190 du Livre des procédures fiscales`,
+    /* L'année était celle du jour de génération. Rien ne dit que l'avis
+       contesté est celui de l'année en cours — le délai de réclamation peut
+       couvrir l'année précédente. Elle devient donc un champ à compléter,
+       comme la référence de l'avis juste à côté. */
+    `avis n° [référence de l'avis contesté], année [année de l'avis contesté] — article L.190 du Livre des procédures fiscales`,
     { taille: 10, style: 'bold', espace: 6 }
   );
 
@@ -654,6 +684,14 @@ function dessinerPageDemarche(doc, d) {
     titreSuite: 'Marche à suivre',
   });
   w.y = dessinerEnTete(doc, 'Marche à suivre');
+
+  /* La réserve territoriale doit précéder les instructions de démarche : c'est
+     le moment où le lecteur s'apprête à écrire à l'administration. Elle
+     n'apparaissait qu'à l'écran, plusieurs pages et plusieurs jours plus tôt. */
+  if (d.reserveTerritoriale) {
+    w.ligne('À vérifier avant d’engager la démarche', { taille: 12, style: 'bold', espace: 3 });
+    w.ligne(d.reserveTerritoriale, { taille: 9.5, espace: 7 });
+  }
 
   // La note sur l'écart de surface est une explication au lecteur, pas une
   // pièce du courrier : sa place est ici, et non au dos de la lettre où elle

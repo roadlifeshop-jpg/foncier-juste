@@ -306,7 +306,7 @@
               <div>
                 <button class="btn-secondary" id="dl-recap">Télécharger le récapitulatif (PDF)</button>
                 <p class="quoi">Vos réponses, chaque élément relevé avec ce que nous en déduisons et ce qu'il
-                reste à vérifier, la valeur de chaque constat, et les sources. 2 pages.</p>
+                reste à vérifier, la valeur de chaque constat, et les sources.</p>
               </div>
               <div id="dl-dossier-zone" hidden>
                 <button class="btn-secondary" id="dl-dossier">Télécharger le dossier complet (PDF)</button>
@@ -1081,6 +1081,16 @@ function remplirRecapQuatreCases(d){
     "Aucune correction ni aucun remboursement n'est garanti. Seule l'administration peut recalculer une valeur locative.",
     "Cet outil ne détecte ni une hausse du taux voté par votre commune, ni la fin d'une exonération temporaire — deux causes fréquentes d'augmentation, qui ne se contestent pas par une réclamation.",
   );
+
+  /* Le PDF reprenait ni la réserve territoriale ni la prochaine action : il
+     les recevait d'autant moins qu'il ne les connaissait pas. Plutôt que de
+     les recalculer dans rapport.js — deux sources qui divergeraient un jour —
+     on les attache au diagnostic, qui est déjà ce que le PDF consomme. */
+  if (dernierDiagnostic){
+    dernierDiagnostic.prochaineAction = action[0];
+    dernierDiagnostic.reserveTerritoriale =
+      (communeChoisie && communeChoisie.aVerifier) ? limites[0] : null;
+  }
 
   document.getElementById('tf-r4').innerHTML =
     rendreResultat4({ constat, somme, verification, action, limites });
