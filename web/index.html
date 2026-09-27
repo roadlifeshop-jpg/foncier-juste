@@ -3,215 +3,119 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dépense·Juste — payer moins, ou récupérer son dû</title>
-<meta name="description" content="Repérez où votre foyer pourrait payer moins, ou récupérer une somme. Un sujet à la fois : nous commençons par le forfait mobile. Sans compte, sans coordonnées.">
+<title>Dépense·Juste — vos dépenses, plus claires</title>
+<meta name="description" content="Choisissez une première dépense pour voir son coût mensuel et annuel. La comparaison d'offres existe pour le mobile et la box internet. Sans compte, sans coordonnées.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
-<!-- Thème : fichier externe et non script intégré, pour survivre au retrait
-     éventuel de 'unsafe-inline' dans la CSP. Doit rester dans <head>, sans
-     defer ni async : il pose data-theme avant le premier rendu. -->
 <script src="theme.js"></script>
 <link rel="stylesheet" href="base.css">
-<style>
-/* ACCUEIL — une promesse, une action, trois portes.
-   --------------------------------------------------------------------------
-   Ce que cette version corrige par rapport à la précédente.
-
-   1. LE TITRE NE RÉDUIT PLUS LE SITE AU MOBILE. « Payez-vous votre forfait
-      mobile trop cher ? » donnait un comparateur de forfaits. La promesse
-      redevient celle du foyer ; le mobile est annoncé comme le premier sujet
-      traité, pas comme le seul sujet possible.
-
-   2. BEAUCOUP MOINS DE MOTS AVANT LE BOUTON. Les trois définitions, le
-      déroulé en trois étapes et l'encart box pesaient plus de deux cents mots
-      sur le premier écran. Il en reste une promesse, une précision, un bouton
-      et deux lignes. La méthode, les sources, les limites et les données
-      restent à un lien.
-
-   3. LE FOND CLAIR EST LE DÉFAUT, décidé dans `base.css` et non ici : le
-      sombre reste accessible par le sélecteur du pied de page.
-
-   Aucune statistique, aucun témoignage, aucun logo, aucune photo. */
-
-/* ---- L'entrée ---- */
-.entree{margin-top:40px;}
-@media(max-width:560px){ .entree{margin-top:24px;} }
-.entree h1{max-width:17ch; letter-spacing:-.026em;}
-.entree .promesse{
-  margin-top:16px; font-size:1.14rem; line-height:1.55; color:var(--ink-muted); max-width:40ch;
-}
-.entree .promesse b{color:var(--ink); font-weight:600;}
-
-.action{
-  margin-top:30px; background:var(--surface); border:1px solid var(--line);
-  border-left:4px solid var(--accent); border-radius:var(--r-lg);
-  padding:22px 22px 20px; box-shadow:var(--lift); max-width:34rem;
-}
-@media(max-width:560px){ .action{padding:18px 16px 16px;} }
-.action .btn-primary{width:100%; min-height:54px; font-size:1.04rem;}
-.action .box{margin-top:14px; font-size:.9rem; line-height:1.55; color:var(--ink-muted);}
-.action .box b{color:var(--ink);}
-.action .sans{margin-top:12px; padding-top:12px; border-top:1px solid var(--line);
-  font-size:.86rem; line-height:1.5; color:var(--ink-faint);}
-.action .sans b{color:var(--ink-muted); font-weight:600;}
-
-/* ---- Les autres possibilités ---- */
-.autres{margin-top:46px;}
-.autres > h2{font-size:1.02rem; font-family:'Archivo',sans-serif; font-weight:600; color:var(--ink-muted);}
-.autres ul{list-style:none; padding:0; margin:12px 0 0; border-top:1px solid var(--line);}
-.autres li{border-bottom:1px solid var(--line);}
-.autres a{
-  display:grid; grid-template-columns:1fr auto; gap:3px 12px; align-items:baseline;
-  padding:15px 2px; text-decoration:none; color:inherit;
-}
-.autres a:hover .t{text-decoration:underline;}
-.autres a:focus-visible{outline:none; box-shadow:var(--ring); border-radius:var(--r);}
-.autres .t{font-weight:600; font-size:1rem;}
-.autres .fleche{color:var(--accent); font-size:1.05rem; justify-self:end;}
-.autres .d{grid-column:1 / -1; font-size:.9rem; line-height:1.5; color:var(--ink-muted); max-width:58ch;}
-
-.pour-savoir{margin-top:34px; padding-top:20px; border-top:1px solid var(--line);
-  font-size:.92rem; line-height:1.9; color:var(--ink-muted);}
-.pour-savoir b{display:block; color:var(--ink); font-family:'Archivo',sans-serif;
-  font-size:.86rem; font-weight:600; margin-bottom:4px;}
-
-/* ---- Le sélecteur de thème, au pied de page ---- */
-.theme-choix{margin-top:22px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  font-size:.84rem; color:var(--ink-faint);}
-.theme-choix button{
-  font:inherit; cursor:pointer; background:transparent; color:var(--ink-muted);
-  border:1px solid var(--line-strong); border-radius:var(--r); padding:7px 12px; min-height:38px;
-}
-.theme-choix button[aria-pressed="true"]{
-  background:var(--accent-soft); border-color:var(--accent); color:var(--accent); font-weight:600;
-}
-.theme-choix button:focus-visible{outline:none; box-shadow:var(--ring);}
-</style>
+<link rel="stylesheet" href="accueil.css">
+<link rel="stylesheet" href="parcours-interface.css">
 </head>
 <body>
 
-<header class="site-head">
-  <div class="shell">
-    <a class="brand" href="index.html">Dépense<span class="dot">·</span>Juste<small>Payer moins, ou récupérer son dû</small></a>
-    <nav class="nav" aria-label="Outils">
-      <a href="bilan.html">Mes dépenses</a>
-      <a href="comparer-mobile.html">Forfait mobile</a>
-      <a href="vol-retarde.html">Vol retardé</a>
-      <a href="abonnements.html">Dépense mensuelle</a>
-      <a href="taxe-fonciere.html">Taxe foncière</a>
-      <a href="sources.html">Sources</a>
-    </nav>
-  </div>
+<main class="shell-lire">
+
+<header class="parcours-head">
+  <a class="parcours-brand" href="index.html">Dépense<span>·</span>Juste</a>
+  <nav aria-label="Navigation principale">
+    <a href="bilan.html">Mon bilan</a>
+    <details class="outils-menu">
+      <summary>Les outils</summary>
+      <div class="outils-liens">
+        <strong>Mes dépenses</strong>
+        <a href="comparer-mobile.html">Comparer mon forfait mobile</a>
+        <a href="comparer-box.html">Examiner ma box internet</a>
+        <a href="abonnements.html">Vérifier mes contrats</a>
+        <strong>Une somme à récupérer</strong>
+        <a href="vol-retarde.html">Vol retardé ou annulé</a>
+        <a href="taxe-fonciere.html">Taxe foncière</a>
+        <a href="sources.html">Sources et dates</a>
+      </div>
+    </details>
+  </nav>
 </header>
 
-<main>
-  <section class="shell-lire entree">
-    <h1>Repérez où votre foyer pourrait payer moins</h1>
-    <p class="promesse">Ou récupérer une somme qui vous revient. <b>Un sujet à la fois</b> —
-    nous commençons par le forfait mobile.</p>
-
-    <div class="action">
-      <a class="btn btn-primary" href="bilan.html">Faire le point sur mes dépenses</a>
-      <p class="box">Une seule dépense suffit pour un premier résultat&nbsp;: vous voyez son coût par
-      mois et par an, et ce que nous savons vérifier dessus. Les autres postes sont facultatifs.</p>
-      <p class="sans">Gratuit. <b>Aucun nom, e-mail ni numéro de téléphone</b> n'est demandé pour voir
-      le résultat.</p>
-    </div>
+  <section class="promesse">
+    <h1>Vos dépenses,<br>plus <em>claires.</em><span class="l2">Vos prochaines actions, aussi.</span></h1>
+    <p>Choisissez une première dépense pour voir son coût mensuel et annuel.</p>
   </section>
 
-  <section class="shell-lire autres">
-    <h2>Aller droit à un outil</h2>
-    <ul>
-      <li>
-        <a href="comparer-mobile.html">
-          <span class="t">Comparer mon forfait mobile</span>
-          <span class="fleche" aria-hidden="true">→</span>
-          <span class="d">Le seul poste pour lequel nous disposons d'offres relevées chez plusieurs
-          opérateurs, à une date connue.</span>
-        </a>
-      </li>
-      <li>
-        <a href="abonnements.html">
-          <span class="t">Vérifier mes contrats un par un</span>
-          <span class="fleche" aria-hidden="true">→</span>
-          <span class="d">Ce que la loi impose au professionnel, et les démarches gratuites ouvertes.
-          Aucune économie n'y est chiffrée.</span>
-        </a>
-      </li>
-    </ul>
-
-    <h2 style="margin-top:36px">Vérifier une somme à récupérer</h2>
-    <ul>
-      <li>
-        <a href="vol-retarde.html">
-          <span class="t">Un vol retardé ou annulé</span>
-          <span class="fleche" aria-hidden="true">→</span>
-          <span class="d">Le seul outil qui affiche un montant, de 250 à 600 €, parce qu'un règlement
-          européen en fixe le barème.</span>
-        </a>
-      </li>
-      <li>
-        <a href="taxe-fonciere.html">
-          <span class="t">Ma taxe foncière</span>
-          <span class="fleche" aria-hidden="true">→</span>
-          <span class="d">Repère ce qui mérite vérification sur votre fiche d'évaluation&nbsp;; aucune
-          somme n'y est chiffrable, seule l'administration recalcule.</span>
-        </a>
-      </li>
-    </ul>
-
-    <p class="pour-savoir">
-      <b>Avant de vous décider</b>
-      <a href="notre-methode.html">Ce que chaque outil sait dire, et ce qu'il ne dira jamais</a><br>
-      <a href="sources.html">Les sources officielles, avec leurs dates de vérification</a><br>
-      <a href="confidentialite.html">Ce qui est enregistré lors de votre visite</a>
-    </p>
-  </section>
-</main>
-
-<footer class="site-foot">
-  <div class="shell">
-    <div class="cols">
-      <div><h4>Les outils</h4><ul>
-        <li><a href="bilan.html">Faire le point sur mes dépenses</a></li>
-        <li><a href="comparer-mobile.html">Comparer mon forfait mobile</a></li>
-        <li><a href="vol-retarde.html">Vol retardé</a></li>
-        <li><a href="abonnements.html">Dépense mensuelle</a></li>
-        <li><a href="taxe-fonciere.html">Taxe foncière</a></li>
-        <li><a href="garanties.html">Garanties après achat</a></li></ul></div>
-      <div>
-        <h4>Comprendre</h4>
-        <ul>
-          <li><a href="notre-methode.html">Notre méthode</a></li>
-          <li><a href="guide-erreurs-taxe-fonciere.html">Erreurs fréquentes de taxe foncière</a></li>
-          <li><a href="resilier-un-abonnement.html">Résilier un abonnement</a></li>
-          <li><a href="sources.html">Toutes les sources</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Le site</h4>
-        <ul>
-          <li><a href="mentions-legales.html">Mentions légales</a></li>
-          <li><a href="confidentialite.html">Confidentialité</a></li>
-        </ul>
-      </div>
+  <section class="choix">
+    <h2>Quelle dépense souhaitez-vous renseigner&nbsp;?</h2>
+    <p class="portee">Calculez le coût des dépenses que vous renseignez.
+    <b>La comparaison d'offres n'existe aujourd'hui que pour le mobile et la box
+    internet.</b></p>
+    <div class="postes">
+      <a href="bilan.html?poste=mobile">Mobile <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=box">Box <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=energie">Énergie <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=assurance">Assurances <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=abonnements">Abonnements <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=logement">Logement <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=transport">Transport <span class="fl" aria-hidden="true">→</span></a>
+      <a href="bilan.html?poste=autre">Autre <span class="fl" aria-hidden="true">→</span></a>
     </div>
+    <p class="sans">Aucun nom, e-mail ni téléphone n'est demandé pour voir le résultat.</p>
+  </section>
 
+
+  <!-- L'exemple montrait une addition : 25 + 50 = 75. N'importe qui sait
+       additionner, et le site se présentait donc par ce qu'il a de moins
+       précieux. Il montre maintenant une comparaison — un prix en face d'un
+       autre, avec sa date de relevé et son inconnue nommée. C'est la seule
+       chose qu'on fait et qu'une réponse assurée ne fait pas. -->
+  <section class="exemple" aria-label="Exemple fictif de comparaison">
+    <p class="eti">Exemple fictif · Ce que montre une comparaison</p>
+    <dl>
+      <dt>Ce que vous payez</dt><dd>24,90 € / mois</dd>
+      <dt>Une offre du relevé</dt><dd>9,99 € / mois</dd>
+    </dl>
+    <p class="total-label">Écart sur douze mois</p>
+    <p class="tot">178,92 € <span>de mensualités</span></p>
+    <p class="annuel">hors frais de souscription</p>
+    <p class="couvre"><b>Ces frais-là sont inconnus pour cette offre</b> — nous
+    n'écrirons donc pas qu'elle est moins chère. Chaque prix porte sa date de
+    relevé et le lien vers la page de l'opérateur.</p>
+  </section>
+
+  <p class="discrets">
+    <a href="notre-methode.html">Ce que les outils permettent</a><span>·</span>
+    <a href="sources.html">Sources et dates</a><span>·</span>
+    <a href="confidentialite.html">Données enregistrées</a>
+  </p>
+
+  <section class="recuperer" id="autres">
+    <h2>Vérifier une somme à récupérer</h2>
+    <ul>
+      <li>
+        <a href="vol-retarde.html">Un vol retardé ou annulé</a>
+        <p>De 250 à 600 €, barème fixé par le règlement (CE) n° 261/2004. Il faut être
+        arrivé à destination avec <b>au moins trois heures de retard</b>&nbsp;; la compagnie
+        ne doit rien si elle prouve une circonstance extraordinaire.</p>
+      </li>
+      <li>
+        <a href="taxe-fonciere.html">Ma taxe foncière</a>
+        <p>Repère ce qui mérite vérification sur votre fiche d'évaluation. <b>Aucune somme
+        n'y est chiffrable</b> — seule l'administration recalcule. La réclamation se dépose
+        au plus tard le 31 décembre de l'année suivant la mise en recouvrement.</p>
+      </li>
+    </ul>
+  </section>
+
+  <div class="pied">
+    <p>Service d'information gratuit. Ne constitue ni un conseil juridique personnalisé,
+    ni une garantie de résultat. Aucun lien affilié, aucune rémunération d'aucun opérateur.</p>
     <div class="theme-choix" role="group" aria-label="Thème d'affichage">
       <span>Affichage&nbsp;:</span>
       <button type="button" data-theme-val="light" aria-pressed="false">Clair</button>
       <button type="button" data-theme-val="dark" aria-pressed="false">Sombre</button>
       <button type="button" data-theme-val="auto" aria-pressed="false">Comme mon système</button>
     </div>
-
-    <p class="fine">Service d'information gratuit. Ne constitue ni un conseil juridique personnalisé,
-    ni une garantie de résultat. Aucun lien affilié, aucune rémunération d'aucun opérateur.</p>
-    <p class="fine">Vos réponses aux outils sont calculées dans votre navigateur et n'en sortent pas.
-    Le site enregistre en revanche des données de visite&nbsp;:
-    <a href="confidentialite.html">ce qui est enregistré, et pourquoi</a>.</p>
   </div>
-</footer>
+
+</main>
 
 <script>
 try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
