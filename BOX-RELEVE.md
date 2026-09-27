@@ -9,6 +9,8 @@ Périmètre : trois offres fibre sans engagement, deux opérateurs, aucun classe
 
 Calcul : mensualités × horizon + souscription connue ; TV optionnelle incluse si demandée. Tarif inchangé projeté sur 12 et 24 mois. Résiliation future séparée, sortie actuelle inconnue, remboursements conditionnels exclus. Pas de gain annoncé.
 
+Affichage : **la première phrase de `condition` est celle qui reste visible sur la carte** ; les suivantes rejoignent le dépliant « Frais, conditions et sources ». Écrire donc en tête la condition qui décide de l'accès à l'offre.
+
 Entretien : `web/box.js` contient chaque entrée, source, date et fin. Mettre `active:false` pour retirer. Relire les mentions avant chaque campagne de test ou diffusion, et au plus tard avant les échéances ; une date de fin n’est pas une garantie de validité jusque-là. Aucun accès automatisé ni droit de réutilisation systématique établi.
 
 Limites : pas de box avec engagement, pas de scénario chiffré box + mobile, pas d’éligibilité interrogée, pas de devis contractuel. B&YOU conserve uniquement un sous-total de mensualités tant que ses frais ne sont pas établis. Aucun document personnel ni adresse demandé. Le montant du bilan est lu sans écriture ; les réponses propres à la box restent en mémoire de la page.

@@ -14,12 +14,16 @@ bx('box-form').onsubmit=ev=>{
  ev.preventDefault();if(etapeBox===0){bx('suite').click();return;}
  const prix=enCentimes(bx('prix').value);const besoin=bx('besoin').value;
  bx('synthese').replaceChildren();bx('offres').replaceChildren();
- paragraphe(bx('synthese'),prix===null?'Coût actuel inconnu.':`Votre box : ${euros(prix)} par mois, soit ${euros(prix*12)} sur 12 mois à tarif inchangé.`);
- let action=bx('engagement').value==='non'?'Demandez le montant exact des frais de fermeture de votre box actuelle.':'Retrouvez la date de fin d’engagement et demandez votre coût de sortie à l’opérateur.';
- if(bx('remise').value!=='non')action+=' Vérifiez aussi le prix de votre mobile si vous quittez cette box : sa remise peut disparaître.';
- paragraphe(bx('synthese'),'Votre prochaine action : '+action,'reserve');
- if(besoin==='inconnu')paragraphe(bx('synthese'),'Précisez si vous utilisez un décodeur TV ou les appels fixes avant de choisir. Les pistes ci-dessous ne sont pas déclarées équivalentes à votre contrat.');
- paragraphe(bx('synthese'),'Économie à confirmer : éligibilité, accès aux offres, frais de sortie et remise mobile éventuelle restent à vérifier.');
+ /* L'action passe en premier. Le résumé commençait par un rappel de ce que le
+    visiteur venait de saisir, puis trois réserves : quatre paragraphes avant
+    de savoir quoi faire. Essai du 27/09/2026 : « les résumés sont longs, ça
+    manque d'un droit au but ». Même information, ordre inversé, moins de mots. */
+ let action=bx('engagement').value==='non'?'Demandez à votre opérateur le montant exact des frais de fermeture.':'Demandez à votre opérateur votre date de fin d’engagement et votre coût de sortie.';
+ if(bx('remise').value!=='non')action+=' Et le prix de votre mobile sans cette box : sa remise peut disparaître.';
+ if(besoin==='inconnu')action+=' Décidez aussi s’il vous faut la TV ou les appels fixes.';
+ paragraphe(bx('synthese'),'À faire : '+action,'reserve');
+ paragraphe(bx('synthese'),prix===null?'Coût actuel inconnu.':`Vous payez ${euros(prix)} par mois, soit ${euros(prix*12)} sur douze mois à tarif inchangé.`);
+ paragraphe(bx('synthese'),'Aucune économie n’est chiffrée ici : éligibilité, frais de sortie et remise mobile restent à vérifier.');
  const date=new Date().toLocaleDateString('sv-SE');const offres=offresBoxPour(besoin,date);
  if(!offres.length)paragraphe(bx('offres'),'Aucune offre de ce relevé ne peut être présentée actuellement pour ce besoin. Consultez les conditions officielles ou revenez après actualisation.');
  offres.forEach(o=>{
@@ -30,7 +34,13 @@ bx('box-form').onsubmit=ev=>{
  paragraphe(details,`Mensualités : ${euros(a.recurrent)} sur 12 mois · ${euros(b.recurrent)} sur 24 mois.`,'box-cout');
  paragraphe(art,a.total===null?'Coût total inconnu : frais de souscription non confirmés.':`Coût connu avec souscription : ${euros(a.total)} sur 12 mois · ${euros(b.total)} sur 24 mois, hors sortie actuelle et options supplémentaires.`);
  paragraphe(details,`Souscription : ${o.entree===null?'à confirmer':euros(o.entree)}. Résiliation future de cette nouvelle offre : ${o.sortie===null?'à confirmer':euros(o.sortie)}, non incluse dans ces projections.`);
- paragraphe(art,o.condition);
+ /* La condition tient en trois phrases dont une seule décide de l'accès. La
+    première reste visible — c'est celle que l'auteur du relevé a placée en
+    tête — et le reste rejoint le dépliant, qui s'intitule déjà « Frais,
+    conditions et sources ». */
+ const bouts=String(o.condition).split(/(?<=\.)\s+/);
+ paragraphe(art,bouts[0]);
+ if(bouts.length>1)paragraphe(details,bouts.slice(1).join(' '));
 
  const aLien=document.createElement('a');aLien.href=o.url;aLien.target='_blank';aLien.rel='noopener noreferrer';aLien.className='btn-secondary';aLien.textContent='Voir l’offre chez '+(o.nom.startsWith('Sosh')?'Sosh':'B&YOU')+' ↗';art.append(aLien);
  art.append(details);
