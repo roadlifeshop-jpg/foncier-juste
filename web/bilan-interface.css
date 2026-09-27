@@ -11,7 +11,10 @@ main .shell-lire{max-width:800px;}
 .postes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
 .poste{padding:10px 6px;font-size:14px;min-height:48px;}
 .saisie-montant{margin-top:24px;padding-top:22px;}
-#f-montant{font-size:30px;font-weight:600;letter-spacing:-.03em;min-height:64px;}
+/* Le champ occupait toute la largeur pour un nombre de quatre ou cinq
+   caractères. Ramené à la taille de ce qu'on y écrit : le regard va au montant,
+   et les raccourcis rétablis tiennent sur la même ligne visuelle. */
+#f-montant{font-size:30px;font-weight:600;letter-spacing:-.03em;min-height:64px;max-width:11ch;}
 .en-direct{padding:18px;border:0;border-left:3px solid var(--accent);border-radius:0;}
 .en-direct .m{font-size:24px;}
 .totaux{border-radius:0;border-top:4px solid var(--accent);padding:24px;box-shadow:6px 6px 0 var(--surface-2);}
@@ -24,7 +27,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 @media(max-width:560px){.postes{grid-template-columns:repeat(2,minmax(0,1fr));}.site-head .brand small{display:none;}.totaux{padding:20px;}.rythme{flex-wrap:wrap;}.rythme label{min-width:80px;}.piste{padding:18px;}}
 /* Une tâche à la fois : poste, montant, bilan. */
 [hidden],.postes[hidden]{display:none!important;}
-.raccourcis,.note-raccourcis,#zone-liste{display:none;}
+/* Les raccourcis de montant avaient été masqués ici. Essai du 27/09/2026 sur
+   téléphone : « faut impérativement donner des sommes à remplir, surtout pour
+   abonnement, box, mobile — là c'est relou de remplir ». Sans eux, l'écran
+   n'offre qu'un grand champ vide. Rétablis, avec leur légende qui rappelle que
+   ce sont des nombres ronds et non des prix constatés.
+   #zone-liste reste masqué : c'est un autre choix, celui d'alléger le résultat. */
+#zone-liste{display:none;}
+/* Rétablis, ils doivent être atteignables comme le reste : ils mesuraient 41 px. */
+.raccourcis button{min-height:44px;}
 #zone-resultat>h2{display:none;}
 #modifier-poste{margin-bottom:10px;}
 .detail-depenses{font:600 17px Archivo,sans-serif;margin-top:28px;}
