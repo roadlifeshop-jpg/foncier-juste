@@ -179,8 +179,17 @@ def test_inline_cancel_invalid_and_annual(page):
 
 def test_mobile_fold_and_large_text(page):
     page.select_option('#month','1')
+    # La mention « montants fictifs » précède les montants : elle doit être lue
+    # avant eux. Ce qui compte n'est donc plus une hauteur fixe, mais que la
+    # mention et la première dépense tiennent ensemble sur le plus petit écran.
+    page.set_viewport_size({'width':320,'height':568})
+    note=page.locator('.demo-note').bounding_box()
+    assert note['y'] >= 0 and note['y'] < page.locator('.expense').first.bounding_box()['y']
+    first=page.locator('.expense').first.bounding_box()
+    assert first['y'] + first['height'] <= 568, first
+    page.set_viewport_size({'width':390,'height':844})
     y=page.locator('.expense').first.bounding_box()['y']
-    assert 150 <= y <= 235, y
+    assert 150 <= y <= 260, y
     page.add_style_tag(content='html {font-size:200% !important;}')
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     page.get_by_role('button',name='Modifier Mobile',exact=True).click()
