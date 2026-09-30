@@ -105,27 +105,12 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
   <section class="hero shell" style="padding-block:40px 20px">
     <div class="eyebrow">Premier essai — gratuit, sans inscription</div>
     <h1>Comparer mon forfait mobile</h1>
-    <p class="lede" style="margin-top:14px; font-size:1.1rem; max-width:52ch">
-      Un petit ensemble d'offres <b>lues sur les pages officielles à une date connue</b>. Mensualités sur
-      douze mois, puis frais de souscription lorsqu’ils sont connus. Aucun partenaire, aucun classement
-      sponsorisé, aucun lien affilié. <b>Revérifiez le prix chez l'opérateur avant de décider.</b>
-    </p>
-    <!-- Les prix sont affichés dès l'ouverture, mais sous le formulaire : sans
-         cette ligne, un visiteur qui ne remplit rien croit qu'il n'y a rien. -->
-    <p class="lede" style="margin-top:12px; font-size:1.02rem; max-width:52ch">
-      <b>Les prix sont déjà affichés plus bas</b>, sans rien remplir. Le
-      formulaire ne sert qu'à chiffrer <i>votre</i> écart.
-    </p>
-    <!-- Lien autonome et non enchâssé dans la phrase : c'est une action, elle
-         doit être atteignable au pouce comme les autres. -->
-    <p style="margin-top:6px">
-      <a href="#zone-resultat"
-         style="display:inline-flex; align-items:center; min-height:44px; font-weight:600">Voir
-      les prix tout de suite&nbsp;↓</a>
-    </p>
+    <p class="lede" style="margin-top:14px">Explorez les prix. Précisez ensuite votre besoin pour comparer.</p>
+    <p class="aide">Relevé limité et daté, sans partenaire. Prix et conditions à confirmer chez l’opérateur.</p>
   </section>
 
   <section class="shell-lire" id="saisie">
+    <details id="personnaliser"><summary style="min-height:48px;display:flex;align-items:center;cursor:pointer;font-weight:600">Adapter à mon besoin · montant, données et box ↓</summary>
     <div class="forme">
       <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Votre situation</h2>
       <p class="aide">Trois questions, et deux facultatives si vous avez une box. « Je ne sais pas »
@@ -199,6 +184,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
         </div>
       </form>
     </div>
+    </details>
   </section>
 
   <section class="shell-lire" id="zone-resultat" hidden aria-live="polite">

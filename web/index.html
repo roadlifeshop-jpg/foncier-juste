@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dépense·Juste — vos dépenses, plus claires</title>
-<meta name="description" content="Choisissez une première dépense pour voir son coût mensuel et annuel. La comparaison d'offres existe pour le mobile et la box internet. Sans compte, sans coordonnées.">
+<meta name="description" content="Comparez votre mobile, examinez votre box ou faites le point sur vos dépenses. Accès direct, sans compte ni coordonnées.">
 <link rel="canonical" href="https://foncier-juste.vercel.app/">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2310566C'/><path d='M9 11.5h14M9 16.5h14' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/><path d='M9 21.5h7.5' fill='none' stroke='%23D4AE6A' stroke-width='2.4' stroke-linecap='round'/></svg>">
@@ -38,47 +38,24 @@
 </header>
 
   <section class="promesse">
-    <h1>Vos dépenses,<br>plus <em>claires.</em><span class="l2">Vos prochaines actions, aussi.</span></h1>
-    <p>Choisissez une première dépense pour voir son coût mensuel et annuel.</p>
+    <h1>Une dépense.<br>Une prochaine <em>action.</em></h1>
+    <p>Faites le point sur une dépense. Trouvez quoi faire ensuite.</p>
   </section>
-
-  <section class="choix">
-    <h2>Quelle dépense souhaitez-vous renseigner&nbsp;?</h2>
-    <p class="portee">Calculez le coût des dépenses que vous renseignez.
-    <b>La comparaison d'offres n'existe aujourd'hui que pour le mobile et la box
-    internet.</b></p>
-    <div class="postes">
-      <a href="bilan.html?poste=mobile">Mobile <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html?poste=box">Box <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html?poste=energie">Énergie <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html?poste=assurance">Assurances <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html?poste=abonnements">Abonnements <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html?poste=logement">Logement <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html?poste=transport">Transport <span class="fl" aria-hidden="true">→</span></a>
-      <a href="bilan.html?poste=autre">Autre <span class="fl" aria-hidden="true">→</span></a>
+  <section class="choix" aria-labelledby="commencer">
+    <h2 id="commencer">Par quoi voulez-vous commencer ?</h2>
+    <div class="choix-directs">
+      <a href="comparer-mobile.html"><span><b>Mon forfait mobile</b><small>Voir les offres, puis affiner selon mon besoin.</small></span><span aria-hidden="true">↗</span></a>
+      <a href="comparer-box.html"><span><b>Ma box internet</b><small>Examiner les coûts et les conditions de changement.</small></span><span aria-hidden="true">↗</span></a>
+      <a href="bilan.html"><span><b>Mon bilan</b><small>Commencer avec une seule dépense.</small></span><span aria-hidden="true">→</span></a>
     </div>
-    <p class="sans">Aucun nom, e-mail ni téléphone n'est demandé pour voir le résultat.</p>
+    <p class="sans">Gratuit. Sans nom, e-mail ni téléphone pour voir le résultat.</p>
   </section>
-
-
-  <!-- L'exemple montrait une addition : 25 + 50 = 75. N'importe qui sait
-       additionner, et le site se présentait donc par ce qu'il a de moins
-       précieux. Il montre maintenant une comparaison — un prix en face d'un
-       autre, avec sa date de relevé et son inconnue nommée. C'est la seule
-       chose qu'on fait et qu'une réponse assurée ne fait pas. -->
-  <section class="exemple" aria-label="Exemple fictif de comparaison">
-    <p class="eti">Exemple fictif · Ce que montre une comparaison</p>
-    <dl>
-      <dt>Ce que vous payez</dt><dd>24,90 € / mois</dd>
-      <dt>Une offre du relevé</dt><dd>9,99 € / mois</dd>
-    </dl>
-    <p class="total-label">Écart sur douze mois</p>
-    <p class="tot">178,92 € <span>de mensualités</span></p>
-    <p class="annuel">hors frais de souscription</p>
-    <p class="couvre"><b>Ces frais-là sont inconnus pour cette offre</b> — nous
-    n'écrirons donc pas qu'elle est moins chère. Chaque prix porte sa date de
-    relevé et le lien vers la page de l'opérateur.</p>
-  </section>
+  <aside class="apercu" aria-label="Ce que vous obtenez">
+    <p class="eti">DU CHOIX À L’ACTION</p>
+    <h2>Comprendre.<br>Comparer.<br><em>Décider.</em></h2>
+    <ol><li><b>Votre situation</b><span>Les informations que vous connaissez suffisent pour commencer.</span></li><li><b>Un résultat lisible</b><span>Un coût, des conditions et les inconnues signalées.</span></li><li><b>Une suite concrète</b><span>Vérifier une offre ou préparer votre prochaine démarche.</span></li></ol>
+    <p class="couvre">Mobile et box : des relevés limités, pas tout le marché. Aucune économie garantie.</p>
+  </aside>
 
   <p class="discrets">
     <a href="notre-methode.html">Ce que les outils permettent</a><span>·</span>
