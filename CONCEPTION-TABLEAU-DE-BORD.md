@@ -97,3 +97,25 @@ l’énergie](https://comparateur-offres.energie-info.fr/compte/profil?profil=pa
 consulté le 30 septembre 2026. Le départ vers ce site et le nouvel onglet sont annoncés ;
 aucun montant fictif n’est transmis. Seule la page d’entrée a été vérifiée, pas une simulation
 complète ni les offres finales.
+
+## Validation rapide intégrée dans la liste
+
+Cette évolution remplace le parcours en fenêtre décrit ci-dessus : octobre est maintenant
+le point d’entrée, les montants confirmés et prévisionnels restent séparés, et chaque ligne
+propose « Inchangé », « Modifier » et « Passer ». L’édition se déplie sur place ; fermer
+sans enregistrer ne valide rien. La ligne suivante est surlignée. Après trois confirmations,
+un message non modal propose de continuer. Aucun store, compte, rappel ni sauvegarde réelle
+n’est promis. Le rechargement restaure l’exemple fictif.
+
+Les améliorations intervenues pendant la reprise sont conservées : mention fictive avant
+les chiffres, surlignage visible au toucher, navigation qui revient à la ligne à 200 %.
+Deux cas supplémentaires sont corrigés : éditer depuis « Changements » rend la liste et
+l’éditeur visibles ; une liste vide propose une première saisie via le bouton principal.
+Les ressources propres à la maquette portent une version d’URL pour éviter de mélanger
+l’ancien script avec le nouveau HTML dans le cache du navigateur.
+
+Contrôle local à 390 × 844 : première ligne à environ 230 px, et non exactement 200 px.
+Le compromis conserve l’avertissement fictif avant les montants. Les tests couvrent aussi
+la séparation des totaux, l’annuel, le passage sans confirmation, l’annulation, les données
+existantes, les quatre largeurs et l’agrandissement du texte. Les téléphones physiques,
+le clavier virtuel et Vercel ne sont pas validés par ces tests.

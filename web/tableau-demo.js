@@ -46,7 +46,7 @@
     $('confirmation').textContent = confirmed.length+' sur '+rows().length+' confirmées';
     $('month-progress').max = Math.max(rows().length,1);
     $('month-progress').value = confirmed.length;
-    $('review').textContent = pending ? 'Vérifier mes dépenses' : 'Voir mes pistes';
+    $('review').textContent = !rows().length ? 'Ajouter ma première dépense' : pending ? 'Vérifier mes dépenses' : 'Voir mes pistes';
     $('empty').hidden = !!rows().length;
     $('next-month').textContent = month ? 'Revoir septembre ←' : 'Essayer octobre →';
     $('milestone').hidden = month!==1 || confirmed.length<3;
@@ -95,7 +95,7 @@
   }
   function startReview() {
     closeEditor();setView('depenses',false);skipped.clear();render();
-    if(rows().some(r=>!r.confirmed))focusNext(0);else setView('pistes',true);
+    if(!rows().length)openEditor(null);else if(rows().some(r=>!r.confirmed))focusNext(0);else setView('pistes',true);
   }
   function closeEditor() {
     if(editing!=null) $('editor').append($('expense-form'));
@@ -104,7 +104,7 @@
     if(old!=null){const trigger=$('edit-'+old);if(trigger){trigger.setAttribute('aria-expanded','false');trigger.focus();}}
   }
   function openEditor(id) {
-    closeEditor();editing=id;
+    closeEditor();setView('depenses',false);editing=id;
     const r=rows().find(x=>x.id===id);
     $('expense-form').reset();$('error').textContent='';
     $('edit-title').textContent=r?'Modifier '+labels[r.category]:'Ajouter une dépense';

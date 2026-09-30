@@ -204,3 +204,24 @@ def test_energy_destination(page):
     assert link.get_attribute('href')=='https://comparateur-offres.energie-info.fr/compte/profil?profil=particulier'
     assert link.get_attribute('target')=='_blank'
     assert 'aucun montant de la maquette' in page.locator('#guide').inner_text()
+
+
+def test_reopen_change_edits_visible_row(page):
+    page.select_option('#month','1')
+    page.get_by_role('button',name='Modifier Mobile',exact=True).click()
+    page.fill('#amount','25');page.click('#save')
+    page.locator('[data-view=changements]').click()
+    page.get_by_role('button',name='Revoir ce montant',exact=True).click()
+    assert page.locator('#inline-1 #amount').is_visible()
+    page.fill('#amount','24');page.click('#save')
+    assert amount(page)=='2400'
+    assert page.locator('[data-id="1"] .value').inner_text().startswith('24,00')
+
+
+def test_empty_list_primary_action_and_resume(page):
+    while page.get_by_role('button',name='Supprimer').count():
+        page.get_by_role('button',name='Supprimer').first.click()
+    page.click('#review')
+    assert page.locator('#editor').is_visible()
+    page.fill('#amount','12');page.click('#save')
+    assert amount(page)=='1200'
