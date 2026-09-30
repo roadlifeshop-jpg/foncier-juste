@@ -42,7 +42,8 @@ def test_month_confirmation_history_and_no_assumed_savings(page):
     page.fill('#amount','102,50')
     assert '102,50' in page.locator('#preview').inner_text()
     page.click('#save')
-    assert amount(page)=='96250'
+    assert amount(page)=='10250'
+    assert '860,00' in page.locator('#pending-amount').inner_text()
     assert '6 montants à confirmer' in page.locator('#confirmation').inner_text()
     page.locator('[data-view=changements]').click()
     text=page.locator('#changes').inner_text()
@@ -52,7 +53,8 @@ def test_month_confirmation_history_and_no_assumed_savings(page):
     page.locator('[data-view=depenses]').click()
     assert amount(page)=='95000'
     page.select_option('#month','1')
-    assert amount(page)=='96250'
+    assert amount(page)=='10250'
+    assert '860,00' in page.locator('#pending-amount').inner_text()
 
 def test_single_expense_annual_and_rounded_total(page):
     while page.get_by_role('button',name='Supprimer').count():
@@ -125,3 +127,37 @@ def test_layout_errors_links_and_dark(page,size):
     for href in page.locator('a[href]').evaluate_all('(els)=>els.map(e=>e.getAttribute("href"))'):
         if not href.startswith('#'):
             assert page.request.get(page.url.rsplit('/',1)[0]+'/'+href).status==200
+
+
+def test_guided_review_skip_resume_and_totals(page):
+    page.select_option('#month','1')
+    assert not page.locator('#confirmed-total').is_visible()
+    assert '7 dépenses à confirmer' in page.locator('#pending-title').inner_text()
+    assert '950,00' in page.locator('#pending-amount').inner_text()
+    assert page.locator('#review').get_attribute('class')=='primary'
+    page.click('#review')
+    assert page.locator('#edit-title').inner_text()=='Mobile'
+    page.click('#skip-expense')
+    assert page.locator('#edit-title').inner_text()=='Box internet'
+    page.fill('#amount','32,50');page.click('#save')
+    assert page.locator('#edit-title').inner_text()=='Énergie'
+    assert amount(page)=='3250'
+    page.keyboard.press('Escape')
+    page.click('#review')
+    assert page.locator('#edit-title').inner_text()=='Mobile'
+    for _ in range(6):
+        page.click('#save')
+    assert not page.locator('#editor').is_visible()
+    assert not page.locator('#pending-title').is_visible()
+    assert amount(page)=='94750'
+    page.select_option('#month','0')
+    assert amount(page)=='95000'
+
+
+def test_energy_destination(page):
+    page.locator('[data-view=pistes]').click()
+    page.locator('#ideas .card').nth(1).locator('.primary').click()
+    link=page.get_by_role('link',name='Comparer sur Énergie-Info')
+    assert link.get_attribute('href')=='https://comparateur-offres.energie-info.fr/compte/profil?profil=particulier'
+    assert link.get_attribute('target')=='_blank'
+    assert 'aucun montant de la maquette' in page.locator('#guide').inner_text()

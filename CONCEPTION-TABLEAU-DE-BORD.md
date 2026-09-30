@@ -82,3 +82,18 @@ le retour en septembre, les causes inconnues, les suppressions, les suggestions 
 les données réelles préservées, le rechargement, le clavier et les deux thèmes aux largeurs
 320, 375, 390 et 1440 px. Les captures et la relecture visuelle complètent les assertions :
 ce n’est pas un test sur des téléphones physiques ni un audit d’accessibilité complet.
+
+## Ajustement du retour mensuel
+
+Le montant principal ne mélange plus confirmé et repris : tant que des dépenses restent
+à confirmer, leur nombre est mis en avant, leur montant est séparé et le sous-total confirmé
+est explicitement partiel. L’annualisation porte seulement sur les montants confirmés.
+Le bouton principal ouvre une vérification séquentielle avec progression, correction,
+passage et reprise des postes encore non confirmés. Fermer ne valide pas la saisie.
+La cause n’est demandée que lorsque le montant ou la fréquence est modifié.
+
+La piste énergie aboutit désormais au [comparateur officiel du médiateur national de
+l’énergie](https://comparateur-offres.energie-info.fr/compte/profil?profil=particulier),
+consulté le 30 septembre 2026. Le départ vers ce site et le nouvel onglet sont annoncés ;
+aucun montant fictif n’est transmis. Seule la page d’entrée a été vérifiée, pas une simulation
+complète ni les offres finales.
