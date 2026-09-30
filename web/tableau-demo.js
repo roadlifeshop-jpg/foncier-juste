@@ -9,16 +9,16 @@
   const yearly = row => row.amount * (row.frequency === 'annuelle' ? 1 : 12);
   const monthly = row => Math.round(yearly(row) / 12);
   const parse = value => /^\d{1,7}([.,]\d{1,2})?$/.test(value.trim()) ? Math.round(Number(value.trim().replace(',','.')) * 100) : null;
-  let months, month, nextId, editing, dismissed, view, reviewQueue = null, reviewIndex = 0;
+  let months, month, nextId, editing, dismissed, view, skipped = new Set(), current = null;
   function seed() {
-    nextId = 8; month = 0; view = 'depenses'; dismissed = new Set();
+    nextId = 8; month = 1; skipped = new Set(); view = 'depenses'; dismissed = new Set();
     months = [[['mobile',3000],['box',3500],['energie',9000],['assurance',24000,'annuelle'],['abonnements',1500],['logement',70000],['transport',6000]].map((r,i) => ({id:i+1,category:r[0],amount:r[1],frequency:r[2]||'mensuelle',confirmed:true,reason:'unknown'})), null];
   }
   function rows() { return months[month]; }
   function changeMonth(value) {
     month = value;
     if (!months[month]) months[month] = months[0].map(r => ({...r, confirmed:false,reason:'unknown'}));
-    $('month').value = String(month); render();
+    closeEditor(); skipped.clear(); current = null; $('month').value = String(month); render();
     $('status').textContent = month ? 'Octobre : les montants repris sont à confirmer.' : 'Septembre : vos montants précédents.';
   }
   function node(tag, text, className) {
@@ -30,78 +30,95 @@
     view = target;
     ['depenses','changements','pistes'].forEach(id => { $(id).hidden = target !== id; });
     document.querySelectorAll('[data-view]').forEach(b => { if(b.dataset.view===target)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current'); });
-    if (focus) {const h = $(target).querySelector('h2');h.tabIndex=-1;h.focus();}
+    if (focus) {const h = $(target).querySelector('h2') || $('contenu');h.tabIndex=-1;h.focus();}
   }
   function announce(message) { $('status').textContent = message; }
   function render() {
+    if(editing!=null)closeEditor();
     const confirmed = rows().filter(r=>r.confirmed), awaiting = rows().filter(r=>!r.confirmed);
     const annual = confirmed.reduce((s,r)=>s+yearly(r),0), pending = awaiting.length;
     const pendingAnnual = awaiting.reduce((s,r)=>s+yearly(r),0);
-    $('total-label').textContent = pending ? 'VOTRE MOIS RESTE À CONFIRMER' : 'TOTAL DES DÉPENSES RENSEIGNÉES';
-    $('pending-title').hidden = !pending;
-    $('pending-title').textContent = pending+' dépense'+(pending>1?'s':'')+' à confirmer';
-    $('confirmed-total').hidden = pending>0 && !confirmed.length;
-    $('annual').hidden = pending>0 && !confirmed.length;
-    $('confirmed-total').classList.toggle('partial',!!pending);
-    $('confirmed-total').querySelector('span').textContent = pending ? '/ mois confirmés · total partiel' : '/ mois en moyenne';
-    $('pending-amount').hidden = !pending;
-    $('pending-amount').textContent = 'Encore à confirmer : '+euro(Math.round(pendingAnnual/12))+' / mois en moyenne, repris de septembre.';
-    $('review').hidden = !pending;
-    $('add').className = pending ? 'text-action' : 'primary';
+    $('total-label').textContent = pending ? 'Confirmé · partiel' : 'Total confirmé';
     $('total').textContent = euro(Math.round(annual/12));
-    $('annual').textContent = euro(annual) + (pending ? ' / an pour les seuls montants confirmés' : ' / an si ces montants se maintiennent');
-    $('confirmation').textContent = pending ? pending+' montant'+(pending>1?'s':'')+' à confirmer · projection' : rows().length+' montant'+(rows().length>1?'s':'')+' confirmé'+(rows().length>1?'s':'')+' dans l’exemple';
-    $('count').textContent = rows().length+' poste'+(rows().length>1?'s':'');
+    $('pending-amount').textContent = euro(Math.round(pendingAnnual/12));
+    $('annual').textContent = euro(annual) + ' / an pour les montants confirmés, s’ils se maintiennent.';
+    $('pending-annual').textContent = euro(pendingAnnual)+' / an encore à confirmer.';
+    $('confirmation').textContent = confirmed.length+' sur '+rows().length+' confirmées';
+    $('month-progress').max = Math.max(rows().length,1);
+    $('month-progress').value = confirmed.length;
+    $('review').textContent = pending ? 'Vérifier mes dépenses' : 'Voir mes pistes';
     $('empty').hidden = !!rows().length;
     $('next-month').textContent = month ? 'Revoir septembre ←' : 'Essayer octobre →';
-    $('next-title').textContent = pending ? 'Qu’est-ce qui a changé ?' : 'Une piste pour avancer.';
-    $('next-text').textContent = pending ? 'Gardez la main : confirmez ou corrigez un montant avant de vous y fier.' : 'Choisissez une démarche adaptée aux dépenses de cet exemple.';
-    $('next-action').textContent = pending ? 'Confirmer un montant →' : 'Voir mes pistes →';
-    $('intro').textContent = month ? 'Le mois suivant, sans tout recommencer.' : 'Une vue d’ensemble. Une prochaine action.';
+    $('milestone').hidden = month!==1 || confirmed.length<3;
+    $('milestone-text').textContent = confirmed.length+' dépenses confirmées'+(pending ? '.' : ' · votre liste est vérifiée.');
+    $('continue-review').hidden = !pending;
     $('expenses').replaceChildren();
     rows().forEach(r => {
       const line = node('article',undefined,'expense');line.dataset.id=r.id;
       const symbol=node('span',symbols[r.category],'expense-symbol');symbol.setAttribute('aria-hidden','true');
-      const copy=node('div');copy.append(node('h3',labels[r.category]),node('p',r.confirmed?'Confirmé dans l’exemple':'Repris · à confirmer'));
-      const value=button('', 'value',()=>openEditor(r.id));value.append(node('span',euro(r.amount)),node('small',(r.frequency==='annuelle'?'par an':'par mois')+' · modifier'));value.setAttribute('aria-label','Modifier '+labels[r.category]+' : '+euro(r.amount));
+      const copy=node('div');copy.append(node('h3',labels[r.category]),node('p',r.confirmed?'Confirmé par vous':(skipped.has(r.id)?'Passé · reste à confirmer':'Repris de septembre · à confirmer')));
+      const value=node('div',undefined,'value');value.append(node('span',euro(monthly(r))+' / mois'),node('small',r.frequency==='annuelle'?euro(r.amount)+' par an':'Montant mensuel'));
       const del=button('', 'icon',()=>{
         months[month]=rows().filter(x=>x.id!==r.id);render();
         $('add').focus();announce(labels[r.category]+' supprimé de '+(month?'octobre':'septembre')+'.');
       });
       del.setAttribute('aria-label','Supprimer '+labels[r.category]);
       del.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7"/></svg>';
-      line.append(symbol,copy,value,del);$('expenses').append(line);
+      const actions=node('div',undefined,'fast-actions');
+      if(!r.confirmed) {
+        const unchanged=button('Inchangé','primary',()=>{
+          r.confirmed=true;skipped.delete(r.id);render();focusNext(r.id);
+          announce(labels[r.category]+' confirmé.');
+        });unchanged.setAttribute('aria-label','Inchangé : '+labels[r.category]);actions.append(unchanged);
+      }
+      const edit=button('Modifier','secondary',()=>openEditor(r.id));edit.id='edit-'+r.id;
+      edit.setAttribute('aria-label','Modifier '+labels[r.category]);edit.setAttribute('aria-expanded','false');edit.setAttribute('aria-controls','inline-'+r.id);actions.append(edit);
+      if(!r.confirmed)actions.append(button('Passer','text-action',()=>{skipped.add(r.id);render();focusNext(r.id);announce(labels[r.category]+' passé, non confirmé.');}));
+      const slot=node('div',undefined,'inline-editor');slot.id='inline-'+r.id;
+      if(r.id===current&&!r.confirmed)line.classList.add('en-cours');
+      line.append(symbol,copy,value,del,actions,slot);$('expenses').append(line);
     });
     renderChanges();renderIdeas();setView(view,false);
   }
+  function focusNext(id) {
+    const candidates=rows().filter(r=>!r.confirmed&&!skipped.has(r.id));
+    const target=candidates.find(r=>r.id>id)||candidates[0];
+    document.querySelectorAll('.expense.en-cours').forEach(l=>l.classList.remove('en-cours'));
+    current=target?target.id:null;
+    if(target) {
+      const line=document.querySelector('[data-id="'+target.id+'"]');
+      line.classList.add('en-cours');
+      line.querySelector('.fast-actions button').focus({preventScroll:true});
+      line.scrollIntoView({block:'nearest'});
+      announce(labels[target.category]+' : à confirmer.');
+    } else {$('review').focus();announce('Fin du passage. Les dépenses passées restent à confirmer.');}
+  }
   function startReview() {
-    reviewQueue = rows().filter(r=>!r.confirmed).map(r=>r.id); reviewIndex=0;
-    if(reviewQueue.length)openEditor(reviewQueue[0],true);
+    closeEditor();setView('depenses',false);skipped.clear();render();
+    if(rows().some(r=>!r.confirmed))focusNext(0);else setView('pistes',true);
   }
-  function advanceReview() {
-    reviewIndex++;
-    if(reviewIndex<reviewQueue.length)openEditor(reviewQueue[reviewIndex],true);
-    else {reviewQueue=null;$('editor').close();render();setView('depenses',false);$('contenu').focus();announce('Parcours terminé. Les dépenses passées restent à confirmer.');}
+  function closeEditor() {
+    if(editing!=null) $('editor').append($('expense-form'));
+    if($('editor').open)$('editor').close();
+    const old=editing;editing=null;
+    if(old!=null){const trigger=$('edit-'+old);if(trigger){trigger.setAttribute('aria-expanded','false');trigger.focus();}}
   }
-  function openEditor(id, guided=false) {
-    if(!guided)reviewQueue=null;
-    $('review-progress').hidden=!guided;
-    $('review-progress').textContent=guided?'Dépense '+(reviewIndex+1)+' sur '+reviewQueue.length:'';
-    $('skip-expense').hidden=!guided;
-    editing = id;
-    const r = rows().find(x=>x.id===id);
+  function openEditor(id) {
+    closeEditor();editing=id;
+    const r=rows().find(x=>x.id===id);
     $('expense-form').reset();$('error').textContent='';
-    $('edit-title').textContent=r?(guided?labels[r.category]:'Confirmer ou modifier'):'Ajouter une dépense';
-    $('save').textContent=r?'Confirmer ce montant':'Ajouter à mon exemple';
-    $('category').disabled=!!r;
-    $('category').hidden=guided;
-    document.querySelector('label[for=category]').hidden=guided;
+    $('edit-title').textContent=r?'Modifier '+labels[r.category]:'Ajouter une dépense';
+    $('save').textContent=r?'Enregistrer et confirmer':'Ajouter à mon exemple';
+    $('category').disabled=!!r;$('category').hidden=!!r;
+    document.querySelector('label[for=category]').hidden=!!r;
     $('category').value=r?r.category:'mobile';
     $('amount').value=r?String(r.amount/100).replace('.',','):'';
     $('frequency').value=r?r.frequency:'mensuelle';
-    $('reason-wrap').hidden=!(r&&month===1);
     $('reason').value=r?r.reason:'unknown';
-    preview();if(!$('editor').open)$('editor').showModal();if(guided)$('save').focus();else $('amount').focus();
+    preview();
+    if(r){$('inline-'+id).append($('expense-form'));$('edit-'+id).setAttribute('aria-expanded','true');}
+    else $('editor').showModal();
+    $('amount').focus();
   }
   function preview() {
     const v=parse($('amount').value);
@@ -114,7 +131,7 @@
     if(!month){area.append(node('p','Essayez octobre pour comparer vos montants avec septembre.','card'),button('Passer à octobre →','primary',()=>changeMonth(1)));return;}
     const pending=rows().filter(r=>!r.confirmed);
     if(pending.length) {
-      const c=node('article',undefined,'card');c.append(node('span','À CONFIRMER','chip'),node('h3',pending.length+' montant'+(pending.length>1?'s repris':' repris')),node('p','Ces montants viennent de septembre. Ils ne sont pas encore confirmés pour octobre.'),button('Vérifier le prochain montant →','text-action',()=>openEditor(pending[0].id)));area.append(c);
+      const c=node('article',undefined,'card');c.append(node('span','À CONFIRMER','chip'),node('h3',pending.length+' montant'+(pending.length>1?'s repris':' repris')),node('p','Ces montants viennent de septembre. Ils ne sont pas encore confirmés pour octobre.'),button('Vérifier le prochain montant →','text-action',startReview));area.append(c);
     }
     let changes=0;
     rows().filter(r=>r.confirmed).forEach(r=>{
@@ -170,20 +187,19 @@
     const old=rows().find(r=>r.id===editing);
     const r={id:old?old.id:nextId++,category,amount,frequency:$('frequency').value,confirmed:true,reason:$('reason').value};
     if(old)months[month]=rows().map(x=>x.id===editing?r:x);else rows().push(r);
-    if(reviewQueue){render();advanceReview();return;}
-    $('editor').close();render();$('add').focus();announce('Montant confirmé dans l’exemple. Total mis à jour.');
+    closeEditor();render();if(old)$('edit-'+old.id).focus();else $('add').focus();announce('Montant confirmé dans l’exemple. Total mis à jour.');
   });
   $('review').addEventListener('click',startReview);
-  $('skip-expense').addEventListener('click',advanceReview);
+  $('continue-review').addEventListener('click',startReview);
   $('add').addEventListener('click',()=>openEditor(null));
-  $('close').addEventListener('click',()=>$('editor').close());
+  $('close').addEventListener('click',closeEditor);
+  $('expense-form').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeEditor();}});
   $('guide-close').addEventListener('click',()=>$('guide').close());$('guide-done').addEventListener('click',()=>$('guide').close());
   $('amount').addEventListener('input',preview);$('frequency').addEventListener('change',preview);
   $('month').addEventListener('change',()=>changeMonth(Number($('month').value)));
   $('next-month').addEventListener('click',()=>{changeMonth(month?0:1);$('contenu').focus();});
-  $('next-action').addEventListener('click',()=>{const pending=rows().find(r=>!r.confirmed);if(pending)startReview();else setView('pistes',true);});
-  document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view,true)));
+  document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{closeEditor();setView(b.dataset.view,true);}));
   $('restore').addEventListener('click',()=>{dismissed.clear();renderIdeas();$('ideas-title').focus();});
-  $('reset').addEventListener('click',()=>{seed();$('month').value='0';render();$('contenu').focus();announce('Exemple réinitialisé.');});
-  seed();render();
+  $('reset').addEventListener('click',()=>{closeEditor();seed();changeMonth(1);$('contenu').focus();announce('Exemple réinitialisé.');});
+  seed();changeMonth(1);
 })();

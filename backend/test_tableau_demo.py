@@ -27,6 +27,7 @@ def page(browser):
     ctx = b.new_context(viewport={'width':390,'height':844})
     page = ctx.new_page()
     page.goto(url)
+    page.select_option("#month","0")
     yield page
     ctx.close()
 
@@ -35,16 +36,17 @@ def amount(page, selector='#total'):
 
 def test_month_confirmation_history_and_no_assumed_savings(page):
     assert amount(page) == '95000'
+    page.locator('.annual-details summary').click()
     assert amount(page,'#annual') == '1140000'
     page.select_option('#month','1')
-    assert '7 montants à confirmer' in page.locator('#confirmation').inner_text()
+    assert '0 sur 7 confirmées' in page.locator('#confirmation').inner_text()
     page.get_by_role('button',name='Modifier Énergie').click()
     page.fill('#amount','102,50')
     assert '102,50' in page.locator('#preview').inner_text()
     page.click('#save')
     assert amount(page)=='10250'
     assert '860,00' in page.locator('#pending-amount').inner_text()
-    assert '6 montants à confirmer' in page.locator('#confirmation').inner_text()
+    assert '1 sur 7 confirmées' in page.locator('#confirmation').inner_text()
     page.locator('[data-view=changements]').click()
     text=page.locator('#changes').inner_text()
     assert '+12,50' in text and 'Cause à vérifier' in text
@@ -64,6 +66,7 @@ def test_single_expense_annual_and_rounded_total(page):
     page.click('#add'); page.select_option('#category','assurance')
     page.fill('#amount','100');page.select_option('#frequency','annuelle');page.click('#save')
     assert amount(page)=='833'
+    page.locator('.annual-details summary').click()
     assert amount(page,'#annual')=='10000'
     page.click('#add');page.select_option('#category','courses');page.fill('#amount','20,01');page.click('#save')
     assert amount(page)=='2834'
@@ -99,7 +102,7 @@ def test_no_storage_writes_and_reload_reset(page):
     page.select_option('#month','1');page.get_by_role('button',name='Modifier Mobile').click()
     page.fill('#amount','7');page.click('#save')
     page.reload()
-    assert amount(page)=='95000'
+    assert amount(page)=='000'
     assert before==page.evaluate('() => [JSON.stringify(localStorage),JSON.stringify(sessionStorage)]')
 
 def test_keyboard_focus_and_escape(page):
@@ -120,6 +123,7 @@ def test_layout_errors_links_and_dark(page,size):
         for view in ['depenses','changements','pistes']:
             page.locator('[data-view=%s]' % view).click()
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.locator('[data-view=depenses]').click()
         page.click('#add')
         assert page.locator('#editor').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
         page.keyboard.press('Escape')
@@ -129,29 +133,59 @@ def test_layout_errors_links_and_dark(page,size):
             assert page.request.get(page.url.rsplit('/',1)[0]+'/'+href).status==200
 
 
-def test_guided_review_skip_resume_and_totals(page):
+def test_fast_check_skip_resume_and_totals(page):
     page.select_option('#month','1')
-    assert not page.locator('#confirmed-total').is_visible()
-    assert '7 dépenses à confirmer' in page.locator('#pending-title').inner_text()
+    assert amount(page)=='000'
     assert '950,00' in page.locator('#pending-amount').inner_text()
-    assert page.locator('#review').get_attribute('class')=='primary'
     page.click('#review')
-    assert page.locator('#edit-title').inner_text()=='Mobile'
-    page.click('#skip-expense')
-    assert page.locator('#edit-title').inner_text()=='Box internet'
-    page.fill('#amount','32,50');page.click('#save')
-    assert page.locator('#edit-title').inner_text()=='Énergie'
-    assert amount(page)=='3250'
-    page.keyboard.press('Escape')
-    page.click('#review')
-    assert page.locator('#edit-title').inner_text()=='Mobile'
-    for _ in range(6):
-        page.click('#save')
     assert not page.locator('#editor').is_visible()
-    assert not page.locator('#pending-title').is_visible()
+    assert page.locator('[data-id="1"].en-cours').count()==1
+    mobile=page.locator('[data-id="1"]')
+    mobile.get_by_role('button',name='Passer',exact=True).click()
+    assert 'reste à confirmer' in mobile.inner_text()
+    assert amount(page)=='000'
+    page.get_by_role('button',name='Modifier Box internet',exact=True).click()
+    assert page.locator('#inline-2 #expense-form').is_visible()
+    page.fill('#amount','32,50');page.click('#save')
+    assert amount(page)=='3250'
+    mobile.get_by_role('button',name='Inchangé').click()
+    page.get_by_role('button',name='Inchangé : Énergie',exact=True).click()
+    assert amount(page)=='15250'
+    assert '3 dépenses confirmées' in page.locator('#milestone').inner_text()
+    assert not page.locator('dialog[open]').count()
+    page.click('#continue-review')
+    for _ in range(4):
+        page.get_by_role('button',name='Inchangé :').first.click()
     assert amount(page)=='94750'
+    assert '0,00' in page.locator('#pending-amount').inner_text()
     page.select_option('#month','0')
     assert amount(page)=='95000'
+
+
+def test_inline_cancel_invalid_and_annual(page):
+    page.select_option('#month','1')
+    page.get_by_role('button',name='Modifier Assurances',exact=True).click()
+    page.fill('#amount','999');page.click('#close')
+    assert amount(page)=='000'
+    assert '950,00' in page.locator('#pending-amount').inner_text()
+    page.get_by_role('button',name='Modifier Assurances',exact=True).click()
+    assert page.input_value('#amount')=='240'
+    page.fill('#amount','-10');page.click('#save')
+    assert page.locator('#error').inner_text()
+    page.fill('#amount','120');page.click('#save')
+    assert amount(page)=='1000'
+    assert '930,00' in page.locator('#pending-amount').inner_text()
+
+
+def test_mobile_fold_and_large_text(page):
+    page.select_option('#month','1')
+    y=page.locator('.expense').first.bounding_box()['y']
+    assert 150 <= y <= 235, y
+    page.add_style_tag(content='html {font-size:200% !important;}')
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    page.get_by_role('button',name='Modifier Mobile',exact=True).click()
+    assert page.locator('#amount').is_visible()
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
 
 
 def test_energy_destination(page):
