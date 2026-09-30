@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord — Feuille de relevé</title>
+<style>
+/* FEUILLE DE RELEVÉ — essai du suivi mensuel (web/tableau-demo.html).
+   Document de travail, hors du site. Ouvrir dans un navigateur, puis Cmd+P.
+   Page 1 : une séance. À imprimer en deux exemplaires.
+   Page 2 : la mise en commun des deux séances.
+   Cet essai est distinct de T2. Les résultats ne se mélangent pas. */
+@page { size:A4; margin:13mm; }
+*{box-sizing:border-box;}
+body{margin:0; padding:20px; background:#EEEDEA; color:#000;
+  font:11px/1.3 -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}
+.page{background:#fff; max-width:186mm; margin:0 auto 20px; padding:12mm 13mm;
+  box-shadow:0 2px 14px rgba(0,0,0,.18);}
+h1{font-size:15px; margin:0; letter-spacing:.01em;}
+h1 small{display:block; font-size:10px; font-weight:400; color:#444; margin-top:2px;}
+h2{font-size:12.5px; margin:5px 0 3px; padding-bottom:3px; border-bottom:1.5px solid #000;}
+h2 .n{display:inline-block; min-width:16px;}
+p.q{margin:5px 0 3px; font-size:11px;}
+p.c{margin:2px 0; font-size:9.6px; color:#333; font-style:italic;}
+.ent{display:flex; gap:12px; flex-wrap:wrap; font-size:10.5px; margin-top:7px;
+  padding-bottom:6px; border-bottom:1px solid #000;}
+.ent span{flex:1 1 auto;}
+.lg{border-bottom:1px solid #999; height:17px; margin-top:3px;}
+.lg.h{height:25px;}
+.cases{margin:4px 0 0; font-size:10.5px;}
+.cases label{display:inline-block; margin-right:14px; white-space:nowrap;}
+.cases i{display:inline-block; width:10px; height:10px; border:1px solid #000;
+  margin-right:4px; vertical-align:-1px; font-style:normal;}
+table{width:100%; border-collapse:collapse; margin-top:6px; font-size:10.5px;}
+th,td{border:1px solid #000; padding:2.5px 5px; text-align:left; vertical-align:top;}
+th{background:#EEE; font-weight:600;}
+td.v{height:19px;}
+.enc{margin-top:8px; border:2px solid #000; padding:5px 9px;}
+.enc b{font-size:11.5px;}
+.enc p{margin:4px 0 0; font-size:10.5px;}
+.avant{margin-top:8px; font-size:10.3px;}
+.avant b{display:block; margin-bottom:2px;}
+@media print{ body{background:#fff; padding:0;}
+  .page{box-shadow:none; margin:0; padding:0; max-width:none; page-break-after:always;}
+  .page:last-child{page-break-after:auto;} }
+</style>
+</head>
+<body>
+
+<div class="page">
+<h1>Suivi mensuel — feuille de séance
+  <small><code>web/tableau-demo.html</code> — dépenses fictives, état perdu au rechargement.
+  Essai distinct de T2 : ne rien reporter sur les feuilles T2.</small></h1>
+
+<div class="ent">
+  <span>Séance n° ____ / 2</span>
+  <span>Date : ____ / ____ / 2026</span>
+  <span>Début : ____ h ____</span>
+  <span>Fin : ____ h ____</span>
+  <span>Appareil : ▢ téléphone ▢ ordinateur</span>
+</div>
+
+<div class="avant">
+<b>Consigne, lue telle quelle, une seule fois :</b>
+« C’est une maquette avec des dépenses fictives. Imaginez que vous revenez le mois suivant pour
+faire le point. Montrez-moi ce que vous feriez, en disant ce que vous pensez. »
+<br>Puis se taire. On teste l’interface, pas la personne.
+</div>
+
+<h2><span class="n">1.</span> Comprendre les montants repris et confirmés</h2>
+<p class="c">Ne rien demander. Noter ses mots pour désigner les montants d’octobre.</p>
+<div class="lg h"></div>
+<div class="cases">
+  <label><i></i> dit « repris » / « à confirmer » ou équivalent, sans aide</label>
+  <label><i></i> après relance neutre (« dites-m’en plus »)</label>
+  <label><i></i> pas du tout</label>
+</div>
+<p class="q">Croit-elle que ces montants viennent d’une facture réelle&nbsp;? ▢ oui ▢ non ▢ indéterminé</p>
+<div class="lg"></div>
+
+<h2><span class="n">2.</span> Terminer la vérification</h2>
+<p class="c">Noter où le doigt s’arrête, et à quel poste elle s’arrête si elle s’arrête.</p>
+<table>
+<tr><th style="width:38%">Geste</th><th style="width:20%">Trouvé seul</th><th>Ce qui s’est passé</th></tr>
+<tr><td>Ouvrir la vérification</td><td class="v">▢ oui ▢ non</td><td class="v"></td></tr>
+<tr><td>Confirmer un montant</td><td class="v">▢ oui ▢ non</td><td class="v"></td></tr>
+<tr><td>Corriger un montant</td><td class="v">▢ oui ▢ non</td><td class="v"></td></tr>
+<tr><td>Passer un poste</td><td class="v">▢ oui ▢ non</td><td class="v"></td></tr>
+<tr><td>Aller au bout des 7</td><td class="v">▢ oui ▢ non</td><td class="v"></td></tr>
+</table>
+
+<h2><span class="n">3.</span> Trouver une prochaine action</h2>
+<p class="c">À la toute fin : « qu’est-ce que vous feriez en sortant d’ici&nbsp;? » Mot pour mot.</p>
+<div class="lg h"></div>
+<div class="cases">
+  <label><i></i> la réponse contient un verbe d’action</label>
+  <label><i></i> et un moment (« ce soir », « demain »)</label>
+  <label><i></i> ni l’un ni l’autre</label>
+</div>
+
+<div class="enc">
+<b>Interventions — à remplir dès qu’on ouvre la bouche</b>
+<p>Observer d’abord, laisser le silence durer. Noter la minute, le mot exact et ce qui l’a
+déclenché : une aide non notée rend la séance inexploitable.</p>
+<div class="lg"></div><div class="lg"></div>
+</div>
+
+</div>
+
+<div class="page">
+<h1>Mise en commun des deux séances
+  <small>Deux personnes ne font pas un résultat. Ce tableau sert à décider quoi observer ensuite,
+  pas à conclure sur l’interface.</small></h1>
+
+<table>
+<tr><th style="width:44%">Observation</th><th style="width:28%">Séance 1</th><th style="width:28%">Séance 2</th></tr>
+<tr><td>Statut des montants compris sans aide</td><td class="v">▢ oui ▢ non</td><td class="v">▢ oui ▢ non</td></tr>
+<tr><td>Vérification menée à son terme sans aide</td><td class="v">▢ oui ▢ non</td><td class="v">▢ oui ▢ non</td></tr>
+<tr><td>« Passer » trouvé sans aide</td><td class="v">▢ oui ▢ non</td><td class="v">▢ oui ▢ non</td></tr>
+<tr><td>Prochaine action avec verbe et moment</td><td class="v">▢ oui ▢ non</td><td class="v">▢ oui ▢ non</td></tr>
+<tr><td>Nombre d’interventions</td><td class="v"></td><td class="v"></td></tr>
+<tr><td>Endroit exact du premier blocage</td><td class="v"></td><td class="v"></td></tr>
+</table>
+
+<h2>La difficulté qui décidera de la suite</h2>
+<p class="c">Une seule, celle qui est apparue chez les deux personnes, ou la plus coûteuse chez l’une.
+S’il n’y en a pas, l’écrire : « aucune difficulté commune » est un résultat.</p>
+<div class="lg h"></div><div class="lg"></div>
+
+<div class="enc">
+<b>Ce que cet essai ne peut pas dire</b>
+<p>Les dépenses sont fictives et l’état se perd au rechargement : rien ici ne mesure l’utilité
+dans la vie réelle, ni l’envie de revenir. La consigne annonce elle-même le rendez-vous mensuel —
+on observe donc si la personne sait l’exécuter, pas si elle l’aurait découvert seule.</p>
+</div>
+</div>
+
+</body>
+</html>
