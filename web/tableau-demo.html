@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Votre quotidien, plus clair — maquette Dépense·Juste</title>
+<script src="theme.js"></script><link rel="stylesheet" href="base.css"><link rel="stylesheet" href="tableau-demo.css"><script src="tableau-demo.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<div class="demo-banner">MAQUETTE INTERACTIVE <span>Montants fictifs · aucune offre recherchée en direct</span></div>
+<div class="app">
+<header class="rail">
+<a class="brand" href="index.html">Dépense<span>·</span>Juste</a>
+<p class="rail-caption">Moins de flou.<br>Plus de latitude.</p>
+<nav aria-label="Mon tableau de bord">
+<button data-view="depenses" aria-current="page"><span aria-hidden="true">▦</span> Mes dépenses</button>
+<button data-view="changements"><span aria-hidden="true">↗</span> Changements</button>
+<button data-view="pistes"><span aria-hidden="true">✳</span> Mes pistes</button>
+</nav>
+<div class="rail-bottom"><a href="index.html">← Retour au site</a><p>Un exemple à explorer,<br>à votre rythme.</p></div>
+</header>
+<main id="contenu" tabindex="-1">
+<div class="topline"><span>MON QUOTIDIEN</span><label class="month">Période <select id="month"><option value="0">Septembre · exemple</option><option value="1">Octobre · exemple</option></select></label></div>
+<div class="heading"><div><h1>Vos dépenses, <em>plus claires.</em></h1><p id="intro">Une vue d’ensemble. Une prochaine action.</p></div><button class="primary" id="add">+ Ajouter une dépense</button></div>
+<section id="depenses" aria-label="Mes dépenses">
+<div class="overview">
+<div class="total-card"><span class="eyebrow">TOTAL DES DÉPENSES RENSEIGNÉES</span><div class="big"><strong id="total"></strong><span>/ mois en moyenne</span></div><p id="annual"></p><div class="total-bottom"><span id="confirmation"></span><span>Ce n’est pas tout le budget du foyer.</span></div></div>
+<aside class="next-card"><span class="eyebrow">UNE CHOSE À LA FOIS</span><h2 id="next-title"></h2><p id="next-text"></p><button class="text-action" id="next-action"></button></aside>
+</div>
+<div class="section-head"><h2>Ce qui compose votre mois</h2><span id="count"></span></div>
+<div id="expenses" class="expenses"></div>
+<p class="small" id="empty" hidden>Commencez par une seule dépense. Le total se construit au fur et à mesure.</p>
+<div class="month-invite"><div><b>Et le mois prochain ?</b><p>Retrouvez les montants précédents, puis confirmez ce qui a changé.</p></div><button class="secondary" id="next-month">Essayer octobre →</button></div>
+</section>
+<section id="changements" hidden aria-labelledby="changes-title"><div class="section-head"><h2 id="changes-title" tabindex="-1">Ce qui a changé</h2></div><p class="muted">Comparaison avec septembre, pour les mêmes dépenses. Une hausse ne prouve pas une hausse de tarif.</p><div id="changes" class="cards"></div></section>
+<section id="pistes" hidden aria-labelledby="ideas-title"><div class="section-head"><h2 id="ideas-title" tabindex="-1">Vos prochaines pistes</h2></div><p class="muted">Deux pistes maximum. Aucun gain promis, aucune relance.</p><div id="ideas" class="cards"></div><button id="restore" class="secondary" hidden>Revoir les pistes mises de côté</button></section>
+<footer><details><summary>Comment fonctionne cette maquette ?</summary><p>Ces montants illustrent un foyer fictif. Les modifications restent dans cet onglet jusqu’au rechargement. Aucun accès à vos dépenses ou contrats enregistrés. Les montants annuels sont répartis sur douze mois ; la projection annuelle n’est pas une prévision de factures.</p><p>Le mois suivant reprend des montants à confirmer, sans les considérer comme payés. Pas de connexion bancaire, de lecture de facture, de veille d’offres ni de notification. Les comparateurs existants s’ouvrent séparément, sans reprendre les montants fictifs.</p></details><div class="footer-actions"><button id="reset" class="text-action">Recommencer l’exemple</button><div class="theme-choix" role="group" aria-label="Thème"><button data-theme-val="light">Clair</button><button data-theme-val="dark">Sombre</button></div></div></footer>
+<p id="status" class="sr" role="status"></p>
+</main></div>
+<dialog id="editor" aria-labelledby="edit-title"><form id="expense-form"><div class="dialog-head"><span class="eyebrow">UNE DÉPENSE À LA FOIS</span><button type="button" class="icon" id="close" aria-label="Fermer">×</button></div><h2 id="edit-title">Ajouter une dépense</h2><p class="small">Utilisez un montant d’exemple, pas vos données personnelles.</p><label for="category">Le poste</label><select id="category" required><option value="mobile">Mobile</option><option value="box">Box internet</option><option value="energie">Énergie</option><option value="assurance">Assurances</option><option value="abonnements">Abonnements</option><option value="logement">Logement</option><option value="transport">Transport</option><option value="courses">Courses du quotidien</option><option value="autre">Autre</option></select><label for="amount">Le montant (€)</label><input id="amount" type="text" inputmode="decimal" autocomplete="off" required placeholder="Ex. 30"><label for="frequency">La fréquence</label><select id="frequency"><option value="mensuelle">Par mois</option><option value="annuelle">Par an</option></select><div id="reason-wrap" hidden><label for="reason">Si le montant a changé, savez-vous pourquoi ?</label><select id="reason"><option value="unknown">Je ne sais pas encore</option><option value="usage">Mon usage a changé</option><option value="tariff">Un tarif a changé, d’après moi</option><option value="oneoff">Une dépense ponctuelle, d’après moi</option><option value="correction">Je corrige ma saisie</option></select></div><p id="preview" class="preview" aria-live="polite"></p><p id="error" role="alert"></p><button type="submit" class="primary" id="save">Ajouter à mon exemple</button></form></dialog>
+<dialog id="guide" aria-labelledby="guide-title"><div class="dialog-head"><span class="eyebrow">VOTRE PROCHAINE ÉTAPE</span><button class="icon" id="guide-close" aria-label="Fermer le conseil">×</button></div><h2 id="guide-title"></h2><div id="guide-content"></div><button id="guide-done" class="primary">J’ai ma prochaine étape</button></dialog>
+</body></html>
