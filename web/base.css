@@ -32,66 +32,148 @@
   src:url('vendor/fonts/spectral-600.woff2') format('woff2');
 }
 
+/* ==========================================================================
+   JETONS — source unique de la palette, de l'échelle et des espacements.
+   --------------------------------------------------------------------------
+   Toutes les pages lisent ces variables ; aucune ne redéfinit une couleur en
+   dur. Les noms existants sont conservés même quand leur valeur change, pour
+   que les dix-neuf pages suivent sans être réécrites une à une.
+
+   Ce que mesure chaque couple texte/fond est écrit à côté de lui, sous la
+   forme « n,nn:1 » — sur le fond de page par défaut, ou sur le jeton nommé
+   après la barre. Ces chiffres ne sont pas décoratifs : `pytest
+   backend/test_contraste.py` les recalcule et refuse tout commentaire devenu
+   faux.
+   ========================================================================== */
 :root{
-  /* Direction : claire et rassurante.
-     Le fond passe d'un gris-vert froid (#F5F6F4) à un blanc cassé chaud. Ce seul
-     changement retire au site son air de formulaire administratif, sans toucher
-     à la sobriété : le papier est chaud, l'encre reste froide.
-     L'accent se déplace de #0F3D56 (bleu ardoise, proche d'un bleu par défaut)
-     vers un bleu-canard plus saturé : il se lit comme un choix, pas comme le
-     bleu de tout le monde, et il n'est ni le vert ni le bleu vif des sites
-     comparables. Tous les couples texte/fond de cette palette ont été mesurés :
-     minimum constaté 4,67:1, la majorité au-dessus de 7:1. */
-  --bg:#FBFAF7; --surface:#FFFFFF; --surface-2:#F1EFEA; --surface-3:#E6E2DA;
-  --ink:#17212B; --ink-muted:#4C5762; --ink-faint:#626C76;
-  --line:#E3DFD6; --line-strong:#C4BDB0;
-  --accent:#10566C; --accent-ink:#FFFFFF; --accent-soft:#E4F0F3; --accent-line:#9CC4D0;
-  --gold:#8A6520; --gold-soft:#F6F0E3;
-  --ok:#1B6045; --ok-soft:#E2EFE8;
-  --warn:#7D5210; --warn-soft:#F6EDDA; --warn-line:#DCC28A;
-  --alert:#932D20; --alert-soft:#F8E5E1; --alert-line:#E2B7AE;
-  --ring:0 0 0 3px rgba(16,86,108,.32);
-  --lift:0 1px 0 rgba(23,33,43,.03), 0 14px 34px -24px rgba(23,33,43,.38);
-  --r:5px;            /* angles nettement plus francs : moins de « carte » générique */
-  --r-lg:8px;
-  --mesure:66ch;      /* largeur de lecture du texte courant */
+  /* ---- Fond et surfaces ----
+     Le fond est un crème chaud, pas un blanc d'écran. Les cartes sont
+     réellement blanches : c'est l'écart entre les deux qui sépare, et non une
+     bordure appuyée. */
+  --bg:#FDFBF7; --surface:#FFFFFF; --surface-2:#F5F1EA; --surface-3:#EBE5DA;
+
+  /* ---- Encre, quatre niveaux réellement distincts ----
+     Un seul gris « pâle » servait jusqu'ici au texte secondaire comme aux
+     mentions : rien ne les hiérarchisait. Les voici séparés, chacun au-dessus
+     du seuil AA sur le crème. */
+  --ink:#17212B;          /* 15,76:1 — titres, montants, texte courant */
+  --ink-muted:#454F5A;    /*  8,07:1 — texte secondaire, descriptions */
+  --ink-faint:#5E6872;    /*  5,49:1 — labels, mentions, légendes */
+  --ink-disabled:#8A939C; /*  3,02:1 — inactif, jamais porteur d'information */
+
+  /* ---- Lignes ----
+     Deux rôles, longtemps confondus. `--line` sépare visuellement et n'a pas
+     à être contrastée. `--line-strong` dessine le contour d'un élément avec
+     lequel on interagit : elle vise les 3:1 du critère WCAG 1.4.11. */
+  --line:#E7E2D8;
+  --line-strong:#9B917F;  /* 3,01:1 */
+
+  /* ---- Accent : l'action ----
+     Terracotta. Déjà la signature du premier parcours, désormais celle du
+     site. Réservé à ce sur quoi on agit — bouton principal, sélection active,
+     accent éditorial ponctuel. Une interface entièrement terracotta ne
+     désignerait plus rien. */
+  --accent:#B83C1B;        /* 5,49:1 */
+  --accent-ink:#FFFFFF;    /* 5,68:1 / --accent */
+  --accent-hover:#9E3317; --accent-active:#872B13;
+  --accent-soft:#FDF0EA; --accent-line:#E3B9A6;
+
+  /* ---- Validation ---- */
+  --ok:#2E7D32;           /* 4,96:1 — et 4,56:1 sur --ok-soft */
+  --ok-ink:#FFFFFF; --ok-soft:#E8F5E9; --ok-line:#A8D3AB;
+
+  /* ---- À vérifier ----
+     Sable chaud, pas un orange d'alerte système : il signale ce qui attend un
+     geste, pas une panne. */
+  --warn:#8A5A12;         /* 5,72:1 — et 5,24:1 sur --warn-soft */
+  --warn-soft:#FBF0DC; --warn-line:#DCC28A;
+  --gold:#8A5A12; --gold-soft:#FBF0DC;   /* anciens noms, même valeur */
+
+  /* ---- Erreur ---- */
+  --alert:#932D20;        /* 7,71:1 */
+  --alert-soft:#F8E5E1; --alert-line:#E2B7AE;
+
+  /* ---- Espacement : une seule échelle, pas de valeur inventée ---- */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px;
+  --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+
+  /* ---- Échelle typographique ----
+     Les écarts doivent se voir sans comparer. Entre deux niveaux voisins,
+     jamais moins de 15 %. */
+  --t-display:clamp(42px,6vw,72px);
+  --t-h1:clamp(31px,4vw,46px);
+  --t-h2:clamp(23px,2.4vw,30px);
+  --t-h3:19px;
+  --t-body-lg:19px;
+  --t-body:17px;
+  --t-small:15px;
+  --t-label:13px;
+
+  /* ---- Montants : trois rangs, pour qu'un chiffre se lise avant sa phrase ---- */
+  --t-montant:clamp(38px,5vw,56px);   /* le montant dont la page parle */
+  --t-montant-2:24px;                 /* un montant de second rang */
+  --t-montant-3:17px;                 /* un montant dans une liste */
+
+  /* ---- Rayons ----
+     Les angles s'adoucissent : 12 px sur les contrôles, 18 sur les cartes,
+     24 sur les grands modules. */
+  --r:12px; --r-lg:18px; --r-xl:24px; --r-pill:999px;
+
+  /* ---- Ombres : séparer, jamais faire flotter ---- */
+  --shadow-card:0 1px 2px rgba(23,33,43,.03), 0 4px 20px rgba(23,33,43,.04);
+  --shadow-lift:0 2px 4px rgba(23,33,43,.04), 0 12px 32px rgba(23,33,43,.07);
+  --lift:var(--shadow-card);
+
+  --ring:0 0 0 3px rgba(184,60,27,.34);
+  --mesure:66ch;          /* largeur de lecture du texte courant */
+
+  /* ---- Mouvement : un retour fonctionnel, jamais une récompense ---- */
+  --duree:170ms; --courbe:cubic-bezier(.2,.7,.3,1);
 }
+
 /* Le thème clair est le thème par défaut, sans condition.
    --------------------------------------------------------------------------
-   Il l'était déjà sur le papier, mais le bloc ci-dessous basculait tout le
-   site en sombre dès que le système le demandait — c'est-à-dire, pour
-   beaucoup de gens, toujours. Un fond presque noir sur un service qui parle
-   d'argent et de droit se lit comme une application, pas comme un document.
-
    Le sombre reste entièrement disponible, par deux chemins :
      `data-theme="dark"` sur <html> — le choix explicite du visiteur ;
      `data-theme="auto"` sur <html> — suivre à nouveau le réglage du système.
-   Aucun jeton n'est modifié : ce sont exactement les mêmes palettes. */
+   Seules les couleurs changent : l'échelle, les espacements, les rayons et les
+   ombres sont les mêmes dans les deux thèmes. */
 @media (prefers-color-scheme: dark){
   :root[data-theme="auto"]{
     --bg:#0D1418; --surface:#141D23; --surface-2:#1B252C; --surface-3:#233038;
-    --ink:#E9EEF2; --ink-muted:#A0AEB8; --ink-faint:#7B8992;
-    --line:#233038; --line-strong:#35444E;
-    --accent:#86C6DC; --accent-ink:#06131A; --accent-soft:#122A34; --accent-line:#27505F;
-    --gold:#CFA867; --gold-soft:#241D10;
-    --ok:#74C79E; --ok-soft:#0F2620;
+    --ink:#E9EEF2;          /* 15,90:1 */
+    --ink-muted:#A7B4BE;    /*  8,77:1 */
+    --ink-faint:#8694A0;    /*  5,98:1 */
+    --ink-disabled:#67737D;
+    --line:#243139;
+    --line-strong:#5A6B78;  /* 3,37:1 */
+    --accent:#FFAD86;       /* 10,24:1 */
+    --accent-ink:#2A1007; --accent-hover:#FFC0A0; --accent-active:#FFD2BA;
+    --accent-soft:#30231E; --accent-line:#7A5243;
+    --ok:#74C79E; --ok-ink:#06251A; --ok-soft:#10261D; --ok-line:#2F5F49;
     --warn:#E0B064; --warn-soft:#2A2113; --warn-line:#4C3B1C;
+    --gold:#E0B064; --gold-soft:#2A2113;
     --alert:#EC9686; --alert-soft:#2D1A17; --alert-line:#4E2C25;
-    --ring:0 0 0 3px rgba(134,198,220,.38);
-    --lift:0 1px 0 rgba(0,0,0,.3), 0 12px 32px -22px rgba(0,0,0,.85);
+    --shadow-card:0 1px 2px rgba(0,0,0,.3), 0 4px 20px rgba(0,0,0,.35);
+    --shadow-lift:0 2px 4px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.5);
+    --lift:var(--shadow-card);
+    --ring:0 0 0 3px rgba(255,173,134,.4);
   }
 }
 :root[data-theme="dark"]{
   --bg:#0D1418; --surface:#141D23; --surface-2:#1B252C; --surface-3:#233038;
-  --ink:#E9EEF2; --ink-muted:#A0AEB8; --ink-faint:#7B8992;
-  --line:#233038; --line-strong:#35444E;
-  --accent:#86C6DC; --accent-ink:#06131A; --accent-soft:#122A34; --accent-line:#27505F;
-  --gold:#CFA867; --gold-soft:#241D10;
-  --ok:#74C79E; --ok-soft:#0F2620;
+  --ink:#E9EEF2; --ink-muted:#A7B4BE; --ink-faint:#8694A0; --ink-disabled:#67737D;
+  --line:#243139; --line-strong:#5A6B78;
+  --accent:#FFAD86; --accent-ink:#2A1007; --accent-hover:#FFC0A0; --accent-active:#FFD2BA;
+  --accent-soft:#30231E; --accent-line:#7A5243;
+  --ok:#74C79E; --ok-ink:#06251A; --ok-soft:#10261D; --ok-line:#2F5F49;
   --warn:#E0B064; --warn-soft:#2A2113; --warn-line:#4C3B1C;
+  --gold:#E0B064; --gold-soft:#2A2113;
   --alert:#EC9686; --alert-soft:#2D1A17; --alert-line:#4E2C25;
-  --ring:0 0 0 3px rgba(134,198,220,.38);
-  --lift:0 1px 0 rgba(0,0,0,.3), 0 12px 32px -22px rgba(0,0,0,.85);
+  --shadow-card:0 1px 2px rgba(0,0,0,.3), 0 4px 20px rgba(0,0,0,.35);
+  --shadow-lift:0 2px 4px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.5);
+  --lift:var(--shadow-card);
+  --ring:0 0 0 3px rgba(255,173,134,.4);
 }
 
 *{box-sizing:border-box;}
@@ -120,21 +202,47 @@ a:hover{text-decoration-thickness:2px;}
 .shell-lire{max-width:760px; margin:0 auto; padding-inline:22px;}
 @media(max-width:560px){ .shell,.shell-lire{padding-inline:18px;} }
 
-/* ---------- Titres ---------- */
-h1,h2,h3,h4{font-family:'Spectral',Georgia,serif; font-weight:600; line-height:1.18; text-wrap:balance; margin:0;}
-h1{font-size:clamp(1.92rem,4.4vw,3.05rem); letter-spacing:-.026em;}
-/* Sous 400 px, un titre de cinq lignes repoussait le premier choix hors de
-   l'écran. Un cran plus bas suffit : la promesse tient en quatre lignes. */
-@media(max-width:400px){ h1{font-size:1.72rem; letter-spacing:-.022em;} }
-h2{font-size:clamp(1.42rem,2.4vw,1.8rem); letter-spacing:-.018em;}
-h3{font-family:'Archivo',sans-serif; font-size:1.06rem; font-weight:600; letter-spacing:-.01em;}
-h4{font-family:'Archivo',sans-serif; font-size:.98rem; font-weight:600;}
+/* ---------- Titres ----------
+   Une seule famille porte l'interface : Archivo, déjà auto-hébergée, en
+   variable, avec des chiffres tabulaires — ce qui compte sur un site qui
+   aligne des montants. Les titres étaient en Spectral sur les pages d'outils
+   et en Archivo sur l'accueil : deux identités pour un seul produit.
+
+   Spectral ne disparaît pas. Elle devient une signature, et rien d'autre :
+   le mot accentué d'un titre (`em`), et la marque. Mélanger deux familles sans
+   règle est du bruit ; les séparer par un rôle est une intention. */
+h1,h2,h3,h4{font-family:'Archivo',system-ui,sans-serif; font-weight:650; line-height:1.14; text-wrap:balance; margin:0; letter-spacing:-.03em;}
+h1{font-size:var(--t-h1);}
+h2{font-size:var(--t-h2); letter-spacing:-.025em;}
+h3{font-size:var(--t-h3); font-weight:600; letter-spacing:-.012em;}
+h4{font-size:var(--t-body); font-weight:600; letter-spacing:-.008em;}
+.display{font-size:var(--t-display); font-weight:650; line-height:1.02; letter-spacing:-.045em; margin:0;}
+/* Le mot que la phrase met en avant. Volontairement d'une autre famille, en
+   italique, dans l'accent : c'est le seul endroit où deux polices se croisent. */
+h1 em,h2 em,.display em,.editorial{font-family:'Spectral',Georgia,serif; font-style:italic; font-weight:500; color:var(--accent); letter-spacing:-.01em;}
 p{margin:15px 0 0; max-width:var(--mesure);}
 ul,ol{margin:15px 0 0; padding-left:23px; max-width:var(--mesure);}
 li{margin-bottom:9px;}
 strong,b{font-weight:600;}
-.eyebrow{font-size:.7rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--gold);}
-.surtitre{font-size:.7rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-faint);}
+.eyebrow{font-size:var(--t-label); font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint);}
+.surtitre{font-size:var(--t-label); font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint);}
+.lede{font-size:var(--t-body-lg); line-height:1.5; color:var(--ink-muted); max-width:52ch;}
+.lede b{color:var(--ink); font-weight:600;}
+.petit{font-size:var(--t-small); color:var(--ink-muted);}
+.mention{font-size:var(--t-label); line-height:1.55; color:var(--ink-faint);}
+
+/* ---------- Montants ----------
+   Trois rangs, pour qu'un chiffre se lise avant la phrase qui l'entoure. La
+   hiérarchie se fait par la taille, la graisse et l'espace — jamais par un
+   cadre de plus. `--t-montant` ne sert qu'au montant dont la page parle ; en
+   mettre deux côte à côte revient à n'en mettre aucun. */
+.montant{font-size:var(--t-montant); font-weight:650; line-height:1.04; letter-spacing:-.05em; font-variant-numeric:tabular-nums; display:block;}
+.montant-2{font-size:var(--t-montant-2); font-weight:650; letter-spacing:-.03em; font-variant-numeric:tabular-nums;}
+.montant-3{font-size:var(--t-montant-3); font-weight:600; letter-spacing:-.015em; font-variant-numeric:tabular-nums;}
+.montant-unite{font-size:var(--t-small); font-weight:400; letter-spacing:0; color:var(--ink-faint);}
+.montant-avant{text-decoration:line-through; color:var(--ink-faint); font-weight:500;}
+.variation-hausse{color:var(--alert); font-weight:600; font-variant-numeric:tabular-nums;}
+.variation-baisse{color:var(--ok); font-weight:600; font-variant-numeric:tabular-nums;}
 
 /* ---------- Bandeau de tête : filet d'or, repère de marque ---------- */
 .site-head{background:var(--surface); border-bottom:1px solid var(--line); position:relative;}
@@ -165,22 +273,56 @@ strong,b{font-weight:600;}
 .nav a:hover{color:var(--ink); text-decoration:underline;}
 .nav a[aria-current="page"]{color:var(--ink); box-shadow:inset 0 -2px 0 var(--gold);}
 
-/* ---------- Boutons ---------- */
+/* ---------- Boutons ----------
+   Les états ne s'inventent plus écran par écran : repos, survol, enfoncé,
+   focus, sélectionné, inactif et en cours sont définis ici une fois.
+   48 px de haut au minimum sur les actions réelles — le seuil tactile retenu
+   pour cette refonte, au-dessus des 44 px précédents. */
 .btn,button.btn,.btn-primary,.btn-secondary,.btn-ghost{
-  display:inline-flex; align-items:center; justify-content:center; gap:9px;
-  font-family:inherit; font-size:1rem; font-weight:600; line-height:1.2;
-  min-height:50px; padding:13px 22px; border-radius:var(--r); border:1px solid transparent;
-  cursor:pointer; text-decoration:none; transition:background-color .15s ease, border-color .15s ease;
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--s2);
+  font-family:inherit; font-size:var(--t-body); font-weight:650; line-height:1.2;
+  min-height:48px; padding:var(--s3) var(--s5); border-radius:var(--r);
+  border:1px solid transparent; cursor:pointer; text-decoration:none;
+  transition:background-color var(--duree) var(--courbe),
+             border-color var(--duree) var(--courbe),
+             transform var(--duree) var(--courbe);
 }
-.btn-primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
-.btn-primary:hover{background:color-mix(in srgb,var(--accent) 86%,var(--ink));}
+.btn-primary{background:var(--accent); color:var(--accent-ink); border-color:var(--accent); box-shadow:var(--shadow-card);}
+.btn-primary:hover{background:var(--accent-hover); border-color:var(--accent-hover);}
+.btn-primary:active{background:var(--accent-active); border-color:var(--accent-active); transform:translateY(1px);}
 .btn-secondary{background:var(--surface); color:var(--ink); border-color:var(--line-strong);}
-.btn-secondary:hover{border-color:var(--ink-faint);}
-.btn-ghost{background:transparent; color:var(--ink-muted); border-color:transparent; padding-inline:8px; min-height:44px;}
-.btn-ghost:hover{color:var(--ink);}
-.btn-petit{min-height:40px; padding:8px 14px; font-size:.88rem;}
-.btn:disabled,button:disabled{opacity:.5; cursor:not-allowed;}
-.cta-row{display:flex; flex-wrap:wrap; gap:12px; margin-top:26px;}
+.btn-secondary:hover{background:var(--surface-2); border-color:var(--ink-faint);}
+.btn-secondary:active{background:var(--surface-3); transform:translateY(1px);}
+.btn-ghost{background:transparent; color:var(--accent); border-color:transparent; padding-inline:var(--s2); min-height:48px;}
+.btn-ghost:hover{background:var(--accent-soft);}
+.btn-ghost:active{background:var(--accent-soft); transform:translateY(1px);}
+/* Sélectionné : la bordure et le fond suffisent, sans changer la taille du
+   texte — un libellé qui grossit en se sélectionnant déplace ses voisins. */
+.btn[aria-pressed=true],.btn-secondary[aria-pressed=true]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
+/* Un bouton secondaire, dans une liste, où 48 px casserait le rythme. Jamais
+   sous 44 px : c'est le plancher tactile, pas une préférence. */
+.btn-petit{min-height:44px; padding:var(--s2) var(--s4); font-size:var(--t-small);}
+.btn:disabled,button:disabled,.btn[aria-disabled=true]{
+  background:var(--surface-2); color:var(--ink-disabled); border-color:var(--line);
+  cursor:not-allowed; box-shadow:none; transform:none;
+}
+/* En cours : l'intitulé reste lisible et la largeur ne bouge pas. Aucune
+   animation ne tourne si le visiteur a demandé moins de mouvement. */
+.btn[data-encours=true]{cursor:progress; color:transparent; position:relative;}
+.btn[data-encours=true]::after{
+  content:""; position:absolute; width:18px; height:18px; border-radius:50%;
+  border:2px solid currentColor; border-top-color:transparent; color:var(--accent-ink);
+  animation:tourne .7s linear infinite;
+}
+.btn-secondary[data-encours=true]::after{color:var(--ink);}
+@keyframes tourne{to{transform:rotate(360deg);}}
+.cta-row{display:flex; flex-wrap:wrap; gap:var(--s3); margin-top:var(--s5);}
+/* Validation discrète : un état qui change, pas une récompense. */
+.valide{display:inline-flex; align-items:center; gap:var(--s1); color:var(--ok); font-weight:600; font-size:var(--t-small);}
+@media(prefers-reduced-motion:no-preference){
+  .valide{animation:parait var(--duree) var(--courbe);}
+  @keyframes parait{from{opacity:0; transform:translateY(2px);} to{opacity:1; transform:none;}}
+}
 
 /* ---------- Blocs de texte ---------- */
 .encart{
@@ -203,20 +345,32 @@ strong,b{font-weight:600;}
 .encart b{color:var(--ink);}
 .encart h3{margin-bottom:2px;}
 
-/* ---------- Cartes ---------- */
-.cartes{display:grid; gap:16px; margin-top:26px; grid-template-columns:repeat(auto-fit,minmax(270px,1fr));}
+/* ---------- Cartes et modules ----------
+   La carte blanche se détache du crème par l'écart de fond et une ombre très
+   basse ; la bordure n'est qu'un filet. Elle ne flotte pas : elle se pose.
+   Une carte est une unité fonctionnelle — elle répond à une question. Envelopper
+   chaque phrase dans un cadre ne hiérarchise rien et fatigue l'œil. */
+.cartes{display:grid; gap:var(--s4); margin-top:var(--s5); grid-template-columns:repeat(auto-fit,minmax(270px,1fr));}
 .carte{
   background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
-  padding:22px; display:flex; flex-direction:column; gap:2px;
+  box-shadow:var(--shadow-card); padding:var(--s5); display:flex; flex-direction:column; gap:2px;
 }
-.carte h3{font-family:'Spectral',Georgia,serif; font-size:1.18rem; font-weight:600; letter-spacing:-.014em;}
-.carte p{font-size:.94rem; color:var(--ink-muted); margin-top:9px;}
-.carte .apres{margin-top:auto; padding-top:18px;}
-.carte .apres a{font-weight:600; font-size:.94rem;}
+.carte h3{font-size:var(--t-h3); font-weight:650; letter-spacing:-.015em;}
+.carte p{font-size:var(--t-small); color:var(--ink-muted); margin-top:var(--s2);}
+.carte .apres{margin-top:auto; padding-top:var(--s4);}
+.carte .apres a{font-weight:600; font-size:var(--t-small);}
 .carte-num{
-  font-family:'Archivo',sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.14em;
-  text-transform:uppercase; color:var(--gold); margin-bottom:9px;
+  font-size:var(--t-label); font-weight:700; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--ink-faint); margin-bottom:var(--s2);
 }
+/* Un module cliquable dans son entier : il doit se signaler comme tel au
+   survol, au focus et sous le doigt, sans dépendre d'un bouton à l'intérieur. */
+.carte-action{text-decoration:none; color:inherit; transition:border-color var(--duree) var(--courbe), box-shadow var(--duree) var(--courbe), transform var(--duree) var(--courbe);}
+.carte-action:hover{border-color:var(--accent-line); box-shadow:var(--shadow-lift);}
+.carte-action:active{transform:translateY(1px); box-shadow:var(--shadow-card);}
+/* Un grand module : la synthèse du mois, le résultat d'un outil. */
+.module-large{border-radius:var(--r-xl); padding:var(--s6);}
+@media(max-width:560px){ .module-large{padding:var(--s5); border-radius:var(--r-lg);} }
 
 /* ---------- Bandes de page ---------- */
 .band{border-top:1px solid var(--line); padding-block:52px;}

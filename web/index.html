@@ -38,24 +38,53 @@
 </header>
 
   <section class="promesse">
-    <h1>Une dépense.<br>Une prochaine <em>action.</em></h1>
-    <p>Faites le point sur une dépense. Trouvez quoi faire ensuite.</p>
+    <h1 class="display">Une dépense.<br>Une prochaine <em>action.</em></h1>
+    <p class="lede">Vous entrez ce que vous payez. Le site vous dit ce que ça représente
+    sur l’année, ce qui existe ailleurs, et la démarche exacte à faire ensuite.</p>
   </section>
-  <section class="choix" aria-labelledby="commencer">
-    <h2 id="commencer">Par quoi voulez-vous commencer ?</h2>
-    <div class="choix-directs">
-      <a href="comparer-mobile.html"><span><b>Mon forfait mobile</b><small>Voir les offres, puis affiner selon mon besoin.</small></span><span aria-hidden="true">↗</span></a>
-      <a href="comparer-box.html"><span><b>Ma box internet</b><small>Examiner les coûts et les conditions de changement.</small></span><span aria-hidden="true">↗</span></a>
-      <a href="bilan.html"><span><b>Mon bilan</b><small>Commencer avec une seule dépense.</small></span><span aria-hidden="true">→</span></a>
+
+  <section class="entrees" aria-labelledby="commencer">
+    <h2 id="commencer">Par quoi voulez-vous commencer&nbsp;?</h2>
+    <div class="entrees-grille">
+      <a class="entree carte carte-action" href="comparer-mobile.html">
+        <span class="entree-signe" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>
+        </span>
+        <span class="entree-titre">Mon forfait mobile</span>
+        <span class="entree-dit">Les prix relevés, puis le vôtre comparé.</span>
+        <span class="entree-fleche" aria-hidden="true">→</span>
+      </a>
+      <a class="entree carte carte-action" href="comparer-box.html">
+        <span class="entree-signe" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="13" width="19" height="7.5" rx="2"/><path d="M6 17h2M17.5 17h0"/><path d="M6.5 9.2a7.5 7.5 0 0 1 11 0M9.3 6.2a11.5 11.5 0 0 1 5.4 0"/></svg>
+        </span>
+        <span class="entree-titre">Ma box internet</span>
+        <span class="entree-dit">Le coût réel et les conditions pour partir.</span>
+        <span class="entree-fleche" aria-hidden="true">→</span>
+      </a>
+      <a class="entree carte carte-action" href="bilan.html">
+        <span class="entree-signe" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        </span>
+        <span class="entree-titre">Mon bilan</span>
+        <span class="entree-dit">Une seule dépense suffit pour commencer.</span>
+        <span class="entree-fleche" aria-hidden="true">→</span>
+      </a>
     </div>
-    <p class="sans">Gratuit. Sans nom, e-mail ni téléphone pour voir le résultat.</p>
+    <p class="sans">Gratuit. Sans nom, e-mail ni téléphone pour voir le résultat.
+    Aucun lien affilié, aucune rémunération d’un opérateur.</p>
   </section>
-  <aside class="apercu" aria-label="Ce que vous obtenez">
-    <p class="eti">DU CHOIX À L’ACTION</p>
-    <h2>Comprendre.<br>Comparer.<br><em>Décider.</em></h2>
-    <ol><li><b>Votre situation</b><span>Les informations que vous connaissez suffisent pour commencer.</span></li><li><b>Un résultat lisible</b><span>Un coût, des conditions et les inconnues signalées.</span></li><li><b>Une suite concrète</b><span>Vérifier une offre ou préparer votre prochaine démarche.</span></li></ol>
-    <p class="couvre">Mobile et box : des relevés limités, pas tout le marché. Aucune économie garantie.</p>
-  </aside>
+
+  <section class="methode" aria-labelledby="methode-titre">
+    <p class="eyebrow">La méthode</p>
+    <h2 id="methode-titre">Comprendre. Comparer. <em>Décider.</em></h2>
+    <ol class="methode-etapes">
+      <li><b>Votre situation</b><span>Les informations que vous connaissez suffisent pour commencer.</span></li>
+      <li><b>Un résultat lisible</b><span>Un coût, des conditions et les inconnues signalées.</span></li>
+      <li><b>Une suite concrète</b><span>Vérifier une offre ou préparer votre prochaine démarche.</span></li>
+    </ol>
+    <p class="couvre">Mobile et box&nbsp;: des relevés limités, pas tout le marché. Aucune économie garantie.</p>
+  </section>
 
   <p class="discrets">
     <a href="notre-methode.html">Ce que les outils permettent</a><span>·</span>

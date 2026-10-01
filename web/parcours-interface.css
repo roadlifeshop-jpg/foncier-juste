@@ -1,7 +1,8 @@
-/* Identité commune aux trois pages du premier parcours seulement. */
-body{--accent:#b23c19;--accent-soft:#fff0e8;--accent-line:#d49b83;--accent-ink:#fff;--ring:0 0 0 3px #b23c1960;}
-:root[data-theme=dark] body{--accent:#ffad86;--accent-soft:#30231e;--accent-line:#946c59;--accent-ink:#17212b;}
-@media(prefers-color-scheme:dark){:root[data-theme=auto] body{--accent:#ffad86;--accent-soft:#30231e;--accent-line:#946c59;--accent-ink:#17212b;}}
+/* Mise en page commune aux pages du premier parcours.
+   La palette n'est plus redéfinie ici : ces trois pages redéclaraient un
+   terracotta à elles, légèrement différent de celui du reste du site et hors
+   de portée du contrôle de contraste. L'accent est désormais celui de
+   `base.css`, pour toutes les pages sans exception. */
 .parcours-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;width:calc(100% - 44px);max-width:1080px;margin:0 auto;padding:22px 0;border-bottom:1px solid var(--line-strong);position:relative;z-index:5;}
 .shell-lire>.parcours-head{width:100%;}
 /* La marque mesurait 23 px de haut : trop peu pour un pouce. La zone
@@ -19,12 +20,12 @@ body{--accent:#b23c19;--accent-soft:#fff0e8;--accent-line:#d49b83;--accent-ink:#
 a:focus-visible,summary:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
 main h1{font-family:Archivo,sans-serif;font-weight:650;letter-spacing:-.045em;}
 .hero.shell{max-width:800px;}
-.forme{border-radius:0;border-top:3px solid var(--accent);}
-.offre{border-radius:0;padding:22px;margin-top:20px;}
+.forme{border-top:3px solid var(--accent);}
+.offre{padding:var(--s5);margin-top:var(--s4);}
 .offre-prix .m{font-size:28px;letter-spacing:-.04em;}
 .offre-prix{max-width:100%;flex-shrink:1;}
 .offre.gagnante{border-color:var(--line-strong);box-shadow:none;}
-.a-confirmer{border-radius:0;}
+
 .sup{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-muted);}
 .sup:hover{color:var(--alert);background:var(--alert-soft);}
 .suppression{max-width:756px;margin:16px auto;padding:12px 18px;background:var(--surface-2);display:flex;align-items:center;justify-content:space-between;gap:12px;}

@@ -1,87 +1,150 @@
-/* Variante isolée : aucune règle ne s'applique aux autres pages ni à T2. */
-body { --signature:#b23c19; background:var(--bg); }
-.shell-lire {max-width:1160px; padding:0 40px 40px; display:grid;grid-template-columns:1.35fr 1fr;column-gap:76px;}
-.tete {grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:26px 0;border-bottom:1px solid var(--line-strong);}
-.tete a{text-decoration:none;color:var(--ink);}
-.marque {font-family:Archivo,sans-serif;font-size:24px;font-weight:750;letter-spacing:-1px;}
-.pt {color:var(--signature);}
-.menu {font-size:14px;}
-.promesse {grid-column:1/-1;margin:52px 0 34px;}
-.promesse .surtitre {font:600 11px Archivo,sans-serif;letter-spacing:.18em;color:var(--ink-muted);margin:0 0 20px;}
-.promesse h1 {font-family:Archivo,sans-serif;font-weight:650;font-size:clamp(44px,6vw,76px);line-height:1.02;letter-spacing:-.055em;max-width:none;margin:0;}
-.promesse h1 em {font-family:Spectral,Georgia,serif;font-weight:500;color:var(--signature);}
-.promesse .l2 {display:block;font-size:.54em;letter-spacing:-.035em;line-height:1.3;margin-top:16px;}
-.promesse p {font-size:17px;color:var(--ink-muted);margin:20px 0 0;max-width:48ch;line-height:1.55;}
-.choix {grid-column:1;margin:0;}
-h2 {font:600 19px/1.35 Archivo,sans-serif;letter-spacing:-.02em;color:var(--ink);}
-.portee {font-size:13px;line-height:1.6;color:var(--ink-muted);margin:10px 0 16px;}
-.portee b {font-weight:550;color:var(--ink);}
-.postes {display:grid;grid-template-columns:1fr 1fr;column-gap:22px;border-top:1px solid var(--line-strong);}
-.postes a {display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:62px;border-bottom:1px solid var(--line-strong);text-decoration:none;color:var(--ink);font-weight:550;font-size:16px;transition:background .15s,color .15s;padding:0 8px;}
-.postes a:hover {background:var(--surface-2);color:var(--signature);}
-.fl {color:var(--signature);font-size:23px;transition:transform .15s;}
-.postes a:hover .fl {transform:translateX(3px);}
-a:focus-visible,button:focus-visible {outline:3px solid var(--signature);outline-offset:4px;}
-.sans {font-size:12px;color:var(--ink-muted);line-height:1.6;margin-top:16px;}
-.exemple {grid-column:2;grid-row:3;align-self:start;margin:12px 0 0;padding:28px;background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--signature);box-shadow:8px 10px 0 var(--surface-2);}
-.eti {font:600 10px/1.6 Archivo,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-muted);margin:0 0 24px;}
-.exemple dl {display:grid;grid-template-columns:1fr auto;gap:16px;font-size:14px;}
-.exemple dd {margin:0;font-variant-numeric:tabular-nums;}
-.exemple dt {color:var(--ink-muted);}
-.total-label {border-top:1px dashed var(--line-strong);padding-top:22px;margin:24px 0 8px;font-size:13px;color:var(--ink-muted);}
-.tot {font:650 64px/1.1 Archivo,sans-serif;letter-spacing:-.06em;margin:0;font-variant-numeric:tabular-nums;}
-.tot span {font-size:16px;font-weight:400;letter-spacing:0;color:var(--ink-muted);}
-.annuel {font-size:18px;margin:8px 0 20px;}
-.couvre {font-size:12px;color:var(--ink-muted);line-height:1.6;}
-.discrets {grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px 24px;margin:36px 0;font-size:13px;}
-.discrets a {color:var(--ink-muted);text-underline-offset:4px;}
-.discrets span {display:none;}
-.recuperer {grid-column:1/-1;border-top:1px solid var(--line-strong);padding-top:26px;}
-.recuperer ul {list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:40px;margin:20px 0;}
-.recuperer a {color:var(--ink);font-weight:600;text-underline-offset:4px;}
-.recuperer p {color:var(--ink-muted);font-size:13px;line-height:1.7;margin-top:10px;}
-.pied {grid-column:1/-1;border-top:1px solid var(--line);margin-top:24px;padding-top:20px;color:var(--ink-muted);font-size:12px;line-height:1.7;}
-.theme-choix {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px;}
-.theme-choix button {font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);padding:8px 12px;min-height:44px;cursor:pointer;}
-.theme-choix button[aria-pressed=true] {background:var(--signature);color:var(--bg);}
-:root[data-theme=dark] body {--signature:#ffad86;}
-@media(prefers-color-scheme:dark){:root[data-theme=auto] body{--signature:#ffad86;}}
-@media(max-width:760px){
- .shell-lire {display:block;padding:0 22px 28px;}
- .tete {padding:20px 0;}.marque {font-size:21px;}.menu {font-size:12px;}
- .promesse {margin:30px 0 28px;}.promesse .surtitre {font-size:10px;margin-bottom:14px;}
- .promesse h1 {font-size:42px;}.promesse .l2 {font-size:24px;max-width:20ch;margin-top:12px;}
- .promesse p {font-size:15px;margin-top:16px;}.choix h2 {font-size:18px;}
- .portee {font-size:12px;margin:8px 0 12px;}.postes {column-gap:14px;}.postes a {font-size:14px;min-height:54px;padding:0 4px;}
- .exemple {margin:32px 0;padding:24px;}.discrets {display:flex;margin:28px 0;gap:12px 20px;}
- .recuperer ul {grid-template-columns:1fr;gap:20px;}
+/* ==========================================================================
+   ACCUEIL — mise en page propre à `index.html`.
+   --------------------------------------------------------------------------
+   Ce fichier ne portait plus que des règles mortes : `.tete`, `.marque`,
+   `.postes`, `.exemple`, `.entree-directe`, `.promesse .surtitre` visaient des
+   éléments retirés du HTML depuis plusieurs refontes. Elles ont été supprimées
+   plutôt que conservées « au cas où » : une feuille qui décrit une page qui
+   n'existe plus ne documente rien, elle égare.
+
+   La page suit maintenant un seul axe vertical — bénéfice, choix, méthode,
+   seconde famille d'outils. L'ancienne colonne de droite plaçait le bloc
+   « Comprendre. Comparer. Décider. » à la hauteur des trois entrées, dans un
+   aplat gris plus lourd qu'elles : il gagnait le regard que le choix devait
+   recevoir. Il passe dessous, et devient ce qu'il est — une preuve de méthode.
+
+   Aucune couleur n'est écrite ici : tout vient des jetons de `base.css`.
+   ========================================================================== */
+
+.shell-lire{max-width:1080px; padding:0 var(--s5) var(--s7);}
+
+/* ---------- Promesse ---------- */
+.promesse{margin:var(--s8) 0 var(--s7);}
+.promesse .display{max-width:16ch;}
+/* Le sous-titre était à peine distinct d'une mention de bas de page, sous un
+   titre de 72 px. Il remonte d'un cran en taille et de deux en contraste :
+   c'est lui qui dit à quoi sert le site, le titre n'en donne que le ton. */
+.promesse .lede{margin-top:var(--s5); max-width:54ch; font-size:var(--t-body-lg); color:var(--ink-muted);}
+
+/* ---------- Les trois entrées ----------
+   Elles étaient des panneaux blancs bordés, c'est-à-dire des zones de contenu.
+   Rien n'y signalait qu'on clique. Elles deviennent des modules d'action :
+   un signe, un titre, une phrase, et une flèche dans une pastille qui tient
+   lieu de cible. Le survol, le focus et l'appui ont chacun leur état.
+
+   Les trois ont le même poids. Lequel sert dépend de la facture à laquelle on
+   pense en arrivant : aucune ne précède les autres, et le liseré d'accent qui
+   désignait le mobile comme entrée principale a été retiré. */
+.entrees{margin:0;}
+.entrees h2{font-size:var(--t-h2); max-width:none;}
+.entrees-grille{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s4); margin-top:var(--s5);}
+.entree{
+  display:grid; grid-template-columns:1fr auto; grid-template-rows:auto auto auto;
+  align-items:start; gap:var(--s2) var(--s4); padding:var(--s5);
+  border-color:var(--line-strong); min-height:184px; align-content:start;
 }
-@media(max-width:350px){.shell-lire{padding-inline:16px;}.promesse h1{font-size:42px;}.promesse .l2{font-size:25px;}}
-@media(prefers-reduced-motion:reduce){.postes a,.fl{transition:none;}}
-.entree-directe{grid-column:1/-1;margin:0 0 32px;}.entree-directe p{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:14px;}.entree-directe .btn-primary{text-decoration:none;}
+.entree-signe{
+  grid-column:1; width:44px; height:44px; border-radius:var(--r);
+  background:var(--accent-soft); color:var(--accent);
+  display:grid; place-items:center; margin-bottom:var(--s3);
+}
+.entree-signe svg{width:23px; height:23px;}
+.entree-titre{grid-column:1/-1; font-size:var(--t-h3); font-weight:650; letter-spacing:-.015em; color:var(--ink);}
+.entree-dit{grid-column:1; font-size:var(--t-small); line-height:1.5; color:var(--ink-muted);}
+/* La pastille fait 44 px : la cible tactile ne dépend pas de la flèche seule. */
+.entree-fleche{
+  grid-column:2; grid-row:3; align-self:end; justify-self:end;
+  width:44px; height:44px; border-radius:var(--r-pill);
+  background:var(--accent); color:var(--accent-ink);
+  display:grid; place-items:center; font-size:19px; line-height:1;
+  transition:transform var(--duree) var(--courbe), background-color var(--duree) var(--courbe);
+}
+.entree:hover .entree-fleche{background:var(--accent-hover); transform:translateX(3px);}
+.entree:active .entree-fleche{background:var(--accent-active);}
+.sans{margin-top:var(--s4); font-size:var(--t-label); line-height:1.6; color:var(--ink-faint); max-width:62ch;}
 
+/* ---------- Méthode ----------
+   Elle rassure sur la façon de procéder ; elle ne dispute pas le choix. D'où
+   un titre d'un cran plus bas que l'accroche, aucune surface pleine, et une
+   simple règle au-dessus pour marquer le changement de registre. */
+.methode{margin-top:var(--s8); padding-top:var(--s6); border-top:1px solid var(--line);}
+.methode h2{margin-top:var(--s2); font-size:var(--t-h2);}
+.methode-etapes{list-style:none; padding:0; margin:var(--s6) 0 0; display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s5);}
+.methode-etapes li{margin:0; padding-top:var(--s3); border-top:2px solid var(--accent-line); counter-increment:etape;}
+.methode-etapes b{display:block; font-size:var(--t-body); font-weight:650;}
+.methode-etapes span{display:block; margin-top:var(--s1); font-size:var(--t-small); line-height:1.55; color:var(--ink-muted);}
+.couvre{margin-top:var(--s5); font-size:var(--t-label); line-height:1.6; color:var(--ink-faint); max-width:70ch;}
 
-/* CIBLES TACTILES — mesurées à 390 px, huit liens sous 44 px.
-   Les accès directs tombaient à 28 px, les liens de confiance à 21, vol et
-   taxe à 19. Sur un pouce, c'est la différence entre atteindre et réessayer.
-   On agrandit la zone atteignable, pas le texte : `inline-flex` + `min-height`
-   étend la boîte du lien sans toucher à la taille de police ni à la casse. */
-.entree-directe p a,.discrets a,.recuperer a{
- display:inline-flex;align-items:center;min-height:44px;}
-/* Ces deux-là portent une description en dessous : la zone s'étend vers le
-   haut et le bas du seul libellé, sans avaler le paragraphe qui suit. */
-.recuperer li{margin-top:8px;}
-.recuperer p{margin-top:0;}
+/* ---------- Liens discrets ---------- */
+.discrets{display:flex; flex-wrap:wrap; gap:0 var(--s5); margin:var(--s6) 0 0; font-size:var(--t-small);}
+.discrets a{display:inline-flex; align-items:center; min-height:44px; color:var(--ink-muted); text-underline-offset:4px;}
+.discrets span{display:none;}
 
-/* Trois intentions, sans inventaire imposé avant la comparaison. */
-.choix-directs{display:grid;gap:12px;margin-top:20px;}
-.choix-directs a{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px;background:var(--surface);border:1px solid var(--line-strong);text-decoration:none;color:var(--ink);min-height:88px;}
-.choix-directs a:first-child{border-left:4px solid var(--signature);}
-.choix-directs a:hover{background:var(--surface-2);border-color:var(--signature);}
-.choix-directs b{font-size:19px;}.choix-directs small{display:block;color:var(--ink-muted);font-size:13px;line-height:1.5;margin-top:5px;}
-.choix-directs a>span:last-child{font-size:25px;color:var(--signature);}
-.apercu{grid-column:2;grid-row:3;padding:28px;background:var(--surface-2);align-self:start;}
-.apercu h2{font-size:38px;line-height:1.15;letter-spacing:-.035em;}.apercu em{font-family:Spectral,Georgia,serif;color:var(--signature);}
-.apercu ol{padding-left:20px;margin-top:24px;}.apercu li{padding-left:6px;margin-top:18px;}.apercu li span{display:block;font-size:13px;color:var(--ink-muted);line-height:1.6;margin-top:4px;}
-.apercu .couvre{margin-top:24px;}
-@media(max-width:760px){.promesse h1{font-size:39px;}.promesse{margin:26px 0;}.choix-directs{gap:9px;margin-top:16px;}.choix-directs a{padding:15px;min-height:80px;}.choix-directs b{font-size:17px;}.apercu{margin-top:32px;padding:24px;}.apercu h2{font-size:32px;}}
+/* ---------- Seconde famille d'outils ---------- */
+.recuperer{margin-top:var(--s6); padding-top:var(--s6); border-top:1px solid var(--line);}
+.recuperer ul{list-style:none; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:var(--s6); margin:var(--s5) 0 0;}
+.recuperer li{margin:0;}
+.recuperer a{display:inline-flex; align-items:center; min-height:44px; color:var(--ink); font-weight:650; text-underline-offset:4px;}
+.recuperer p{margin-top:0; font-size:var(--t-small); line-height:1.65; color:var(--ink-muted);}
+
+/* ---------- Pied ---------- */
+.pied{border-top:1px solid var(--line); margin-top:var(--s7); padding-top:var(--s5); color:var(--ink-faint); font-size:var(--t-label); line-height:1.7;}
+.theme-choix{display:flex; flex-wrap:wrap; align-items:center; gap:var(--s2); margin-top:var(--s4);}
+.theme-choix button{
+  font:inherit; font-size:var(--t-small); color:var(--ink); background:var(--surface);
+  border:1px solid var(--line-strong); border-radius:var(--r);
+  padding:var(--s2) var(--s3); min-height:44px; min-width:44px; cursor:pointer;
+  transition:background-color var(--duree) var(--courbe), border-color var(--duree) var(--courbe);
+}
+.theme-choix button:hover{background:var(--surface-2);}
+.theme-choix button[aria-pressed=true]{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
+
+/* ---------- Tablette ---------- */
+@media(max-width:900px){
+  .entrees-grille{grid-template-columns:1fr 1fr;}
+  .methode-etapes{grid-template-columns:1fr 1fr;}
+}
+
+/* ---------- Téléphone ----------
+   Conçu pour cette largeur, et non réduit depuis l'ordinateur : l'entrée
+   devient une ligne large, signe à gauche, flèche à droite, toute la hauteur
+   atteignable au pouce. Le titre descend pour que le premier choix reste
+   visible sans faire défiler. */
+@media(max-width:700px){
+  .shell-lire{padding:0 var(--s4) var(--s6);}
+  .promesse{margin:var(--s6) 0 var(--s5);}
+  .promesse .display{max-width:none;}
+  .promesse .lede{margin-top:var(--s4); font-size:var(--t-body);}
+  .entrees-grille{grid-template-columns:1fr; gap:var(--s3); margin-top:var(--s4);}
+  .entree{
+    grid-template-columns:auto 1fr auto; grid-template-rows:auto auto;
+    align-items:center; gap:2px var(--s4); padding:var(--s4); min-height:80px;
+  }
+  .entree-signe{grid-column:1; grid-row:1/3; width:40px; height:40px; margin-bottom:0;}
+  .entree-titre{grid-column:2; grid-row:1; font-size:var(--t-body);}
+  .entree-dit{grid-column:2; grid-row:2; font-size:var(--t-label);}
+  .entree-fleche{grid-column:3; grid-row:1/3; align-self:center; width:40px; height:40px; font-size:17px;}
+  .methode{margin-top:var(--s7); padding-top:var(--s5);}
+  .methode-etapes{grid-template-columns:1fr; gap:var(--s4); margin-top:var(--s5);}
+  .recuperer ul{grid-template-columns:1fr; gap:var(--s5);}
+  .discrets{gap:0 var(--s4);}
+}
+/* Sur un écran de 320 x 568, l'accroche à 42 px et son sous-titre occupaient
+   447 px : la première entrée commençait sous la pliure, et la page ne montrait
+   que sa promesse. Un cran plus bas sur le titre et le sous-titre rend les deux
+   premières entrées visibles sans défiler. Mesuré, pas estimé. */
+@media(max-width:400px){
+  .promesse{margin:var(--s5) 0 var(--s5);}
+  .promesse .display{font-size:34px; letter-spacing:-.04em;}
+  .promesse .lede{margin-top:var(--s3); font-size:var(--t-small); line-height:1.45;}
+  .entrees h2{font-size:21px;}
+  .entrees-grille{margin-top:var(--s3);}
+}
+@media(max-width:360px){
+  .shell-lire{padding-inline:var(--s3);}
+  .entree{gap:2px var(--s3); padding:var(--s3);}
+}
+@media(prefers-reduced-motion:reduce){
+  .entree-fleche,.carte-action{transition:none;}
+  .entree:hover .entree-fleche{transform:none;}
+}
