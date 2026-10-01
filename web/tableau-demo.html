@@ -16,12 +16,19 @@
 <h1 class="sr">Mes dépenses du mois</h1>
 <p class="demo-note">Maquette&nbsp;: montants fictifs, remis à zéro au rechargement.</p>
 <section id="depenses" aria-label="Mes dépenses">
-<div class="quick-summary">
-<div class="summary-values"><div><span id="total-label">Confirmé · partiel</span><strong id="total"></strong></div><div><span>À confirmer · prévisionnel</span><strong id="pending-amount"></strong></div></div>
-<div class="progress-label"><span id="confirmation"></span><span>/ mois en moyenne</span></div>
+<section class="module module-attention" aria-labelledby="attention-titre">
+<p class="eyebrow" id="attention-periode">Octobre</p>
+<h2 id="attention-titre"></h2>
+<p class="module-dit" id="attention-dit"></p>
 <progress id="month-progress" value="0" max="7" aria-label="Dépenses confirmées"></progress>
-</div>
+<p class="progress-label"><span id="confirmation"></span></p>
 <div class="review-action"><button class="primary" id="review">Vérifier mes dépenses</button></div>
+<div class="module-chiffres">
+<div><span id="total-label">Confirmé · partiel</span><strong id="total" class="montant-2"></strong></div>
+<div><span>À confirmer · prévisionnel</span><strong id="pending-amount" class="montant-2"></strong></div>
+<p class="module-note">/ mois en moyenne</p>
+</div>
+</section>
 <div id="milestone" hidden role="status"><span id="milestone-text"></span><button class="text-action" id="continue-review">Continuer la vérification →</button></div>
 <div id="expenses" class="expenses"></div>
 <p class="small" id="empty" hidden>Commencez par une seule dépense. Le total se construit au fur et à mesure.</p>

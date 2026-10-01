@@ -9,7 +9,7 @@
   const yearly = row => row.amount * (row.frequency === 'annuelle' ? 1 : 12);
   const monthly = row => Math.round(yearly(row) / 12);
   const parse = value => /^\d{1,7}([.,]\d{1,2})?$/.test(value.trim()) ? Math.round(Number(value.trim().replace(',','.')) * 100) : null;
-  let months, month, nextId, editing, dismissed, view, skipped = new Set(), current = null;
+  let months, month, nextId, editing, dismissed, view, skipped = new Set(), current = null, vientDEtreConfirme = null;
   function seed() {
     nextId = 8; month = 1; skipped = new Set(); view = 'depenses'; dismissed = new Set();
     months = [[['mobile',3000],['box',3500],['energie',9000],['assurance',24000,'annuelle'],['abonnements',1500],['logement',70000],['transport',6000]].map((r,i) => ({id:i+1,category:r[0],amount:r[1],frequency:r[2]||'mensuelle',confirmed:true,reason:'unknown'})), null];
@@ -38,6 +38,17 @@
     const confirmed = rows().filter(r=>r.confirmed), awaiting = rows().filter(r=>!r.confirmed);
     const annual = confirmed.reduce((s,r)=>s+yearly(r),0), pending = awaiting.length;
     const pendingAnnual = awaiting.reduce((s,r)=>s+yearly(r),0);
+    /* Niveau 1 — ce qui mérite l'attention aujourd'hui. Le nombre de dépenses
+       à confirmer passe devant les montants : à l'arrivée, « 0,00 € confirmé »
+       était le plus gros chiffre de l'écran alors qu'il ne disait rien. */
+    $('attention-periode').textContent = month ? 'Octobre' : 'Septembre';
+    $('attention-titre').textContent = pending
+      ? pending+' dépense'+(pending>1?'s':'')+' à confirmer'
+      : (rows().length ? 'Tout est confirmé' : 'Aucune dépense pour le moment');
+    $('attention-dit').textContent = pending
+      ? 'Repris du mois précédent. Confirmez ou corrigez, un poste à la fois.'
+      : (rows().length ? 'Votre liste du mois est à jour.' : 'Ajoutez une dépense pour commencer votre exemple.');
+    /* Niveau 2 — les montants. */
     $('total-label').textContent = pending ? 'Confirmé · partiel' : 'Total confirmé';
     $('total').textContent = euro(Math.round(annual/12));
     $('pending-amount').textContent = euro(Math.round(pendingAnnual/12));
@@ -56,8 +67,12 @@
     rows().forEach(r => {
       const line = node('article',undefined,'expense');line.dataset.id=r.id;
       const symbol=node('span',symbols[r.category],'expense-symbol');symbol.setAttribute('aria-hidden','true');
-      const copy=node('div');copy.append(node('h3',labels[r.category]),node('p',r.confirmed?'Confirmé par vous':(skipped.has(r.id)?'Passé · reste à confirmer':'Repris de septembre · à confirmer')));
-      const value=node('div',undefined,'value');value.append(node('span',euro(monthly(r))+' / mois'),node('small',r.frequency==='annuelle'?euro(r.amount)+' par an':'Montant mensuel'));
+      const copy=node('div');
+      const etat=node('p',r.confirmed?'Confirmé par vous':(skipped.has(r.id)?'Passé · reste à confirmer':'Repris de septembre · à confirmer'));
+      if(r.confirmed&&r.id===vientDEtreConfirme){etat.replaceChildren();etat.className='valide';etat.append(node('span','✓'),node('span','Validé'));}
+      copy.append(node('h3',labels[r.category]),etat);
+      const value=node('div',undefined,'value');value.append(node('span',euro(monthly(r))+' / mois','montant-3'));
+      if(r.frequency==='annuelle')value.append(node('small',euro(r.amount)+' par an'));
       const del=button('', 'icon',()=>{
         months[month]=rows().filter(x=>x.id!==r.id);render();
         $('add').focus();announce(labels[r.category]+' supprimé de '+(month?'octobre':'septembre')+'.');
@@ -66,18 +81,19 @@
       del.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7"/></svg>';
       const actions=node('div',undefined,'fast-actions');
       if(!r.confirmed) {
-        const unchanged=button('Inchangé','primary',()=>{
-          r.confirmed=true;skipped.delete(r.id);render();focusNext(r.id);
+        const unchanged=button('Inchangé','btn-valider',()=>{
+          r.confirmed=true;skipped.delete(r.id);vientDEtreConfirme=r.id;render();focusNext(r.id);
           announce(labels[r.category]+' confirmé.');
         });unchanged.setAttribute('aria-label','Inchangé : '+labels[r.category]);actions.append(unchanged);
       }
       const edit=button('Modifier','secondary',()=>openEditor(r.id));edit.id='edit-'+r.id;
       edit.setAttribute('aria-label','Modifier '+labels[r.category]);edit.setAttribute('aria-expanded','false');edit.setAttribute('aria-controls','inline-'+r.id);actions.append(edit);
-      if(!r.confirmed)actions.append(button('Passer','text-action',()=>{skipped.add(r.id);render();focusNext(r.id);announce(labels[r.category]+' passé, non confirmé.');}));
+      if(!r.confirmed)actions.append(button('Passer','btn-passer',()=>{skipped.add(r.id);render();focusNext(r.id);announce(labels[r.category]+' passé, non confirmé.');}));
       const slot=node('div',undefined,'inline-editor');slot.id='inline-'+r.id;
       if(r.id===current&&!r.confirmed)line.classList.add('en-cours');
       line.append(symbol,copy,value,del,actions,slot);$('expenses').append(line);
     });
+    vientDEtreConfirme=null;
     renderChanges();renderIdeas();setView(view,false);
   }
   function focusNext(id) {

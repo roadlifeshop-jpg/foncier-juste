@@ -194,6 +194,13 @@ a{color:var(--accent); text-underline-offset:3px; text-decoration-thickness:1px;
 a:hover{text-decoration-thickness:2px;}
 :focus-visible{outline:none; box-shadow:var(--ring); border-radius:var(--r);}
 .num{font-variant-numeric:tabular-nums;}
+/* Un dépliant est une commande : il ouvre et ferme du contenu. Les `summary`
+   sans style propre mesuraient 16 à 22 px de haut. Le remplissage étend la
+   zone sans toucher au marqueur, qui disparaîtrait en display:flex. */
+summary{min-height:44px; padding-block:11px;}
+/* Un lien seul dans son paragraphe n'est pas un lien « dans une phrase » :
+   c'est une action isolée, et le critère de taille de cible s'y applique. */
+p > a:only-child{display:inline-flex; align-items:center; min-height:44px;}
 .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
 [hidden]{display:none !important;}
 
@@ -250,11 +257,14 @@ strong,b{font-weight:600;}
 .site-head .shell{display:flex; align-items:center; gap:20px; padding-block:15px 14px; flex-wrap:wrap;}
 /* inline-block et non inline-flex : la baseline de marque est un <small> en
    display:block, qui doit passer SOUS le nom. En flex, il devenait un item
-   voisin et s'affichait à côté. */
+   voisin et s'affichait à côté.
+   La marque mesurait 36 px de haut. Le remplissage l'amène à 44, et une marge
+   négative de même valeur rend l'en-tête à sa hauteur d'origine. */
 .brand{
   display:inline-block; font-family:'Spectral',Georgia,serif;
   font-weight:600; font-size:1.18rem; line-height:1.15; color:var(--ink);
   text-decoration:none; letter-spacing:-.012em;
+  padding-block:4px; margin-block:-4px; min-height:44px;
 }
 .brand .dot{color:var(--gold); font-size:1.25em; line-height:0;}
 .brand small{
@@ -269,7 +279,7 @@ strong,b{font-weight:600;}
   .site-head .shell{gap:10px; padding-block:12px 11px;}
   .nav{font-size:.82rem; gap:2px 14px; margin-left:0; width:100%;}
 }
-.nav a{color:var(--ink-muted); text-decoration:none; font-weight:500; padding-block:4px;}
+.nav a{color:var(--ink-muted); text-decoration:none; font-weight:500; display:inline-flex; align-items:center; min-height:44px;}
 .nav a:hover{color:var(--ink); text-decoration:underline;}
 .nav a[aria-current="page"]{color:var(--ink); box-shadow:inset 0 -2px 0 var(--gold);}
 
@@ -519,8 +529,12 @@ td.nombre,th.nombre{text-align:right; font-variant-numeric:tabular-nums; white-s
 .doc h2{margin-top:38px;}
 .doc h3{margin-top:26px;}
 .doc .maj{margin-top:10px; font-size:.86rem; color:var(--ink-faint);}
-.sommaire{margin-top:26px; padding:18px 20px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r);}
-.sommaire ul{margin:10px 0 0; padding-left:20px; font-size:.95rem;}
+.sommaire{margin-top:26px; padding:18px 20px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow-card);}
+.sommaire ul{margin:10px 0 0; padding-left:20px; font-size:var(--t-small);}
+/* Un sommaire est une liste de destinations, pas une phrase : la taille de
+   cible lui est opposable. Ses liens mesuraient 16 px de haut. */
+.sommaire li{margin-bottom:0;}
+.sommaire a{display:inline-flex; align-items:center; min-height:44px;}
 
 .warn{
   margin-top:22px; padding:16px 18px; border-radius:var(--r); font-size:.94rem; line-height:1.55;
@@ -532,9 +546,12 @@ td.nombre,th.nombre{text-align:right; font-variant-numeric:tabular-nums; white-s
 .site-foot{border-top:1px solid var(--line); background:var(--surface); margin-top:56px; padding-block:34px 44px;}
 .site-foot .cols{display:grid; gap:24px; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));}
 .site-foot h4{font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:11px;}
-.site-foot ul{list-style:none; margin:0; padding:0; font-size:.92rem;}
-.site-foot li{margin-bottom:8px;}
-.site-foot a{color:var(--ink-muted); text-decoration:none;}
+.site-foot ul{list-style:none; margin:0; padding:0; font-size:var(--t-small);}
+.site-foot li{margin-bottom:0;}
+/* Ces liens ne sont pas dans une phrase : ils forment une liste de
+   destinations, et le critère de taille de cible leur est donc opposable. Ils
+   mesuraient 16 px de haut. La zone atteignable s'étend sans grossir le texte. */
+.site-foot a{color:var(--ink-muted); text-decoration:none; display:inline-flex; align-items:center; min-height:44px;}
 .site-foot a:hover{color:var(--ink); text-decoration:underline;}
 .site-foot .fine{margin-top:26px; padding-top:20px; border-top:1px solid var(--line); font-size:.84rem; color:var(--ink-faint); max-width:78ch;}
 .site-foot .fine + .fine{margin-top:9px; padding-top:0; border-top:none;}

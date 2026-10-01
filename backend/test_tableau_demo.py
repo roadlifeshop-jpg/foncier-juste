@@ -182,14 +182,26 @@ def test_mobile_fold_and_large_text(page):
     # La mention « montants fictifs » précède les montants : elle doit être lue
     # avant eux. Ce qui compte n'est donc plus une hauteur fixe, mais que la
     # mention et la première dépense tiennent ensemble sur le plus petit écran.
+    # Sur le plus petit écran, la première vue doit porter les trois niveaux :
+    # où l'on est, ce qui mérite l'attention, et l'action. La liste est le
+    # troisième niveau : il lui suffit d'être visiblement commencée, sinon rien
+    # n'indique qu'on peut faire défiler.
     page.set_viewport_size({'width':320,'height':568})
     note=page.locator('.demo-note').bounding_box()
-    assert note['y'] >= 0 and note['y'] < page.locator('.expense').first.bounding_box()['y']
-    first=page.locator('.expense').first.bounding_box()
-    assert first['y'] + first['height'] <= 568, first
+    titre=page.locator('#attention-titre').bounding_box()
+    bouton=page.locator('#review').bounding_box()
+    premiere=page.locator('.expense').first.bounding_box()
+    assert note['y'] >= 0 and note['y'] < titre['y'] < premiere['y']
+    assert titre['y'] + titre['height'] <= 568, titre
+    assert bouton['y'] + bouton['height'] <= 568, bouton
+    assert premiere['y'] < 568, premiere
+    # Sur un écran courant, la première vue va plus loin : le module du mois
+    # entier — montants compris — et la première dépense en entier.
     page.set_viewport_size({'width':390,'height':844})
-    y=page.locator('.expense').first.bounding_box()['y']
-    assert 150 <= y <= 260, y
+    chiffres=page.locator('.module-chiffres').bounding_box()
+    premiere=page.locator('.expense').first.bounding_box()
+    assert chiffres['y'] + chiffres['height'] <= 844, chiffres
+    assert premiere['y'] + premiere['height'] <= 844, premiere
     page.add_style_tag(content='html {font-size:200% !important;}')
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     page.get_by_role('button',name='Modifier Mobile',exact=True).click()
