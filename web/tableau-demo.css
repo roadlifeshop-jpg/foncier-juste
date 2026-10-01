@@ -15,6 +15,35 @@ button,input,select{font:inherit}button,a,summary{touch-action:manipulation}butt
 .module-attention h2{font-size:var(--t-h2);margin-top:var(--s1)}
 .module-dit{margin:var(--s2) 0 0;font-size:var(--t-small);line-height:1.5;color:var(--ink-muted)}
 .module-attention .review-action{margin-top:var(--s4)}
+
+/* ---------- Au téléphone, le résumé s'allège ----------
+   Mesuré avant : la première dépense commençait à 487 px sur 390 x 844, et à
+   508 px sur 375 x 667. Deux textes n'y apprenaient rien de neuf.
+
+   Le surtitre répétait le sélecteur de mois, à vingt pixels de là. La phrase
+   « Repris du mois précédent. Confirmez ou corrigez, un poste à la fois. »
+   répétait ce que chaque ligne dit déjà d'elle-même et ce que le bouton
+   annonce. Les deux disparaissent au téléphone et restent sur grand écran, où
+   la place ne coûte rien.
+
+   Rien d'obligatoire n'est masqué : le nombre à confirmer, la barre, le compte
+   écrit, la distinction confirmé/prévisionnel, l'action et la mention des
+   montants fictifs restent tous visibles. */
+@media(max-width:700px){
+  .module{padding:var(--s4);margin-top:var(--s2)}
+  #attention-periode,.module-dit{display:none}
+  .module-attention h2{margin-top:0}
+  .module-attention .review-action{margin-top:var(--s3)}
+  progress{margin-top:var(--s3)}
+  .progress-label{margin-top:var(--s1);font-size:var(--t-label)}
+  /* Les deux montants passent en lignes compactes : l'étiquette porte déjà
+     « partiel » et « prévisionnel », le chiffre n'a plus besoin de deux rangs
+     de hauteur pour se distinguer de son voisin. */
+  .module-chiffres{margin-top:var(--s3);padding-top:var(--s3);gap:0 var(--s3)}
+  .module-chiffres strong{font-size:19px;letter-spacing:-.02em}
+  .module-chiffres span{font-size:12px;line-height:1.3}
+  .module-note{margin-top:var(--s1)}
+}
 /* Pleine largeur au doigt, où la cible compte. Sur grand écran, un bouton de
    mille pixels n'est pas plus visible, seulement plus insistant. */
 .review-action .primary{width:100%}
@@ -49,6 +78,9 @@ progress::-moz-progress-bar{background:var(--accent)}
 .annual-details{margin-top:12px;font-size:.85rem;color:var(--ink-muted)}summary{display:flex;align-items:center;cursor:pointer}summary:before{content:'＋';margin-right:8px}.month-invite{margin-top:6px}.view-nav{display:flex;flex-wrap:wrap;gap:4px;border-block:1px solid var(--line);margin-top:20px;padding:8px 0}.view-nav button{flex:1;background:none;color:var(--ink-muted);border-radius:8px;padding:8px;font-size:.8rem}.view-nav [aria-current]{background:var(--signature-soft);color:var(--signature);font-weight:650}footer{font-size:.8rem;color:var(--ink-muted);padding:12px 0 24px}.footer-actions{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}.theme-choix{display:flex;gap:6px}.theme-choix button{background:var(--surface);color:var(--ink);border-radius:6px;padding:8px;font-size:.8rem}.theme-choix [aria-pressed=true]{border:1px solid var(--line-strong)}
 .section-head{margin:20px 0 12px}.cards{display:grid;gap:16px;margin-top:16px}.card{padding:20px;border:1px solid var(--line);background:var(--surface);border-radius:12px}.card h3{font-family:Spectral;font-size:1.5rem;margin-top:8px}.card p{font-size:.9rem;color:var(--ink-muted)}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}.chip{font-size:.75rem;color:var(--ink-muted)}.small,.muted{font-size:.85rem;color:var(--ink-muted)}
 dialog{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:24px;max-width:440px;width:calc(100% - 28px);max-height:90vh;overflow:auto}dialog::backdrop{background:#17212b80}.dialog-head{display:flex;align-items:center;justify-content:space-between}.eyebrow{font-size:.7rem}dialog h2{font-size:1.6rem}form label{display:block;font-size:.85rem;font-weight:600;margin:12px 0 5px}form input,form select{width:100%;min-width:0;border:1px solid var(--line-strong);border-radius:7px;padding:10px;background:var(--bg);color:var(--ink)}form .primary{width:100%;margin-top:12px}#error{color:var(--alert)}.preview{font-size:.85rem;margin-top:10px}dialog p,dialog li{font-size:.9rem}#guide-done{width:100%;margin-top:18px}#guide a{display:inline-flex;align-items:center}
-@media(max-width:400px){.module{padding:var(--s4)}.module-attention h2{font-size:21px}.demo-note{font-size:var(--t-label)}}
+/* Sous 400 px, la mention des montants fictifs passait sur deux lignes. À
+   13 px elle tient sur une seule, et reste au-dessus de la taille qu'elle
+   avait avant d'être remontée au-dessus des montants. */
+@media(max-width:400px){.module-attention h2{font-size:21px}.demo-note{font-size:var(--t-label)}}
 @media(max-width:700px){.app{padding:0 16px}.compact-head{min-height:48px}.brand{font-size:1.05rem}.quick-summary{padding:8px 0}.summary-values span{font-size:.75rem}.summary-values strong{font-size:1.5rem}.summary-values>div:last-child strong{font-size:1.1rem}.expense{grid-template-columns:24px minmax(0,1fr) auto 44px;gap:6px}.expense-symbol{width:24px}.expense h3{font-size:.85rem}.value{font-size:.85rem}.expense p{font-size:.7rem}.fast-actions{grid-column:1/-1}.summary-values{gap:8px}}
 @media(max-width:350px){.expense{grid-template-columns:minmax(0,1fr) auto 44px}.expense-symbol{display:none}}

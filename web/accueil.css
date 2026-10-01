@@ -45,9 +45,19 @@
 }
 .entree-signe{
   grid-column:1; width:44px; height:44px; border-radius:var(--r);
-  background:var(--accent-soft); color:var(--accent);
+  background:var(--surface-2); color:var(--ink-muted);
   display:grid; place-items:center; margin-bottom:var(--s3);
 }
+/* Emphase mesurée sur le bilan — une bordure d'accent et un signe coloré, à
+   taille et à structure identiques. La direction du produit est le suivi des
+   dépenses du foyer, et le bilan en est la porte ; les deux comparateurs
+   restent atteignables directement, sans passer par lui.
+
+   C'est une hypothèse de hiérarchie, pas une préférence constatée : aucune
+   observation ne dit aujourd'hui par où les gens veulent commencer. Elle se
+   teste, et elle se défait si les séances disent autre chose. */
+.entree-tete{border-color:var(--accent); box-shadow:var(--shadow-lift);}
+.entree-tete .entree-signe{background:var(--accent-soft); color:var(--accent);}
 .entree-signe svg{width:23px; height:23px;}
 .entree-titre{grid-column:1/-1; font-size:var(--t-h3); font-weight:650; letter-spacing:-.015em; color:var(--ink);}
 .entree-dit{grid-column:1; font-size:var(--t-small); line-height:1.5; color:var(--ink-muted);}
