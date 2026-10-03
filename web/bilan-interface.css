@@ -1,7 +1,8 @@
 /* Présentation du bilan uniquement ; données et moteurs inchangés. */
-body{--accent:#b23c19;--accent-soft:#fff0e8;--accent-line:#d49b83;--accent-ink:#fff;--ring:0 0 0 3px #b23c1960;}
-:root[data-theme=dark] body{--accent:#ffad86;--accent-soft:#30231e;--accent-line:#946c59;--accent-ink:#17212b;}
-@media(prefers-color-scheme:dark){:root[data-theme=auto] body{--accent:#ffad86;--accent-soft:#30231e;--accent-line:#946c59;--accent-ink:#17212b;}}
+/* La palette n'est plus redéclarée ici. Cette feuille portait un terracotta à
+   elle, #b23c19, voisin mais différent de celui du reste du site : le point de
+   la marque changeait de couleur entre l'accueil et le bilan. L'accent vient de
+   `base.css`, et de nulle part ailleurs. */
 .site-head{background:var(--bg);}
 .brand{font-family:Archivo,sans-serif;font-weight:750;letter-spacing:-.04em;}
 .brand .dot{color:var(--accent);}
@@ -15,13 +16,13 @@ main .shell-lire{max-width:800px;}
    caractères. Ramené à la taille de ce qu'on y écrit : le regard va au montant,
    et les raccourcis rétablis tiennent sur la même ligne visuelle. */
 #f-montant{font-size:30px;font-weight:600;letter-spacing:-.03em;min-height:64px;max-width:11ch;}
-.en-direct{padding:18px;border:0;border-left:3px solid var(--accent);border-radius:0;}
+.en-direct{padding:18px;border:0;border-left:3px solid var(--accent);}
 .en-direct .m{font-size:24px;}
-.totaux{border-radius:0;border-top:4px solid var(--accent);padding:24px;box-shadow:6px 6px 0 var(--surface-2);}
+.totaux{border-top:4px solid var(--accent);padding:var(--s5);box-shadow:var(--shadow-card);}
 .totaux .val{font-size:clamp(32px,7vw,48px);letter-spacing:-.05em;}
 .totaux .second{font-size:18px;}
 .ligne-d{border:0;border-bottom:1px solid var(--line-strong);border-radius:0;background:transparent;padding:18px 0;}
-.piste{border:0;border-left:3px solid var(--accent);border-radius:0;padding:22px;}
+.piste{border:0;border-left:3px solid var(--accent);padding:var(--s5);}
 .btn,.btn-primary,.btn-secondary{min-height:46px;}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
 @media(max-width:560px){.postes{grid-template-columns:repeat(2,minmax(0,1fr));}.site-head .brand small{display:none;}.totaux{padding:20px;}.rythme{flex-wrap:wrap;}.rythme label{min-width:80px;}.piste{padding:18px;}}
