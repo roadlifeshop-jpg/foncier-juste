@@ -433,6 +433,33 @@ function scenarioBoxMobile(foyer, scenario, aujourdhui) {
   const auj = aujourdhui || new Date();
   const sc = scenario || SCENARIOS_BOX_MOBILE[0];
 
+  /* La box du couple existe-t-elle encore au relevé ?
+     ------------------------------------------------------------------------
+     Ce contrôle manquait, et ça se voyait : le 3 octobre 2026, cette page
+     chiffrait encore « Série spéciale 200Go + B&YOU Pure fibre » à 505,76 €
+     sur douze mois, alors que `box.js` avait retiré cette fibre le 26 septembre.
+     Le comparateur box ne la proposait plus ; celui-ci la vendait toujours.
+
+     Le registre des box est la seule source. On ne recopie pas sa date ici :
+     une date recopiée finit par diverger de celle qu'elle copie.
+
+     Et si `box.js` n'est pas chargé, on s'arrête aussi. Ne rien pouvoir
+     vérifier n'autorise pas à affirmer : mieux vaut une page qui dit qu'elle
+     ne sait pas qu'une page qui affiche un prix que personne ne contrôle. */
+  const jour = auj.toLocaleDateString('sv-SE');
+  const registreLu = typeof boxEncoreAuReleve === 'function';
+  const box = registreLu ? boxEncoreAuReleve(sc.nomBox, jour) : null;
+  if (!box) {
+    return {
+      scenario: sc,
+      boxIndisponible: true,
+      /* Deux motifs à ne pas confondre : l'offre a été retirée du relevé, ou
+         le relevé n'a pas pu être consulté. */
+      motif: registreLu ? 'retiree' : 'registre-absent',
+      ancien: releveAncien(sc, auj),
+    };
+  }
+
   const promo = Number(sc.dureeRemiseMois);
   const mobile12 = (Number.isFinite(promo) && promo > 0 && promo < 12)
     ? sc.mobileAvecBox * promo + sc.mobileApresRemise * (12 - promo)
@@ -461,6 +488,7 @@ function scenarioBoxMobile(foyer, scenario, aujourdhui) {
 
   return {
     scenario: sc,
+    boxIndisponible: false,
     ancien: releveAncien(sc, auj),
     mobile12, box12, recurrent12, fraisEntree, nouveau12,
     /* Ce qu'il en coûterait de repartir : affiché, jamais additionné. */

@@ -77,6 +77,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 </style>
 <script src="abonnements.js"></script>
 <script src="bilan.js"></script>
+<script src="box.js"></script>
 <script src="offres-mobiles.js"></script>
 <link rel="stylesheet" href="parcours-interface.css">
 </head>
@@ -461,6 +462,25 @@ function offreHTML(r, situation){
 
 function scenarioHTML(s){
   const sc = s.scenario;
+  /* La box du couple n'est plus au relevé : on le dit, on ne chiffre rien.
+     Afficher un prix de paire dont une moitié a été retirée reviendrait à
+     contredire le comparateur box de notre propre site. */
+  if (s.boxIndisponible) {
+    const motif = s.motif === 'retiree'
+      ? `${ech(sc.nomBox)} ne figure plus dans notre relevé des box.`
+      : `Nous n’avons pas pu consulter notre relevé des box.`;
+    return `<article class="offre">
+      <div class="offre-tete">
+        <div class="offre-nom"><span class="op">${ech(sc.operateur)}</span>${ech(sc.nomMobile)} + ${ech(sc.nomBox)}</div>
+      </div>
+      <p class="offre-cle">${motif} Nous ne chiffrons donc pas ce couple&nbsp;:
+      une moitié de l’offre n’est plus vérifiée, et un prix de paire incomplet
+      serait trompeur.</p>
+      <p class="aide">Le forfait seul reste comparé plus haut. Pour la box,
+      <a href="comparer-box.html">faites le point sur votre coût et les conditions
+      de changement</a>&nbsp;; les prix se revérifient chez l’opérateur.</p>
+    </article>`;
+  }
   return `<article class="offre">
     <div class="offre-tete">
       <div class="offre-nom"><span class="op">${ech(sc.operateur)}</span>${ech(sc.nomMobile)} + ${ech(sc.nomBox)}</div>

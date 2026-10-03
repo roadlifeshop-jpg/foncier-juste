@@ -11,3 +11,16 @@ function coutBox(offre,mois,tv){
  return {recurrent,total:offre.entree===null?null:recurrent+offre.entree};
 }
 function offresBoxPour(besoin,date){return OFFRES_BOX.filter(o=>o.active&&date<=o.fin&&!(besoin==='tv'&&!o.tv)&&!(besoin==='fixe'&&!o.fixe));}
+/* Une box encore présentable à cette date, ou `null`.
+   --------------------------------------------------------------------------
+   Existe parce qu'une autre page en avait besoin sans le savoir : le scénario
+   box+mobile du comparateur mobile chiffrait un couple dont la box avait été
+   retirée d'ici sept jours plus tôt. Deux pages du même site annonçaient des
+   choses contraires sur la même offre.
+
+   Le registre reste la seule source : qui veut savoir si une box existe encore
+   passe par ici, et non par une date recopiée ailleurs, qui dériverait. */
+function boxEncoreAuReleve(nom,date){
+ const d=String(date||'');
+ return OFFRES_BOX.find(o=>o.nom===nom&&o.active&&d<=o.fin)||null;
+}

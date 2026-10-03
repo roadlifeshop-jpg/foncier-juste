@@ -1136,6 +1136,38 @@ SCRIPT_TESTS = r"""
   eq('box : mensualités connues malgré frais inconnus', coutBox({...boxTest,entree:null},12,false).recurrent,29988);
   eq('box : relevés expirés retirés', offresBoxPour('internet','2099-01-01').length,0);
   vrai('box : filtre TV exclut internet seul', offresBoxPour('tv','2026-09-26').every(o=>o.tv));
+
+  /* ------- Le couple box+mobile ne survit pas au retrait de sa box -------
+     Le 03/10/2026, le comparateur mobile chiffrait encore « Série spéciale
+     200Go + B&YOU Pure fibre » alors que le registre des box avait retiré
+     cette fibre le 26/09. Ces assertions existent pour que ça ne puisse plus
+     arriver sans qu'un test tombe. */
+  eq('box au relevé : une offre encore valable est trouvée',
+     (boxEncoreAuReleve('B&YOU Pure fibre','2026-09-26')||{}).nom, 'B&YOU Pure fibre');
+  eq('box au relevé : passé sa date, plus rien',
+     boxEncoreAuReleve('B&YOU Pure fibre','2026-09-27'), null);
+  eq('box au relevé : un nom inconnu ne renvoie rien',
+     boxEncoreAuReleve('Box qui n_existe pas','2026-09-26'), null);
+
+  const foyerVide = {prixActuelMobile:null,prixActuelBox:null,aDejaUneBox:null,remiseBoxDejaActive:null};
+  const scAvant = scenarioBoxMobile(foyerVide, null, new Date(2026,8,26));   // 26/09, box encore là
+  const scApres = scenarioBoxMobile(foyerVide, null, new Date(2026,9,3));    // 03/10, box retirée
+  vrai('couple : chiffré tant que la box est au relevé', scAvant.boxIndisponible === false);
+  vrai('couple : un total existe alors', Number.isFinite(scAvant.nouveau12));
+  vrai('couple : plus chiffré une fois la box retirée', scApres.boxIndisponible === true);
+  eq('couple : le motif est le retrait', scApres.motif, 'retiree');
+  eq('couple : aucun total n_est rendu', scApres.nouveau12, undefined);
+
+  /* Sans registre des box, on s'abstient aussi : ne rien pouvoir vérifier
+     n'autorise pas à afficher un prix. */
+  const sauve = boxEncoreAuReleve;
+  try {
+    boxEncoreAuReleve = undefined;
+    const scAveugle = scenarioBoxMobile(foyerVide, null, new Date(2026,8,26));
+    vrai('couple : registre absent, on ne chiffre pas', scAveugle.boxIndisponible === true);
+    eq('couple : le motif distingue l_absence de registre', scAveugle.motif, 'registre-absent');
+  } finally { boxEncoreAuReleve = sauve; }
+
   return T;
 }
 """
