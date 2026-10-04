@@ -23,7 +23,11 @@ main h1{font-family:Archivo,sans-serif;font-weight:650;letter-spacing:-.045em;}
 /* Marqueur de lien sortant, jusqu'ici défini dans la seule page du comparateur
    mobile. Le bilan renvoie désormais vers des outils publics : le signal doit
    être le même partout. Sur un bouton, il s'affiche en clair sur l'accent. */
-.hors-site{display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border:1px solid currentColor;border-radius:3px;padding:1px 6px;margin-left:6px;white-space:nowrap;opacity:.8;}
+/* Le marqueur ne se coupe pas — c'est voulu, « autre site » sur deux lignes ne
+   se lit pas. Mais à 200 % de taille de texte sur un écran de 320 px, il faisait
+   150 px et poussait son lien hors de l'écran. La ligne peut désormais se
+   rompre AVANT lui, et le marqueur ne dépasse jamais la largeur disponible. */
+.hors-site{max-width:100%; display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border:1px solid currentColor;border-radius:3px;padding:1px 6px;margin-left:6px;white-space:nowrap;opacity:.8;}
 
 /* `.btn-petit` mesurait 40 px : quatre de moins que le seuil, sur les liens
    « Voir l'offre chez… », « Je ne sais pas » et « Tester mon éligibilité ».

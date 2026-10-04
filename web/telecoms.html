@@ -686,7 +686,31 @@ $('forme-cm').addEventListener('submit', ev => {
   afficherResultat(true);
 });
 
+/* Le mode demandé par l'adresse — ?mode=mobile ou ?mode=box.
+   Une ancre ne pouvait pas faire ce travail : elle visait un titre situé dans la
+   zone de résultats, masquée tant qu'on n'a pas répondu. Ici on amène le
+   visiteur à la bonne question, et le paramètre reste lisible pour le sélecteur
+   de mode. */
+function modeDemande(){
+  const m = new URLSearchParams(location.search).get('mode');
+  return (m === 'mobile' || m === 'box') ? m : null;
+}
+
+function appliquerMode(){
+  const mode = modeDemande();
+  if (!mode) return;
+  const cible = mode === 'box' ? $('f-prix-box') : $('f-prix');
+  const bloc = cible.closest('fieldset') || cible.closest('.champ');
+  if (bloc) bloc.scrollIntoView({ block: 'center', behavior: 'auto' });
+  cible.focus({ preventScroll: true });
+  if (mode === 'box') {
+    const oui = document.querySelector('input[name="box"][value="oui"]');
+    if (oui && !document.querySelector('input[name="box"]:checked')) oui.checked = true;
+  }
+}
+
 reprendre();
+appliquerMode();
 /* Les offres n'apparaissent plus avant la réponse.
    --------------------------------------------------------------------------
    Elles s'affichaient au chargement — décision du 27/09, « donner avant de

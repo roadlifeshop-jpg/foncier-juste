@@ -50,8 +50,9 @@
 .guide-avant li{margin-bottom:6px;}
 .guide-reserve{margin-top:12px; font-size:.86rem; line-height:1.55; color:var(--warn); background:var(--warn-soft);
   border-radius:var(--r); padding:10px 12px;}
-.guide-source{margin-top:10px; font-size:.8rem; line-height:1.5; color:var(--ink-faint);}
-.note-raccourcis{font-size:.82rem; line-height:1.55; color:var(--ink-faint); margin-top:10px; max-width:52ch;}
+.guide-sans{margin-top:10px; font-size:.86rem; line-height:1.55; color:var(--ink-muted);}
+.guide-source{overflow-wrap:anywhere; margin-top:10px; font-size:.8rem; line-height:1.5; color:var(--ink-faint);}
+.note-raccourcis{overflow-wrap:anywhere; font-size:.82rem; line-height:1.55; color:var(--ink-faint); margin-top:10px; max-width:52ch;}
 .note-raccourcis:empty{display:none;}
 .note-raccourcis b{color:var(--ink-muted);}
 
@@ -345,20 +346,7 @@ function choisirPoste(cle){
      année : c'est ce qui le distingue d'un nombre rond posé là. Le bouton
      remplit le champ, il ne décide rien — et il dit « en moyenne », pas
      « pour vous ». */
-  if (p.repere) {
-    const r = p.repere;
-
-    const rond = (r.mensuel % 100 === 0) ? (r.mensuel / 100) + ' €' : euros(r.mensuel);
-    $('raccourcis').innerHTML =
-      `<button type="button" data-c="${r.mensuel}">Partir de ${ech(rond)}</button>`;
-    $('note-raccourcis').innerHTML = `En France, ${ech(r.texte)} — ${ech(r.precision)}.
-      <a href="${ech(r.url)}" target="_blank" rel="noopener noreferrer">${ech(r.source)} <span class="hors-site">autre site</span></a>,
-      ${ech(r.editeur)}, relevé le ${ech(jourFr(r.verifiee))}.
-      <b>Votre facture peut être très différente.</b>`;
-  } else {
-    $('raccourcis').innerHTML = '';
-    $('note-raccourcis').textContent = '';
-  }
+  majRepere(p);
   /* Ce que le poste ne permettra pas de vérifier est dit MAINTENANT, avant la
      saisie, et non seulement dans le résultat. */
   $('avert-poste').innerHTML = p.avertissement ? ech(p.avertissement) : '';
@@ -379,11 +367,47 @@ $('raccourcis').addEventListener('click', ev => {
   $('f-montant').focus();
 });
 
+/* ---------- Le repère, converti depuis sa base annuelle ------------------
+   La base est unique et affichée : 2 071 € par an. Le bouton en déduit la valeur
+   de la fréquence cochée, et dit laquelle — « Partir de 173 € par mois » ne se
+   confond pas avec « Partir de 2 071 € par an ». Il inscrivait auparavant 173
+   quelle que soit la fréquence : avec « Par an » coché, le bilan enregistrait
+   173 € sur l'année, soit 14,42 € par mois. Un montant faux, produit par le
+   site. Cliquer remplit le champ ; cliquer ne change jamais la fréquence. */
+const PART_RYTHME = { mensuelle: 12, trimestrielle: 4, annuelle: 1 };
+
+function valeurRepere(repere, rythme){
+  const parts = PART_RYTHME[rythme] || 12;
+  /* Arrondi à l'euro : une moyenne nationale n'a pas de centimes, et en
+     afficher donnerait une précision qu'elle n'a pas. */
+  return Math.round(repere.annuel / parts / 100) * 100;
+}
+
+function majRepere(p){
+  const r = p && p.repere;
+  if (!r){ $('raccourcis').innerHTML = ''; $('note-raccourcis').textContent = ''; return; }
+  const rythme = rythmeCourant();
+  const v = valeurRepere(r, rythme);
+  $('raccourcis').innerHTML =
+    `<button type="button" data-c="${v}">Partir de ${ech(euros(v).replace(',00', ''))} ${ech(LIB_RYTHME[rythme].toLowerCase())}</button>`;
+  const arrondi = (r.annuel / (PART_RYTHME[rythme] || 12)) % 100 !== 0;
+  $('note-raccourcis').innerHTML = `En France, ${ech(r.texte)} — ${ech(r.precision)}.
+    <a href="${ech(r.url)}" target="_blank" rel="noopener noreferrer">${ech(r.source)} <span class="hors-site">autre site</span></a>,
+    ${ech(r.editeur)}, relevé le ${ech(jourFr(r.verifiee))}.
+    Le raccourci part toujours des ${ech(euros(r.annuel))} annuels${arrondi ? ', arrondis à l’euro pour la fréquence choisie' : ''}.
+    <b>Votre facture peut être très différente.</b>`;
+}
+
 /* ---------- Le coût, en direct ---------- */
 function rythmeCourant(){
   const r = document.querySelector('input[name="rythme"]:checked');
   return r ? r.value : 'mensuelle';
 }
+/* Changer de fréquence recalcule le repère, sans toucher au champ déjà saisi. */
+document.addEventListener('change', ev => {
+  if (ev.target && ev.target.name === 'rythme' && posteChoisi) majRepere(POSTES[posteChoisi]);
+});
+
 function majDirect(){
   const c = enCentimes($('f-montant').value);
   const d = $('en-direct');
@@ -554,6 +578,8 @@ function majResultat(){
         <p class="guide-titre">${ech(piste.guide.titre)}</p>
         <ol>${piste.guide.etapes.map(e => `<li>${ech(e)}</li>`).join('')}</ol>
         <p class="guide-reserve">${ech(piste.guide.reserve)}</p>
+        <p class="guide-sans">${ech(piste.guide.sansNumero)}</p>
+        <p class="guide-sans">${ech(piste.guide.moinsDeDouzeMois)}</p>
         <p class="guide-source">${ech(piste.guide.perimetre)}
           <a href="${ech(piste.guide.url)}" target="_blank" rel="noopener noreferrer">${ech(piste.guide.source)}
           <span class="hors-site">autre site</span></a>, relevé le ${ech(jourFr(piste.guide.verifiee))}.</p>

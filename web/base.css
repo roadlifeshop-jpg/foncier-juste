@@ -325,6 +325,10 @@ strong,b{font-weight:600;}
   font-family:inherit; font-size:var(--t-body); font-weight:650; line-height:1.2;
   min-height:48px; padding:var(--s3) var(--s5); border-radius:var(--r);
   border:1px solid transparent; cursor:pointer; text-decoration:none;
+  /* À 200 % de taille de texte sur un écran de 320 px, un bouton portant un
+     libellé et le marqueur « autre site » dépassait l'écran de 35 px. Son
+     contenu peut passer à la ligne, et il ne déborde plus de son conteneur. */
+  max-width:100%; flex-wrap:wrap;
   transition:background-color var(--duree) var(--courbe),
              border-color var(--duree) var(--courbe),
              transform var(--duree) var(--courbe);

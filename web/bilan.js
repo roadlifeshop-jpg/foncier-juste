@@ -45,11 +45,11 @@
 const POSTES = {
   mobile: {
     nom: 'Forfait mobile', reglesContrat: true, categorieContrat: 'telecom',
-    comparatif: 'telecoms.html#t-mobile',
+    comparatif: 'telecoms.html?mode=mobile',
   },
   box: {
     nom: 'Box internet', reglesContrat: true, categorieContrat: 'telecom',
-    comparatif: 'telecoms.html#t-box',
+    comparatif: 'telecoms.html?mode=box',
   },
   energie: {
     /* « En moyenne, les ménages ont dépensé 2 071 € en énergie pour leur
@@ -58,9 +58,15 @@ const POSTES = {
        le 04/10/2026. 2 071 / 12 = 172,58 €, arrondi à 173 € pour ne pas donner
        une précision que la moyenne n'a pas. */
     repere: {
-      mensuel: 17300,
-      texte: 'un ménage dépense en moyenne 173 € par mois d’énergie pour son logement',
-      precision: '2 071 € sur l’année, toutes énergies et taxes comprises',
+      /* UNE SEULE BASE : les 2 071 € par an publiés. Tout le reste s'en déduit.
+         Le raccourci inscrivait 173 quelle que soit la fréquence cochée : avec
+         « Par an », le bilan enregistrait 173 € sur l'année, soit 14,42 € par
+         mois — un montant faux, produit par le site lui-même. La valeur suit
+         désormais la fréquence, et la fréquence n'est jamais changée à la place
+         du visiteur. */
+      annuel: 207100,
+      texte: 'un ménage dépense en moyenne 2 071 € par an d’énergie pour son logement',
+      precision: 'soit environ 173 € par mois, toutes énergies et taxes comprises',
       source: 'Chiffres clés de l’énergie, édition 2026 — données 2024',
       editeur: 'service des données et études statistiques du ministère',
       url: 'https://www.statistiques.developpement-durable.gouv.fr/chiffres-cles-de-lenergie-edition-2026',
@@ -105,13 +111,21 @@ const POSTES = {
        Le gaz a un autre identifiant et un autre gestionnaire ; tant que ce n'est
        pas lu à la source, nous n'en parlons pas. */
     guideAvant: {
-      titre: 'Un numéro à 14 chiffres suffit',
+      titre: 'Ce qu’il faut avoir sous la main',
       etapes: [
         'Prenez une facture d’électricité : votre identifiant de compteur, appelé PRM ou PDL, est indiqué en haut.',
         'Il figure aussi sur le compteur Linky, en faisant défiler l’affichage, et dans l’application de votre fournisseur.',
-        'Le comparateur s’en sert pour récupérer votre consommation annuelle et votre puissance souscrite auprès d’Enedis, si vous l’y autorisez.',
+        'Sur le comparateur, ce numéro sert à récupérer votre consommation annuelle et votre puissance souscrite auprès d’Enedis — si vous l’y autorisez.',
       ],
-      reserve: 'Cette étape-là transmet votre identifiant au comparateur, qui interroge Enedis : c’est le seul endroit du site où une donnée sort, elle sort sur l’autre site, et seulement si vous l’acceptez. Sans ce numéro, le comparateur fonctionne aussi — il vous demandera alors d’estimer votre consommation.',
+      /* La phrase précédente affirmait que c'était « le seul endroit du site où
+         une donnée sort ». C'était faux : `bilan.html` et `telecoms.html`
+         appellent `sendBeacon` vers /api/track au chargement, et l'hébergeur
+         tient ses propres journaux. Une affirmation de confidentialité démentie
+         par le code de la page qui la porte. Elle est remplacée par ce qui est
+         vrai et vérifiable : ce que nous faisons du PRM, c'est-à-dire rien. */
+      reserve: 'Nous ne vous demandons pas ce numéro et nous ne le recevons jamais : il se saisit sur le comparateur, pas ici. Là-bas, la récupération de votre consommation auprès d’Enedis est facultative et suppose votre autorisation.',
+      sansNumero: 'Sans ce numéro, la comparaison reste possible : le comparateur part alors des informations que vous saisissez, ou d’une consommation moyenne.',
+      moinsDeDouzeMois: 'Si vous habitez le logement depuis moins de douze mois, la valeur remontée est une estimation proratisée sur douze mois, à partir des consommations enregistrées depuis votre emménagement.',
       source: 'énergie-info, site du médiateur national de l’énergie',
       url: 'https://www.energie-info.fr/une-nouvelle-fonctionnalite-du-comparateur-du-mediateur-national-de-lenergie/',
       verifiee: '2026-10-04',
@@ -233,8 +247,8 @@ function pistePrioritaire(depenses) {
          part de nouveau. On change le libellé du bouton plutôt que d'en
          ajouter un. */
       action: box
-        ? { libelle: 'Comparer mon mobile et ma box', href: 'telecoms.html#t-mobile' }
-        : { libelle: 'Comparer mon forfait mobile', href: 'telecoms.html#t-mobile' },
+        ? { libelle: 'Comparer mon mobile et ma box', href: 'telecoms.html?mode=mobile' }
+        : { libelle: 'Comparer mon forfait mobile', href: 'telecoms.html?mode=mobile' },
       secondaire: null,
     };
   }
@@ -244,7 +258,7 @@ function pistePrioritaire(depenses) {
       cle: 'comparer-box',
       titre: 'Examiner votre box internet',
       phrase: `Votre ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois peut être mis en face d’un premier relevé d’offres fibre sans engagement, relevées à une date connue. <b>Aucune économie n’est annoncée</b> : le comparatif montre des coûts, et dit ce qu’il ignore.`,
-      action: { libelle: 'Examiner ma box internet', href: 'telecoms.html#t-box' },
+      action: { libelle: 'Examiner ma box internet', href: 'telecoms.html?mode=box' },
       secondaire: null,
     };
   }

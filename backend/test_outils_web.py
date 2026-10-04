@@ -900,9 +900,11 @@ SCRIPT_TESTS = r"""
      inventé. Ces trois assertions interdisent qu'ils reviennent. */
   vrai("aucun poste ne propose de montant sans source",
        Object.values(POSTES).every(p => p.suggestions === undefined));
-  vrai("un repère porte toujours sa valeur, sa source, son éditeur, son adresse et sa date",
+  /* La base est annuelle depuis que le raccourci suit la fréquence : une valeur
+     mensuelle unique produisait un montant faux dès qu'on cochait « par an ». */
+  vrai("un repère porte toujours sa valeur annuelle, sa source, son éditeur, son adresse et sa date",
        Object.values(POSTES).filter(p => p.repere).every(p =>
-         Number.isInteger(p.repere.mensuel) && p.repere.mensuel > 0 &&
+         Number.isInteger(p.repere.annuel) && p.repere.annuel > 0 &&
          typeof p.repere.texte === 'string' && typeof p.repere.source === 'string' &&
          typeof p.repere.editeur === 'string' &&
          /^https:\/\//.test(p.repere.url) && /^\d{4}-\d{2}-\d{2}$/.test(p.repere.verifiee)));
@@ -915,8 +917,20 @@ SCRIPT_TESTS = r"""
              typeof g.source === 'string' && /^https:\/\//.test(g.url) &&
              /^\d{4}-\d{2}-\d{2}$/.test(g.verifiee) &&
              typeof g.perimetre === 'string' && typeof g.reserve === 'string')(POSTES.energie.guideAvant));
-  vrai("le guide dit que cette étape transmet une donnée",
-       /transmet|sort/.test(POSTES.energie.guideAvant.reserve));
+  /* L'ancienne réserve affirmait que le PRM était « le seul endroit du site où
+     une donnée sort » : faux, puisque les pages appellent /api/track au
+     chargement. Ce qui doit être dit, c'est ce que NOUS faisons du numéro —
+     rien — et que le comparateur n'en a pas besoin pour fonctionner. */
+  vrai("le guide dit que nous ne recevons jamais ce numéro",
+       /ne le recevons jamais/.test(POSTES.energie.guideAvant.reserve));
+  vrai("le guide n'affirme plus être le seul envoi de données",
+       !/seul endroit/.test(POSTES.energie.guideAvant.reserve));
+  vrai("le guide dit que la récupération Enedis est facultative",
+       /facultative/.test(POSTES.energie.guideAvant.reserve));
+  vrai("le guide dit qu'une comparaison reste possible sans le numéro",
+       /reste possible/.test(POSTES.energie.guideAvant.sansNumero));
+  vrai("le guide porte la précision des moins de douze mois",
+       /moins de douze mois/.test(POSTES.energie.guideAvant.moinsDeDouzeMois));
   vrai("la piste énergie emporte le guide jusqu'à l'affichage",
        pistePrioritaire([{id:'x',poste:'energie',libelle:'',montant:15000,periodicite:'mensuelle'}]).guide !== null);
   vrai("l'énergie est le seul poste à porter un repère aujourd'hui",
@@ -1008,9 +1022,9 @@ SCRIPT_TESTS = r"""
      public qui s'en charge. */
   eq("le registre sait où mène chaque poste comparable",
      [POSTES.mobile.comparatif, POSTES.box.comparatif, POSTES.energie.comparatif],
-     ['telecoms.html#t-mobile', 'telecoms.html#t-box', null]);
+     ['telecoms.html?mode=mobile', 'telecoms.html?mode=box', null]);
   vrai("les deux postes comparables mènent à la même page",
-     POSTES.mobile.comparatif.split('#')[0] === POSTES.box.comparatif.split('#')[0]);
+     POSTES.mobile.comparatif.split('?')[0] === POSTES.box.comparatif.split('?')[0]);
   eq("uniquement logement et transport : rien de chiffrable, et on le dit",
      pistePrioritaire([{ id:'x', poste:'logement', montant: 75000, periodicite:'mensuelle' },
                        { id:'y', poste:'transport', montant: 12000, periodicite:'mensuelle' }]).cle,
