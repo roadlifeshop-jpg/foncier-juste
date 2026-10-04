@@ -78,6 +78,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 .methode-selection{margin:8px 0; font-size:.88rem;}
 .methode-selection summary{cursor:pointer; min-height:44px; padding:10px 0;}
 #zone-resultat > .groupe:first-child{margin-top:12px;}
+#saisie .forme{margin-top:4px;}
 @media(max-width:560px){
   main .hero.shell{padding-block:20px 8px!important;}
   .hero .surtitre{display:none;}
@@ -116,12 +117,11 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
   <section class="hero shell" style="padding-block:40px 20px">
     <div class="eyebrow">Gratuit, sans inscription</div>
     <h1>Comparer mon forfait mobile</h1>
-    <p class="lede" style="margin-top:14px">Explorez les prix. Précisez ensuite votre besoin pour comparer.</p>
+    <p class="lede" style="margin-top:14px">Dites ce que vous payez et ce qu'il vous faut. Les offres de notre relevé viennent ensuite.</p>
     
   </section>
 
   <section class="shell-lire" id="saisie">
-    <details id="personnaliser"><summary style="min-height:48px;display:flex;align-items:center;cursor:pointer;font-weight:600">Adapter à mon besoin ↓</summary>
     <div class="forme">
       <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Votre situation</h2>
       <p class="aide">Trois questions, et deux facultatives si vous avez une box. « Je ne sais pas »
@@ -191,11 +191,10 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
         </fieldset>
 
         <div class="cta-row">
-          <button type="submit" class="btn-primary" id="f-comparer">Comparer</button>
+          <button type="submit" class="btn-primary" id="f-comparer">Voir les offres</button>
         </div>
       </form>
     </div>
-    </details>
   </section>
 
   <section class="shell-lire" id="zone-resultat" hidden aria-live="polite">
@@ -598,10 +597,16 @@ $('forme-cm').addEventListener('submit', ev => {
 });
 
 reprendre();
-/* Le relevé est montré d'emblée. Si `reprendre()` a rempli un montant depuis
-   le bilan, l'écart est déjà chiffré ; sinon ce sont des prix, et la page le
-   dit. */
-afficherResultat(false);
+/* Les offres n'apparaissent plus avant la réponse.
+   --------------------------------------------------------------------------
+   Elles s'affichaient au chargement — décision du 27/09, « donner avant de
+   demander ». L'intention était bonne et le résultat incohérent : la page
+   montrait des prix tout en écrivant, sur chaque carte, qu'aucun écart n'était
+   chiffré faute de connaître le besoin et le montant actuel. On donnait quelque
+   chose qu'on déclarait inutilisable dans la même phrase.
+
+   Le comparateur box demandait déjà avant de montrer. Les deux parcours se
+   comportent maintenant pareil. */
 try { navigator.sendBeacon?.('/api/track', new Blob([JSON.stringify({ e: 'page_vue' })], { type: 'application/json' })); } catch (_) {}
 </script>
 </body>
