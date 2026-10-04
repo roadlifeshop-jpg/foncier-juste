@@ -75,6 +75,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 .a-confirmer ul{margin:10px 0 0; padding-left:19px;}
 .a-confirmer li{font-size:.9rem; color:var(--ink-muted); margin-top:6px;}
 /* Une entrée courte ; les règles de sélection restent accessibles avant les offres. */
+.bascule-mode label{font-weight:600;}
 .methode-selection{margin:8px 0; font-size:.88rem;}
 .methode-selection summary{cursor:pointer; min-height:44px; padding:10px 0;}
 #zone-resultat > .groupe:first-child{margin-top:12px;}
@@ -125,13 +126,21 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
   <section class="shell-lire" id="saisie">
     <div class="forme">
       <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Votre situation</h2>
-      <p class="aide">Trois questions, et deux facultatives si vous avez une box. « Je ne sais pas »
-      est une réponse&nbsp;: elle élargit la comparaison au lieu de l'arrêter.</p>
+
+      <fieldset class="champ sans-cadre" id="choix-mode" style="margin-top:4px">
+        <legend class="lab">Que voulez-vous regarder&nbsp;?</legend>
+        <div class="bascule bascule-mode">
+          <label><input type="radio" name="mode" value="mobile"><span>Mon mobile</span></label>
+          <label><input type="radio" name="mode" value="box"><span>Ma box</span></label>
+          <label><input type="radio" name="mode" value="deux" checked><span>Les deux</span></label>
+        </div>
+        <p class="aide" id="dit-mode"></p>
+      </fieldset>
 
       <div id="repris" class="repris" hidden></div>
 
       <form id="forme-cm" novalidate style="margin-top:16px">
-        <div class="forme-grille">
+        <div class="forme-grille" data-pan="mobile">
           <div class="champ">
             <label for="f-prix">Montant mensuel sur votre dernière facture (€)</label>
             <div class="unite" data-unite="€"><input type="text" id="f-prix" inputmode="decimal" placeholder="ex : 19,99"></div>
@@ -152,7 +161,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
           </div>
         </div>
 
-        <fieldset class="champ sans-cadre">
+        <fieldset class="champ sans-cadre" data-pan="mobile">
           <legend class="lab">Avez-vous besoin de données à l'étranger&nbsp;?</legend>
           <div class="bascule">
             <label><input type="radio" name="etranger" value="oui"><span>Oui</span></label>
@@ -163,10 +172,23 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
           mis en avant dans chaque résultat.</p>
         </fieldset>
 
-        <fieldset class="champ sans-cadre" style="margin-top:26px; padding-top:20px; border-top:1px solid var(--line)">
-          <legend class="lab">Votre box internet — facultatif</legend>
-          <p class="aide" style="margin-top:0">Ces trois réponses ne servent qu'au second résultat, celui
-          où la remise mobile dépend d'une box. Elles ne changent rien au premier.</p>
+        <fieldset class="champ sans-cadre" data-pan="mobile" style="margin-top:22px">
+          <legend class="lab">Êtes-vous engagé sur votre forfait mobile&nbsp;?</legend>
+          <div class="bascule">
+            <label><input type="radio" name="eng-mobile" value="oui"><span>Oui</span></label>
+            <label><input type="radio" name="eng-mobile" value="non"><span>Non</span></label>
+            <label><input type="radio" name="eng-mobile" value="" checked><span>Je ne sais pas</span></label>
+          </div>
+          <p class="aide">C'est ce que vous en dites, pas une lecture de votre contrat&nbsp;: nous ne
+          l'avons pas. « Je ne sais pas » n'est pas « sans engagement » — tant que ce n'est pas vérifié,
+          aucun départ sans frais n'est supposé.</p>
+        </fieldset>
+
+        <fieldset class="champ sans-cadre" data-pan="box" style="margin-top:26px; padding-top:20px; border-top:1px solid var(--line)">
+          <legend class="lab" id="legende-box">Votre box internet</legend>
+          <p class="aide" style="margin-top:0" id="dit-box">Ces réponses servent au résultat de votre box.
+          « Je ne sais pas » reste une réponse&nbsp;: elle élargit la comparaison au lieu de l'arrêter, et
+          n'est jamais lue comme un « non ».</p>
 
           <div class="bascule" style="margin-top:12px">
             <label><input type="radio" name="box" value="oui"><span>J'ai une box</span></label>
@@ -188,7 +210,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
           <select id="f-box-engagement">
             <option value="inconnu">Je ne sais pas</option>
             <option value="oui">Encore engagé</option>
-            <option value="non">Sans engagement ou terminé</option>
+            <option value="non">Terminé, ou jamais engagé</option>
           </select>
 
           <label for="f-prix-box">Prix de votre box, par mois</label>
@@ -402,7 +424,7 @@ function lireForme(){
     }
   }
   let prixBox = null;
-  if ($('f-prix-box').value.trim()){
+  if (modeCourant() !== 'mobile' && $('f-prix-box').value.trim()){
     prixBox = enCentimes($('f-prix-box').value);
     if (prixBox === null || prixBox === 0){
       erreur('prix-box', "Montant non compris. Vous pouvez laisser vide si vous ne le connaissez pas."); ok = false;
@@ -411,15 +433,30 @@ function lireForme(){
   if (!ok) return null;
 
   const dn = $('f-donnees').value;
+  const mode = modeCourant();
+  const mobileDansLePerimetre = mode !== 'box';
+  const boxDansLePerimetre = mode !== 'mobile';
+
+  /* Hors périmètre, on ne lit rien. Les champs gardent leur valeur pour qu'un
+     retour en arrière ne fasse pas retaper — mais une réponse masquée ne doit
+     pas produire un résultat que personne n'a demandé. */
   return {
-    prixActuel,
-    donneesNecessaires: dn ? Number(dn) : null,
-    besoinEtranger: radio('etranger') === 'oui' ? true : radio('etranger') === 'non' ? false : null,
-    aDejaUneBox: radio('box') === 'oui' ? true : radio('box') === 'non' ? false : null,
-    prixActuelBox: prixBox,
-    remiseBoxDejaActive: radio('remise') === 'oui' ? true : radio('remise') === 'non' ? false : null,
-    boxBesoin: $('f-box-besoin').value,
-    boxEngagement: $('f-box-engagement').value,
+    mode,
+    prixActuel: mobileDansLePerimetre ? prixActuel : null,
+    donneesNecessaires: mobileDansLePerimetre && dn ? Number(dn) : null,
+    besoinEtranger: mobileDansLePerimetre
+      ? (radio('etranger') === 'oui' ? true : radio('etranger') === 'non' ? false : null) : null,
+    /* Déclaré par le visiteur, jamais lu sur un contrat : `null` vaut
+       « inconnu » et ne se confond pas avec « sans engagement ». */
+    engagementMobileDeclare: mobileDansLePerimetre
+      ? (radio('eng-mobile') === 'oui' ? true : radio('eng-mobile') === 'non' ? false : null) : null,
+    aDejaUneBox: boxDansLePerimetre
+      ? (radio('box') === 'oui' ? true : radio('box') === 'non' ? false : null) : null,
+    prixActuelBox: boxDansLePerimetre ? prixBox : null,
+    remiseBoxDejaActive: boxDansLePerimetre
+      ? (radio('remise') === 'oui' ? true : radio('remise') === 'non' ? false : null) : null,
+    boxBesoin: boxDansLePerimetre ? $('f-box-besoin').value : 'inconnu',
+    boxEngagement: boxDansLePerimetre ? $('f-box-engagement').value : 'inconnu',
   };
 }
 
@@ -683,7 +720,7 @@ function afficherResultat(defiler){
   if (!situation) return;
 
   const res = comparerMobile(situation, AUJ);
-  afficherBox(situation);
+  if (situation.mode !== 'mobile') afficherBox(situation);
   $('intro-mobile').textContent = 'Offres sans remise box. ' + (res.besoinApplique
     ? `Au moins ${res.besoinApplique} Go. ` : 'Précisez votre besoin pour comparer. ')
     + 'Frais et conditions à vérifier sur chaque offre.';
@@ -707,15 +744,26 @@ function afficherResultat(defiler){
   $('autres-offres').hidden = !autres.length;
   $('autres-offres').open = false;
 
-  const sc = scenarioBoxMobile({
-    prixActuelMobile: situation.prixActuel,
-    prixActuelBox: situation.prixActuelBox,
-    aDejaUneBox: situation.aDejaUneBox,
-    remiseBoxDejaActive: situation.remiseBoxDejaActive,
-  }, null, AUJ);
-  $('liste-box').innerHTML = scenarioHTML(sc);
+  /* Le couple n'est chiffré qu'en mode « les deux ». Ailleurs, il ferait
+     apparaître une remise liée à une box que le visiteur n'a pas demandé à
+     examiner — une économie mobile présentée à partir d'un contrat qu'il n'a
+     peut-être pas. */
+  if (situation.mode === 'deux'){
+    const sc = scenarioBoxMobile({
+      prixActuelMobile: situation.prixActuel,
+      prixActuelBox: situation.prixActuelBox,
+      aDejaUneBox: situation.aDejaUneBox,
+      remiseBoxDejaActive: situation.remiseBoxDejaActive,
+    }, null, AUJ);
+    $('liste-box').innerHTML = scenarioHTML(sc);
+  } else {
+    $('liste-box').innerHTML = '';
+  }
 
   $('zone-resultat').hidden = false;
+  /* Le résultat est atteignable au clavier dès qu'il paraît. */
+  const premier = document.querySelector('#zone-resultat .groupe:not([hidden]) h2');
+  if (premier){ premier.tabIndex = -1; premier.focus({ preventScroll: true }); }
   if (defiler) $('zone-resultat').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -729,26 +777,68 @@ $('forme-cm').addEventListener('submit', ev => {
    zone de résultats, masquée tant qu'on n'a pas répondu. Ici on amène le
    visiteur à la bonne question, et le paramètre reste lisible pour le sélecteur
    de mode. */
+/* ---------- Le mode : mobile, box, ou les deux ---------------------------
+   Un seul outil, trois périmètres. Chaque bloc du formulaire porte son
+   `data-pan` ; on montre ceux du mode courant et on masque les autres.
+
+   Les réponses masquées NE SONT PAS effacées — changer d'avis ne doit pas faire
+   retaper ce qu'on a déjà dit — mais elles ne produisent aucun résultat : la
+   lecture de la situation annule ce qui est hors périmètre, faute de quoi un
+   prix de box saisi puis masqué ferait apparaître un résultat que personne n'a
+   demandé. */
+const MODES = ['mobile', 'box', 'deux'];
+const DIT_MODE = {
+  mobile: 'Quatre questions sur votre forfait. Les questions box sont masquées et ne produisent aucun résultat.',
+  box: 'Quatre questions sur votre box. Les questions mobile sont masquées et ne produisent aucun résultat.',
+  deux: 'Les questions des deux postes, posées une seule fois. Le couple box + mobile n’est examiné que dans ce mode.',
+};
+
+function modeCourant(){
+  const m = document.querySelector('input[name="mode"]:checked');
+  return m && MODES.indexOf(m.value) >= 0 ? m.value : 'deux';
+}
+
+function appliquerMode(){
+  const mode = modeCourant();
+  document.querySelectorAll('[data-pan]').forEach(bloc => {
+    bloc.hidden = !(bloc.dataset.pan === mode || mode === 'deux');
+  });
+  $('dit-mode').textContent = DIT_MODE[mode];
+  /* Les résultats suivent le même périmètre. Le couple n'existe qu'en mode
+     « les deux » : le présenter ailleurs reviendrait à chiffrer une économie
+     mobile à partir d'une box qu'on n'a pas demandée. */
+  const grMobile = document.querySelector('#zone-resultat .groupe');
+  if (grMobile) grMobile.hidden = mode === 'box';
+  $('groupe-box').hidden = mode === 'mobile';
+  const couple = $('liste-box') && $('liste-box').closest('.groupe');
+  if (couple) couple.hidden = mode !== 'deux';
+}
+
 function modeDemande(){
   const m = new URLSearchParams(location.search).get('mode');
   return (m === 'mobile' || m === 'box') ? m : null;
 }
 
-function appliquerMode(){
-  const mode = modeDemande();
-  if (!mode) return;
-  const cible = mode === 'box' ? $('f-prix-box') : $('f-prix');
+function modeInitial(){
+  const demande = modeDemande();
+  if (demande){
+    const r = document.querySelector(`input[name="mode"][value="${demande}"]`);
+    if (r) r.checked = true;
+  }
+  appliquerMode();
+  if (!demande) return;
+  const cible = demande === 'box' ? $('f-prix-box') : $('f-prix');
   const bloc = cible.closest('fieldset') || cible.closest('.champ');
   if (bloc) bloc.scrollIntoView({ block: 'center', behavior: 'auto' });
   cible.focus({ preventScroll: true });
-  if (mode === 'box') {
-    const oui = document.querySelector('input[name="box"][value="oui"]');
-    if (oui && !document.querySelector('input[name="box"]:checked')) oui.checked = true;
-  }
 }
 
+document.addEventListener('change', ev => {
+  if (ev.target && ev.target.name === 'mode') appliquerMode();
+});
+
 reprendre();
-appliquerMode();
+modeInitial();
 /* Les offres n'apparaissent plus avant la réponse.
    --------------------------------------------------------------------------
    Elles s'affichaient au chargement — décision du 27/09, « donner avant de

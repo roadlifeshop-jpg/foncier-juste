@@ -177,6 +177,15 @@ function normaliserDepense(brut, rang) {
     libelle: (typeof brut.libelle === 'string' && brut.libelle.trim()) ? brut.libelle.trim() : '',
     montant,
     periodicite,
+    /* `estimation` dit une seule chose : ce montant vient d'une moyenne
+       nationale, pas de vous. Il ne dit NI que le montant est vérifié, NI qu'il
+       ne l'est pas — nous n'avons jamais vu votre facture.
+
+       Les lignes enregistrées avant ce champ n'en ont pas : `undefined` devient
+       `false`, c'est-à-dire « montant saisi par vous », ce qui est exact
+       puisque le repère n'existait pas quand elles ont été créées. Aucune
+       requalification silencieuse, aucune perte. */
+    estimation: brut.estimation === true,
   };
 }
 

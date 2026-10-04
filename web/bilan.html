@@ -102,6 +102,13 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
   box-shadow:var(--shadow-card); padding:var(--s4) var(--s5); margin-top:var(--s3);
   display:grid; grid-template-columns:minmax(0,1fr) auto 44px; gap:var(--s2) var(--s4); align-items:center;}
 .ligne-d .nom{grid-column:1; grid-row:1; font-weight:650; font-size:var(--t-body); letter-spacing:-.01em;}
+.et-estim{display:inline-block; margin-left:8px; padding:1px 7px; border-radius:var(--r-pill);
+  background:var(--warn-soft); color:var(--warn); border:1px solid var(--warn-line);
+  font-size:.7rem; font-weight:650; letter-spacing:.01em; vertical-align:2px;}
+.estim-dit{display:block; margin-top:4px; font-size:var(--t-label); color:var(--ink-faint);}
+.lien-remplacer{background:none; border:0; padding:4px 0; min-height:36px; color:var(--accent);
+  font:inherit; font-size:var(--t-label); font-weight:600; text-decoration:underline;
+  text-underline-offset:3px; cursor:pointer;}
 .ligne-d .nom small{display:block; font-weight:400; font-size:var(--t-label); color:var(--ink-faint);
   margin-top:3px; font-variant-numeric:tabular-nums;}
 /* Les deux contrôles font la taille de leur contenu, et rien de plus. Étirés sur
@@ -359,9 +366,12 @@ $('postes').addEventListener('click', ev => {
   const b = ev.target.closest('button[data-poste]');
   if (b) choisirPoste(b.dataset.poste);
 });
+let montantVientDuRepere = false;
+
 $('raccourcis').addEventListener('click', ev => {
   const b = ev.target.closest('button[data-c]');
   if (!b) return;
+  montantVientDuRepere = true;
   $('f-montant').value = (Number(b.dataset.c) / 100).toFixed(2).replace('.', ',').replace(',00', '');
   majDirect();
   $('f-montant').focus();
@@ -431,7 +441,7 @@ function majDirect(){
     <span class="m">${ech(euros(mensuelCentimes(c, r)))} par mois</span>
     <span class="a">${ech(euros(annuelCentimes(c, r)))} par an</span>`;
 }
-$('f-montant').addEventListener('input', majDirect);
+$('f-montant').addEventListener('input', () => { montantVientDuRepere = false; majDirect(); });
 $('rythme').addEventListener('change', majDirect);
 
 /* ---------- Ajouter ---------- */
@@ -447,7 +457,9 @@ $('ajouter').addEventListener('click', () => {
     id: 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
     poste: posteChoisi || 'autre', libelle: '',
     montant: c, periodicite: rythmeCourant(),
+    estimation: montantVientDuRepere,
   });
+  montantVientDuRepere = false;
   sauver();
   $('f-montant').value = '';
   choisirPoste(posteChoisi);          /* referme la saisie de ce poste */
@@ -476,7 +488,8 @@ function ligneHTML(d){
      dès qu'on touche à l'autre. À la place, le coût annuel — la seule donnée
      que la ligne ajoute vraiment. */
   return `<div class="ligne-d" data-id="${ech(d.id)}">
-    <div class="nom">${ech(p.nom)}<small data-an>${ech(euros(annuelCentimes(d.montant, d.periodicite)))} par an</small></div>
+    <div class="nom">${ech(p.nom)}${d.estimation ? '<span class="et-estim">estimation</span>' : ''}<small data-an>${ech(euros(annuelCentimes(d.montant, d.periodicite)))} par an</small>${
+      d.estimation ? '<small class="estim-dit">Moyenne nationale, pas votre facture. <button type="button" class="lien-remplacer" data-remplacer>Remplacer par mon montant</button></small>' : ''}</div>
     <button type="button" class="sup" data-sup aria-label="Supprimer la dépense ${ech(p.nom)}" title="Supprimer cette dépense"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button>
     <div class="corr">
       <label class="sr" for="m-${ech(d.id)}">Montant pour ${ech(p.nom)}</label>
@@ -496,10 +509,12 @@ function majListe(){
   $('totaux').innerHTML = !t.nombre ? '' : `<div class="totaux">
     <div><span class="val num">${ech(euros(t.mensuel))}</span><span class="u">par mois</span></div>
     <div class="second">${ech(euros(t.annuel))} par an</div>
+    <p class="portee" data-estim hidden></p>
     <p class="portee"><b>Total des dépenses renseignées</b> — il ne couvre que
     ${t.nombre > 1 ? 'les ' + t.nombre + ' lignes que vous avez saisies' : 'la ligne que vous avez saisie'},
     pas l'ensemble des dépenses de votre foyer.</p>
   </div>`;
+  majMentionEstimation(null);
 }
 
 $('liste').addEventListener('input', ev => {
@@ -510,6 +525,15 @@ $('liste').addEventListener('input', ev => {
   const v = enCentimes(c.value);
   if (!d || v === null || v === 0) return;      /* une saisie en cours n'écrase rien */
   d.montant = v;
+  /* Ce n'est plus la moyenne nationale — ce qui ne veut pas dire que c'est
+     vérifié sur une facture. Le champ ne dit que la provenance.
+     Le badge part avec elle, sans redessiner la ligne : la personne est en
+     train de taper dedans, et un rendu complet lui prendrait le curseur. */
+  if (d.estimation){
+    d.estimation = false;
+    const badge = ligne.querySelector('.et-estim'); if (badge) badge.remove();
+    const dit = ligne.querySelector('.estim-dit'); if (dit) dit.remove();
+  }
   sauver();
   ligne.querySelector('[data-an]').textContent = euros(annuelCentimes(d.montant, d.periodicite)) + ' par an';
   majTotauxSeuls();
@@ -524,7 +548,16 @@ $('liste').addEventListener('change', ev => {
   d.periodicite = RYTHMES_BILAN.indexOf(s.value) >= 0 ? s.value : 'mensuelle';
   sauver(); majTout();
 });
+/* Remplacer explicitement une estimation par son propre montant : on amène au
+   champ, on le vide, et on laisse la personne écrire. Rien n'est décidé pour
+   elle, et le statut ne tombera qu'une fois un montant saisi. */
 $('liste').addEventListener('click', ev => {
+  const r = ev.target.closest('[data-remplacer]');
+  if (r){
+    const champ = r.closest('.ligne-d').querySelector('input[data-corr="montant"]');
+    if (champ){ champ.value = ''; champ.focus(); champ.scrollIntoView({ block: 'center' }); }
+    return;
+  }
   const b = ev.target.closest('[data-sup]');
   if (!b) return;
   const id = b.closest('.ligne-d').dataset.id;
@@ -551,6 +584,23 @@ function majTotauxSeuls(){
   if (!bloc) return;
   bloc.querySelector('.val').textContent = euros(t.mensuel);
   bloc.querySelector('.second').textContent = euros(t.annuel) + ' par an';
+  majMentionEstimation(bloc);
+}
+
+/* Un total qui contient une moyenne nationale doit le dire — sinon il se lit
+   comme une somme de montants personnels. La formule de totalisation n'est pas
+   touchée : on ajoute une mention, on ne retire ni ne pondère rien. */
+function majMentionEstimation(bloc){
+  const cibles = [...(bloc || document).querySelectorAll('[data-estim]')];
+  if (!cibles.length) return;
+  const estim = depenses.filter(d => d.estimation);
+  const noms = estim.map(d => POSTES[d.poste].nom).join(', ');
+  cibles.forEach(cible => {
+    cible.hidden = !estim.length;
+    if (!estim.length) return;
+    cible.innerHTML = `<b>Ce total contient ${estim.length === 1 ? 'une estimation' : estim.length + ' estimations'}.</b>
+      ${ech(noms)} ${estim.length === 1 ? 'vient' : 'viennent'} d'une moyenne nationale, pas de votre facture.`;
+  });
 }
 
 /* ---------- Le résultat ---------- */
@@ -564,6 +614,7 @@ function majResultat(){
   $('resultat').innerHTML = `<div class="totaux">
       <div><span class="val num">${ech(euros(t.mensuel))}</span><span class="u">par mois</span></div>
       <div class="second">${ech(euros(t.annuel))} par an</div>
+      <p class="portee" data-estim hidden></p>
       <p class="portee"><b>Total des dépenses renseignées.</b> Il ne couvre que
       ${t.nombre > 1 ? 'vos ' + t.nombre + ' lignes' : 'cette seule ligne'}, pas l'ensemble du foyer.</p>
     </div>
@@ -591,6 +642,7 @@ function majResultat(){
       ${piste.secondaire ? `<p class="piste-second">${ech(piste.secondaire.texte)}
         <a href="${ech(piste.secondaire.href)}">${ech(piste.secondaire.libelle)}</a></p>` : ''}
     </div>` : ''}`;
+  majMentionEstimation(null);
   $('zone-resultat').hidden = false;
 }
 

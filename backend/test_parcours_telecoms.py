@@ -263,3 +263,174 @@ def test_registre_box_vide_etat_utile_et_aucun_prix_couple(page):
     couple = page.locator('#liste-box').inner_text()
     assert 'ne figure plus dans notre relevé' in couple or 'ne chiffrons donc pas' in couple
     assert not page.erreurs
+
+
+# --------------------------------------------------------------------------
+# Lot 3 — le mode, et le statut d'estimation.
+# --------------------------------------------------------------------------
+
+@pytest.mark.parametrize('mode,visibles', [
+    ('mobile', {'mobile'}), ('box', {'box'}), ('deux', {'mobile', 'box'}),
+])
+def test_le_mode_ne_montre_que_son_perimetre(page, mode, visibles):
+    page.goto(page.base + 'telecoms.html', wait_until='networkidle')
+    page.locator('input[name="mode"][value="%s"]' % mode).check()
+    page.wait_for_timeout(150)
+    vus = page.evaluate("[...document.querySelectorAll('[data-pan]')].filter(e=>!e.hidden).map(e=>e.dataset.pan)")
+    assert set(vus) == visibles
+    assert not page.erreurs
+
+
+def test_changer_de_mode_conserve_les_reponses(page):
+    page.goto(page.base + 'telecoms.html', wait_until='networkidle')
+    page.fill('#f-prix', '24,90')
+    page.fill('#f-prix-box', '32')
+    page.select_option('#f-donnees', index=2)
+    page.locator('input[name="mode"][value="mobile"]').check()
+    page.wait_for_timeout(120)
+    page.locator('input[name="mode"][value="deux"]').check()
+    page.wait_for_timeout(120)
+    assert page.input_value('#f-prix') == '24,90'
+    assert page.input_value('#f-prix-box') == '32'
+    assert page.input_value('#f-donnees') == '20'
+
+
+def test_un_champ_masque_ne_produit_aucun_resultat(page):
+    """Un prix de box saisi puis masqué ne doit pas faire apparaître un résultat
+    que personne n'a demandé — ni le couple, qui chiffrerait une remise à partir
+    d'un contrat hors périmètre."""
+    page.goto(page.base + 'telecoms.html', wait_until='networkidle')
+    page.fill('#f-prix-box', '32')
+    page.locator('input[name="box"][value="oui"]').check()
+    page.locator('input[name="mode"][value="mobile"]').check()
+    page.fill('#f-prix', '24,90')
+    page.select_option('#f-donnees', index=2)
+    page.click('#f-comparer')
+    page.wait_for_timeout(500)
+    assert page.locator('#groupe-box').is_hidden()
+    assert page.locator('#liste-box').inner_text().strip() == ''
+    assert not page.erreurs
+
+
+def test_le_couple_n_existe_qu_en_mode_les_deux(page):
+    page.goto(page.base + 'telecoms.html', wait_until='networkidle')
+    page.fill('#f-prix', '24,90')
+    page.select_option('#f-donnees', index=2)
+    page.locator('input[name="box"][value="oui"]').check()
+    page.fill('#f-prix-box', '32')
+    page.click('#f-comparer')
+    page.wait_for_timeout(500)
+    assert page.locator('#liste-box').inner_text().strip() != ''
+
+
+def test_le_resultat_recoit_le_focus(page):
+    page.goto(page.base + 'telecoms.html', wait_until='networkidle')
+    page.fill('#f-prix', '24,90')
+    page.select_option('#f-donnees', index=2)
+    page.click('#f-comparer')
+    page.wait_for_timeout(500)
+    assert 'Votre mobile' in page.evaluate('document.activeElement.textContent')
+
+
+def test_un_engagement_mobile_inconnu_reste_inconnu(page):
+    """Le champ est une déclaration, pas une lecture de contrat, et « je ne sais
+    pas » ne devient jamais « sans engagement »."""
+    page.goto(page.base + 'telecoms.html', wait_until='networkidle')
+    legende = page.locator('text=Êtes-vous engagé sur votre forfait mobile').first
+    assert legende.is_visible()
+    aide = page.locator('#forme-cm').inner_text()
+    assert 'pas une lecture de votre contrat' in aide
+    assert 'sans engagement' in aide
+    assert 'aucun départ sans frais' in aide
+    coche = page.evaluate("document.querySelector('input[name=eng-mobile]:checked').value")
+    assert coche == ''
+
+
+# ----- Le statut d'estimation -----
+
+def test_le_repere_cree_une_ligne_marquee_estimation(page):
+    page.goto(page.base + 'bilan.html', wait_until='networkidle')
+    page.get_by_role('button', name='Énergie', exact=True).click()
+    page.locator('#raccourcis button').click()
+    page.get_by_role('button', name='Ajouter').first.click()
+    page.wait_for_timeout(400)
+    assert page.locator('.et-estim').count() == 1
+    assert page.evaluate("JSON.parse(localStorage.getItem('dj_bilan_v1'))[0].estimation") is True
+
+
+def test_le_statut_survit_au_rechargement(page):
+    page.goto(page.base + 'bilan.html', wait_until='networkidle')
+    page.get_by_role('button', name='Énergie', exact=True).click()
+    page.locator('#raccourcis button').click()
+    page.get_by_role('button', name='Ajouter').first.click()
+    page.wait_for_timeout(400)
+    page.reload(wait_until='networkidle')
+    page.wait_for_timeout(400)
+    assert page.locator('.et-estim').count() == 1
+    assert page.locator('[data-estim]:not([hidden])').count() >= 1
+
+
+def test_le_total_dit_quil_contient_une_estimation(page):
+    page.goto(page.base + 'bilan.html', wait_until='networkidle')
+    page.get_by_role('button', name='Énergie', exact=True).click()
+    page.locator('#raccourcis button').click()
+    page.get_by_role('button', name='Ajouter').first.click()
+    page.wait_for_timeout(400)
+    mention = page.locator('[data-estim]:not([hidden])').first.inner_text()
+    assert 'contient une estimation' in mention
+    assert 'moyenne nationale' in mention
+
+
+def test_un_montant_saisi_ne_porte_pas_le_statut(page):
+    page.goto(page.base + 'bilan.html', wait_until='networkidle')
+    page.get_by_role('button', name='Énergie', exact=True).click()
+    page.locator('#raccourcis button').click()
+    page.fill('#f-montant', '140')          # la frappe annule la provenance
+    page.get_by_role('button', name='Ajouter').first.click()
+    page.wait_for_timeout(400)
+    assert page.locator('.et-estim').count() == 0
+    assert page.evaluate("JSON.parse(localStorage.getItem('dj_bilan_v1'))[0].estimation") is False
+
+
+def test_corriger_le_montant_retire_le_statut(page):
+    page.goto(page.base + 'bilan.html', wait_until='networkidle')
+    page.get_by_role('button', name='Énergie', exact=True).click()
+    page.locator('#raccourcis button').click()
+    page.get_by_role('button', name='Ajouter').first.click()
+    page.wait_for_timeout(400)
+    champ = page.locator('.ligne-d input[data-corr="montant"]').first
+    champ.fill('140')
+    champ.dispatch_event('input')
+    page.wait_for_timeout(400)
+    assert page.locator('.et-estim').count() == 0
+    assert page.evaluate("JSON.parse(localStorage.getItem('dj_bilan_v1'))[0].estimation") is False
+
+
+def test_remplacer_par_mon_montant_vide_le_champ_et_y_amene(page):
+    page.goto(page.base + 'bilan.html', wait_until='networkidle')
+    page.get_by_role('button', name='Énergie', exact=True).click()
+    page.locator('#raccourcis button').click()
+    page.get_by_role('button', name='Ajouter').first.click()
+    page.wait_for_timeout(400)
+    page.locator('[data-remplacer]').first.click()
+    page.wait_for_timeout(200)
+    champ = page.locator('.ligne-d input[data-corr="montant"]').first
+    assert champ.input_value() == ''
+    assert page.evaluate("document.activeElement.getAttribute('data-corr')") == 'montant'
+
+
+def test_les_anciennes_lignes_restent_lisibles(page):
+    """Une ligne enregistrée avant l'existence du champ n'en a pas : elle doit
+    rester utilisable, sans perte et sans être requalifiée en estimation."""
+    ancien = [{'id': 'vieux1', 'poste': 'mobile', 'libelle': '', 'montant': 1999,
+               'periodicite': 'mensuelle'}]
+    page.goto(page.base + 'bilan.html')
+    page.evaluate("d => localStorage.setItem('dj_bilan_v1', JSON.stringify(d))", ancien)
+    page.reload(wait_until='networkidle')
+    page.wait_for_timeout(400)
+    assert page.locator('.ligne-d').count() == 1
+    assert page.locator('.et-estim').count() == 0
+    stocke = page.evaluate("JSON.parse(localStorage.getItem('dj_bilan_v1'))")
+    assert stocke[0]['montant'] == 1999
+    assert stocke[0]['poste'] == 'mobile'
+    assert not page.erreurs
