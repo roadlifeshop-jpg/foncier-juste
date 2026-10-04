@@ -83,23 +83,48 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 /* ---- La liste ---- */
 /* `minmax(0,1fr)` et non `1fr` : sans cela le rail conserve la largeur
    minimale du menu déroulant et la ligne déborde de l'écran à 320 px. */
+/* La seconde famille d'outils : même composant que l'accueil, en plus discret —
+   pas de pastille colorée, une flèche simple. Ils se lisent comme des outils
+   sans prendre le poids de l'action principale. */
+.autres-outils{display:grid; grid-template-columns:1fr 1fr; gap:var(--s3); margin-top:var(--s4);}
+.autres-outils a{display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start;
+  gap:var(--s1) var(--s3); padding:var(--s4); border-color:var(--line-strong);}
+.ao-titre{grid-column:1; font-weight:650; font-size:var(--t-small); color:var(--ink); letter-spacing:-.01em;}
+.ao-dit{grid-column:1; font-size:var(--t-label); line-height:1.5; color:var(--ink-muted);}
+.ao-fleche{grid-column:2; grid-row:1/3; align-self:center; color:var(--accent); font-size:19px; line-height:1;
+  transition:transform var(--duree) var(--courbe);}
+.autres-outils a:hover .ao-fleche{transform:translateX(3px);}
+@media(max-width:600px){ .autres-outils{grid-template-columns:1fr;} }
+@media(prefers-reduced-motion:reduce){ .ao-fleche{transition:none;} .autres-outils a:hover .ao-fleche{transform:none;} }
+
 .ligne-d{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
-  box-shadow:var(--shadow-card); padding:var(--s4); margin-top:var(--s3);
-  display:grid; grid-template-columns:minmax(0,1fr) 44px; gap:var(--s3) var(--s2); align-items:start;}
-.ligne-d .nom{font-weight:650; font-size:var(--t-body); letter-spacing:-.01em;}
+  box-shadow:var(--shadow-card); padding:var(--s4) var(--s5); margin-top:var(--s3);
+  display:grid; grid-template-columns:minmax(0,1fr) auto 44px; gap:var(--s2) var(--s4); align-items:center;}
+.ligne-d .nom{grid-column:1; grid-row:1; font-weight:650; font-size:var(--t-body); letter-spacing:-.01em;}
 .ligne-d .nom small{display:block; font-weight:400; font-size:var(--t-label); color:var(--ink-faint);
   margin-top:3px; font-variant-numeric:tabular-nums;}
+/* Les deux contrôles font la taille de leur contenu, et rien de plus. Étirés sur
+   la largeur disponible, ils donnaient 369 px de champ pour cinq caractères et
+   un sélecteur de 346 : deux dalles vides au milieu d'une ligne qui, le reste du
+   temps, ne fait que lire. */
+.ligne-d .corr{grid-column:2; grid-row:1; display:flex; align-items:center; gap:var(--s2);}
+.ligne-d .corr .unite{position:relative; flex:0 0 auto;}
+.ligne-d .corr input{width:7.4em; text-align:right; padding-right:2.1rem; font-variant-numeric:tabular-nums;}
+.ligne-d .corr select{width:auto; padding-right:2.4rem;}
 /* La suppression est au bout de la ligne, en icône seule : une action
    destructive n'a pas à porter le poids d'un bouton bordé. */
-.ligne-d .sup{grid-column:2; grid-row:1; justify-self:end; width:44px; height:44px; margin:-6px -4px 0 0;
+.ligne-d .sup{grid-column:3; grid-row:1; width:44px; height:44px; justify-self:end;
   display:inline-flex; align-items:center; justify-content:center; background:transparent; border:0;
   border-radius:var(--r); color:var(--ink-faint); cursor:pointer;}
 .ligne-d .sup:hover{background:var(--alert-soft); color:var(--alert);}
-.ligne-d .corr{grid-column:1 / -1; display:flex; align-items:center; gap:var(--s2);}
-/* Le € vit dans le champ, comme sur l'écran de saisie, au lieu de flotter à côté. */
-.ligne-d .corr .unite{flex:1 1 7em; min-width:0; position:relative;}
-.ligne-d .corr input{width:100%; text-align:right; padding-right:2.2rem; font-variant-numeric:tabular-nums;}
-.ligne-d .corr select{flex:0 1 auto; width:auto; min-width:8.5em;}
+/* Sous 600 px, les contrôles passent sous le nom — mais sans s'étirer pour
+   autant : ils gardent leur largeur utile et restent alignés à gauche. */
+@media(max-width:600px){
+  .ligne-d{grid-template-columns:minmax(0,1fr) 44px; padding:var(--s4);}
+  .ligne-d .sup{grid-column:2; grid-row:1; align-self:start;}
+  .ligne-d .corr{grid-column:1/-1; grid-row:2; flex-wrap:wrap;}
+  .ligne-d .corr input{width:6.6em;}
+}
   .ligne-d .corr select{flex:1 1 6em; min-width:0; width:auto;}
 }
 
@@ -128,7 +153,10 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
    phrase : leur zone peut s'étendre sans disloquer un paragraphe. Le lien de
    confidentialité du pied de page, lui, est au milieu d'une phrase et reste
    inline — l'agrandir casserait l'interligne pour rien. */
-#autres-verifs a{display:inline-flex; align-items:center; min-height:44px;}
+/* Cette règle étendait la zone atteignable des liens de ce bloc. Elle vise un
+   identifiant, donc elle l'emportait sur les cartes qui l'ont remplacé et les
+   remettait en ligne. Elle ne concerne plus que les liens restés en texte. */
+#autres-verifs p a{display:inline-flex; align-items:center; min-height:44px;}
 #autres-verifs p{margin-top:2px;}
 /* Le second lien reste un lien : il ne doit pas concurrencer la piste. */
 .piste .piste-second{margin-top:14px; padding-top:12px; border-top:1px solid var(--accent-line);
@@ -230,12 +258,23 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
       <h2 style="font-size:1.02rem; font-family:'Archivo',sans-serif; font-weight:600">Vérifier une somme à récupérer</h2>
       <p class="aide">Deux sujets qui ne relèvent pas d'une dépense mensuelle, mais d'une somme
       qu'on peut vous devoir.</p>
-      <p style="margin-top:12px; line-height:2">
-        <a href="vol-retarde.html">Un vol retardé ou annulé</a> — de 250 à 600 €, barème fixé par un
-        règlement européen.<br>
-        <a href="taxe-fonciere.html">Ma taxe foncière</a> — ce qui mérite vérification sur votre fiche&nbsp;;
-        aucune somme n'y est chiffrable.
-      </p>
+      <!-- Deux outils, pas deux liens. Ils étaient posés en texte courant, soulignés,
+           juste au-dessus des liens de pied de page : rien ne les en distinguait. La
+           place reste la bonne — récupérer une somme n'est pas suivre une dépense, et
+           ça ne doit pas disputer le résultat — mais ils prennent le composant des
+           autres outils du site. -->
+      <div class="autres-outils">
+        <a class="carte carte-action" href="vol-retarde.html">
+          <span class="ao-titre">Un vol retardé ou annulé</span>
+          <span class="ao-dit">De 250 à 600 €, barème fixé par un règlement européen.</span>
+          <span class="ao-fleche" aria-hidden="true">→</span>
+        </a>
+        <a class="carte carte-action" href="taxe-fonciere.html">
+          <span class="ao-titre">Ma taxe foncière</span>
+          <span class="ao-dit">Ce qui mérite vérification sur votre fiche&nbsp;; aucune somme n'y est chiffrable.</span>
+          <span class="ao-fleche" aria-hidden="true">→</span>
+        </a>
+      </div>
       <p class="aide" style="margin-top:18px">
         <a href="notre-methode.html">Ce que chaque outil sait dire</a> ·
         <a href="sources.html">Les sources et leurs dates</a> ·
