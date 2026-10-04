@@ -27,21 +27,45 @@
    tous définis dans `abonnements.js` et inchangés.
    ========================================================================== */
 
-/* Les huit postes. `suggestions` accélère la saisie : ce sont des nombres
-   ronds, jamais des prix constatés, jamais une moyenne, et aucun n'est
-   sélectionné d'office. L'interface le dit à côté d'eux. */
+/* Les huit postes.
+   --------------------------------------------------------------------------
+   Chaque poste portait quatre montants « raccourcis » — 50, 80, 120, 160 € pour
+   l'énergie, par exemple. C'étaient des nombres ronds choisis à la main. Un
+   raccourci qu'on propose est lu comme un ordre de grandeur, et un ordre de
+   grandeur avancé sans source est un montant inventé : exactement ce que ce
+   dépôt s'interdit. Ils ont été retirés.
+
+   À la place, `repere` — là où une source publique existe, et nulle part
+   ailleurs. Un repère porte toujours sa valeur, sa source, son année et son
+   adresse. Aujourd'hui l'énergie est le seul poste à en avoir un : pour le
+   loyer et le transport, les publications officielles ne donnent pas de montant
+   mensuel exploitable, et une moyenne nationale y mélangerait de toute façon
+   des situations sans rapport — un studio et une maison, un abonnement de métro
+   et deux pleins par semaine. Mieux vaut pas de repère qu'un faux repère. */
 const POSTES = {
   mobile: {
     nom: 'Forfait mobile', reglesContrat: true, categorieContrat: 'telecom',
     comparatif: 'comparer-mobile.html',
-    suggestions: [1000, 1500, 2000, 3000],
   },
   box: {
     nom: 'Box internet', reglesContrat: true, categorieContrat: 'telecom',
     comparatif: 'comparer-box.html',
-    suggestions: [2000, 3000, 4000, 5000],
   },
   energie: {
+    /* « En moyenne, les ménages ont dépensé 2 071 € en énergie pour leur
+       logement » — Chiffres clés de l'énergie, édition 2026, données 2024,
+       service des données et études statistiques du ministère. Lu à la source
+       le 04/10/2026. 2 071 / 12 = 172,58 €, arrondi à 173 € pour ne pas donner
+       une précision que la moyenne n'a pas. */
+    repere: {
+      mensuel: 17300,
+      texte: 'un ménage dépense en moyenne 173 € par mois d’énergie pour son logement',
+      precision: '2 071 € sur l’année, toutes énergies et taxes comprises',
+      source: 'Chiffres clés de l’énergie, édition 2026 — données 2024',
+      editeur: 'service des données et études statistiques du ministère',
+      url: 'https://www.statistiques.developpement-durable.gouv.fr/chiffres-cles-de-lenergie-edition-2026',
+      verifiee: '2026-10-04',
+    },
     nom: 'Énergie', reglesContrat: true, categorieContrat: 'energie', comparatif: null,
     /* Nous ne comparerons jamais les offres d'énergie : un comparateur public
        existe, édité par le médiateur national de l'énergie — autorité publique
@@ -55,32 +79,26 @@ const POSTES = {
       editeur: 'le médiateur national de l’énergie, autorité publique indépendante',
       url: 'https://comparateur-offres.energie-info.fr/comparateur-offres-electricite-gaz-naturel/criteria.action?profil=particulier',
     },
-    suggestions: [5000, 8000, 12000, 16000],
     /* La mensualité d'énergie est un acompte estimé, régularisé une fois par
        an : ce n'est pas un coût constaté. Le bilan doit le dire. */
     avertissement: "Ce que vous payez chaque mois pour l’énergie est un acompte estimé, régularisé une fois par an : ce n’est pas votre coût réel.",
   },
   assurance: {
     nom: 'Assurances', reglesContrat: true, categorieContrat: 'assurance', comparatif: null,
-    suggestions: [2000, 4000, 6000, 10000],
   },
   abonnements: {
     nom: 'Abonnements', reglesContrat: true, categorieContrat: '', comparatif: null,
-    suggestions: [500, 1000, 1500, 2500],
   },
   logement: {
     nom: 'Logement', reglesContrat: false, categorieContrat: null, comparatif: null,
-    suggestions: [50000, 70000, 90000, 120000],
     avertissement: "Un loyer ou une mensualité de prêt ne relève d’aucune des règles de résiliation que ce site connaît. Il compte dans votre total, et rien de plus.",
   },
   transport: {
     nom: 'Transport', reglesContrat: false, categorieContrat: null, comparatif: null,
-    suggestions: [5000, 10000, 15000, 20000],
     avertissement: "Carburant, péages ou titres de transport ne sont pas des contrats résiliables : ils comptent dans votre total, sans démarche associée.",
   },
   autre: {
     nom: 'Autre', reglesContrat: false, categorieContrat: null, comparatif: null,
-    suggestions: [1000, 3000, 5000, 10000],
   },
 };
 

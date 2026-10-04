@@ -32,7 +32,8 @@
 .poste:focus-visible{outline:none; box-shadow:var(--ring);}
 
 .saisie-montant{margin-top:18px; padding-top:16px; border-top:1px solid var(--line);}
-.raccourcis{display:flex; flex-wrap:wrap; gap:7px; margin-top:8px;}
+.raccourcis{display:flex; flex-wrap:wrap; gap:7px; margin-top:10px;}
+.raccourcis:empty{display:none;}
 .raccourcis button{
   font:inherit; font-size:.9rem; cursor:pointer; min-height:40px;
   background:var(--surface-2); color:var(--ink); border:1px solid var(--line);
@@ -40,7 +41,9 @@
 }
 .raccourcis button:hover{border-color:var(--ink-faint);}
 .raccourcis button:focus-visible{outline:none; box-shadow:var(--ring);}
-.note-raccourcis{font-size:.8rem; color:var(--ink-faint); margin-top:8px;}
+.note-raccourcis{font-size:.82rem; line-height:1.55; color:var(--ink-faint); margin-top:10px; max-width:52ch;}
+.note-raccourcis:empty{display:none;}
+.note-raccourcis b{color:var(--ink-muted);}
 
 .rythme{display:flex; gap:8px; margin-top:7px;}
 .rythme label{
@@ -169,7 +172,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
           <label for="f-montant" id="lab-montant">Combien&nbsp;?</label>
           <div class="unite" data-unite="€"><input type="text" id="f-montant" inputmode="decimal" placeholder="ex : 24,90" autocomplete="off"></div>
           <div class="raccourcis" id="raccourcis"></div>
-          <p class="note-raccourcis">Raccourcis facultatifs, pas des prix constatés.</p>
+          <p class="note-raccourcis" id="note-raccourcis"></p>
           <p class="erreur-champ" id="e-montant" hidden></p>
         </div>
 
@@ -290,8 +293,26 @@ function choisirPoste(cle){
   if (parMois) parMois.checked = true;
 
   $('lab-montant').textContent = `Combien pour « ${p.nom} » ?`;
-  $('raccourcis').innerHTML = p.suggestions.map(c =>
-    `<button type="button" data-c="${c}">${ech(euros(c))}</button>`).join('');
+  /* Un repère, s'il existe, et jamais autre chose. Il porte sa source et son
+     année : c'est ce qui le distingue d'un nombre rond posé là. Le bouton
+     remplit le champ, il ne décide rien — et il dit « en moyenne », pas
+     « pour vous ». */
+  if (p.repere) {
+    const r = p.repere;
+    /* Une date ISO est comparable, elle ne s'affiche pas. Une date illisible
+       ressort telle quelle plutôt que déformée. */
+    const jour = i => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(i || '')); return m ? `${m[3]}/${m[2]}/${m[1]}` : String(i || ''); };
+    const rond = (r.mensuel % 100 === 0) ? (r.mensuel / 100) + ' €' : euros(r.mensuel);
+    $('raccourcis').innerHTML =
+      `<button type="button" data-c="${r.mensuel}">Partir de ${ech(rond)}</button>`;
+    $('note-raccourcis').innerHTML = `En France, ${ech(r.texte)} — ${ech(r.precision)}.
+      <a href="${ech(r.url)}" target="_blank" rel="noopener noreferrer">${ech(r.source)} <span class="hors-site">autre site</span></a>,
+      ${ech(r.editeur)}, relevé le ${ech(jour(r.verifiee))}.
+      <b>Votre facture peut être très différente.</b>`;
+  } else {
+    $('raccourcis').innerHTML = '';
+    $('note-raccourcis').textContent = '';
+  }
   /* Ce que le poste ne permettra pas de vérifier est dit MAINTENANT, avant la
      saisie, et non seulement dans le résultat. */
   $('avert-poste').innerHTML = p.avertissement ? ech(p.avertissement) : '';

@@ -895,8 +895,19 @@ SCRIPT_TESTS = r"""
      que nous ne savons pas comparer. */
   vrai("seuls le mobile et la box portent un comparatif : les six autres n'ont aucun prix relevé",
        Object.entries(POSTES).filter(([, p]) => p.comparatif).map(([k]) => k).join(',') === 'mobile,box');
-  vrai("les montants suggérés sont des nombres ronds, jamais des centimes précis",
-       Object.values(POSTES).every(p => p.suggestions.every(c => c % 100 === 0)));
+  /* Les raccourcis inventés ont été retirés : un montant proposé est lu comme
+     un ordre de grandeur, et un ordre de grandeur sans source est un montant
+     inventé. Ces trois assertions interdisent qu'ils reviennent. */
+  vrai("aucun poste ne propose de montant sans source",
+       Object.values(POSTES).every(p => p.suggestions === undefined));
+  vrai("un repère porte toujours sa valeur, sa source, son éditeur, son adresse et sa date",
+       Object.values(POSTES).filter(p => p.repere).every(p =>
+         Number.isInteger(p.repere.mensuel) && p.repere.mensuel > 0 &&
+         typeof p.repere.texte === 'string' && typeof p.repere.source === 'string' &&
+         typeof p.repere.editeur === 'string' &&
+         /^https:\/\//.test(p.repere.url) && /^\d{4}-\d{2}-\d{2}$/.test(p.repere.verifiee)));
+  vrai("l'énergie est le seul poste à porter un repère aujourd'hui",
+       Object.entries(POSTES).filter(([, p]) => p.repere).map(([k]) => k).join(',') === 'energie');
   vrai("le loyer, l'énergie et le transport portent leur avertissement propre",
        ['logement','energie','transport'].every(p => typeof POSTES[p].avertissement === 'string'));
 
