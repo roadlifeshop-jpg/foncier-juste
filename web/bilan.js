@@ -45,11 +45,11 @@
 const POSTES = {
   mobile: {
     nom: 'Forfait mobile', reglesContrat: true, categorieContrat: 'telecom',
-    comparatif: 'comparer-mobile.html',
+    comparatif: 'telecoms.html#t-mobile',
   },
   box: {
     nom: 'Box internet', reglesContrat: true, categorieContrat: 'telecom',
-    comparatif: 'comparer-box.html',
+    comparatif: 'telecoms.html#t-box',
   },
   energie: {
     /* « En moyenne, les ménages ont dépensé 2 071 € en énergie pour leur
@@ -227,13 +227,15 @@ function pistePrioritaire(depenses) {
     return {
       cle: 'comparer-mobile',
       titre: 'Comparer votre forfait mobile',
-      phrase: `C’est le poste pour lequel nous disposons du relevé le plus large — plusieurs opérateurs, à une date connue : votre ${euros(mensuelCentimes(mobile.montant, mobile.periodicite))} par mois peut être mis en face de leur coût sur douze mois.`,
-      action: { libelle: 'Comparer mon forfait mobile', href: 'comparer-mobile.html' },
-      secondaire: box ? {
-        texte: `Vous avez aussi saisi une box à ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois. Un premier relevé existe, limité à des offres fibre sans engagement.`,
-        libelle: 'Examiner ma box internet',
-        href: 'comparer-box.html',
-      } : null,
+      phrase: `C’est le poste pour lequel nous disposons du relevé le plus large — plusieurs opérateurs, à une date connue : votre ${euros(mensuelCentimes(mobile.montant, mobile.periodicite))} par mois peut être mis en face de leur coût sur douze mois.${box ? ` Votre box à ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois est examinée sur la même page, sur un relevé plus court.` : ''}`,
+      /* Quand les deux postes sont saisis, l'outil les traite tous les deux sur
+         la même page : un second lien vers ce même endroit ne mènerait nulle
+         part de nouveau. On change le libellé du bouton plutôt que d'en
+         ajouter un. */
+      action: box
+        ? { libelle: 'Comparer mon mobile et ma box', href: 'telecoms.html#t-mobile' }
+        : { libelle: 'Comparer mon forfait mobile', href: 'telecoms.html#t-mobile' },
+      secondaire: null,
     };
   }
 
@@ -242,7 +244,7 @@ function pistePrioritaire(depenses) {
       cle: 'comparer-box',
       titre: 'Examiner votre box internet',
       phrase: `Votre ${euros(mensuelCentimes(box.montant, box.periodicite))} par mois peut être mis en face d’un premier relevé d’offres fibre sans engagement, relevées à une date connue. <b>Aucune économie n’est annoncée</b> : le comparatif montre des coûts, et dit ce qu’il ignore.`,
-      action: { libelle: 'Examiner ma box internet', href: 'comparer-box.html' },
+      action: { libelle: 'Examiner ma box internet', href: 'telecoms.html#t-box' },
       secondaire: null,
     };
   }

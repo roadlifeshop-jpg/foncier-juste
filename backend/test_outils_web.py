@@ -990,16 +990,27 @@ SCRIPT_TESTS = r"""
   vrai("cette piste-là annonce explicitement qu'aucune économie n'est chiffrée",
        /Aucune économie n.est annoncée/.test(pistePrioritaire(sansComparatif).phrase));
 
-  /* Mobile ET box : une seule piste mise en avant, la box en second lien. */
-  vrai("mobile et box : la box est offerte en second lien, pas en seconde piste",
+  /* Mobile ET box : les deux postes sont traités sur la même page depuis que
+     l'outil est unique. Un second lien vers ce même endroit ne mènerait nulle
+     part de nouveau — c'est le libellé du bouton qui change, pas leur nombre. */
+  vrai("mobile et box : une seule piste, un seul bouton, aucun second lien",
        pistePrioritaire(plusieurs).cle === 'comparer-mobile'
-       && pistePrioritaire(plusieurs).secondaire !== null
-       && pistePrioritaire(plusieurs).secondaire.href === 'comparer-box.html');
+       && pistePrioritaire(plusieurs).secondaire === null
+       && pistePrioritaire(plusieurs).action.libelle === 'Comparer mon mobile et ma box');
+  vrai("sans box saisie, le bouton ne promet que le mobile",
+       pistePrioritaire(plusieurs.filter(d => d.poste !== 'box')).action.libelle === 'Comparer mon forfait mobile');
+  vrai("la phrase mentionne la box quand elle est saisie",
+       /box à .* par mois est examinée sur la même page/.test(pistePrioritaire(plusieurs).phrase));
   vrai("sans box saisie, aucun second lien n'est inventé",
        pistePrioritaire(plusieurs.filter(d => d.poste !== 'box')).secondaire === null);
+  /* Le mobile et la box sont devenus un seul outil : les deux postes mènent à
+     la même page, chacun à sa section. L'énergie n'y mène pas — c'est un outil
+     public qui s'en charge. */
   eq("le registre sait où mène chaque poste comparable",
      [POSTES.mobile.comparatif, POSTES.box.comparatif, POSTES.energie.comparatif],
-     ['comparer-mobile.html', 'comparer-box.html', null]);
+     ['telecoms.html#t-mobile', 'telecoms.html#t-box', null]);
+  vrai("les deux postes comparables mènent à la même page",
+     POSTES.mobile.comparatif.split('#')[0] === POSTES.box.comparatif.split('#')[0]);
   eq("uniquement logement et transport : rien de chiffrable, et on le dit",
      pistePrioritaire([{ id:'x', poste:'logement', montant: 75000, periodicite:'mensuelle' },
                        { id:'y', poste:'transport', montant: 12000, periodicite:'mensuelle' }]).cle,
