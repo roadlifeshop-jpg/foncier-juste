@@ -309,61 +309,76 @@ const dateFrCourt = iso => { const d = versDate(iso); return d ? d.toLocaleDateS
    Cette page ne réécrit jamais `dj_abonnements_v1` : elle propose ce qu'elle
    y trouve, et l'utilisateur reste libre de corriger le champ. ------------ */
 function reprendre(){
-  /* Deux sources, dans cet ordre. Le BILAN d'abord : si le visiteur vient d'y
-     saisir son forfait, lui redemander le montant serait absurde. L'inventaire
-     des CONTRATS ensuite, pour qui arrive par l'autre chemin. Aucune des deux
-     n'est réécrite par cette page. */
+  /* Deux sources, et chaque poste est traité SÉPARÉMENT.
+     ------------------------------------------------------------------------
+     La box n'était reprise qu'à l'intérieur de la branche mobile : un bilan ne
+     contenant qu'une box ne la reprenait jamais, et tombait sur la liste des
+     contrats comme s'il n'avait rien saisi.
+
+     Règle appliquée : pour CHAQUE poste, le bilan d'abord, la liste des
+     contrats seulement s'il n'y a rien dans le bilan pour ce poste-là. Un
+     contrat ne remplace donc jamais une donnée du bilan, et reprendre un
+     mobile n'entraîne pas la reprise d'une box qui viendrait d'ailleurs.
+
+     La provenance est dite poste par poste : « votre bilan » et « votre liste
+     Dépense mensuelle » ne sont pas la même chose, et les confondre créerait
+     une association que le visiteur n'a pas faite.
+
+     Aucune des deux listes n'est réécrite par cette page. */
+  const mensuel = x => mensuelCentimes(x.montant, x.periodicite);
+
   let duBilan = [];
   try { duBilan = normaliserBilan(JSON.parse(localStorage.getItem('dj_bilan_v1') || '[]')); }
   catch (_) { duBilan = []; }
-  const mBilan = mobileDuBilan(duBilan), bBilan = boxDuBilan(duBilan);
-  if (mBilan){
-    $('f-prix').value = (mensuelCentimes(mBilan.montant, mBilan.periodicite) / 100).toFixed(2).replace('.', ',');
-    let dit = `<b>${ech(euros(mensuelCentimes(mBilan.montant, mBilan.periodicite)))} par mois</b> pour votre forfait mobile`;
-    if (bBilan){
-      $('f-prix-box').value = (mensuelCentimes(bBilan.montant, bBilan.periodicite) / 100).toFixed(2).replace('.', ',');
-      document.querySelector('input[name="box"][value="oui"]').checked = true;
-      dit += `, et <b>${ech(euros(mensuelCentimes(bBilan.montant, bBilan.periodicite)))} par mois</b> pour votre box`;
-    }
-    $('repris').innerHTML = `Repris de votre bilan&nbsp;: ${dit}. Corrigez si besoin —
-      <b>rien n'est réécrit dans votre bilan</b>. <a href="bilan.html">Revenir au bilan</a>.`;
+
+  let lignes = [];
+  try { lignes = normaliserLignes(JSON.parse(localStorage.getItem(CLE) || '[]')); }
+  catch (_) { lignes = []; }
+  const telecom = lignes.filter(l => l.categorie === 'telecom');
+  const duContrat = role => telecom.find(l => roleTelecom(l.nom) === role) || null;
+  const illisibles = telecom.filter(l => roleTelecom(l.nom) === null);
+
+  /* Chaque poste choisit sa source, indépendamment de l'autre. */
+  const source = (dansLeBilan, role) => dansLeBilan
+    ? { montant: mensuel(dansLeBilan), provenance: 'bilan', nom: null }
+    : (duContrat(role) ? { montant: mensuel(duContrat(role)), provenance: 'contrats', nom: duContrat(role).nom } : null);
+
+  const srcMobile = source(mobileDuBilan(duBilan), 'mobile');
+  const srcBox    = source(boxDuBilan(duBilan), 'box');
+
+  if (srcMobile) $('f-prix').value = (srcMobile.montant / 100).toFixed(2).replace('.', ',');
+  if (srcBox){
+    $('f-prix-box').value = (srcBox.montant / 100).toFixed(2).replace('.', ',');
+    /* Le prix d'une box déclare qu'on en a une — mais c'est une déclaration
+       reprise, pas une vérification sur contrat. Le visiteur peut la défaire. */
+    const oui = document.querySelector('input[name="box"][value="oui"]');
+    if (oui) oui.checked = true;
+  }
+
+  const phrase = (src, quoi) => src.provenance === 'bilan'
+    ? `<b>${ech(euros(src.montant))} par mois</b> pour ${quoi}, repris de votre bilan`
+    : `<b>${ech(euros(src.montant))} par mois</b> pour ${quoi}, repris de « ${ech(src.nom)} » dans votre liste Dépense mensuelle`;
+
+  const dits = [];
+  if (srcMobile) dits.push(phrase(srcMobile, 'votre forfait mobile'));
+  if (srcBox) dits.push(phrase(srcBox, 'votre box'));
+
+  if (dits.length){
+    $('repris').innerHTML = `${dits.join('. ')}. Corrigez si besoin —
+      <b>rien n'est réécrit dans votre bilan ni dans votre liste</b>.
+      <a href="bilan.html">Revenir au bilan</a>.${
+        illisibles.length ? ` ${illisibles.length} contrat${illisibles.length > 1 ? 's' : ''} télécom de votre liste n'${illisibles.length > 1 ? 'ont' : 'a'} pas pu être identifié${illisibles.length > 1 ? 's' : ''} : ${ech(illisibles.map(l => l.nom).join(', '))}.` : ''}`;
     $('repris').hidden = false;
     return;
   }
 
-  let lignes = [];
-  try { lignes = normaliserLignes(JSON.parse(localStorage.getItem(CLE) || '[]')); }
-  catch (_) { return; }
-  const telecom = lignes.filter(l => l.categorie === 'telecom');
-  if (!telecom.length) return;
-
-  /* Le nom décide, pas le prix : une box coûte souvent plus cher qu'un
-     forfait, et trier par montant ferait proposer la box comme mobile. Ce
-     qu'on ne sait pas lire n'est pas prérempli. */
-  const mensuel = l => mensuelCentimes(l.montant, l.periodicite);
-  const mobile = telecom.find(l => roleTelecom(l.nom) === 'mobile') || null;
-  const box = telecom.find(l => roleTelecom(l.nom) === 'box') || null;
-  const illisibles = telecom.filter(l => roleTelecom(l.nom) === null);
-
-  if (mobile) $('f-prix').value = (mensuel(mobile) / 100).toFixed(2).replace('.', ',');
-  if (box){
-    $('f-prix-box').value = (mensuel(box) / 100).toFixed(2).replace('.', ',');
-    document.querySelector('input[name="box"][value="oui"]').checked = true;
+  if (telecom.length){
+    $('repris').innerHTML = `Votre liste « Dépense mensuelle » contient ${telecom.length} contrat${telecom.length > 1 ? 's' : ''}
+      télécom, mais leur nom ne dit pas lequel est le mobile et lequel est la box
+      — ${ech(telecom.map(l => l.nom).join(', '))}. <b>Rien n'a été prérempli</b> : renseignez vous-même
+      les montants ci-dessous.`;
+    $('repris').hidden = false;
   }
-
-  const dits = [];
-  if (mobile) dits.push(`<b>${ech(mobile.nom)}</b> à ${ech(euros(mensuel(mobile)))} par mois comme forfait mobile`);
-  if (box) dits.push(`<b>${ech(box.nom)}</b> à ${ech(euros(mensuel(box)))} par mois comme box`);
-
-  $('repris').innerHTML = dits.length
-    ? `Repris de votre liste « Dépense mensuelle »&nbsp;: ${dits.join(', et ')}.
-       Corrigez si ce n'est pas le bon contrat — <b>rien n'est réécrit dans votre liste</b>.${
-         illisibles.length ? ` ${illisibles.length} autre${illisibles.length > 1 ? 's contrats télécom n\'ont' : ' contrat télécom n\'a'} pas pu être identifié${illisibles.length > 1 ? 's' : ''} : ${ech(illisibles.map(l => l.nom).join(', '))}.` : ''}`
-    : `Votre liste « Dépense mensuelle » contient ${telecom.length} contrat${telecom.length > 1 ? 's' : ''}
-       télécom, mais leur nom ne dit pas lequel est le mobile et lequel est la box
-       — ${ech(telecom.map(l => l.nom).join(', '))}. <b>Rien n'a été prérempli</b> : renseignez vous-même
-       les montants ci-dessous.`;
-  $('repris').hidden = false;
 }
 
 /* ---------- Le formulaire ---------- */
@@ -458,19 +473,42 @@ function afficherBox(situation){
   const jour = AUJ.toLocaleDateString('sv-SE');
   const besoin = situation.boxBesoin === 'inconnu' ? null : situation.boxBesoin;
   const offres = offresBoxPour(besoin, jour);
-  const aFaire = situation.boxEngagement === 'non'
-    ? 'Demandez à votre opérateur le montant exact des frais de fermeture.'
-    : 'Demandez à votre opérateur votre date de fin d’engagement et votre coût de sortie.';
+
+  /* La démarche suit ce qu'on sait, et seulement ça.
+     ------------------------------------------------------------------------
+     Elle demandait « contactez votre opérateur box » même à quelqu'un qui avait
+     répondu ne pas en avoir. Trois situations, trois conseils :
+       — pas de box : rien à résilier, il s'agit d'un ajout de dépense ;
+       — box, engagement terminé : seuls les frais de fermeture restent ;
+       — box, engagement inconnu OU en cours : on demande les deux, parce qu'un
+         engagement inconnu n'est PAS un engagement terminé. Les confondre
+         ferait croire qu'on peut partir sans frais. */
+  const aUneBox = situation.aDejaUneBox === true
+    || (situation.aDejaUneBox === null && situation.prixActuelBox !== null);
+  let aFaire;
+  if (situation.aDejaUneBox === false){
+    aFaire = 'Vous n’avez pas de box : il s’agirait d’une dépense nouvelle, pas d’un remplacement. Vérifiez l’éligibilité de votre adresse avant tout.';
+  } else if (!aUneBox){
+    aFaire = 'Vous n’avez pas dit si vous aviez déjà une box. Si oui, demandez à votre opérateur votre date de fin d’engagement et votre coût de sortie ; sinon, il s’agirait d’une dépense nouvelle.';
+  } else if (situation.boxEngagement === 'non'){
+    aFaire = 'Votre engagement est terminé : demandez à votre opérateur le montant exact des frais de fermeture.';
+  } else if (situation.boxEngagement === 'oui'){
+    aFaire = 'Vous êtes encore engagé : demandez à votre opérateur votre date de fin d’engagement et votre coût de sortie.';
+  } else {
+    aFaire = 'Votre engagement n’est pas connu — ce qui n’est pas la même chose qu’un engagement terminé. Demandez à votre opérateur votre date de fin d’engagement et votre coût de sortie avant de compter sur un départ sans frais.';
+  }
 
   $('intro-box').innerHTML = situation.prixActuelBox === null
-    ? `Vous n'avez pas indiqué le prix de votre box : nous affichons des coûts, pas des écarts. <b>À faire :</b> ${ech(aFaire)}`
+    ? `Vous n'avez pas indiqué de prix de box : nous affichons des coûts, pas des écarts. <b>À faire :</b> ${ech(aFaire)}`
     : `Vous payez ${ech(euros(situation.prixActuelBox))} par mois, soit ${ech(euros(situation.prixActuelBox * 12))} sur douze mois à tarif inchangé. <b>À faire :</b> ${ech(aFaire)} Aucune économie n'est chiffrée ici : éligibilité, frais de sortie et remise mobile restent à vérifier.`;
 
   $('liste-box-offres').innerHTML = offres.length
     ? offres.map(o => offreBoxHTML(o, situation.boxBesoin)).join('')
     : `<p class="aide">Aucune offre de notre relevé ne peut être présentée aujourd'hui pour ce besoin.
        Notre relevé box est court et daté&nbsp;; quand ses offres sortent, nous préférons ne rien montrer
-       plutôt qu'un prix périmé. Votre coût actuel et la démarche ci-dessus restent valables.</p>`;
+       plutôt qu'un prix périmé. <b>« Affichable selon notre relevé » n'est d'ailleurs pas
+       « vérifié aujourd'hui chez l'opérateur »</b> : nos prix se revérifient à la source.
+       ${aUneBox ? 'Votre coût actuel et la démarche ci-dessus restent valables.' : 'La démarche ci-dessus reste valable.'}</p>`;
 }
 
 /* ---------- Le rendu d'une offre : prix et période, condition, action ----- */
