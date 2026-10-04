@@ -436,6 +436,13 @@ select,input[type=text],input[type=number],input[type=email],input[type=date],te
   border-radius:var(--r); border:1px solid var(--line-strong); background:var(--surface); color:var(--ink);
   min-height:50px;
 }
+/* Un champ de date rendait 52 px là où ses voisins en font 50 : le composant
+   natif ajoute ses propres marges autour de la valeur. On les annule, pour que
+   deux champs empilés ne soient pas décalés de deux pixels. */
+input[type=date]::-webkit-date-and-time-value{margin:0; text-align:left;}
+input[type=date]::-webkit-datetime-edit{padding:0;}
+input[type=date]::-webkit-calendar-picker-indicator{margin:0; padding:0;}
+input[type=date]::-webkit-datetime-edit-fields-wrapper{padding:0;}
 select{padding-right:38px; text-overflow:ellipsis;}
 select:hover,input:hover,textarea:hover{border-color:var(--ink-faint);}
 input::placeholder{color:var(--ink-faint);}
