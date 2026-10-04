@@ -74,6 +74,16 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 .a-confirmer h3{font-family:'Archivo',sans-serif; font-size:1rem; color:var(--warn);}
 .a-confirmer ul{margin:10px 0 0; padding-left:19px;}
 .a-confirmer li{font-size:.9rem; color:var(--ink-muted); margin-top:6px;}
+/* Une entrée courte ; les règles de sélection restent accessibles avant les offres. */
+.methode-selection{margin:8px 0; font-size:.88rem;}
+.methode-selection summary{cursor:pointer; min-height:44px; padding:10px 0;}
+#zone-resultat > .groupe:first-child{margin-top:12px;}
+@media(max-width:560px){
+  main .hero.shell{padding-block:20px 8px!important;}
+  .hero .surtitre{display:none;}
+  .hero .lede{font-size:1rem;margin-top:10px!important;}
+  .hero .aide{margin-top:8px;}
+}
 </style>
 <script src="abonnements.js"></script>
 <script src="bilan.js"></script>
@@ -84,7 +94,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 <body>
 
 <header class="parcours-head">
-  <a class="parcours-brand" href="accueil-variante.html">Dépense<span>·</span>Juste</a>
+  <a class="parcours-brand" href="index.html">Dépense<span>·</span>Juste</a>
   <nav aria-label="Navigation principale">
     <a href="bilan.html">Mon bilan</a>
     <details class="outils-menu">
@@ -104,14 +114,14 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
 
 <main>
   <section class="hero shell" style="padding-block:40px 20px">
-    <div class="eyebrow">Premier essai — gratuit, sans inscription</div>
+    <div class="eyebrow">Gratuit, sans inscription</div>
     <h1>Comparer mon forfait mobile</h1>
     <p class="lede" style="margin-top:14px">Explorez les prix. Précisez ensuite votre besoin pour comparer.</p>
-    <p class="aide">Relevé limité et daté, sans partenaire. Prix et conditions à confirmer chez l’opérateur.</p>
+    
   </section>
 
   <section class="shell-lire" id="saisie">
-    <details id="personnaliser"><summary style="min-height:48px;display:flex;align-items:center;cursor:pointer;font-weight:600">Adapter à mon besoin · montant, données et box ↓</summary>
+    <details id="personnaliser"><summary style="min-height:48px;display:flex;align-items:center;cursor:pointer;font-weight:600">Adapter à mon besoin ↓</summary>
     <div class="forme">
       <h2 style="font-size:1.15rem; font-family:'Archivo',sans-serif; font-weight:600">Votre situation</h2>
       <p class="aide">Trois questions, et deux facultatives si vous avez une box. « Je ne sais pas »
@@ -192,7 +202,7 @@ fieldset.sans-cadre{border:0; padding:0; margin:0;}
     <div class="groupe">
       <h2>Mobile seul</h2>
       <p class="aide" id="intro-mobile"></p>
-      <p class="aide" id="selection-mobile"></p>
+      <details class="methode-selection"><summary>Comment ces offres sont sélectionnées</summary><p class="aide">Relevé limité et daté, sans partenaire. Prix et conditions à confirmer chez l’opérateur.</p><p class="aide" id="selection-mobile"></p><p class="aide">Sans besoin en données et prix actuel renseignés, aucun écart n’est chiffré. Les offres restent soumises à leurs conditions d’accès.</p></details>
       <div id="liste-mobile"></div>
       <details id="autres-offres" class="detail-diagnostic" hidden>
         <summary>Voir les autres offres du relevé</summary>
@@ -547,10 +557,9 @@ function afficherResultat(defiler){
   if (!situation) return;
 
   const res = comparerMobile(situation, AUJ);
-  $('intro-mobile').innerHTML = `Ces offres <b>ne dépendent d'aucune box</b> : les prix ont été relevés hors remise liée à une box et restent soumis aux conditions de chaque offre. ${res.besoinApplique
-      ? `Seules celles d'au moins ${res.besoinApplique} Go sont montrées${res.nombreEcartees ? ` — ${res.nombreEcartees} écartée${res.nombreEcartees > 1 ? 's' : ''}` : ''}.`
-      : `<b>Vous n'avez pas précisé votre besoin en données.</b> Les prix et les caractéristiques sont affichés pour que vous puissiez explorer, mais <b>aucun écart en euros n'est chiffré</b> : sans savoir combien de données il vous faut, un forfait à 1 Go remporterait toujours la comparaison. Choisissez votre besoin ci-dessus pour voir les écarts.`}
-    ${res.prixActuelConnu ? '' : ' Votre prix actuel n\'étant pas renseigné, nous affichons des coûts, pas des écarts.'}`;
+  $('intro-mobile').textContent = 'Offres sans remise box. ' + (res.besoinApplique
+    ? `Au moins ${res.besoinApplique} Go. ` : 'Précisez votre besoin pour comparer. ')
+    + 'Frais et conditions à vérifier sur chaque offre.';
 
   // Présentation seulement : le filtre et le tri du moteur restent inchangés.
   // Une offre par opérateur dans la première lecture ; le reste reste accessible.

@@ -41,3 +41,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 #modifier-poste{margin-bottom:10px;}
 .detail-depenses{font:600 17px Archivo,sans-serif;margin-top:28px;}
 #titre-etape:focus{outline:none;}
+
+/* La correction du poste reste secondaire ; le montant est le point d'entrée. */
+#modifier-poste{border:0;background:transparent;box-shadow:none;padding:0 4px;min-height:44px;font-size:.9rem;font-weight:500;color:var(--ink-muted);margin:0;}
+.saisie-montant{margin-top:8px;padding-top:12px;border-top:0;}
+#zone-montant .unite{max-width:16rem;}
+#f-montant{max-width:none;width:100%;padding-right:2rem;}
+.en-direct.vide{padding:8px 0;min-height:0;background:transparent;border:0;}
+.note-raccourcis{margin:6px 0 12px;}
+@media(max-width:560px){.forme{padding-top:10px;} #saisie{margin-top:12px!important;}}

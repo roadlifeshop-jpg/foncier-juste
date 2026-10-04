@@ -158,3 +158,15 @@
   .entree-fleche,.carte-action{transition:none;}
   .entree:hover .entree-fleche{transform:none;}
 }
+
+/* Exemple du résultat disponible, sans simuler un bouton ni un gain. */
+.apercu{margin-top:var(--s7);padding:var(--s5);background:var(--surface-2);border-radius:var(--r-lg);display:grid;grid-template-columns:1fr 1fr;gap:var(--s5);align-items:center;}
+.apercu h2{font-size:var(--t-h2);margin:var(--s3) 0;}
+.apercu p{color:var(--ink-muted);font-size:var(--t-small);}
+.apercu-resultat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--s5);}
+.apercu-resultat p{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s2);margin:0;}
+.apercu-resultat .apercu-total{margin-top:var(--s4);padding-top:var(--s4);border-top:1px solid var(--line);}
+.apercu-total strong{font-size:var(--t-h2);color:var(--ink);}
+.apercu-total span{flex-basis:100%;}
+.apercu-resultat .apercu-suite{margin-top:var(--s4);}
+@media(max-width:700px){.apercu{grid-template-columns:1fr;padding:var(--s4);}.apercu-resultat{padding:var(--s4);}}

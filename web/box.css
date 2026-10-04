@@ -4,3 +4,7 @@ main{padding-top:32px;padding-bottom:48px;}h1{font-size:clamp(30px,5vw,44px);lin
    s'étendre. Le dépliant garde `display:list-item` pour conserver sa flèche. */
 main.shell-lire > p > a,details > p > a{display:inline-flex;align-items:center;min-height:44px;}
 details > summary{padding:9px 0;min-height:44px;box-sizing:border-box;}
+
+/* Même contour et même surface que les sélecteurs voisins. */
+#prix{font:inherit;padding:12px 14px;border:1px solid var(--line-strong);border-radius:var(--r);background:var(--surface);color:var(--ink);}
+#prix:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
