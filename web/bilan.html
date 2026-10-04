@@ -41,6 +41,16 @@
 }
 .raccourcis button:hover{border-color:var(--ink-faint);}
 .raccourcis button:focus-visible{outline:none; box-shadow:var(--ring);}
+/* Ce qu'il faut avoir sous la main avant de partir sur le site officiel.
+   Numéroté, parce que c'est une suite de gestes et non une liste de faits. */
+.guide-avant{margin-top:16px; padding:14px 16px; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); }
+.guide-titre{margin:0; font-weight:650; font-size:.95rem;}
+.guide-avant ol{margin:10px 0 0; padding-left:20px; font-size:.9rem; line-height:1.55; color:var(--ink-muted);}
+.guide-avant li{margin-bottom:6px;}
+.guide-reserve{margin-top:12px; font-size:.86rem; line-height:1.55; color:var(--warn); background:var(--warn-soft);
+  border-radius:var(--r); padding:10px 12px;}
+.guide-source{margin-top:10px; font-size:.8rem; line-height:1.5; color:var(--ink-faint);}
 .note-raccourcis{font-size:.82rem; line-height:1.55; color:var(--ink-faint); margin-top:10px; max-width:52ch;}
 .note-raccourcis:empty{display:none;}
 .note-raccourcis b{color:var(--ink-muted);}
@@ -299,15 +309,13 @@ function choisirPoste(cle){
      « pour vous ». */
   if (p.repere) {
     const r = p.repere;
-    /* Une date ISO est comparable, elle ne s'affiche pas. Une date illisible
-       ressort telle quelle plutôt que déformée. */
-    const jour = i => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(i || '')); return m ? `${m[3]}/${m[2]}/${m[1]}` : String(i || ''); };
+
     const rond = (r.mensuel % 100 === 0) ? (r.mensuel / 100) + ' €' : euros(r.mensuel);
     $('raccourcis').innerHTML =
       `<button type="button" data-c="${r.mensuel}">Partir de ${ech(rond)}</button>`;
     $('note-raccourcis').innerHTML = `En France, ${ech(r.texte)} — ${ech(r.precision)}.
       <a href="${ech(r.url)}" target="_blank" rel="noopener noreferrer">${ech(r.source)} <span class="hors-site">autre site</span></a>,
-      ${ech(r.editeur)}, relevé le ${ech(jour(r.verifiee))}.
+      ${ech(r.editeur)}, relevé le ${ech(jourFr(r.verifiee))}.
       <b>Votre facture peut être très différente.</b>`;
   } else {
     $('raccourcis').innerHTML = '';
@@ -394,6 +402,10 @@ function resumeCourt(){
 }
 
 /* ---------- La liste, corrigeable ---------- */
+/* Une date ISO est comparable, elle ne s'affiche pas. Une date illisible
+   ressort telle quelle plutôt que déformée. */
+function jourFr(i){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(i || '')); return m ? `${m[3]}/${m[2]}/${m[1]}` : String(i || ''); }
+
 function ligneHTML(d){
   const p = POSTES[d.poste];
   const val = (d.montant / 100).toFixed(2).replace('.', ',');
@@ -500,6 +512,14 @@ function majResultat(){
     ${piste ? `<div class="piste">
       <h3>${ech(piste.titre)}</h3>
       <p>${piste.phrase}</p>
+      ${piste.guide ? `<div class="guide-avant">
+        <p class="guide-titre">${ech(piste.guide.titre)}</p>
+        <ol>${piste.guide.etapes.map(e => `<li>${ech(e)}</li>`).join('')}</ol>
+        <p class="guide-reserve">${ech(piste.guide.reserve)}</p>
+        <p class="guide-source">${ech(piste.guide.perimetre)}
+          <a href="${ech(piste.guide.url)}" target="_blank" rel="noopener noreferrer">${ech(piste.guide.source)}
+          <span class="hors-site">autre site</span></a>, relevé le ${ech(jourFr(piste.guide.verifiee))}.</p>
+      </div>` : ''}
       ${piste.action ? `<a class="btn btn-primary" href="${ech(piste.action.href)}"
         ${piste.action.externe ? 'target="_blank" rel="noopener noreferrer"' : ''}
         style="text-decoration:none">${ech(piste.action.libelle)}${piste.action.externe

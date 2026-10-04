@@ -906,6 +906,19 @@ SCRIPT_TESTS = r"""
          typeof p.repere.texte === 'string' && typeof p.repere.source === 'string' &&
          typeof p.repere.editeur === 'string' &&
          /^https:\/\//.test(p.repere.url) && /^\d{4}-\d{2}-\d{2}$/.test(p.repere.verifiee)));
+  /* Le guide qui précède le départ vers le comparateur officiel : il énonce des
+     faits lus chez un tiers, il doit donc porter sa source, sa date et son
+     périmètre — et dire ce qui sort, puisque c'est le seul endroit du site où
+     une donnée quitte le navigateur. */
+  vrai("le guide énergie porte sa source, son adresse, sa date et son périmètre",
+       (g => typeof g === 'object' && Array.isArray(g.etapes) && g.etapes.length > 0 &&
+             typeof g.source === 'string' && /^https:\/\//.test(g.url) &&
+             /^\d{4}-\d{2}-\d{2}$/.test(g.verifiee) &&
+             typeof g.perimetre === 'string' && typeof g.reserve === 'string')(POSTES.energie.guideAvant));
+  vrai("le guide dit que cette étape transmet une donnée",
+       /transmet|sort/.test(POSTES.energie.guideAvant.reserve));
+  vrai("la piste énergie emporte le guide jusqu'à l'affichage",
+       pistePrioritaire([{id:'x',poste:'energie',libelle:'',montant:15000,periodicite:'mensuelle'}]).guide !== null);
   vrai("l'énergie est le seul poste à porter un repère aujourd'hui",
        Object.entries(POSTES).filter(([, p]) => p.repere).map(([k]) => k).join(',') === 'energie');
   vrai("le loyer, l'énergie et le transport portent leur avertissement propre",

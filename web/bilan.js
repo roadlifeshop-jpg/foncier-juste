@@ -79,6 +79,44 @@ const POSTES = {
       editeur: 'le médiateur national de l’énergie, autorité publique indépendante',
       url: 'https://comparateur-offres.energie-info.fr/comparateur-offres-electricite-gaz-naturel/criteria.action?profil=particulier',
     },
+    /* Ce qu'il faut avoir sous la main avant d'y aller.
+       ------------------------------------------------------------------------
+       Nous disions « munissez-vous de votre consommation annuelle en kWh, elle
+       figure sur votre facture de régularisation ». C'était un conseil plus
+       difficile que nécessaire, et bientôt daté : l'obligation de faire figurer
+       la consommation annuelle sur les factures ne commence qu'au 1er janvier
+       2027. Beaucoup de factures d'aujourd'hui ne la portent pas.
+
+       Le comparateur sait la chercher lui-même. Vérifié à la source le
+       04/10/2026 sur énergie-info, site du médiateur national de l'énergie :
+         « il suffit de renseigner les 14 chiffres de votre numéro de Point
+           Référence Mesure (PRM) » ;
+         « votre identifiant de compteur (PDL ou PRM) est indiqué en haut de
+           votre facture » ;
+         « cela permet au comparateur du médiateur national de l'énergie de
+           récupérer votre consommation annuelle et la puissance souscrite ».
+
+       Les données viennent d'Enedis, le gestionnaire du réseau d'électricité.
+       Il faut donc le dire : contrairement au reste de ce site, cette étape-là
+       transmet quelque chose — sur l'autre site, et seulement si la personne y
+       consent.
+
+       Restriction assumée : je n'ai vérifié ce chemin que pour l'électricité.
+       Le gaz a un autre identifiant et un autre gestionnaire ; tant que ce n'est
+       pas lu à la source, nous n'en parlons pas. */
+    guideAvant: {
+      titre: 'Un numéro à 14 chiffres suffit',
+      etapes: [
+        'Prenez une facture d’électricité : votre identifiant de compteur, appelé PRM ou PDL, est indiqué en haut.',
+        'Il figure aussi sur le compteur Linky, en faisant défiler l’affichage, et dans l’application de votre fournisseur.',
+        'Le comparateur s’en sert pour récupérer votre consommation annuelle et votre puissance souscrite auprès d’Enedis, si vous l’y autorisez.',
+      ],
+      reserve: 'Cette étape-là transmet votre identifiant au comparateur, qui interroge Enedis : c’est le seul endroit du site où une donnée sort, elle sort sur l’autre site, et seulement si vous l’acceptez. Sans ce numéro, le comparateur fonctionne aussi — il vous demandera alors d’estimer votre consommation.',
+      source: 'énergie-info, site du médiateur national de l’énergie',
+      url: 'https://www.energie-info.fr/une-nouvelle-fonctionnalite-du-comparateur-du-mediateur-national-de-lenergie/',
+      verifiee: '2026-10-04',
+      perimetre: 'Vérifié pour l’électricité. Le gaz utilise un autre identifiant, que nous n’avons pas vérifié.',
+    },
     /* La mensualité d'énergie est un acompte estimé, régularisé une fois par
        an : ce n'est pas un coût constaté. Le bilan doit le dire. */
     avertissement: "Ce que vous payez chaque mois pour l’énergie est un acompte estimé, régularisé une fois par an : ce n’est pas votre coût réel.",
@@ -219,7 +257,8 @@ function pistePrioritaire(depenses) {
     return {
       cle: 'comparer-energie',
       titre: 'Comparer vos offres d’énergie',
-      phrase: `Nous ne comparons pas l’énergie, et nous ne le ferons pas : ${o.nom} est édité par ${o.editeur}. Il est gratuit, nous n’en tirons rien, et il compare ce que nous ne savons pas comparer. Vos ${euros(mensuelCentimes(energie.montant, energie.periodicite))} par mois sont un acompte estimé, pas un coût constaté : munissez-vous de votre consommation annuelle en kWh, elle figure sur votre facture de régularisation.`,
+      phrase: `Nous ne comparons pas l’énergie, et nous ne le ferons pas : ${o.nom} est édité par ${o.editeur}. Il est gratuit, nous n’en tirons rien, et il compare ce que nous ne savons pas comparer. Vos ${euros(mensuelCentimes(energie.montant, energie.periodicite))} par mois sont un acompte estimé, pas un coût constaté : ce qui se compare, c’est votre consommation réelle.`,
+      guide: POSTES.energie.guideAvant || null,
       action: { libelle: 'Ouvrir le comparateur officiel', href: o.url, externe: true },
       secondaire: null,
     };
