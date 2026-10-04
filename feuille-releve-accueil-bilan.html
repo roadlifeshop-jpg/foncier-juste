@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parcours d’entrée — Feuille de relevé</title>
+<style>
+/* FEUILLE DE RELEVÉ — parcours d'entrée : accueil, bilan, guide PRM.
+   Document de travail, hors du site. Ouvrir dans un navigateur, puis Cmd+P.
+   Page 1 : une séance. À imprimer en deux exemplaires.
+   Page 2 : la mise en commun.
+   Feuille distincte de celle du tableau de bord : ce sont deux parcours, et
+   les relevés ne se mélangent pas. Même gabarit, pour que la main s'y retrouve. */
+@page { size:A4; margin:13mm; }
+*{box-sizing:border-box;}
+body{margin:0; padding:20px; background:#EEEDEA; color:#000;
+  font:12.3px/1.34 -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;}
+.page{background:#fff; max-width:186mm; margin:0 auto 20px; padding:12mm 13mm;
+  box-shadow:0 2px 14px rgba(0,0,0,.18);}
+h1{font-size:15px; margin:0; letter-spacing:.01em;}
+h1 small{display:block; font-size:11px; font-weight:400; color:#444; margin-top:2px;}
+h2{font-size:12.5px; margin:3px 0 3px; padding-bottom:3px; border-bottom:1.5px solid #000;}
+h2 .n{display:inline-block; min-width:16px;}
+p.q{margin:4px 0 2px; font-size:11.8px;}
+p.c{margin:2px 0; font-size:11.5px; color:#333; font-style:italic;}
+.ent{display:flex; gap:12px; flex-wrap:wrap; font-size:11.5px; margin-top:5px;
+  padding-bottom:4px; border-bottom:1px solid #000;}
+.ent span{flex:1 1 auto;}
+.lg{border-bottom:1px solid #999; height:17px; margin-top:3px;}
+.lg.h{height:25px;}
+.cases{margin:4px 0 0; font-size:11.8px;}
+.cases label{display:inline-block; margin-right:14px; white-space:nowrap;}
+.cases i{display:inline-block; width:10px; height:10px; border:1px solid #000;
+  margin-right:4px; vertical-align:-1px; font-style:normal;}
+table{width:100%; border-collapse:collapse; margin-top:6px; font-size:11.8px;}
+th,td{border:1px solid #000; padding:2.5px 5px; text-align:left; vertical-align:top;}
+th{background:#EEE; font-weight:600;}
+td.v{height:19px;}
+.enc{margin-top:6px; border:2px solid #000; padding:5px 9px;}
+.enc b{font-size:11.5px;}
+.enc p{margin:5px 0 0; font-size:11.8px;}
+.avant{margin-top:7px; font-size:11.8px;}
+.avant b{display:block; margin-bottom:2px;}
+@media print{ body{background:#fff; padding:0;}
+  .page{box-shadow:none; margin:0; padding:0; max-width:none; page-break-after:always;}
+  .page:last-child{page-break-after:auto;} }
+</style>
+
+</head>
+<body>
+
+<div class="page">
+<h1>Accueil, bilan et guide PRM — feuille de séance
+  <small><code>index.html</code> puis <code>bilan.html</code> — feuille distincte de celle du tableau de bord.</small></h1>
+
+<div class="ent">
+  <span>Séance n° ____ / 2</span>
+  <span>Date : ____ / ____ / 2026</span>
+  <span>Début : ____ h ____</span>
+  <span>Fin : ____ h ____</span>
+  <span>Appareil : ▢ téléphone ▢ ordinateur</span>
+  <span>Facture d’électricité sous la main : ▢ la sienne ▢ un exemple ▢ aucune</span>
+</div>
+
+<div class="avant">
+<b>Consigne, lue telle quelle, une seule fois :</b> « Voici un site qui parle de dépenses.
+Regardez-le et racontez-moi ce que vous voyez, puis faites ce que vous feriez naturellement. »
+<br><b>Ne rien expliquer</b> — ni le PRM, ni le repère de 173 €, ni les trois entrées.
+</div>
+
+<h2><span class="n">1.</span> L’accueil — une à deux minutes</h2>
+<p class="c">Laisser lire. Noter les mots employés devant le titre et le sous-titre, avant toute question.</p>
+<div class="lg h"></div>
+<p class="q">Elle s’attend à : ▢ comparer des offres ▢ suivre ses dépenses ▢ récupérer de l’argent ▢ autre</p>
+<p class="q">Premier clic : ▢ Faire le point ▢ Mobile ▢ Box ▢ autre : ________ &nbsp;·&nbsp; après ______ s</p>
+
+<h2><span class="n">2.</span> Le bilan — saisie libre</h2>
+<p class="c">Trois colonnes : réussi seul n’est pas réussi après relance, qui n’est pas réussi avec une aide.</p>
+<table>
+<tr><th style="width:34%">Geste</th><th style="width:12%">Seule</th><th style="width:15%">Après relance</th><th style="width:12%">Avec aide</th><th>Ce qui s’est passé</th></tr>
+<tr><td>Choisir un poste</td><td class="v">▢</td><td class="v">▢</td><td class="v">▢</td><td class="v"></td></tr>
+<tr><td>Saisir un montant</td><td class="v">▢</td><td class="v">▢</td><td class="v">▢</td><td class="v"></td></tr>
+<tr><td>Changer la fréquence</td><td class="v">▢</td><td class="v">▢</td><td class="v">▢</td><td class="v"></td></tr>
+<tr><td>Corriger un montant ensuite</td><td class="v">▢</td><td class="v">▢</td><td class="v">▢</td><td class="v"></td></tr>
+</table>
+<p class="q"><b>Le repère de 173 € (énergie)</b> — ne pas le désigner. Noter ce qu’elle en fait&nbsp;:</p>
+<div class="cases">
+  <label><i></i> l’utilise pour se situer</label>
+  <label><i></i> clique « Partir de 173 € »</label>
+  <label><i></i> le lit puis saisit le sien</label>
+  <label><i></i> doute ou le conteste</label>
+  <label><i></i> ne le voit pas</label>
+</div>
+<div class="lg"></div>
+
+<h2><span class="n">3.</span> Le guide PRM — le point le plus fragile</h2>
+<p class="c">Le seul endroit qui demande d’aller chercher un papier. <b>Ne jamais noter le numéro.</b></p>
+<table>
+<tr><th style="width:52%">Observation</th><th style="width:20%">Résultat</th><th>Mots exacts</th></tr>
+<tr><td>Comprend ce qu’est le PRM, sans explication orale</td><td class="v">▢ oui ▢ non</td><td class="v"></td></tr>
+<tr><td>Le repère sur une facture</td><td class="v">▢ oui ▢ non<br>▢ pas essayé</td><td class="v"></td></tr>
+<tr><td>Lit la mention « interroge Enedis »</td><td class="v">▢ oui ▢ non</td><td class="v"></td></tr>
+</table>
+<p class="q">Après coup seulement, si elle n’en a pas parlé&nbsp;: « d’après vous, qu’est-ce qui sort d’ici&nbsp;? »</p>
+<div class="cases">
+  <label><i></i> accepte sans réserve</label>
+  <label><i></i> accepte en le remarquant</label>
+  <label><i></i> hésite</label>
+  <label><i></i> refuse</label>
+</div>
+
+<h2><span class="n">4.</span> Fin de séance</h2>
+<p class="c">« Qu’est-ce que vous feriez en sortant d’ici&nbsp;? » Mot pour mot, avant toute autre question.</p>
+<div class="lg h"></div>
+<p class="q">Ponctuel ou régulier&nbsp;? Noter ce qui sort <i>spontanément</i> ; seulement si rien ne vient :
+« vous y reviendriez quand&nbsp;? » Une intention déclarée n’est pas un comportement.</p>
+<div class="cases">
+  <label><i></i> ponctuel, pour vérifier une chose</label>
+  <label><i></i> régulier, de lui-même</label>
+  <label><i></i> régulier, seulement après la question</label>
+  <label><i></i> ne se prononce pas</label>
+</div>
+
+<div class="enc">
+<b>Relances — dans cet ordre, et chacune se note</b>
+<p>1. Dix secondes de silence. — 2. « Dites-moi ce qui vous vient. » — 3. « Qu’est-ce que vous feriez
+maintenant&nbsp;? » — 4. En dernier recours, au point 3 seulement : expliquer le PRM. Noter la minute et
+le mot exact. La quatrième donne la réponse cherchée : ce qui précède reste acquis, ce qui suit devient
+un parcours guidé. Tracer un trait là où elle tombe.</p>
+<div class="lg"></div><div class="lg"></div>
+</div>
+
+</div>
+
+<div class="page">
+<h1>Mise en commun
+  <small>Même version pour les deux séances, aucune retouche entre elles. Deux personnes font
+  apparaître des difficultés&nbsp;; elles ne disent pas si le produit plaît.</small></h1>
+
+<table>
+<tr><th style="width:46%">Observation</th><th style="width:27%">Séance 1</th><th style="width:27%">Séance 2</th></tr>
+<tr><td>Comprend à quoi sert le site sans aide</td><td class="v">▢ oui ▢ non</td><td class="v">▢ oui ▢ non</td></tr>
+<tr><td>Première entrée cliquée</td><td class="v"></td><td class="v"></td></tr>
+<tr><td>Saisie d’un montant réussie seule</td><td class="v">▢ oui ▢ non</td><td class="v">▢ oui ▢ non</td></tr>
+<tr><td>Le repère de 173 € aide plutôt qu’il ne gêne</td><td class="v">▢ oui ▢ non</td><td class="v">▢ oui ▢ non</td></tr>
+<tr><td>Comprend le PRM sans explication</td><td class="v">▢ oui ▢ non</td><td class="v">▢ oui ▢ non</td></tr>
+<tr><td>Le trouve sur une facture</td><td class="v">▢ oui ▢ non ▢ n/a</td><td class="v">▢ oui ▢ non ▢ n/a</td></tr>
+<tr><td>Remarque que la donnée sort</td><td class="v">▢ oui ▢ non</td><td class="v">▢ oui ▢ non</td></tr>
+<tr><td>Ponctuel / régulier, dit spontanément</td><td class="v"></td><td class="v"></td></tr>
+<tr><td>Nombre de relances · dont la quatrième</td><td class="v"></td><td class="v"></td></tr>
+<tr><td>Endroit exact du premier blocage</td><td class="v"></td><td class="v"></td></tr>
+</table>
+
+<h2>La difficulté qui décidera de la suite</h2>
+<p class="c">Une seule, celle qui est apparue chez les deux, ou la plus coûteuse chez l’une.
+« Aucune difficulté commune » est un résultat, et s’écrit.</p>
+<div class="lg h"></div><div class="lg"></div>
+
+<div class="enc">
+<b>Ce que cette feuille ne peut pas dire</b>
+<p>Elle observe un premier contact, pas un usage. Elle ne dit rien de ce qui se passe le mois suivant —
+c’est l’autre feuille qui s’en occupe, sur un autre écran. Et le guide PRM n’a été vérifié que pour
+l’électricité&nbsp;: si la personne arrive avec une facture de gaz, le noter et ne rien conclure.</p>
+</div>
+</div>
+
+</body>
+</html>
