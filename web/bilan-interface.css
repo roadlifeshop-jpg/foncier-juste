@@ -21,7 +21,8 @@ main .shell-lire{max-width:800px;}
 .totaux{border-top:4px solid var(--accent);padding:var(--s5);box-shadow:var(--shadow-card);}
 .totaux .val{font-size:clamp(32px,7vw,48px);letter-spacing:-.05em;}
 .totaux .second{font-size:18px;}
-.ligne-d{border:0;border-bottom:1px solid var(--line-strong);border-radius:0;background:transparent;padding:18px 0;}
+/* .ligne-d : plus de règle ici. Elle retirait la carte et le rayon que bilan.html
+   venait de poser — deux feuilles qui se contredisaient sur le même élément. */
 .piste{border:0;border-left:3px solid var(--accent);padding:var(--s5);}
 .btn,.btn-primary,.btn-secondary{min-height:46px;}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:3px;}
